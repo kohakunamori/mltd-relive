@@ -1,81 +1,15 @@
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
+import random
 from uuid import UUID
-
+from enum import Enum
 from jsonrpc import dispatcher
 from sqlalchemy import func, select, update
 from sqlalchemy.orm import Session
 
 from mltd.models.engine import engine
-from mltd.models.models import GashaMedalExpireDate, Item, Jewel, MstItem, User
-from mltd.models.schemas import ItemSchema
+from mltd.models.models import Card, Costume, GashaMedalExpireDate, Item, Jewel, MstCard, MstCostume, MstItem, MstRewardItem, User
+from mltd.models.schemas import GashaMedalSchema, ItemSchema
 from mltd.servers.config import config
-
-
-def add_item(
-        session: Session,
-        user: User,
-        mst_item_id,
-        item_type,
-        amount=1,
-        expire_date=datetime(
-            2099, 12, 31, 23, 59, 59, tzinfo=config.timezone
-        ).astimezone(timezone.utc)):
-    """Give specified amount of an item to a user.
-
-    Args:
-        session: Existing SQLAlchemy session.
-        user: A User object.
-        mst_item_id: Master item ID of the item to be added.
-        item_type: Item type.
-        amount: Amount of the item to be added (default 1).
-        expire_date: Expiry date of the item (default 2099-12-31
-                     23:59:59).
-    Returns:
-        None.
-    """
-    if item_type == 1:      # Jewel
-        session.execute(
-            update(Jewel)
-            .where(Jewel.user == user)
-            .values(free_jewel_amount=Jewel.free_jewel_amount + amount)
-        )
-    elif item_type == 2:    # Money
-        session.execute(
-            update(User)
-            .where(User.user == user)
-            .values(money=func.min(User.money + amount, User.max_money))
-        )
-    elif item_type == 4:    # Gasha medal pt
-        point_amonut = session.scalar(
-            select(MstItem.value1)
-            .where(MstItem.mst_item_id == mst_item_id)
-        )
-        gasha_medal = user.gasha_medal
-        if len(gasha_medal.gasha_medal_expire_dates) >= 10:
-            return
-        gasha_medal.point_amount += point_amonut
-        if gasha_medal.point_amount >= 100:
-            gasha_medal.gasha_medal_expire_dates.append(GashaMedalExpireDate())
-            gasha_medal.point_amount -= 100
-        if len(gasha_medal.gasha_medal_expire_dates) >= 10:
-            gasha_medal.point_amount = 0
-    else:
-        item = session.scalar(
-            select(Item)
-            .where(Item.user == user)
-            .where(Item.mst_item_id == mst_item_id)
-        )
-        if not item:
-            user.items.append(Item(
-                item_id=f'{user.user_id}_{mst_item_id}',
-                mst_item_id=mst_item_id,
-                amount=amount,
-                expire_date=expire_date
-            ))
-        else:
-            item.amount += amount
-            item.expire_date = expire_date
-
 
 @dispatcher.add_method(name='ItemService.GetItemList', context_arg='context')
 def get_item_list(params, context):

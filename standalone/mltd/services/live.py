@@ -27,11 +27,9 @@ from mltd.models.schemas import (CardSchema, GashaMedalSchema, GuestSchema,
                                  UserSchema)
 from mltd.servers.config import config
 from mltd.servers.i18n import translation
-from mltd.services.card import add_card
+from mltd.services.utils import add_card, add_item, add_present
 from mltd.services.game_setting import get_item_day_idol_type
-from mltd.services.item import add_item
 from mltd.services.mission import update_mission_progress
-from mltd.services.present import add_present
 from mltd.services.song import localize_song_name
 
 _ = translation.gettext
@@ -967,34 +965,26 @@ def finish_song(params, context):
 
         course_id = user.pending_song.course
         is_ticket = user.pending_song.live_ticket > 0
-        gained_exp = (0 if is_ticket
-                      else [0, 150, 150, 260, 204, 260, 306][course_id])
+        gained_exp = [0, 150, 150, 260, 204, 260, 306][course_id]
         if user.level < 50:
             gained_exp *= 2
-        gained_money = (0 if is_ticket
-                        else [0, 630, 630, 1200, 900, 1200, 1350][course_id])
+        gained_money = [0, 630, 630, 1200, 900, 1200, 1350][course_id]
         gained_fan = [0, 60, 60, 100, 78, 97, 120][course_id]
         gained_affection = [0, 12, 12, 24, 18, 24, 30][course_id]
         gained_awakening_pt = [0, 15, 15, 28, 22, 28, 34][course_id]
         if is_ticket:
+            gained_exp = 0
+            gained_money = 0
             gained_fan //= 2
             gained_affection //= 2
         if user.pending_song.use_song_random:
-            if is_ticket:
-                gained_fan = [0, 36, 36, 60, 48, 60, 72][course_id]
-                gained_affection = [0, 7, 6, 14, 7, 12, 18][course_id]
-            else:
-                gained_fan = [0, 72, 72, 120, 96, 120, 144][course_id]
-                gained_affection = [0, 14, 12, 28, 19, 25, 36][course_id]
-            gained_awakening_pt = [0, 18, 18, 33, 26, 33, 40][course_id]
+            gained_fan = int(1.2 * gained_fan)
+            gained_affection = int(1.2 * gained_affection)
+            gained_awakening_pt = int(1.2 * gained_awakening_pt)
         if user.pending_song.use_full_random:
-            if is_ticket:
-                gained_fan = [0, 45, 43, 75, 60, 73, 90][course_id]
-                gained_affection = [0, 9, 7, 18, 12, 18, 19][course_id]
-            else:
-                gained_fan = [0, 90, 90, 150, 120, 150, 180][course_id]
-                gained_affection = [0, 18, 18, 36, 25, 36, 43][course_id]
-            gained_awakening_pt = [0, 22, 22, 42, 33, 42, 51][course_id]
+            gained_fan = int(1.5 * gained_fan)
+            gained_affection = int(1.5 * gained_affection)
+            gained_awakening_pt = int(1.5 * gained_awakening_pt)
 
         #region Update user info.
 

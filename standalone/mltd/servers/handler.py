@@ -3,15 +3,16 @@ import time
 from datetime import datetime
 from decimal import Decimal
 from uuid import UUID
-
+import os
+import requests
 from jsonrpc import JSONRPCResponseManager, dispatcher
 
-from mltd.servers.encryption import decrypt_request, encrypt_response
+from mltd.servers.encryption import decrypt_request, decrypt_response, encrypt_response
 from mltd.servers.logging import logger
 from mltd.servers.utilities import format_datetime
 from mltd.services import *
 
-
+test = {}
 class CustomJSONEncoder(json.JSONEncoder):
     def default(self, o):
         if isinstance(o, UUID):
@@ -22,10 +23,10 @@ class CustomJSONEncoder(json.JSONEncoder):
             return format_datetime(o)
         return json.JSONEncoder.default(self, o)
 
-
 def application(environ, start_response):
+    global i, test
     host = environ['HTTP_HOST']
-
+    logger.info(f'Host: {host}')
     if ('theaterdays-zh.appspot.com' in host
             or 'theaterdays-ko.appspot.com' in host
             or '127.0.0.1' in host):
@@ -43,7 +44,7 @@ def application(environ, start_response):
 
         request_len = int(environ['CONTENT_LENGTH'])
         request = environ['wsgi.input'].read(request_len)
-        logger.debug(request)
+        # logger.debug(request)
         request = decrypt_request(request)
 
         context = {
@@ -52,8 +53,6 @@ def application(environ, start_response):
         svc_start_time = time.perf_counter_ns()
         response = JSONRPCResponseManager.handle(request, dispatcher, context)
         svc_end_time = time.perf_counter_ns()
-        logger.debug(
-            json.dumps(response.data, cls=CustomJSONEncoder, indent=2))
         response = json.dumps(response.data, cls=CustomJSONEncoder,
                               separators=(',', ':'))
         response = encrypt_response(response)
@@ -66,7 +65,6 @@ def application(environ, start_response):
 
         start_response(status, headers)
         return [response]
-
     else:
         status = '503 Service Unavailable'
         headers = [('Content-Type', 'text/html')]

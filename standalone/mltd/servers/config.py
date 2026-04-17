@@ -2,12 +2,12 @@ import logging
 from configparser import ConfigParser
 from datetime import timedelta, timezone
 
-version = '0.1.3'
+version = '0.1.7'
 api_port = 7650
 # 'zh' for Traditional Chinese, 'ko' for Korean
 _language = 'zh'
 _log_level = logging.INFO
-_is_local = False
+_is_local = True
 
 
 def version_tuple(v):

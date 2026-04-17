@@ -14,7 +14,7 @@ from mltd.models.schemas import (MissionSchema, MstMissionScheduleSchema,
                                  PanelMissionSheetSchema, SongSchema)
 from mltd.servers.i18n import translation
 from mltd.services.idol import localize_character_name
-from mltd.services.present import add_present
+from mltd.services.utils import add_present
 
 _ = translation.gettext
 

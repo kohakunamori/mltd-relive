@@ -1,10 +1,11 @@
 import csv
 import os
 import sys
+from datetime import datetime, timezone
 from base64 import b64encode
 from uuid import UUID, uuid4
 
-from sqlalchemy import delete, insert, select, text, update
+from sqlalchemy import delete, insert, inspect, select, text, update
 from sqlalchemy.orm import Session
 
 from mltd.models.engine import engine
@@ -869,6 +870,137 @@ def cleanup():
         session.execute(text('PRAGMA foreign_keys=ON'))
 
 
+def _migrate_pending_job_answer_composite_pk(session: Session) -> None:
+    """Rebuild pending_job_answer with (user_id, answer_key) PK for old DBs."""
+    bind = session.get_bind()
+    inspector = inspect(bind)
+    if not inspector.has_table('pending_job_answer'):
+        Base.metadata.tables['pending_job_answer'].create(bind=bind)
+        return
+
+    pk_cols = inspector.get_pk_constraint('pending_job_answer').get(
+        'constrained_columns', [])
+    if set(pk_cols) == {'user_id', 'answer_key'}:
+        return
+
+    legacy_cols = {
+        c['name'] for c in inspector.get_columns('pending_job_answer')
+    }
+    scenario_expr = (
+        "COALESCE(scenario_id, '')" if 'scenario_id' in legacy_cols else "''"
+    )
+    answer_expr = (
+        "COALESCE(answer_key, '')" if 'answer_key' in legacy_cols else "''"
+    )
+    session.execute(text('PRAGMA foreign_keys=OFF'))
+    session.execute(
+        text('ALTER TABLE pending_job_answer '
+             'RENAME TO pending_job_answer_legacy')
+    )
+    Base.metadata.tables['pending_job_answer'].create(bind=bind)
+    session.execute(
+        text(
+            'INSERT INTO pending_job_answer '
+            '(user_id, scenario_id, answer_key, count) '
+            f'SELECT user_id, {scenario_expr}, {answer_expr}, count '
+            'FROM pending_job_answer_legacy'
+        )
+    )
+    session.execute(text('DROP TABLE pending_job_answer_legacy'))
+    session.execute(text('PRAGMA foreign_keys=ON'))
+    session.execute(text('PRAGMA foreign_key_check'))
+
+
+def _migrate_theater_contact_and_user_contact_schedules(
+    session: Session
+) -> None:
+    """Add theater contact table and user contact schedule columns."""
+    bind = session.get_bind()
+    inspector = inspect(bind)
+
+    table_name = 'mst_theater_contact'
+    table = Base.metadata.tables[table_name]
+    target_cols = [c.name for c in table.columns]
+    has_mst_idol_fk = False
+    if inspector.has_table(table_name):
+        for fk in inspector.get_foreign_keys(table_name):
+            if 'mst_idol_id' in fk.get('constrained_columns', []):
+                has_mst_idol_fk = True
+                break
+
+    if has_mst_idol_fk:
+        legacy_table_name = f'{table_name}_legacy'
+        session.execute(text('PRAGMA foreign_keys=OFF'))
+        session.execute(
+            text(f'ALTER TABLE {table_name} RENAME TO {legacy_table_name}')
+        )
+        table.create(bind=bind)
+
+        legacy_cols = {
+            c['name'] for c in inspect(bind).get_columns(legacy_table_name)
+        }
+        select_exprs = []
+        for col_name in target_cols:
+            if col_name in legacy_cols:
+                select_exprs.append(col_name)
+                continue
+            column = table.c[col_name]
+            if str(column.type) == 'INTEGER':
+                select_exprs.append(f'0 AS {col_name}')
+            else:
+                select_exprs.append(f"'' AS {col_name}")
+
+        session.execute(
+            text(
+                f"INSERT INTO {table_name} ({', '.join(target_cols)}) "
+                f"SELECT {', '.join(select_exprs)} FROM {legacy_table_name}"
+            )
+        )
+        session.execute(text(f'DROP TABLE {legacy_table_name}'))
+        session.execute(text('PRAGMA foreign_keys=ON'))
+        session.execute(text('PRAGMA foreign_key_check'))
+        inspector = inspect(bind)
+
+    mst_data_path = _mst_data_path()
+    csv_filename = 'mst_theater_contact.csv'
+    if not inspector.has_table(table_name):
+        table.create(bind=bind)
+
+    # Insert data when table is newly created or unexpectedly empty.
+    contact_count = session.scalar(
+        text('SELECT COUNT(*) FROM mst_theater_contact')
+    )
+    if contact_count == 0 and os.path.exists(
+        os.path.join(mst_data_path, csv_filename)
+    ):
+        _insert_csv_data(session, mst_data_path, csv_filename)
+
+    # Refresh inspector to ensure latest schema is visible.
+    inspector = inspect(bind)
+    user_cols = {c['name'] for c in inspector.get_columns('user')}
+    contact_schedule_cols = [
+        'contact_schedule_20',
+        'contact_schedule_10',
+        'contact_schedule_5',
+    ]
+    for col_name in contact_schedule_cols:
+        if col_name in user_cols:
+            continue
+        contact_schedule_col = Base.metadata.tables['user'].c[col_name]
+        col_type_sql = contact_schedule_col.type.compile(dialect=bind.dialect)
+        session.execute(
+            text(f'ALTER TABLE user ADD COLUMN {col_name} {col_type_sql}')
+        )
+
+    # Initialize added/legacy NULL schedules for existing users.
+    now = datetime.now(timezone.utc)
+    for col_name in contact_schedule_cols:
+        session.execute(
+            text(f'UPDATE user SET {col_name} = :now WHERE {col_name} IS NULL'),
+            {'now': now}
+        )
+
+
 def check_database_version():
     with Session(engine) as session:
         db_version = session.scalar(
@@ -943,6 +1075,55 @@ def upgrade_database():
 
             session.commit()
         logger.info('Database upgraded to v0.1.3.')
+
+    if version_tuple(db_version) < version_tuple('0.1.4'):
+        logger.info('Upgrading database to v0.1.4...')
+        with Session(engine) as session:
+            table = Base.metadata.tables['mst_comic']
+            table.create(bind=session.get_bind())
+
+            _insert_csv_data(session, _mst_data_path(), 'mst_comic.csv')
+
+            session.execute(
+                update(ServerVersion)
+                .values(version='0.1.4')
+            )
+
+            session.commit()
+        logger.info('Database upgraded to v0.1.4.')
+
+    if version_tuple(db_version) < version_tuple('0.1.6'):
+        logger.info('Upgrading database to v0.1.6...')
+        with Session(engine) as session:
+            _migrate_pending_job_answer_composite_pk(session)
+
+            session.execute(
+                update(ServerVersion)
+                .values(version='0.1.6')
+            )
+
+            session.commit()
+        logger.info('Database upgraded to v0.1.6.')
+
+    if version_tuple(db_version) < version_tuple('0.1.7'):
+        logger.info('Upgrading database to v0.1.7...')
+        with Session(engine) as session:
+            _migrate_theater_contact_and_user_contact_schedules(session)
+
+            session.execute(
+                update(ServerVersion)
+                .values(version='0.1.7')
+            )
+
+            session.commit()
+        logger.info('Database upgraded to v0.1.7.')
+
+    if version_tuple(db_version) == version_tuple('0.1.7'):
+        logger.info('Validating v0.1.7 migration data...')
+        with Session(engine) as session:
+            _migrate_theater_contact_and_user_contact_schedules(session)
+            session.commit()
+        logger.info('v0.1.7 migration data validated.')
 
 
 if __name__ == '__main__':

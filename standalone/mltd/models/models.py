@@ -94,6 +94,9 @@ class User(Base):
     button_disabled: Mapped[bool] = mapped_column(default=False)
     training_point: Mapped[int] = mapped_column(default=0)
     total_training_point: Mapped[int] = mapped_column(default=0)
+    contact_schedule_20: Mapped[datetime] = mapped_column(default=lambda: datetime.now(timezone.utc))
+    contact_schedule_10: Mapped[datetime] = mapped_column(default=lambda: datetime.now(timezone.utc))
+    contact_schedule_5: Mapped[datetime] = mapped_column(default=lambda: datetime.now(timezone.utc))
 
     challenge_song: Mapped['ChallengeSong'] = relationship(
         back_populates='user', lazy='joined', innerjoin=True)
@@ -1906,6 +1909,21 @@ class MstWhiteBoard(Base):
         ).astimezone(timezone.utc))
 
 
+class MstComic(Base):
+    """Master table for comics."""
+    __tablename__ = 'mst_comic'
+
+    mst_comic_id: Mapped[int] = mapped_column(primary_key=True)
+    mst_topics_icon_id: Mapped[int]
+    number: Mapped[int]
+    sort_id: Mapped[int]
+    begin_date: Mapped[datetime]
+    end_date: Mapped[datetime] = mapped_column(
+        default=datetime(
+            2099, 12, 31, 23, 59, 59, tzinfo=config.timezone
+        ).astimezone(timezone.utc))
+
+
 class MstEvent(Base):
     """Master table for events."""
     __tablename__ = 'mst_event'
@@ -2495,7 +2513,7 @@ class PendingJobAnswer(Base):
     user_id = mapped_column(ForeignKey('pending_job.user_id'),
                             primary_key=True)
     scenario_id: Mapped[str]
-    answer_key: Mapped[str] = mapped_column(default='')
+    answer_key: Mapped[str] = mapped_column(primary_key=True)
     count: Mapped[int]
 
 
@@ -2861,6 +2879,7 @@ class Present(Base):
 
     user: Mapped['User'] = relationship(back_populates='presents')
     item: Mapped['Item'] = relationship(lazy='joined')
+    card: Mapped['Card'] = relationship(lazy='joined')
     achievement: Mapped['Achievement'] = relationship(viewonly=True,
                                                       lazy='joined')
 
@@ -2949,6 +2968,20 @@ class ServerVersion(Base):
 
     version: Mapped[str] = mapped_column(primary_key=True)
 
+
+class MstTheaterContact(Base):
+    """Master table for theater contacts."""
+    __tablename__ = 'mst_theater_contact'
+
+    mst_theater_contact_id: Mapped[int] = mapped_column(primary_key=True)
+    mst_idol_id: Mapped[int]
+    resource_id: Mapped[str]
+    reaction_id: Mapped[str]
+    reaction_id2: Mapped[str]
+    mst_card_id: Mapped[int]
+    room_id: Mapped[int]
+    position_id: Mapped[str]
+    motion_id: Mapped[str]
 
 if __name__ == '__main__':
     Base.metadata.create_all(engine)

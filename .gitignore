@@ -11,6 +11,7 @@ standalone/dist/*
 standalone/mltd*.db
 standalone/mltd*.log*
 standalone/mltd/locales/*.cmd
+standalone/test_json/*
 tools/burp-viewer(hardcoded_path).pyw
 tools/imgui.ini
 tools/apk-patcher/build/*

@@ -5,6 +5,7 @@ from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
 
 _key = b'do8PxbqYKV7cexTrt4J3fmgBtXXzu+dP'
+#_key = b'JnfB5AGRL0ApUNjbcct2ddVWmEcuWQuI'
 _iv = b'\x00' * 16
 
 

@@ -7,8 +7,10 @@ from sqlalchemy.orm import Session
 
 from mltd.models.engine import engine
 from mltd.models.models import (MainStoryChapter, MstMainStoryContactStatus,
-                                MstTopics, MstWhiteBoard, SpecialStory)
+                                MstComic, MstTopics, MstWhiteBoard,
+                                SpecialStory)
 from mltd.models.schemas import (MainStoryChapterSchema,
+                                 MstComicSchema,
                                  MstMainStoryContactStatusSchema,
                                  MstTopicsSchema, MstWhiteBoardSchema,
                                  SpecialStorySchema)
@@ -309,3 +311,33 @@ def get_offer_story_list(params):
     """
     return {'offer_story_list': None}
 
+@dispatcher.add_method(name='StoryService.GetComicList')
+def get_comic_list(params):
+    """Get a list of comics.
+
+    Invoked as part of the initial batch requests after logging in.
+    Args:
+        params: An empty dict.
+    Returns:
+        A dict:
+            recent_begin_date:
+            comic_status_list:
+    """
+    with Session(engine) as session:
+        recent_begin_date = session.scalar(
+            select(func.max(MstComic.begin_date))
+        )
+        recent_begin_date = recent_begin_date.replace(
+            tzinfo=timezone.utc).astimezone(config.timezone)
+
+        mst_comics = session.scalars(
+            select(MstComic)
+        ).all()
+
+        mst_comic_schema = MstComicSchema()
+        comic_status_list = mst_comic_schema.dump(mst_comics, many=True)
+
+    return {
+        'recent_begin_date': format_datetime(recent_begin_date),
+        'comic_status_list': comic_status_list
+    }
