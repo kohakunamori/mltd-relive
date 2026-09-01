@@ -1,0 +1,39 @@
+MLTD (RE)Live! - Game Client Notice
+=================================
+
+This release intentionally distributes only the corrected Android game clients:
+
+- mltd-relive-game-client-zh-fixed.apk  (Traditional Chinese)
+- mltd-relive-game-client-ko-fixed.apk  (Korean)
+
+The legacy/unfixed APKs are intentionally NOT included.
+
+Why:
+The upstream project documents that the original game APK cannot run on Android 12L or later. The corrected APKs are therefore used as the default release clients and replace the legacy/unfixed packages for normal use.
+
+The bundled clients are normal corrected game clients. They are NOT pre-patched 2160p/240fps builds. If you want a custom resolution or frame rate, use the APK Patcher included/published by this project; the repaired patcher verifies signing before producing an output APK.
+
+SHA-256 hashes for the APK files are generated during the release workflow and provided in SHA256SUMS.txt.
+
+Upstream client sources:
+- Traditional Chinese corrected client: https://mega.nz/file/HMgiTSbI#cy7z52H6zBOSdSX5Xok1GKQ4yT7k6K1ctjV6Heceu3I
+- Korean corrected client: https://mega.nz/file/2dBgiBQY#NBgo-1rTW7g1Jtm9FLYZ61KoOP4HFoElxO75dzMyXew
+
+---
+
+遊戲客戶端說明
+==============
+
+本 Release 僅提供修正版 Android 遊戲客戶端：
+
+- mltd-relive-game-client-zh-fixed.apk（繁體中文）
+- mltd-relive-game-client-ko-fixed.apk（韓文）
+
+不再附帶 legacy / 未修正版 APK。
+
+原因：
+上游專案已說明原始 APK 在 Android 12L 或以上版本無法正常運行，因此 Release 統一以修正版作為預設遊戲客戶端，取代原始未修正版供一般使用。
+
+Release 內的遊戲客戶端是正常的修正版，不是預先修改為 2160p / 240fps 的版本。如需自訂解析度或幀率，請使用本專案的 APK Patcher；修復後的 Patcher 會在輸出 APK 前驗證簽名，避免再次產生未簽名、無法安裝的 APK。
+
+Release 工作流程會同時產生 SHA256SUMS.txt，可用於校驗 APK 完整性。
