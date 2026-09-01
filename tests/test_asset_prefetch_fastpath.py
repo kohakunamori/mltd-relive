@@ -1,4 +1,5 @@
 import hashlib
+import os
 import sys
 import tempfile
 import threading
@@ -176,12 +177,13 @@ class AssetPrefetchFastPathTest(unittest.TestCase):
             server.server_close()
             thread.join(timeout=2)
 
-    def test_prepare_uses_configured_android_only_default(self):
+    def test_prepare_uses_configured_zh_android_scope_default(self):
         ManifestHandler.counts = {}
         server = ThreadingHTTPServer(('127.0.0.1', 0), ManifestHandler)
         thread = threading.Thread(target=server.serve_forever, daemon=True)
-        old_value = config['default'].get('asset_local_platforms', 'android')
-        config['default']['asset_local_platforms'] = 'android'
+        thread.start()
+        old_value = config['default'].get('asset_local_scopes', 'zh-android')
+        config['default']['asset_local_scopes'] = 'zh-android'
         try:
             with tempfile.TemporaryDirectory() as temp:
                 remote = f'http://127.0.0.1:{server.server_address[1]}'
@@ -191,8 +193,8 @@ class AssetPrefetchFastPathTest(unittest.TestCase):
                     workers=8,
                     remote_root=remote,
                 )
-                self.assertEqual(tuple(result), ('android',))
-                self.assertEqual(result['android']['complete'], 2)
+                self.assertEqual(tuple(result), ('zh-android',))
+                self.assertEqual(result['zh-android']['complete'], 2)
                 manifest = manifest_name('zh')
                 self.assertEqual(
                     ManifestHandler.counts[f'/zh-android/{manifest}'], 1
@@ -202,7 +204,7 @@ class AssetPrefetchFastPathTest(unittest.TestCase):
                     for path in ManifestHandler.counts
                 ))
         finally:
-            config['default']['asset_local_platforms'] = old_value
+            config['default']['asset_local_scopes'] = old_value
             server.shutdown()
             server.server_close()
             thread.join(timeout=2)
@@ -231,6 +233,65 @@ class AssetPrefetchFastPathTest(unittest.TestCase):
                 self.assertEqual(
                     ManifestHandler.counts[f'/zh-ios/{manifest}'], 1
                 )
+        finally:
+            server.shutdown()
+            server.server_close()
+            thread.join(timeout=2)
+
+    def test_completed_scope_uses_o1_ready_stamp_on_next_start(self):
+        ManifestHandler.counts = {}
+        server = ThreadingHTTPServer(('127.0.0.1', 0), ManifestHandler)
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        try:
+            with tempfile.TemporaryDirectory() as temp:
+                remote = f'http://127.0.0.1:{server.server_address[1]}'
+                first = prepare_local_assets(
+                    'zh', temp, platforms=('android',), workers=4,
+                    remote_root=remote,
+                )
+                self.assertFalse(first['android']['fast_ready'])
+
+                with patch(
+                    'mltd.servers.asset_prepare.AssetStore',
+                    side_effect=AssertionError('fast start must not open SQLite'),
+                ):
+                    second = prepare_local_assets(
+                        'zh', temp, platforms=('android',), workers=4,
+                        remote_root=remote,
+                    )
+                self.assertTrue(second['android']['fast_ready'])
+                self.assertEqual(second['android']['complete'], 2)
+        finally:
+            server.shutdown()
+            server.server_close()
+            thread.join(timeout=2)
+
+    def test_ready_stamp_invalidates_when_scope_directory_changes(self):
+        ManifestHandler.counts = {}
+        server = ThreadingHTTPServer(('127.0.0.1', 0), ManifestHandler)
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        try:
+            with tempfile.TemporaryDirectory() as temp:
+                remote = f'http://127.0.0.1:{server.server_address[1]}'
+                prepare_local_assets(
+                    'zh', temp, platforms=('android',), workers=4,
+                    remote_root=remote,
+                )
+                scope_dir = Path(temp) / 'zh-android'
+                before = scope_dir.stat().st_mtime_ns
+                (scope_dir / 'external-change.tmp').write_bytes(b'x')
+                after = scope_dir.stat().st_mtime_ns
+                if after == before:
+                    os.utime(scope_dir, ns=(before + 1_000_000, before + 1_000_000))
+
+                second = prepare_local_assets(
+                    'zh', temp, platforms=('android',), workers=4,
+                    remote_root=remote,
+                )
+                self.assertFalse(second['android']['fast_ready'])
+                self.assertEqual(second['android']['complete'], 2)
         finally:
             server.shutdown()
             server.server_close()
