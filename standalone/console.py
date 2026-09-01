@@ -82,6 +82,11 @@ if __name__ == '__main__':
                         help='only update config; do not start server')
     parser.add_argument('--asset-mode', choices=['remote', 'hybrid', 'local'],
                         help='asset source mode')
+    parser.add_argument(
+        '--asset-proxy',
+        help='HTTP proxy used only for outbound asset CDN requests, e.g. '
+             'http://127.0.0.1:7890',
+    )
     args = parser.parse_args()
 
     config.is_local = True
@@ -89,6 +94,8 @@ if __name__ == '__main__':
         config.language = args.language
     if args.asset_mode:
         config.asset_mode = args.asset_mode
+    if args.asset_proxy is not None:
+        config.asset_upstream_proxy = args.asset_proxy
     if args.config_only:
         sys.exit()
     start_server(args.reset)
