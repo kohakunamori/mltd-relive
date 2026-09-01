@@ -16,7 +16,6 @@ __all__ = [
     'greco',
     'guest_character',
     'idol',
-    'idol_detail',
     'inspect',
     'item',
     'jewel',
