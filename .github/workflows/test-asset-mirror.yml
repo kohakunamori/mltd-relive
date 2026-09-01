@@ -3,8 +3,31 @@ name: Test local asset and server transport
 on:
   push:
     branches:
+      - main
       - perf/asset-mirror
       - perf/local-assets-and-server
+    paths:
+      - 'standalone/console.py'
+      - 'standalone/gui.pyw'
+      - 'standalone/main.py'
+      - 'standalone/mltd/models/engine.py'
+      - 'standalone/mltd/services/asset.py'
+      - 'standalone/mltd/servers/api_server.py'
+      - 'standalone/mltd/servers/asset_cache.py'
+      - 'standalone/mltd/servers/asset_prepare.py'
+      - 'standalone/mltd/servers/asset_server.py'
+      - 'standalone/mltd/servers/config.py'
+      - 'standalone/mltd/servers/handler.py'
+      - 'standalone/mltd/servers/proxy.py'
+      - 'tools/prefetch_assets.py'
+      - 'tools/verify_asset_mirror.py'
+      - 'tests/test_asset_mirror.py'
+      - 'tests/test_asset_prefetch_fastpath.py'
+      - 'tests/test_local_asset_runtime.py'
+      - 'tests/test_strict_local_and_api.py'
+      - 'tests/api_transport_benchmark.py'
+      - 'tests/remote_asset_compat.py'
+      - '.github/workflows/test-asset-mirror.yml'
   pull_request:
     paths:
       - 'standalone/console.py'
@@ -22,6 +45,7 @@ on:
       - 'tools/prefetch_assets.py'
       - 'tools/verify_asset_mirror.py'
       - 'tests/test_asset_mirror.py'
+      - 'tests/test_asset_prefetch_fastpath.py'
       - 'tests/test_local_asset_runtime.py'
       - 'tests/test_strict_local_and_api.py'
       - 'tests/api_transport_benchmark.py'
@@ -56,6 +80,7 @@ jobs:
           tools/prefetch_assets.py
           tools/verify_asset_mirror.py
           tests/test_asset_mirror.py
+          tests/test_asset_prefetch_fastpath.py
           tests/test_local_asset_runtime.py
           tests/test_strict_local_and_api.py
           tests/api_transport_benchmark.py
