@@ -24,23 +24,24 @@ def set_sqlite_pragma(dbapi_connection, connection_record):
     cursor.close()
 
 
-@event.listens_for(Engine, 'before_cursor_execute')
-def before_cursor_execute(conn, cursor, statement,
-                          parameters, context, executemany):
-    if not logger.isEnabledFor(logging.DEBUG):
-        return
-    conn.info.setdefault('query_start_time', []).append(time.perf_counter_ns())
-    logger.debug(f'Start query: {statement}')
-    logger.debug(f'Parameters: {parameters}')
+# SQLAlchemy events sit directly on the query hot path. At normal INFO level,
+# do not register them at all; this avoids two Python callbacks per statement.
+if logger.isEnabledFor(logging.DEBUG):
 
+    @event.listens_for(Engine, 'before_cursor_execute')
+    def before_cursor_execute(conn, cursor, statement,
+                              parameters, context, executemany):
+        conn.info.setdefault('query_start_time', []).append(
+            time.perf_counter_ns()
+        )
+        logger.debug(f'Start query: {statement}')
+        logger.debug(f'Parameters: {parameters}')
 
-@event.listens_for(Engine, 'after_cursor_execute')
-def after_cursor_execute(conn, cursor, statement,
-                         parameters, context, executemany):
-    if not logger.isEnabledFor(logging.DEBUG):
-        return
-    starts = conn.info.get('query_start_time')
-    if not starts:
-        return
-    total_ns = time.perf_counter_ns() - starts.pop(-1)
-    logger.debug(f'Query complete in {total_ns / 1_000_000:.2f} ms')
+    @event.listens_for(Engine, 'after_cursor_execute')
+    def after_cursor_execute(conn, cursor, statement,
+                             parameters, context, executemany):
+        starts = conn.info.get('query_start_time')
+        if not starts:
+            return
+        total_ns = time.perf_counter_ns() - starts.pop(-1)
+        logger.debug(f'Query complete in {total_ns / 1_000_000:.2f} ms')
