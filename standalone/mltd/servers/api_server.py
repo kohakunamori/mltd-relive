@@ -1,29 +1,35 @@
 import socket
 import sys
 from os import path
-from wsgiref.simple_server import WSGIRequestHandler, make_server
+from socketserver import ThreadingMixIn
+from wsgiref.simple_server import WSGIRequestHandler, WSGIServer, make_server
 
 from mltd.servers.config import api_port
 from mltd.servers.handler import application
 from mltd.servers.logging import logger
 
 
-# A hack to prevent slow http.server.HTTPServer startup time on Windows.
-# When a new HTTPServer object is created, it calls socket.getfqdn('')
-# to get the fully qualified domain name of the device this Python
-# program is running on. Since this program is expected to only run on
-# PCs and phones, the hostname returned by the OS usually cannot be
-# resolved by the DNS. DNS lookup failures are especially bad on Windows
-# due to its long default timeout.
+# Avoid slow reverse-DNS/FQDN lookup during server startup on Windows.
 def bare_getfqdn(name=''):
     return ''
 socket.getfqdn = bare_getfqdn
 
 
+class ThreadingWSGIServer(ThreadingMixIn, WSGIServer):
+    daemon_threads = True
+    allow_reuse_address = True
+    request_queue_size = 64
+
+    def get_request(self):
+        request, client_address = super().get_request()
+        request.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+        return request, client_address
+
+
 class SilentWSGIRequestHandler(WSGIRequestHandler):
+    protocol_version = 'HTTP/1.1'
 
     def log_message(self, format, *args):
-        # Disable stderr output
         pass
 
 
@@ -34,8 +40,9 @@ def key_path():
 
 def start(port=api_port, conn=None):
     with make_server('', port, application,
+                     server_class=ThreadingWSGIServer,
                      handler_class=SilentWSGIRequestHandler) as httpd:
-        logger.info(f'Serving HTTP on port {port}...')
+        logger.info(f'Serving threaded HTTP/1.1 API on port {port}...')
         if conn:
             conn.send(True)
             conn.close()
@@ -44,4 +51,3 @@ def start(port=api_port, conn=None):
 
 if __name__ == '__main__':
     start()
-
