@@ -1,0 +1,58 @@
+name: Publish APK Patcher v1.0.5
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/publish-patcher-v1.0.5.yml'
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      SOURCE_RUN: '33529113368'
+      RELEASE_TAG: standalone-v0.1.3
+    steps:
+      - name: Download built patcher artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/windows artifacts/ubuntu artifacts/macos release
+          gh run download "$SOURCE_RUN" --repo "$GITHUB_REPOSITORY" -n mltd-relive-apk-patcher-windows -D artifacts/windows
+          gh run download "$SOURCE_RUN" --repo "$GITHUB_REPOSITORY" -n mltd-relive-apk-patcher-ubuntu -D artifacts/ubuntu
+          gh run download "$SOURCE_RUN" --repo "$GITHUB_REPOSITORY" -n mltd-relive-apk-patcher-macos -D artifacts/macos
+
+          win="$(find artifacts/windows -type f -name 'mltd-relive-apk-patcher.exe' -print -quit)"
+          linux="$(find artifacts/ubuntu -type f -name 'mltd-relive-apk-patcher' -print -quit)"
+          maczip="$(find artifacts/macos -type f -name 'mltd-relive-apk-patcher-macos.zip' -print -quit)"
+
+          test -n "$win" && test -f "$win"
+          test -n "$linux" && test -f "$linux"
+          test -n "$maczip" && test -f "$maczip"
+
+          cp "$win" release/mltd-relive-apk-patcher-v1.0.5-windows.exe
+          cp "$linux" release/mltd-relive-apk-patcher-v1.0.5-ubuntu
+          cp "$maczip" release/mltd-relive-apk-patcher-v1.0.5-macos.zip
+          sha256sum release/*
+
+      - name: Replace patcher assets in Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for old in \
+            mltd-relive-apk-patcher-v1.0.4-windows.exe \
+            mltd-relive-apk-patcher-v1.0.4-ubuntu \
+            mltd-relive-apk-patcher-v1.0.4-macos.zip
+          do
+            gh release delete-asset "$RELEASE_TAG" "$old" --repo "$GITHUB_REPOSITORY" --yes || true
+          done
+          gh release upload "$RELEASE_TAG" release/* --repo "$GITHUB_REPOSITORY" --clobber
