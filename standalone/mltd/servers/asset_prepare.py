@@ -53,7 +53,7 @@ def prepare_local_assets(language: str,
                          root: str = 'asset-cache',
                          *,
                          platforms: Iterable[str] | None = None,
-                         workers: int = 8,
+                         workers: int = 24,
                          verify_existing: bool = False,
                          remote_root: str = REMOTE_ASSET_ROOT,
                          upstream_proxy: str | None = None,
@@ -81,7 +81,10 @@ def prepare_local_assets(language: str,
     try:
         for platform_index, platform in enumerate(platforms, start=1):
             scope = f'{language}-{platform}'
-            logger.info(f'Preparing complete local assets for {scope}...')
+            logger.info(
+                f'Preparing complete local assets for {scope} '
+                f'with {workers} workers...'
+            )
             reporter.emit(
                 force=True,
                 phase='manifest',
@@ -92,6 +95,8 @@ def prepare_local_assets(language: str,
                 manifest_total=0,
             )
 
+            # Fetch and parse the manifest exactly once. The parsed object list
+            # is passed into prefetch and reused for the final strict check.
             _, manifest_names = mirror.fetch_manifest(language, platform)
             manifest_total = len(manifest_names)
             reporter.emit(
@@ -144,7 +149,7 @@ def prepare_local_assets(language: str,
                     current=name,
                 )
 
-                if completed == total or completed - last_logged >= 100:
+                if completed == total or completed - last_logged >= 250:
                     logger.info(
                         f'Asset prefetch {scope}: {completed}/{total}'
                     )
@@ -160,6 +165,7 @@ def prepare_local_assets(language: str,
                 workers=workers,
                 verify_existing=verify_existing,
                 progress=progress,
+                manifest_objects=manifest_names,
             )
             if result['failed']:
                 examples = ', '.join(name for name, _ in result['failed'][:5])
@@ -184,10 +190,8 @@ def prepare_local_assets(language: str,
                     f'{len(result["failed"])} download(s) failed; examples: {examples}'
                 )
 
-            _, names = mirror.fetch_manifest(language, platform)
-            check = store.verify if verify_existing else store.is_complete
-            missing = []
-            verify_total = len(names)
+            # One SQLite snapshot + one directory scan replaces the previous
+            # N individual SQLite connections/queries in the final check.
             reporter.emit(
                 force=True,
                 phase='verify',
@@ -195,29 +199,32 @@ def prepare_local_assets(language: str,
                 platform=platform,
                 platform_index=platform_index,
                 platform_count=len(platforms),
-                manifest_total=verify_total,
+                manifest_total=manifest_total,
                 verify_completed=0,
                 cached=result['already_cached'],
                 downloaded=result['downloaded'],
                 failed=0,
             )
-            for verify_completed, name in enumerate(names, start=1):
-                if not check(language, platform, name):
-                    missing.append(name)
-                if verify_completed == verify_total or verify_completed % 250 == 0:
-                    reporter.emit(
-                        force=verify_completed == verify_total,
-                        phase='verify',
-                        language=language,
-                        platform=platform,
-                        platform_index=platform_index,
-                        platform_count=len(platforms),
-                        manifest_total=verify_total,
-                        verify_completed=verify_completed,
-                        cached=result['already_cached'],
-                        downloaded=result['downloaded'],
-                        failed=0,
-                    )
+            complete = store.complete_names(
+                language,
+                platform,
+                manifest_names,
+                verify=verify_existing,
+            )
+            missing = [name for name in manifest_names if name not in complete]
+            reporter.emit(
+                force=True,
+                phase='verify',
+                language=language,
+                platform=platform,
+                platform_index=platform_index,
+                platform_count=len(platforms),
+                manifest_total=manifest_total,
+                verify_completed=manifest_total,
+                cached=result['already_cached'],
+                downloaded=result['downloaded'],
+                failed=len(missing),
+            )
 
             if missing:
                 reporter.emit(
@@ -227,7 +234,7 @@ def prepare_local_assets(language: str,
                     platform=platform,
                     platform_index=platform_index,
                     platform_count=len(platforms),
-                    manifest_total=verify_total,
+                    manifest_total=manifest_total,
                     cached=result['already_cached'],
                     downloaded=result['downloaded'],
                     failed=len(missing),
@@ -244,7 +251,7 @@ def prepare_local_assets(language: str,
 
             summary[platform] = {
                 **result,
-                'complete': len(names),
+                'complete': manifest_total,
             }
             reporter.emit(
                 force=True,
@@ -253,13 +260,13 @@ def prepare_local_assets(language: str,
                 platform=platform,
                 platform_index=platform_index,
                 platform_count=len(platforms),
-                manifest_total=len(names),
+                manifest_total=manifest_total,
                 cached=result['already_cached'],
                 downloaded=result['downloaded'],
                 failed=0,
             )
             logger.info(
-                f'Local assets ready for {scope}: {len(names)} objects.'
+                f'Local assets ready for {scope}: {manifest_total} objects.'
             )
 
         reporter.emit(
