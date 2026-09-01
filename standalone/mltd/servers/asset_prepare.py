@@ -4,11 +4,7 @@ import time
 from collections.abc import Iterable
 from pathlib import Path
 
-from mltd.servers.asset_cache import (
-    REMOTE_ASSET_ROOT,
-    AssetMirror,
-    AssetStore,
-)
+from mltd.servers.asset_cache import REMOTE_ASSET_ROOT, AssetMirror, AssetStore
 from mltd.servers.logging import logger
 
 PROGRESS_STATUS_NAME = '.asset-prepare-status.json'
@@ -29,13 +25,8 @@ class _ProgressReporter:
         now = time.time()
         if not force and now - self._last_write < _PROGRESS_WRITE_INTERVAL:
             return
-        payload = {
-            'updated_at': now,
-            **payload,
-        }
-        temporary = self.path.with_name(
-            f'{self.path.name}.{os.getpid()}.tmp'
-        )
+        payload = {'updated_at': now, **payload}
+        temporary = self.path.with_name(f'{self.path.name}.{os.getpid()}.tmp')
         try:
             temporary.write_text(
                 json.dumps(payload, ensure_ascii=False, separators=(',', ':')),
@@ -52,67 +43,64 @@ def prepare_local_assets(language: str,
                          root: str = 'asset-cache',
                          *,
                          platforms: Iterable[str] | None = None,
+                         scopes: Iterable[str] | None = None,
                          workers: int = 48,
                          verify_existing: bool = False,
                          remote_root: str = REMOTE_ASSET_ROOT,
                          upstream_proxy: str | None = None,
                          conn=None) -> dict:
-    """Ensure the configured strict local mirror exists before serving."""
-    if platforms is None:
-        # Keep runtime local mode narrow by default. The game client platform
-        # set is configured independently from the UI language; v0.1.6 defaults
-        # to Android only. Manual tooling can still request Android+iOS.
+    """Ensure explicitly configured strict-local scopes are complete."""
+    configured_mode = scopes is None and platforms is None
+    if configured_mode:
         from mltd.servers.config import config
-        platforms = config.asset_local_platforms
-    platforms = tuple(dict.fromkeys(str(p).lower() for p in platforms))
-    if not platforms:
-        raise ValueError('At least one local asset platform is required')
+        scopes = config.asset_local_scopes
+
+    if scopes is not None:
+        scope_pairs = []
+        for scope in scopes:
+            lang, platform = str(scope).lower().split('-', 1)
+            pair = (lang, platform)
+            if pair not in scope_pairs:
+                scope_pairs.append(pair)
+    else:
+        platform_list = tuple(dict.fromkeys(
+            str(p).lower() for p in (platforms or ('android',))
+        ))
+        scope_pairs = [(language, platform) for platform in platform_list]
+
+    if not scope_pairs:
+        raise ValueError('At least one local asset scope is required')
 
     store = AssetStore(root)
-    mirror = AssetMirror(
-        store,
-        remote_root=remote_root,
-        upstream_proxy=upstream_proxy,
-    )
+    mirror = AssetMirror(store, remote_root=remote_root,
+                         upstream_proxy=upstream_proxy)
     reporter = _ProgressReporter(root)
     summary = {}
+    scope_count = len(scope_pairs)
 
-    reporter.emit(
-        force=True,
-        phase='starting',
-        language=language,
-        platform='',
-        platform_index=0,
-        platform_count=len(platforms),
-    )
+    reporter.emit(force=True, phase='starting', language='', platform='',
+                  platform_index=0, platform_count=scope_count)
 
     try:
-        for platform_index, platform in enumerate(platforms, start=1):
-            scope = f'{language}-{platform}'
+        for scope_index, (scope_language, platform) in enumerate(
+                scope_pairs, start=1):
+            scope = f'{scope_language}-{platform}'
             logger.info(
                 f'Preparing complete local assets for {scope} '
                 f'with {workers} workers...'
             )
             reporter.emit(
-                force=True,
-                phase='manifest',
-                language=language,
-                platform=platform,
-                platform_index=platform_index,
-                platform_count=len(platforms),
-                manifest_total=0,
+                force=True, phase='manifest', language=scope_language,
+                platform=platform, platform_index=scope_index,
+                platform_count=scope_count, manifest_total=0,
             )
 
-            _, manifest_names = mirror.fetch_manifest(language, platform)
+            _, manifest_names = mirror.fetch_manifest(scope_language, platform)
             manifest_total = len(manifest_names)
             reporter.emit(
-                force=True,
-                phase='scan',
-                language=language,
-                platform=platform,
-                platform_index=platform_index,
-                platform_count=len(platforms),
-                manifest_total=manifest_total,
+                force=True, phase='scan', language=scope_language,
+                platform=platform, platform_index=scope_index,
+                platform_count=scope_count, manifest_total=manifest_total,
             )
 
             last_logged = 0
@@ -125,181 +113,89 @@ def prepare_local_assets(language: str,
                 if ok:
                     try:
                         downloaded_bytes += store.object_path(
-                            language, platform, name
-                        ).stat().st_size
+                            scope_language, platform, name).stat().st_size
                     except OSError:
                         pass
                 else:
                     failed_count += 1
-
                 downloaded_count = completed - failed_count
                 cached_count = max(0, manifest_total - total)
                 elapsed = max(time.monotonic() - started_at, 0.001)
-                rate_bps = downloaded_bytes / elapsed
-
                 reporter.emit(
-                    force=completed == total,
-                    phase='prefetch',
-                    language=language,
-                    platform=platform,
-                    platform_index=platform_index,
-                    platform_count=len(platforms),
-                    manifest_total=manifest_total,
-                    pending_total=total,
-                    completed=completed,
-                    cached=cached_count,
-                    downloaded=downloaded_count,
-                    failed=failed_count,
+                    force=completed == total, phase='prefetch',
+                    language=scope_language, platform=platform,
+                    platform_index=scope_index, platform_count=scope_count,
+                    manifest_total=manifest_total, pending_total=total,
+                    completed=completed, cached=cached_count,
+                    downloaded=downloaded_count, failed=failed_count,
                     bytes_downloaded=downloaded_bytes,
-                    rate_bps=rate_bps,
-                    current=name,
+                    rate_bps=downloaded_bytes / elapsed, current=name,
                 )
-
                 if completed == total or completed - last_logged >= 250:
-                    logger.info(
-                        f'Asset prefetch {scope}: {completed}/{total}'
-                    )
+                    logger.info(f'Asset prefetch {scope}: {completed}/{total}')
                     last_logged = completed
                 if not ok:
                     logger.warning(
-                        f'Asset prefetch failed for {scope}/{name}: {error}'
-                    )
+                        f'Asset prefetch failed for {scope}/{name}: {error}')
 
             result = mirror.prefetch(
-                language,
-                platform,
-                workers=workers,
-                verify_existing=verify_existing,
-                progress=progress,
-                manifest_objects=manifest_names,
-                durable_writes=False,
+                scope_language, platform, workers=workers,
+                verify_existing=verify_existing, progress=progress,
+                manifest_objects=manifest_names, durable_writes=False,
             )
             if result['failed']:
                 examples = ', '.join(name for name, _ in result['failed'][:5])
-                reporter.emit(
-                    force=True,
-                    phase='error',
-                    language=language,
-                    platform=platform,
-                    platform_index=platform_index,
-                    platform_count=len(platforms),
-                    manifest_total=manifest_total,
-                    cached=result['already_cached'],
-                    downloaded=result['downloaded'],
-                    failed=len(result['failed']),
-                    message=(
-                        f'{len(result["failed"])} asset download(s) failed; '
-                        f'examples: {examples}'
-                    ),
-                )
                 raise RuntimeError(
                     f'Local asset prefetch incomplete for {scope}: '
-                    f'{len(result["failed"])} download(s) failed; examples: {examples}'
+                    f'{len(result["failed"])} download(s) failed; '
+                    f'examples: {examples}'
                 )
 
             reporter.emit(
-                force=True,
-                phase='verify',
-                language=language,
-                platform=platform,
-                platform_index=platform_index,
-                platform_count=len(platforms),
-                manifest_total=manifest_total,
-                verify_completed=0,
-                cached=result['already_cached'],
-                downloaded=result['downloaded'],
-                failed=0,
+                force=True, phase='verify', language=scope_language,
+                platform=platform, platform_index=scope_index,
+                platform_count=scope_count, manifest_total=manifest_total,
+                verify_completed=0, cached=result['already_cached'],
+                downloaded=result['downloaded'], failed=0,
             )
             complete = store.complete_names(
-                language,
-                platform,
-                manifest_names,
+                scope_language, platform, manifest_names,
                 verify=verify_existing,
             )
             missing = [name for name in manifest_names if name not in complete]
-            reporter.emit(
-                force=True,
-                phase='verify',
-                language=language,
-                platform=platform,
-                platform_index=platform_index,
-                platform_count=len(platforms),
-                manifest_total=manifest_total,
-                verify_completed=manifest_total,
-                cached=result['already_cached'],
-                downloaded=result['downloaded'],
-                failed=len(missing),
-            )
-
             if missing:
-                reporter.emit(
-                    force=True,
-                    phase='error',
-                    language=language,
-                    platform=platform,
-                    platform_index=platform_index,
-                    platform_count=len(platforms),
-                    manifest_total=manifest_total,
-                    cached=result['already_cached'],
-                    downloaded=result['downloaded'],
-                    failed=len(missing),
-                    message=(
-                        f'{len(missing)} object(s) missing or invalid; '
-                        f'example: {missing[0]}'
-                    ),
-                )
                 raise RuntimeError(
                     f'Local asset cache incomplete for {scope}: '
                     f'{len(missing)} object(s) missing or invalid; '
                     f'example: {missing[0]}'
                 )
 
-            summary[platform] = {
-                **result,
-                'complete': manifest_total,
-            }
+            summary_key = scope if configured_mode or scopes is not None else platform
+            summary[summary_key] = {**result, 'complete': manifest_total}
             reporter.emit(
-                force=True,
-                phase='platform_complete',
-                language=language,
-                platform=platform,
-                platform_index=platform_index,
-                platform_count=len(platforms),
-                manifest_total=manifest_total,
-                cached=result['already_cached'],
-                downloaded=result['downloaded'],
+                force=True, phase='platform_complete', language=scope_language,
+                platform=platform, platform_index=scope_index,
+                platform_count=scope_count, manifest_total=manifest_total,
+                cached=result['already_cached'], downloaded=result['downloaded'],
                 failed=0,
             )
-            logger.info(
-                f'Local assets ready for {scope}: {manifest_total} objects.'
-            )
+            logger.info(f'Local assets ready for {scope}: {manifest_total} objects.')
 
-        reporter.emit(
-            force=True,
-            phase='complete',
-            language=language,
-            platform='',
-            platform_index=len(platforms),
-            platform_count=len(platforms),
-        )
+        reporter.emit(force=True, phase='complete', language='', platform='',
+                      platform_index=scope_count, platform_count=scope_count)
     except Exception as exc:
         current = {}
         try:
-            current = json.loads(
-                reporter.path.read_text(encoding='utf-8')
-            )
+            current = json.loads(reporter.path.read_text(encoding='utf-8'))
         except (OSError, ValueError):
             pass
-        if current.get('phase') != 'error':
-            reporter.emit(
-                force=True,
-                phase='error',
-                language=language,
-                platform=current.get('platform', ''),
-                platform_index=current.get('platform_index', 0),
-                platform_count=len(platforms),
-                message=str(exc),
-            )
+        reporter.emit(
+            force=True, phase='error',
+            language=current.get('language', ''),
+            platform=current.get('platform', ''),
+            platform_index=current.get('platform_index', 0),
+            platform_count=scope_count, message=str(exc),
+        )
         raise
 
     if conn:
