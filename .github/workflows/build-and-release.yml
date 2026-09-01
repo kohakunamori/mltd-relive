@@ -4,14 +4,20 @@ on:
   push:
     tags:
       - 'standalone-v*'
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
   contents: write
 
+env:
+  RELEASE_TAG: ${{ github.ref_type == 'tag' && github.ref_name || 'standalone-v0.1.3' }}
+
 jobs:
   build:
     name: Build packages
+    if: github.ref_type == 'tag' || contains(github.event.head_commit.message, '[release standalone-v0.1.3]')
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -27,9 +33,9 @@ jobs:
               cd standalone
               ..\env\Scripts\pyinstaller gui_windows.spec
               cd dist
-              ren mltd-relive-standalone.exe mltd-relive-${{ github.ref_name }}-windows.exe
+              ren mltd-relive-standalone.exe mltd-relive-${{ env.RELEASE_TAG }}-windows.exe
             out-name: windows
-            out-path: standalone/dist/mltd-relive-${{ github.ref_name }}-windows.exe
+            out-path: standalone/dist/mltd-relive-${{ env.RELEASE_TAG }}-windows.exe
           - os: ubuntu-latest
             target: Ubuntu
             cmd-install: |
@@ -41,9 +47,9 @@ jobs:
               cd standalone
               ../env/bin/pyinstaller gui_ubuntu.spec
               cd dist
-              mv mltd-relive-standalone mltd-relive-${{ github.ref_name }}-ubuntu
+              mv mltd-relive-standalone mltd-relive-${{ env.RELEASE_TAG }}-ubuntu
             out-name: ubuntu
-            out-path: standalone/dist/mltd-relive-${{ github.ref_name }}-ubuntu
+            out-path: standalone/dist/mltd-relive-${{ env.RELEASE_TAG }}-ubuntu
           - os: macos-latest
             target: macOS
             cmd-install: |
@@ -55,9 +61,9 @@ jobs:
               cd standalone
               ../env/bin/pyinstaller gui_macos.spec
               cd dist
-              zip -r9 mltd-relive-${{ github.ref_name }}-macos.zip mltd-relive-standalone.app
+              zip -r9 mltd-relive-${{ env.RELEASE_TAG }}-macos.zip mltd-relive-standalone.app
             out-name: macos
-            out-path: standalone/dist/mltd-relive-${{ github.ref_name }}-macos.zip
+            out-path: standalone/dist/mltd-relive-${{ env.RELEASE_TAG }}-macos.zip
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -82,6 +88,7 @@ jobs:
 
   gameclient:
     name: Prepare corrected game clients
+    if: github.ref_type == 'tag' || contains(github.event.head_commit.message, '[release standalone-v0.1.3]')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -144,7 +151,7 @@ jobs:
 
   createrelease:
     name: Create Release
-    if: github.ref_type == 'tag'
+    if: github.ref_type == 'tag' || contains(github.event.head_commit.message, '[release standalone-v0.1.3]')
     needs:
       - build
       - gameclient
@@ -162,7 +169,10 @@ jobs:
         id: create_release
         uses: ncipollo/release-action@v1
         with:
-          name: mltd-relive-${{ github.ref_name }}
+          tag: ${{ env.RELEASE_TAG }}
+          commit: ${{ github.sha }}
+          name: mltd-relive-${{ env.RELEASE_TAG }}
           bodyFile: GAME_CLIENT_NOTICE.txt
           artifacts: 'LICENSE,release-artifacts/windows/*,release-artifacts/ubuntu/*,release-artifacts/macos/*,release-artifacts/game-client/*'
           artifactErrorsFailBuild: true
+          makeLatest: true
