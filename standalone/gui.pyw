@@ -6,8 +6,8 @@ from tkinter import messagebox, ttk
 
 from mltd.models.setup import (check_database_version, cleanup, setup,
                                upgrade_database)
-from mltd.servers import api_server, dns, proxy
-from mltd.servers.config import ASSET_MODES, api_port, config, version
+from mltd.servers import dns, proxy
+from mltd.servers.config import ASSET_MODES, config, version
 from mltd.servers.dns import dns_port, get_lan_ips
 from mltd.servers.logging import handler, logger
 from mltd.servers.process import CustomProcess
@@ -24,10 +24,10 @@ class MLTDReliveGUI:
         style = ttk.Style()
         style.configure('Green.TButton', foreground='green')
         style.map('Green.TButton', foreground=[('disabled', 'grey'),
-                                               ('active','green')])
+                                               ('active', 'green')])
         style.configure('Red.TButton', foreground='red')
         style.map('Red.TButton', foreground=[('disabled', 'grey'),
-                                             ('active','red')])
+                                             ('active', 'red')])
 
         main_frame = ttk.Frame(self.root, padding=10)
         main_frame.grid()
@@ -71,10 +71,8 @@ class MLTDReliveGUI:
             column=0, row=1, padx=5, sticky=W)
         ttk.Label(info_frame, text=f'DNS Port: {dns_port}').grid(
             column=1, row=0, padx=5, sticky=W)
-        ttk.Label(info_frame, text=f'Proxy Port: {proxy_port}').grid(
+        ttk.Label(info_frame, text=f'TLS/API Port: {proxy_port}').grid(
             column=1, row=1, padx=5, sticky=W)
-        ttk.Label(info_frame, text=f'API Port: {api_port}').grid(
-            column=1, row=2, padx=5, sticky=W)
 
         options_frame = ttk.Labelframe(main_frame, text='Options', padding=10)
         options_frame.grid(column=1, row=2, sticky=(N, S, W, E))
@@ -86,14 +84,12 @@ class MLTDReliveGUI:
             options_frame, text='繁體中文', variable=self.language, value='zh',
             command=self.change_language
         )
-        self.zh_radio_button.grid(
-            column=1, row=0, sticky=W)
+        self.zh_radio_button.grid(column=1, row=0, sticky=W)
         self.ko_radio_button = ttk.Radiobutton(
             options_frame, text='한국어', variable=self.language, value='ko',
             command=self.change_language
         )
-        self.ko_radio_button.grid(
-            column=1, row=1, sticky=W)
+        self.ko_radio_button.grid(column=1, row=1, sticky=W)
 
         ttk.Label(options_frame, text='Asset Mode:').grid(
             column=0, row=2, sticky=E, pady=(6, 0))
@@ -111,20 +107,14 @@ class MLTDReliveGUI:
             '<<ComboboxSelected>>', self.change_asset_mode)
 
     def update_server_status(self):
-        if (self.api_process.is_alive()
-                or self.proxy_process.is_alive()
-                or self.dns_process.is_alive()):
-            if self.api_process.exception:
-                self.stop_server_on_error(self.api_process.exception)
-                return
-            elif self.proxy_process.exception:
+        if self.proxy_process.is_alive() or self.dns_process.is_alive():
+            if self.proxy_process.exception:
                 self.stop_server_on_error(self.proxy_process.exception)
                 return
             elif self.dns_process.exception:
                 self.stop_server_on_error(self.dns_process.exception)
                 return
             if (self.server_status == 'Starting'
-                    and self.api_process.is_ready()
                     and self.proxy_process.is_ready()
                     and self.dns_process.is_ready()):
                 self.server_status = 'Started'
@@ -136,10 +126,9 @@ class MLTDReliveGUI:
                 self.stop_server_button.configure(state=NORMAL)
                 self.progress_bar.stop()
                 self.progress_bar.grid_forget()
-                logger.info(f'Server started.')
+                logger.info('Server started.')
             self.root.after(200, self.update_server_status)
             return
-        self.api_process.join()
         self.proxy_process.join()
         self.dns_process.join()
         if self.server_status == 'Stopping':
@@ -154,7 +143,7 @@ class MLTDReliveGUI:
             self.zh_radio_button.config(state=NORMAL)
             self.ko_radio_button.config(state=NORMAL)
             self.asset_mode_combobox.config(state='readonly')
-            logger.info(f'Server stopped.')
+            logger.info('Server stopped.')
 
     def start_server(self):
         self.server_status = 'Starting'
@@ -164,9 +153,16 @@ class MLTDReliveGUI:
         upgrade_database()
 
         handler.doRollover()
-        self.status_label.config(text='Starting Server...',
-                                 foreground='black')
-        logger.info(f'Starting server...')
+        status = ('Preparing Local Assets...'
+                  if config.asset_mode == 'local'
+                  else 'Starting Server...')
+        self.status_label.config(text=status, foreground='black')
+        logger.info('Starting server...')
+        if config.asset_mode == 'local':
+            logger.info(
+                'Strict local mode pre-downloads all Android and iOS assets '
+                'before the server becomes ready.'
+            )
         self.start_server_button.config(state=DISABLED)
         self.reset_button.config(state=DISABLED)
         self.zh_radio_button.config(state=DISABLED)
@@ -176,8 +172,6 @@ class MLTDReliveGUI:
         self.progress_bar.start()
         self.proxy_process = CustomProcess(target=proxy.start, daemon=True)
         self.proxy_process.start()
-        self.api_process = CustomProcess(target=api_server.start, daemon=True)
-        self.api_process.start()
         self.dns_process = CustomProcess(target=dns.start, daemon=True)
         self.dns_process.start()
         self.root.after(200, self.update_server_status)
@@ -186,10 +180,9 @@ class MLTDReliveGUI:
         self.server_status = 'Stopping'
         self.status_label.config(text='Stopping Server...',
                                  foreground='black')
-        logger.info(f'Stopping server...')
+        logger.info('Stopping server...')
         self.start_server_button.config(state=DISABLED)
         self.proxy_process.terminate()
-        self.api_process.terminate()
         self.dns_process.terminate()
         self.root.after(200, self.update_server_status)
 
