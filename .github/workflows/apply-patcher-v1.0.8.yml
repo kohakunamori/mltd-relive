@@ -1,0 +1,79 @@
+name: Apply APK Patcher v1.0.8 source fix
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.event.head_commit.message == 'ci: apply apk-patcher v1.0.8 source fix'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Patch signer fallback
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('tools/apk-patcher/apk-patcher.pyw')
+          text = path.read_text(encoding='utf-8')
+          old = """    # apksigner verify above is the authoritative signature verdict for
+    # Android API 19+. Parse v2 only to compare signer identity without
+    # depending on apksigner's human-readable output.
+    final_signer_sha256 = extract_signer_sha256(
+        output_apk, verify=False
+    )
+    if final_signer_sha256 != original_signer_sha256:
+        raise RuntimeError(
+            'Final APK signer does not match the input APK signer.\\n\\n'
+            f'Input signer SHA-256: {original_signer_sha256}\\n'
+            f'Output signer SHA-256: {final_signer_sha256}'
+        )
+"""
+          new = """    # apksigner verify above is the authoritative signature verdict for
+    # Android API 19+. Old Build Tools such as 29.0.3 may successfully produce
+    # a verifier-approved v1/JAR-signed APK without an APK Signature Scheme v2
+    # block even when v2 signing was requested. If a v2 block exists, compare
+    # its signer identity with the input APK. If it does not exist, trust the
+    # successful apksigner verification plus the explicitly selected bundled
+    # signing key instead of rejecting an otherwise valid legacy APK.
+    final_signer_sha256 = None
+    try:
+        final_signer_sha256 = extract_signer_sha256(
+            output_apk, verify=False
+        )
+    except RuntimeError as exc:
+        if 'APK Signature Scheme v2 block was not found' not in str(exc):
+            raise
+
+    if (
+        final_signer_sha256 is not None
+        and final_signer_sha256 != original_signer_sha256
+    ):
+        raise RuntimeError(
+            'Final APK signer does not match the input APK signer.\\n\\n'
+            f'Input signer SHA-256: {original_signer_sha256}\\n'
+            f'Output signer SHA-256: {final_signer_sha256}'
+        )
+"""
+          if old not in text:
+              raise SystemExit('expected v1.0.7 signer block not found')
+          path.write_text(text.replace(old, new, 1), encoding='utf-8')
+          PY
+          python -m py_compile tools/apk-patcher/apk-patcher.pyw
+          git diff --check
+      - name: Commit source
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add tools/apk-patcher/apk-patcher.pyw
+          git commit -m 'fix(apk-patcher): allow verifier-approved v1-only APK output'
+          git push origin HEAD:main
