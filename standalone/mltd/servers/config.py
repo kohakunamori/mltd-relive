@@ -2,7 +2,7 @@ import logging
 from configparser import ConfigParser
 from datetime import timedelta, timezone
 
-version = '0.1.7'
+version = '0.1.8'
 api_port = 7650
 # 'zh' for Traditional Chinese, 'ko' for Korean
 _language = 'zh'
