@@ -1,9 +1,11 @@
+import io
 import sys
 import threading
+import traceback
 from http.server import ThreadingHTTPServer
 from os import path
 from ssl import PROTOCOL_TLS_SERVER, SSLContext
-from urllib.parse import urlsplit
+from urllib.parse import unquote, urlsplit
 
 import requests
 import urllib3
@@ -47,6 +49,7 @@ def _upstream_session():
 
 class ProxyHTTPRequestHandler(AssetHTTPRequestHandler):
     protocol_version = 'HTTP/1.1'
+    api_application = None
 
     def do_HEAD(self):
         asset_path = self._asset_path()
@@ -71,16 +74,90 @@ class ProxyHTTPRequestHandler(AssetHTTPRequestHandler):
         return None
 
     def do_POST(self):
-        host = f'127.0.0.1:{api_port}'
-        url = f'http://{host}{self.path}'
         content_len = int(self.headers.get('Content-Length', '0'))
         req_body = self.rfile.read(content_len)
+        if self.api_application is not None:
+            self._dispatch_wsgi(req_body)
+        else:
+            # Compatibility path used by isolated tests and by callers that
+            # explicitly instantiate the handler without proxy.start().
+            self._forward_to_local_api(req_body)
 
+    def _dispatch_wsgi(self, req_body: bytes):
+        parsed = urlsplit(self.path)
+        environ = {
+            'REQUEST_METHOD': 'POST',
+            'SCRIPT_NAME': '',
+            'PATH_INFO': unquote(parsed.path),
+            'QUERY_STRING': parsed.query,
+            'SERVER_NAME': self.server.server_address[0] or '0.0.0.0',
+            'SERVER_PORT': str(self.server.server_address[1]),
+            'SERVER_PROTOCOL': self.request_version,
+            'REMOTE_ADDR': self.client_address[0],
+            'CONTENT_LENGTH': str(len(req_body)),
+            'wsgi.version': (1, 0),
+            'wsgi.url_scheme': 'https',
+            'wsgi.input': io.BytesIO(req_body),
+            'wsgi.errors': sys.stderr,
+            'wsgi.multithread': True,
+            'wsgi.multiprocess': True,
+            'wsgi.run_once': False,
+        }
+        for header, value in self.headers.items():
+            normalized = header.upper().replace('-', '_')
+            if normalized == 'CONTENT_TYPE':
+                environ['CONTENT_TYPE'] = value
+            elif normalized == 'CONTENT_LENGTH':
+                # The byte length above is authoritative after reading the
+                # request body from BaseHTTPRequestHandler.
+                continue
+            else:
+                environ[f'HTTP_{normalized}'] = value
+
+        response_status = []
+        response_headers = []
+        written = []
+
+        def start_response(status, headers, exc_info=None):
+            if exc_info is not None and response_status:
+                raise exc_info[1].with_traceback(exc_info[2])
+            response_status[:] = [status]
+            response_headers[:] = list(headers)
+
+            def write(data):
+                written.append(data)
+
+            return write
+
+        result = None
+        try:
+            result = self.api_application(environ, start_response)
+            chunks = written + list(result)
+            content = b''.join(chunks)
+            if not response_status:
+                raise RuntimeError('WSGI application did not call start_response')
+            status_code = int(response_status[0].split(' ', 1)[0])
+            self._send_response(status_code, response_headers, content)
+        except Exception:
+            logger.error('Direct API dispatch failed:\n' + traceback.format_exc())
+            if not self.wfile.closed:
+                try:
+                    self.send_error(500)
+                except (BrokenPipeError, ConnectionResetError):
+                    pass
+        finally:
+            if result is not None and hasattr(result, 'close'):
+                result.close()
+
+    def _forward_to_local_api(self, req_body: bytes):
+        host = f'127.0.0.1:{api_port}'
+        url = f'http://{host}{self.path}'
         headers = {
             key: value
             for key, value in self.headers.items()
             if key.lower() not in _HOP_BY_HOP_HEADERS
         }
+        resp = None
         try:
             resp = _upstream_session().post(
                 url,
@@ -91,15 +168,19 @@ class ProxyHTTPRequestHandler(AssetHTTPRequestHandler):
                 timeout=(5, 120),
             )
             content = resp.raw.read(decode_content=False)
+            self._send_response(resp.status_code, resp.headers.items(), content)
         except requests.RequestException as exc:
             logger.error(f'Local API proxy request failed: {exc}')
             self.send_error(502)
-            return
+        finally:
+            if resp is not None:
+                resp.close()
 
+    def _send_response(self, status_code, headers, content: bytes):
         try:
-            self.send_response(resp.status_code)
+            self.send_response(status_code)
             has_content_length = False
-            for header, value in resp.headers.items():
+            for header, value in headers:
                 lower = header.lower()
                 if lower in _HOP_BY_HOP_HEADERS or lower in {'server', 'date'}:
                     continue
@@ -113,8 +194,6 @@ class ProxyHTTPRequestHandler(AssetHTTPRequestHandler):
                 self.wfile.write(content)
         except (BrokenPipeError, ConnectionResetError):
             pass
-        finally:
-            resp.close()
 
     def log_message(self, format, *args):
         # Disable stderr output
@@ -127,6 +206,12 @@ def key_path():
 
 
 def start(port=proxy_port, conn=None):
+    # Import here so lightweight transport tests can instantiate the proxy
+    # without importing the complete service/ORM graph.
+    from mltd.servers.handler import application
+
+    ProxyHTTPRequestHandler.api_application = application
+
     store = AssetStore(config.asset_cache_root)
     fetch_on_miss = config.asset_mode == 'hybrid'
     mirror = AssetMirror(store) if fetch_on_miss else None
@@ -147,6 +232,7 @@ def start(port=proxy_port, conn=None):
     httpd.socket = context.wrap_socket(httpd.socket, server_side=True)
 
     logger.info(f'Reverse proxy is running on port {port}...')
+    logger.info('API dispatch: direct WSGI (no localhost HTTP hop)')
     logger.info(f'Asset mode: {config.asset_mode}')
     if conn:
         conn.send(True)
