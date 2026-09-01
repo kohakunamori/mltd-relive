@@ -193,6 +193,19 @@ class AssetHTTPRequestHandler(BaseHTTPRequestHandler):
         entry = self._lookup_entry(language, platform, name)
         if entry is not None:
             return entry
+
+        # Runtime additions (manual cache fill or an external prefetch) are a
+        # cold-path event.  Discover them once, cache them, then all later
+        # requests use the zero-SQLite in-memory path.
+        entry = self._refresh_entry(language, platform, name)
+        if entry is not None:
+            try:
+                if entry.path.is_file():
+                    return entry
+            except OSError:
+                pass
+            self._invalidate_entry(language, platform, name)
+
         error_status = self._fetch_missing(language, platform, name)
         if error_status is not None:
             return error_status
