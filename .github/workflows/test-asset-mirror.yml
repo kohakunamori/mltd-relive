@@ -10,8 +10,9 @@ on:
       - 'standalone/console.py'
       - 'standalone/gui.pyw'
       - 'standalone/main.py'
-      - 'standalone/mltd/models/engine.py'
-      - 'standalone/mltd/services/asset.py'
+      - 'standalone/mltd/models/**'
+      - 'standalone/mltd/services/**'
+      - 'standalone/mltd/locales/**'
       - 'standalone/mltd/servers/api_server.py'
       - 'standalone/mltd/servers/asset_cache.py'
       - 'standalone/mltd/servers/asset_prepare.py'
@@ -19,6 +20,7 @@ on:
       - 'standalone/mltd/servers/config.py'
       - 'standalone/mltd/servers/handler.py'
       - 'standalone/mltd/servers/proxy.py'
+      - 'requirements.txt'
       - 'tools/prefetch_assets.py'
       - 'tools/verify_asset_mirror.py'
       - 'tests/test_asset_mirror.py'
@@ -35,8 +37,9 @@ on:
       - 'standalone/console.py'
       - 'standalone/gui.pyw'
       - 'standalone/main.py'
-      - 'standalone/mltd/models/engine.py'
-      - 'standalone/mltd/services/asset.py'
+      - 'standalone/mltd/models/**'
+      - 'standalone/mltd/services/**'
+      - 'standalone/mltd/locales/**'
       - 'standalone/mltd/servers/api_server.py'
       - 'standalone/mltd/servers/asset_cache.py'
       - 'standalone/mltd/servers/asset_prepare.py'
@@ -44,6 +47,7 @@ on:
       - 'standalone/mltd/servers/config.py'
       - 'standalone/mltd/servers/handler.py'
       - 'standalone/mltd/servers/proxy.py'
+      - 'requirements.txt'
       - 'tools/prefetch_assets.py'
       - 'tools/verify_asset_mirror.py'
       - 'tests/test_asset_mirror.py'
@@ -66,31 +70,23 @@ jobs:
           python-version: '3.11'
       - name: Install minimal dependencies
         run: python -m pip install requests==2.31.0 msgpack==1.0.5
-      - name: Compile changed server modules
-        run: >-
-          python -m py_compile
-          standalone/console.py
-          standalone/gui.pyw
-          standalone/main.py
-          standalone/mltd/models/engine.py
-          standalone/mltd/services/asset.py
-          standalone/mltd/servers/api_server.py
-          standalone/mltd/servers/asset_cache.py
-          standalone/mltd/servers/asset_prepare.py
-          standalone/mltd/servers/asset_server.py
-          standalone/mltd/servers/config.py
-          standalone/mltd/servers/handler.py
-          standalone/mltd/servers/proxy.py
-          tools/prefetch_assets.py
-          tools/verify_asset_mirror.py
-          tests/test_asset_mirror.py
-          tests/test_asset_prefetch_fastpath.py
-          tests/test_asset_server_hotpath.py
-          tests/test_local_asset_runtime.py
-          tests/test_strict_local_and_api.py
-          tests/api_transport_benchmark.py
-          tests/asset_server_benchmark.py
-          tests/remote_asset_compat.py
+      - name: Compile Python source
+        run: |
+          python -m compileall -q standalone/mltd/models standalone/mltd/services standalone/mltd/servers
+          python -m py_compile \
+            standalone/console.py \
+            standalone/gui.pyw \
+            standalone/main.py \
+            tools/prefetch_assets.py \
+            tools/verify_asset_mirror.py \
+            tests/test_asset_mirror.py \
+            tests/test_asset_prefetch_fastpath.py \
+            tests/test_asset_server_hotpath.py \
+            tests/test_local_asset_runtime.py \
+            tests/test_strict_local_and_api.py \
+            tests/api_transport_benchmark.py \
+            tests/asset_server_benchmark.py \
+            tests/remote_asset_compat.py
       - name: Run local asset and transport tests
         run: python -m unittest discover -s tests -p 'test_*.py' -v
       - name: Benchmark API transport
