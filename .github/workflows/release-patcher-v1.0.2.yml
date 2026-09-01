@@ -1,0 +1,112 @@
+name: Publish APK Patcher v1.0.2
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/release-patcher-v1.0.2.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  RELEASE_TAG: standalone-v0.1.3
+  PATCHER_VERSION: v1.0.2
+
+jobs:
+  build:
+    name: Build APK Patcher (${{ matrix.target }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            target: Windows
+            install: |
+              python -m venv env
+              .\env\Scripts\activate
+              python -m pip install --upgrade pip
+              python -m pip install -r requirements.txt
+            build: |
+              cd tools\apk-patcher
+              ..\..\env\Scripts\pyinstaller apk-patcher_windows.spec
+            source: tools/apk-patcher/dist/mltd-relive-apk-patcher.exe
+            suffix: windows.exe
+            artifact: patcher-windows
+          - os: ubuntu-latest
+            target: Ubuntu
+            install: |
+              python -m venv env
+              source env/bin/activate
+              python -m pip install --upgrade pip
+              python -m pip install -r requirements.txt
+            build: |
+              cd tools/apk-patcher
+              ../../env/bin/pyinstaller apk-patcher_ubuntu.spec
+            source: tools/apk-patcher/dist/mltd-relive-apk-patcher
+            suffix: ubuntu
+            artifact: patcher-ubuntu
+          - os: macos-latest
+            target: macOS
+            install: |
+              python -m venv env
+              source env/bin/activate
+              python -m pip install --upgrade pip
+              python -m pip install -r requirements.txt
+            build: |
+              cd tools/apk-patcher
+              ../../env/bin/pyinstaller apk-patcher_macos.spec
+            source: tools/apk-patcher/dist/mltd-relive-apk-patcher.app
+            suffix: macos.zip
+            artifact: patcher-macos
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: ${{ matrix.install }}
+      - name: Build
+        run: ${{ matrix.build }}
+      - name: Package
+        shell: bash
+        env:
+          PACKAGE_SOURCE: ${{ matrix.source }}
+          PACKAGE_SUFFIX: ${{ matrix.suffix }}
+        run: |
+          set -euo pipefail
+          mkdir -p patcher-release
+          if [[ "$PACKAGE_SOURCE" == *.app ]]; then
+            parent="$(dirname "$PACKAGE_SOURCE")"
+            base="$(basename "$PACKAGE_SOURCE")"
+            (cd "$parent" && zip -r9 "$GITHUB_WORKSPACE/patcher-release/mltd-relive-apk-patcher-${PATCHER_VERSION}-${PACKAGE_SUFFIX}" "$base")
+          else
+            cp "$PACKAGE_SOURCE" "patcher-release/mltd-relive-apk-patcher-${PATCHER_VERSION}-${PACKAGE_SUFFIX}"
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: patcher-release/*
+          if-no-files-found: error
+
+  publish:
+    name: Add Patcher to Release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: release-artifacts
+      - name: Upload patcher assets to existing Release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ env.RELEASE_TAG }}
+          artifacts: 'release-artifacts/patcher-windows/*,release-artifacts/patcher-ubuntu/*,release-artifacts/patcher-macos/*'
+          artifactErrorsFailBuild: true
+          allowUpdates: true
+          replacesArtifacts: true
+          omitBodyDuringUpdate: true
+          omitNameDuringUpdate: true
+          makeLatest: true
