@@ -7,7 +7,7 @@ from tkinter import messagebox, ttk
 from mltd.models.setup import (check_database_version, cleanup, setup,
                                upgrade_database)
 from mltd.servers import api_server, dns, proxy
-from mltd.servers.config import api_port, config, version
+from mltd.servers.config import ASSET_MODES, api_port, config, version
 from mltd.servers.dns import dns_port, get_lan_ips
 from mltd.servers.logging import handler, logger
 from mltd.servers.process import CustomProcess
@@ -95,6 +95,21 @@ class MLTDReliveGUI:
         self.ko_radio_button.grid(
             column=1, row=1, sticky=W)
 
+        ttk.Label(options_frame, text='Asset Mode:').grid(
+            column=0, row=2, sticky=E, pady=(6, 0))
+        self.asset_mode = StringVar(value=config.asset_mode)
+        self.asset_mode_combobox = ttk.Combobox(
+            options_frame,
+            textvariable=self.asset_mode,
+            values=ASSET_MODES,
+            state='readonly',
+            width=10,
+        )
+        self.asset_mode_combobox.grid(
+            column=1, row=2, sticky=W, pady=(6, 0))
+        self.asset_mode_combobox.bind(
+            '<<ComboboxSelected>>', self.change_asset_mode)
+
     def update_server_status(self):
         if (self.api_process.is_alive()
                 or self.proxy_process.is_alive()
@@ -138,6 +153,7 @@ class MLTDReliveGUI:
             self.reset_button.config(state=NORMAL)
             self.zh_radio_button.config(state=NORMAL)
             self.ko_radio_button.config(state=NORMAL)
+            self.asset_mode_combobox.config(state='readonly')
             logger.info(f'Server stopped.')
 
     def start_server(self):
@@ -155,6 +171,7 @@ class MLTDReliveGUI:
         self.reset_button.config(state=DISABLED)
         self.zh_radio_button.config(state=DISABLED)
         self.ko_radio_button.config(state=DISABLED)
+        self.asset_mode_combobox.config(state=DISABLED)
         self.progress_bar.grid(column=0, row=1, sticky=(W, E))
         self.progress_bar.start()
         self.proxy_process = CustomProcess(target=proxy.start, daemon=True)
@@ -200,6 +217,7 @@ class MLTDReliveGUI:
         self.reset_button.config(state=NORMAL)
         self.zh_radio_button.config(state=NORMAL)
         self.ko_radio_button.config(state=NORMAL)
+        self.asset_mode_combobox.config(state='readonly')
         self.progress_bar.stop()
         self.progress_bar.grid_forget()
 
@@ -220,6 +238,7 @@ class MLTDReliveGUI:
         self.reset_button.config(state=DISABLED)
         self.zh_radio_button.config(state=DISABLED)
         self.ko_radio_button.config(state=DISABLED)
+        self.asset_mode_combobox.config(state=DISABLED)
         self.progress_bar.grid(column=0, row=1, sticky=(W, E))
         self.progress_bar.start()
         self.process = CustomProcess(target=setup)
@@ -230,6 +249,11 @@ class MLTDReliveGUI:
         language = self.language.get()
         config.language = language
         logger.info(f'Changed language to {language}.')
+
+    def change_asset_mode(self, event=None):
+        mode = self.asset_mode.get()
+        config.asset_mode = mode
+        logger.info(f'Changed asset mode to {mode}.')
 
 
 def report_callback_exception(self, exc, val, tb):
@@ -247,4 +271,3 @@ if __name__ == '__main__':
     if os.path.isfile('mltd-relive.db'):
         gui.root.after_idle(gui.start_server)
     gui.root.mainloop()
-
