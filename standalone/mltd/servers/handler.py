@@ -1,4 +1,5 @@
 import json
+import logging
 import time
 from datetime import datetime
 from decimal import Decimal
@@ -52,8 +53,9 @@ def application(environ, start_response):
         svc_start_time = time.perf_counter_ns()
         response = JSONRPCResponseManager.handle(request, dispatcher, context)
         svc_end_time = time.perf_counter_ns()
-        logger.debug(
-            json.dumps(response.data, cls=CustomJSONEncoder, indent=2))
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug(
+                json.dumps(response.data, cls=CustomJSONEncoder, indent=2))
         response = json.dumps(response.data, cls=CustomJSONEncoder,
                               separators=(',', ':'))
         response = encrypt_response(response)
@@ -72,4 +74,3 @@ def application(environ, start_response):
         headers = [('Content-Type', 'text/html')]
         start_response(status, headers)
         return [b'503 Service Unavailable']
-
