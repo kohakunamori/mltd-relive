@@ -4,8 +4,9 @@ import sqlite3
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from contextlib import contextmanager
 from pathlib import Path
-from typing import Iterable
+from typing import Iterable, NamedTuple
 
 import requests
 from msgpack import unpackb
@@ -17,6 +18,7 @@ MANIFEST_NAMES = {
 }
 SUPPORTED_LANGUAGES = frozenset(MANIFEST_NAMES)
 SUPPORTED_PLATFORMS = frozenset({'android', 'ios'})
+_METADATA_BATCH_SIZE = 64
 
 
 def _safe_component(value: str) -> str:
@@ -67,21 +69,45 @@ def parse_manifest_objects(data: bytes) -> list[str]:
     return objects
 
 
+class _DownloadOutcome(NamedTuple):
+    path: Path
+    metadata: tuple
+    size: int
+
+
 class AssetStore:
     def __init__(self, root: str | os.PathLike[str] = 'asset-cache'):
         self.root = Path(root)
         self.root.mkdir(parents=True, exist_ok=True)
         self.db_path = self.root / '.asset-index.sqlite3'
+        self._scope_dirs: dict[str, Path] = {}
+        self._scope_dirs_lock = threading.Lock()
         self._init_db()
 
     def _connect(self):
         conn = sqlite3.connect(self.db_path, timeout=30)
-        conn.execute('PRAGMA journal_mode=WAL')
+        conn.execute('PRAGMA busy_timeout=30000')
         conn.execute('PRAGMA synchronous=NORMAL')
+        conn.execute('PRAGMA temp_store=MEMORY')
         return conn
 
+    @contextmanager
+    def _connection(self):
+        conn = self._connect()
+        try:
+            yield conn
+            conn.commit()
+        except Exception:
+            conn.rollback()
+            raise
+        finally:
+            conn.close()
+
     def _init_db(self):
-        with self._connect() as conn:
+        with self._connection() as conn:
+            # WAL is persistent for the database, so set it once instead of on
+            # every per-object metadata access.
+            conn.execute('PRAGMA journal_mode=WAL')
             conn.execute('''
                 CREATE TABLE IF NOT EXISTS object_metadata (
                     scope TEXT NOT NULL,
@@ -100,8 +126,16 @@ class AssetStore:
             ''')
 
     def scope_dir(self, language: str, platform: str) -> Path:
-        directory = self.root / scope_name(language, platform)
-        directory.mkdir(parents=True, exist_ok=True)
+        scope = scope_name(language, platform)
+        directory = self._scope_dirs.get(scope)
+        if directory is not None:
+            return directory
+        with self._scope_dirs_lock:
+            directory = self._scope_dirs.get(scope)
+            if directory is None:
+                directory = self.root / scope
+                directory.mkdir(parents=True, exist_ok=True)
+                self._scope_dirs[scope] = directory
         return directory
 
     def object_path(self, language: str, platform: str, name: str) -> Path:
@@ -111,9 +145,16 @@ class AssetStore:
     def part_path(self, language: str, platform: str, name: str) -> Path:
         return self.object_path(language, platform, name).with_name(name + '.part')
 
+    @staticmethod
+    def _metadata_keys():
+        return (
+            'status', 'size', 'sha256', 'content_type', 'etag',
+            'last_modified', 'cache_control', 'content_encoding', 'fetched_at'
+        )
+
     def get_metadata(self, language: str, platform: str, name: str):
         scope = scope_name(language, platform)
-        with self._connect() as conn:
+        with self._connection() as conn:
             row = conn.execute('''
                 SELECT status, size, sha256, content_type, etag,
                        last_modified, cache_control, content_encoding, fetched_at
@@ -122,21 +163,35 @@ class AssetStore:
             ''', (scope, name)).fetchone()
         if row is None:
             return None
-        keys = (
-            'status', 'size', 'sha256', 'content_type', 'etag',
-            'last_modified', 'cache_control', 'content_encoding', 'fetched_at'
-        )
-        return dict(zip(keys, row))
+        return dict(zip(self._metadata_keys(), row))
 
-    def put_metadata(self, language: str, platform: str, name: str,
-                     *, status: int, size: int, sha256: str, headers):
-        scope = scope_name(language, platform)
-
+    @staticmethod
+    def _metadata_record(scope: str, name: str, *, status: int, size: int,
+                         sha256: str, headers, fetched_at: float | None = None):
         def header(key):
             return headers.get(key) if headers else None
 
-        with self._connect() as conn:
-            conn.execute('''
+        return (
+            scope, name, status, size, sha256,
+            header('Content-Type'), header('ETag'), header('Last-Modified'),
+            header('Cache-Control'), header('Content-Encoding'),
+            time.time() if fetched_at is None else fetched_at,
+        )
+
+    def put_metadata(self, language: str, platform: str, name: str,
+                     *, status: int, size: int, sha256: str, headers):
+        record = self._metadata_record(
+            scope_name(language, platform), name,
+            status=status, size=size, sha256=sha256, headers=headers,
+        )
+        self.put_metadata_batch([record])
+
+    def put_metadata_batch(self, records: Iterable[tuple]):
+        records = list(records)
+        if not records:
+            return
+        with self._connection() as conn:
+            conn.executemany('''
                 INSERT INTO object_metadata (
                     scope, name, status, size, sha256, content_type, etag,
                     last_modified, cache_control, content_encoding, fetched_at
@@ -151,30 +206,89 @@ class AssetStore:
                     cache_control = excluded.cache_control,
                     content_encoding = excluded.content_encoding,
                     fetched_at = excluded.fetched_at
-            ''', (
-                scope, name, status, size, sha256,
-                header('Content-Type'), header('ETag'), header('Last-Modified'),
-                header('Cache-Control'), header('Content-Encoding'), time.time()
-            ))
+            ''', records)
+
+    def _metadata_snapshot(self, language: str, platform: str):
+        scope = scope_name(language, platform)
+        with self._connection() as conn:
+            rows = conn.execute('''
+                SELECT name, size, sha256
+                  FROM object_metadata
+                 WHERE scope = ?
+            ''', (scope,)).fetchall()
+        return {name: (size, sha256) for name, size, sha256 in rows}
+
+    def complete_names(self, language: str, platform: str,
+                       names: Iterable[str], *, verify: bool = False) -> set[str]:
+        """Return complete objects using one SQLite query and one directory scan."""
+        names = list(dict.fromkeys(names))
+        if not names:
+            return set()
+        wanted = set(names)
+        metadata = self._metadata_snapshot(language, platform)
+        if not metadata:
+            return set()
+
+        sizes: dict[str, int] = {}
+        directory = self.scope_dir(language, platform)
+        try:
+            with os.scandir(directory) as entries:
+                for entry in entries:
+                    if entry.name not in wanted or not entry.is_file(follow_symlinks=False):
+                        continue
+                    try:
+                        sizes[entry.name] = entry.stat(follow_symlinks=False).st_size
+                    except OSError:
+                        continue
+        except FileNotFoundError:
+            return set()
+
+        candidates = {
+            name for name in wanted
+            if name in metadata and sizes.get(name) == metadata[name][0]
+        }
+        if not verify:
+            return candidates
+
+        verified: set[str] = set()
+        for name in candidates:
+            digest = hashlib.sha256()
+            try:
+                with (directory / name).open('rb') as file:
+                    for chunk in iter(lambda: file.read(1024 * 1024), b''):
+                        digest.update(chunk)
+            except OSError:
+                continue
+            if digest.hexdigest() == metadata[name][1]:
+                verified.add(name)
+        return verified
 
     def is_complete(self, language: str, platform: str, name: str) -> bool:
         path = self.object_path(language, platform, name)
-        if not path.is_file():
+        try:
+            size = path.stat().st_size
+        except OSError:
             return False
         metadata = self.get_metadata(language, platform, name)
-        return metadata is not None and path.stat().st_size == metadata['size']
+        return metadata is not None and size == metadata['size']
 
     def verify(self, language: str, platform: str, name: str) -> bool:
         path = self.object_path(language, platform, name)
         metadata = self.get_metadata(language, platform, name)
-        if not path.is_file() or metadata is None:
+        if metadata is None:
             return False
-        if path.stat().st_size != metadata['size']:
+        try:
+            if path.stat().st_size != metadata['size']:
+                return False
+        except OSError:
             return False
         digest = hashlib.sha256()
-        with path.open('rb') as file:
-            for chunk in iter(lambda: file.read(1024 * 1024), b''):
-                digest.update(chunk)
+        try:
+            with path.open('rb') as file:
+                for chunk in iter(lambda: file.read(1024 * 1024), b''):
+                    digest.update(chunk)
+        except OSError:
+            return False
         return digest.hexdigest() == metadata['sha256']
 
 
@@ -192,8 +306,8 @@ class AssetMirror:
         if session is None:
             session = requests.Session()
             adapter = requests.adapters.HTTPAdapter(
-                pool_connections=4,
-                pool_maxsize=4,
+                pool_connections=2,
+                pool_maxsize=2,
                 max_retries=3,
             )
             session.mount('http://', adapter)
@@ -211,14 +325,23 @@ class AssetMirror:
         _safe_component(name)
         return f'{self.remote_root}/{scope_name(language, platform)}/{name}'
 
-    def download(self, language: str, platform: str, name: str,
-                 *, force: bool = False) -> Path:
+    def _download(self, language: str, platform: str, name: str,
+                  *, force: bool = False, skip_existing_check: bool = False,
+                  defer_metadata: bool = False) -> _DownloadOutcome:
         destination = self.store.object_path(language, platform, name)
-        if not force and self.store.is_complete(language, platform, name):
-            return destination
+        if (not force and not skip_existing_check
+                and self.store.is_complete(language, platform, name)):
+            try:
+                size = destination.stat().st_size
+            except OSError:
+                size = 0
+            return _DownloadOutcome(destination, (), size)
 
         part = self.store.part_path(language, platform, name)
-        resume_at = part.stat().st_size if part.exists() else 0
+        try:
+            resume_at = part.stat().st_size
+        except OSError:
+            resume_at = 0
         headers = {'Accept-Encoding': 'identity'}
         if resume_at:
             headers['Range'] = f'bytes={resume_at}-'
@@ -229,55 +352,65 @@ class AssetMirror:
             stream=True,
             timeout=self.timeout,
         )
-        if response.status_code == 416 and resume_at:
-            part.unlink(missing_ok=True)
-            return self.download(language, platform, name, force=True)
-        response.raise_for_status()
+        try:
+            if response.status_code == 416 and resume_at:
+                part.unlink(missing_ok=True)
+                return self._download(
+                    language, platform, name, force=True,
+                    skip_existing_check=True, defer_metadata=defer_metadata,
+                )
+            response.raise_for_status()
 
-        append = resume_at > 0 and response.status_code == 206
-        if not append:
-            resume_at = 0
-        mode = 'ab' if append else 'wb'
-        digest = hashlib.sha256()
-        if append:
-            with part.open('rb') as existing:
-                for chunk in iter(lambda: existing.read(1024 * 1024), b''):
+            append = resume_at > 0 and response.status_code == 206
+            if not append:
+                resume_at = 0
+            mode = 'ab' if append else 'wb'
+            digest = hashlib.sha256()
+            if append:
+                with part.open('rb') as existing:
+                    for chunk in iter(lambda: existing.read(1024 * 1024), b''):
+                        digest.update(chunk)
+
+            with part.open(mode) as file:
+                for chunk in response.iter_content(chunk_size=1024 * 1024):
+                    if not chunk:
+                        continue
+                    file.write(chunk)
                     digest.update(chunk)
+                file.flush()
+                os.fsync(file.fileno())
 
-        with part.open(mode) as file:
-            for chunk in response.iter_content(chunk_size=1024 * 1024):
-                if not chunk:
-                    continue
-                file.write(chunk)
-                digest.update(chunk)
-            file.flush()
-            os.fsync(file.fileno())
+            size = part.stat().st_size
+            expected_total = None
+            if response.status_code == 206:
+                content_range = response.headers.get('Content-Range', '')
+                if '/' in content_range:
+                    total = content_range.rsplit('/', 1)[1]
+                    if total.isdigit():
+                        expected_total = int(total)
+            elif response.headers.get('Content-Length', '').isdigit():
+                expected_total = int(response.headers['Content-Length'])
 
-        size = part.stat().st_size
-        expected_total = None
-        if response.status_code == 206:
-            content_range = response.headers.get('Content-Range', '')
-            if '/' in content_range:
-                total = content_range.rsplit('/', 1)[1]
-                if total.isdigit():
-                    expected_total = int(total)
-        elif response.headers.get('Content-Length', '').isdigit():
-            expected_total = int(response.headers['Content-Length'])
+            if expected_total is not None and size != expected_total:
+                raise IOError(
+                    f'Incomplete asset {name}: got {size} bytes, expected {expected_total}'
+                )
 
-        if expected_total is not None and size != expected_total:
-            raise IOError(
-                f'Incomplete asset {name}: got {size} bytes, expected {expected_total}'
+            os.replace(part, destination)
+            record = self.store._metadata_record(
+                scope_name(language, platform), name,
+                status=200, size=size, sha256=digest.hexdigest(),
+                headers=response.headers,
             )
+            if not defer_metadata:
+                self.store.put_metadata_batch([record])
+            return _DownloadOutcome(destination, record, size)
+        finally:
+            response.close()
 
-        os.replace(part, destination)
-        self.store.put_metadata(
-            language, platform, name,
-            status=200,
-            size=size,
-            sha256=digest.hexdigest(),
-            headers=response.headers,
-        )
-        return destination
+    def download(self, language: str, platform: str, name: str,
+                 *, force: bool = False) -> Path:
+        return self._download(language, platform, name, force=force).path
 
     def head(self, language: str, platform: str, name: str):
         response = self._session().head(
@@ -298,39 +431,55 @@ class AssetMirror:
     def prefetch(self, language: str, platform: str, *, workers: int = 8,
                  force: bool = False, verify_existing: bool = False,
                  names: Iterable[str] | None = None,
-                 progress=None) -> dict:
-        manifest_path, manifest_objects = self.fetch_manifest(
-            language, platform, force=force
-        )
-        names = manifest_objects if names is None else list(names)
-        names = list(dict.fromkeys(names))
-
-        if verify_existing:
-            pending = [
-                name for name in names
-                if force or not self.store.verify(language, platform, name)
-            ]
+                 progress=None,
+                 manifest_objects: Iterable[str] | None = None,
+                 metadata_batch_size: int = _METADATA_BATCH_SIZE) -> dict:
+        if manifest_objects is None:
+            manifest_path, source_objects = self.fetch_manifest(
+                language, platform, force=force
+            )
         else:
-            pending = [
-                name for name in names
-                if force or not self.store.is_complete(language, platform, name)
-            ]
+            source_objects = list(dict.fromkeys(manifest_objects))
+            manifest_path = self.store.object_path(
+                language, platform, manifest_name(language)
+            )
+
+        requested = source_objects if names is None else list(names)
+        requested = list(dict.fromkeys(requested))
+
+        if force:
+            complete = set()
+        else:
+            complete = self.store.complete_names(
+                language, platform, requested, verify=verify_existing
+            )
+        pending = [name for name in requested if name not in complete]
 
         result = {
             'manifest': str(manifest_path),
-            'total_manifest_objects': len(manifest_objects),
-            'requested': len(names),
-            'already_cached': len(names) - len(pending),
+            'total_manifest_objects': len(source_objects),
+            'requested': len(requested),
+            'already_cached': len(requested) - len(pending),
             'downloaded': 0,
             'failed': [],
         }
         if not pending:
             return result
 
-        with ThreadPoolExecutor(max_workers=max(1, workers)) as executor:
+        batch_size = max(1, int(metadata_batch_size))
+        metadata_batch: list[tuple] = []
+        with ThreadPoolExecutor(
+                max_workers=min(max(1, workers), len(pending))) as executor:
             futures = {
-                executor.submit(self.download, language, platform, name,
-                                force=force): name
+                executor.submit(
+                    self._download,
+                    language,
+                    platform,
+                    name,
+                    force=force,
+                    skip_existing_check=True,
+                    defer_metadata=True,
+                ): name
                 for name in pending
             }
             completed = 0
@@ -338,14 +487,27 @@ class AssetMirror:
                 name = futures[future]
                 completed += 1
                 try:
-                    future.result()
-                    result['downloaded'] += 1
-                    ok = True
-                    error = None
+                    outcome = future.result()
                 except Exception as exc:
                     result['failed'].append((name, str(exc)))
                     ok = False
                     error = exc
+                else:
+                    metadata_batch.append(outcome.metadata)
+                    if len(metadata_batch) >= batch_size:
+                        # Metadata failures are fatal to strict-local prefetch;
+                        # do not misclassify them as an HTTP failure for one file.
+                        self.store.put_metadata_batch(metadata_batch)
+                        metadata_batch.clear()
+                    result['downloaded'] += 1
+                    ok = True
+                    error = None
                 if progress:
                     progress(completed, len(pending), name, ok, error)
+
+        # A completed object is never considered valid until its metadata has
+        # been committed. If the process dies before this batch, the next run
+        # simply redownloads those files instead of accepting unindexed data.
+        if metadata_batch:
+            self.store.put_metadata_batch(metadata_batch)
         return result
