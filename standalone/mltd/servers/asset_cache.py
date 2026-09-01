@@ -18,7 +18,7 @@ MANIFEST_NAMES = {
 }
 SUPPORTED_LANGUAGES = frozenset(MANIFEST_NAMES)
 SUPPORTED_PLATFORMS = frozenset({'android', 'ios'})
-_METADATA_BATCH_SIZE = 64
+_METADATA_BATCH_SIZE = 256
 
 
 def _safe_component(value: str) -> str:
@@ -105,8 +105,6 @@ class AssetStore:
 
     def _init_db(self):
         with self._connection() as conn:
-            # WAL is persistent for the database, so set it once instead of on
-            # every per-object metadata access.
             conn.execute('PRAGMA journal_mode=WAL')
             conn.execute('''
                 CREATE TABLE IF NOT EXISTS object_metadata (
@@ -306,8 +304,8 @@ class AssetMirror:
         if session is None:
             session = requests.Session()
             adapter = requests.adapters.HTTPAdapter(
-                pool_connections=2,
-                pool_maxsize=2,
+                pool_connections=1,
+                pool_maxsize=1,
                 max_retries=3,
             )
             session.mount('http://', adapter)
@@ -327,7 +325,8 @@ class AssetMirror:
 
     def _download(self, language: str, platform: str, name: str,
                   *, force: bool = False, skip_existing_check: bool = False,
-                  defer_metadata: bool = False) -> _DownloadOutcome:
+                  defer_metadata: bool = False,
+                  durable_write: bool = True) -> _DownloadOutcome:
         destination = self.store.object_path(language, platform, name)
         if (not force and not skip_existing_check
                 and self.store.is_complete(language, platform, name)):
@@ -358,6 +357,7 @@ class AssetMirror:
                 return self._download(
                     language, platform, name, force=True,
                     skip_existing_check=True, defer_metadata=defer_metadata,
+                    durable_write=durable_write,
                 )
             response.raise_for_status()
 
@@ -377,8 +377,9 @@ class AssetMirror:
                         continue
                     file.write(chunk)
                     digest.update(chunk)
-                file.flush()
-                os.fsync(file.fileno())
+                if durable_write:
+                    file.flush()
+                    os.fsync(file.fileno())
 
             size = part.stat().st_size
             expected_total = None
@@ -433,7 +434,8 @@ class AssetMirror:
                  names: Iterable[str] | None = None,
                  progress=None,
                  manifest_objects: Iterable[str] | None = None,
-                 metadata_batch_size: int = _METADATA_BATCH_SIZE) -> dict:
+                 metadata_batch_size: int = _METADATA_BATCH_SIZE,
+                 durable_writes: bool = False) -> dict:
         if manifest_objects is None:
             manifest_path, source_objects = self.fetch_manifest(
                 language, platform, force=force
@@ -479,6 +481,7 @@ class AssetMirror:
                     force=force,
                     skip_existing_check=True,
                     defer_metadata=True,
+                    durable_write=durable_writes,
                 ): name
                 for name in pending
             }
@@ -495,8 +498,6 @@ class AssetMirror:
                 else:
                     metadata_batch.append(outcome.metadata)
                     if len(metadata_batch) >= batch_size:
-                        # Metadata failures are fatal to strict-local prefetch;
-                        # do not misclassify them as an HTTP failure for one file.
                         self.store.put_metadata_batch(metadata_batch)
                         metadata_batch.clear()
                     result['downloaded'] += 1
@@ -505,9 +506,6 @@ class AssetMirror:
                 if progress:
                     progress(completed, len(pending), name, ok, error)
 
-        # A completed object is never considered valid until its metadata has
-        # been committed. If the process dies before this batch, the next run
-        # simply redownloads those files instead of accepting unindexed data.
         if metadata_batch:
             self.store.put_metadata_batch(metadata_batch)
         return result
