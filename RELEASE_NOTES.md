@@ -1,6 +1,6 @@
 # mltd-relive Standalone v0.1.4
 
-本 Release 同时包含 **Standalone 服务器、修正版游戏客户端和可选 APK Patcher**。
+本 Release 同时包含 **Standalone v0.1.4 服务器、修正版游戏客户端和 APK Patcher v1.0.9**。
 
 ## 下载哪个文件
 
