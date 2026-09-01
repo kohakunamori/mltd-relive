@@ -62,9 +62,9 @@ class CustomConfigParser(ConfigParser):
                 self['default']['asset_prefetch_workers'] = str(
                     _asset_prefetch_workers
                 )
-            # v0.1.6 strict-local defaults to one explicit scope only.
-            if 'asset_local_scopes' not in self['default']:
-                self['default']['asset_local_scopes'] = _asset_local_scopes
+            self['default']['asset_local_scopes'] = self['default'].get(
+                'asset_local_scopes', _asset_local_scopes
+            )
             self['default']['version'] = version
             self.write_config()
 
@@ -171,6 +171,13 @@ class CustomConfigParser(ConfigParser):
             raise ValueError('At least one local asset scope is required')
         self['default']['asset_local_scopes'] = ','.join(values)
         self.write_config()
+
+    @property
+    def asset_local_platforms(self):
+        """Compatibility view used by the current GUI progress text."""
+        return tuple(dict.fromkeys(
+            scope.split('-', 1)[1] for scope in self.asset_local_scopes
+        ))
 
     def write_config(self):
         with open('config.ini', 'w') as config_file:
