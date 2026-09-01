@@ -1,5 +1,6 @@
 import io
 import socket
+import ssl
 import sys
 import threading
 import traceback
@@ -30,6 +31,8 @@ _HOP_BY_HOP_HEADERS = {
     'upgrade',
 }
 _thread_local = threading.local()
+_REQUEST_QUEUE_SIZE = 512
+_SOCKET_TIMEOUT = 60
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -48,15 +51,40 @@ def _upstream_session():
     return session
 
 
+def _tune_client_socket(request):
+    request.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+    request.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+    request.settimeout(_SOCKET_TIMEOUT)
+
+
 class ThreadedProxyServer(ThreadingHTTPServer):
     daemon_threads = True
+    block_on_close = False
     allow_reuse_address = True
-    request_queue_size = 64
+    request_queue_size = _REQUEST_QUEUE_SIZE
+    ssl_context: SSLContext | None = None
 
     def get_request(self):
+        # Accept stays plaintext so ThreadingMixIn can dispatch immediately;
+        # TLS handshakes are performed inside each worker below.  Wrapping the
+        # listening socket serializes handshakes in the accept path under a
+        # burst of new game/asset connections.
         request, client_address = super().get_request()
-        request.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+        _tune_client_socket(request)
         return request, client_address
+
+    def process_request_thread(self, request, client_address):
+        context = self.ssl_context
+        if context is not None:
+            try:
+                request = context.wrap_socket(request, server_side=True)
+            except (ssl.SSLError, OSError):
+                try:
+                    request.close()
+                except OSError:
+                    pass
+                return
+        super().process_request_thread(request, client_address)
 
 
 class ProxyHTTPRequestHandler(AssetHTTPRequestHandler):
@@ -248,9 +276,12 @@ def start(port=proxy_port, conn=None):
     keyfile = path.join(key_path(), 'api.key')
     context = SSLContext(PROTOCOL_TLS_SERVER)
     context.load_cert_chain(certfile, keyfile)
-    httpd.socket = context.wrap_socket(httpd.socket, server_side=True)
+    # Keep the listening socket plaintext.  Each ThreadingMixIn worker wraps
+    # its accepted socket, so TLS handshakes can proceed in parallel.
+    httpd.ssl_context = context
 
     logger.info(f'TLS API server is running on port {port}...')
+    logger.info('TLS handshakes: parallel worker mode')
     logger.info('API dispatch: direct WSGI (no localhost HTTP hop)')
     logger.info(f'Asset mode: {config.asset_mode}')
     if config.asset_upstream_proxy:
