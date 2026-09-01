@@ -11,6 +11,7 @@ on:
       - 'tools/prefetch_assets.py'
       - 'tools/verify_asset_mirror.py'
       - 'tests/test_asset_mirror.py'
+      - 'tests/remote_asset_compat.py'
       - '.github/workflows/test-asset-mirror.yml'
 
 jobs:
@@ -31,5 +32,18 @@ jobs:
           tools/prefetch_assets.py
           tools/verify_asset_mirror.py
           tests/test_asset_mirror.py
+          tests/remote_asset_compat.py
       - name: Run asset mirror tests
         run: python -m unittest discover -s tests -p 'test_asset_mirror.py' -v
+
+  remote-compat:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install minimal dependencies
+        run: python -m pip install requests==2.31.0 msgpack==1.0.5
+      - name: Compare local mirror with live CDN manifests
+        run: python tests/remote_asset_compat.py
