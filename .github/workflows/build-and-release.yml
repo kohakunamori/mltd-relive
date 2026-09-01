@@ -308,6 +308,18 @@ jobs:
         with:
           path: release-artifacts
 
+      - name: Align release tag with current source
+        if: github.ref_type != 'tag'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ needs.metadata.outputs.release_tag }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if gh api "repos/${GITHUB_REPOSITORY}/git/ref/tags/${RELEASE_TAG}" >/dev/null 2>&1; then
+            gh api -X PATCH "repos/${GITHUB_REPOSITORY}/git/refs/tags/${RELEASE_TAG}" -f sha="${GITHUB_SHA}" -F force=true >/dev/null
+          fi
+
       - name: Create or update Release
         uses: ncipollo/release-action@v1
         with:
