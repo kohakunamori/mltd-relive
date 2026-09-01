@@ -27,7 +27,8 @@ def main():
     )
     parser.add_argument('--root', default='asset-cache',
                         help='local asset cache directory (default: asset-cache)')
-    parser.add_argument('--workers', type=int, default=8)
+    parser.add_argument('--workers', type=int, default=24,
+                        help='parallel asset downloads (default: 24)')
     parser.add_argument(
         '--proxy',
         help='HTTP proxy used only for outbound asset CDN requests, e.g. '
