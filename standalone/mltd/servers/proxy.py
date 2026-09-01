@@ -227,17 +227,20 @@ def start(port=proxy_port, conn=None):
             config.language,
             config.asset_cache_root,
             workers=config.asset_prefetch_workers,
+            upstream_proxy=config.asset_upstream_proxy,
         )
 
     store = AssetStore(config.asset_cache_root)
     fetch_on_miss = config.asset_mode == 'hybrid'
-    mirror = AssetMirror(store) if fetch_on_miss else None
+    mirror = AssetMirror(
+        store,
+        upstream_proxy=config.asset_upstream_proxy,
+    ) if fetch_on_miss else None
     bind_asset_handler(
         ProxyHTTPRequestHandler,
         store,
         mirror=mirror,
         fetch_on_miss=fetch_on_miss,
-        allow_connect_proxy=fetch_on_miss,
     )
 
     httpd = ThreadedProxyServer(('', port), ProxyHTTPRequestHandler)
@@ -250,6 +253,8 @@ def start(port=proxy_port, conn=None):
     logger.info(f'TLS API server is running on port {port}...')
     logger.info('API dispatch: direct WSGI (no localhost HTTP hop)')
     logger.info(f'Asset mode: {config.asset_mode}')
+    if config.asset_upstream_proxy:
+        logger.info(f'Asset upstream proxy: {config.asset_upstream_proxy}')
     if conn:
         conn.send(True)
         conn.close()
