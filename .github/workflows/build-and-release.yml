@@ -32,7 +32,6 @@ jobs:
           standalone_version="$(python - <<'PY'
           import pathlib
           import re
-
           text = pathlib.Path('standalone/mltd/servers/config.py').read_text(encoding='utf-8')
           match = re.search(r"^version\s*=\s*['\"]([^'\"]+)['\"]", text, re.MULTILINE)
           if not match:
@@ -42,12 +41,10 @@ jobs:
           )"
           patcher_version="v$(tr -d '\r\n ' < tools/apk-patcher/VERSION)"
           release_tag="standalone-v${standalone_version}"
-
           if [[ "${GITHUB_REF_TYPE}" == "tag" && "${GITHUB_REF_NAME}" != "${release_tag}" ]]; then
             echo "Tag ${GITHUB_REF_NAME} does not match source version ${release_tag}." >&2
             exit 1
           fi
-
           echo "standalone_version=${standalone_version}" >> "$GITHUB_OUTPUT"
           echo "release_tag=${release_tag}" >> "$GITHUB_OUTPUT"
           echo "patcher_version=${patcher_version}" >> "$GITHUB_OUTPUT"
@@ -102,18 +99,14 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-
       - name: Install dependencies for ${{ matrix.target }}
         run: ${{ matrix.cmd-install }}
-
       - name: Build with PyInstaller for ${{ matrix.target }}
         run: ${{ matrix.cmd-build }}
-
       - name: Package release file
         shell: bash
         env:
@@ -131,7 +124,6 @@ jobs:
           else
             cp "$PACKAGE_SOURCE" "standalone/dist/release-output/mltd-relive-${RELEASE_TAG}-${PACKAGE_SUFFIX}"
           fi
-
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -189,18 +181,14 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-
       - name: Install dependencies for ${{ matrix.target }}
         run: ${{ matrix.cmd-install }}
-
       - name: Build APK Patcher for ${{ matrix.target }}
         run: ${{ matrix.cmd-build }}
-
       - name: Package APK Patcher
         shell: bash
         env:
@@ -218,7 +206,6 @@ jobs:
           else
             cp "$PACKAGE_SOURCE" "tools/apk-patcher/dist/release-output/mltd-relive-apk-patcher-${PATCHER_VERSION}-${PACKAGE_SUFFIX}"
           fi
-
       - name: Upload APK Patcher artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -234,12 +221,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Install MEGA download tools
         run: |
           sudo apt-get update
           sudo apt-get install -y megatools unzip
-
       - name: Download corrected Traditional Chinese client
         shell: bash
         run: |
@@ -253,7 +238,6 @@ jobs:
             megatools dl --no-progress --path - "$legacy" > "${output}.part"
           fi
           mv "${output}.part" "$output"
-
       - name: Download corrected Korean client
         shell: bash
         run: |
@@ -267,7 +251,6 @@ jobs:
             megatools dl --no-progress --path - "$legacy" > "${output}.part"
           fi
           mv "${output}.part" "$output"
-
       - name: Validate game client packages
         shell: bash
         run: |
@@ -282,7 +265,6 @@ jobs:
             cd game-client
             sha256sum *.apk > SHA256SUMS.txt
           )
-
       - name: Upload game client artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -302,12 +284,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
           path: release-artifacts
-
       - name: Align release tag with current source
         if: github.ref_type != 'tag'
         env:
@@ -319,7 +299,6 @@ jobs:
           if gh api "repos/${GITHUB_REPOSITORY}/git/ref/tags/${RELEASE_TAG}" >/dev/null 2>&1; then
             gh api -X PATCH "repos/${GITHUB_REPOSITORY}/git/refs/tags/${RELEASE_TAG}" -f sha="${GITHUB_SHA}" -F force=true >/dev/null
           fi
-
       - name: Create or update Release
         uses: ncipollo/release-action@v1
         with:
@@ -332,16 +311,3 @@ jobs:
           allowUpdates: true
           replacesArtifacts: true
           makeLatest: true
-
-      - name: Remove mislabelled standalone-v0.1.3 release
-        if: needs.metadata.outputs.release_tag == 'standalone-v0.1.4'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          old_release_id="$(gh api "repos/${GITHUB_REPOSITORY}/releases/tags/standalone-v0.1.3" --jq '.id' 2>/dev/null || true)"
-          if [[ -n "$old_release_id" ]]; then
-            gh api -X DELETE "repos/${GITHUB_REPOSITORY}/releases/${old_release_id}"
-          fi
-          gh api -X DELETE "repos/${GITHUB_REPOSITORY}/git/refs/tags/standalone-v0.1.3" >/dev/null 2>&1 || true
