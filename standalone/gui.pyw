@@ -3,6 +3,7 @@ import traceback
 from multiprocessing import freeze_support, set_start_method
 from tkinter import *
 from tkinter import messagebox, ttk
+from tkinter.scrolledtext import ScrolledText
 
 from mltd.models.setup import (check_database_version, cleanup, setup,
                                upgrade_database)
@@ -13,13 +14,18 @@ from mltd.servers.logging import handler, logger
 from mltd.servers.process import CustomProcess
 from mltd.servers.proxy import proxy_port
 
+LOG_PATH = 'mltd-relive.log'
+LOG_TAIL_BYTES = 128 * 1024
+LOG_POLL_MS = 250
+
 
 class MLTDReliveGUI:
 
     def __init__(self):
         self.root = Tk()
         self.root.title(f'mltd-relive Standalone v{version}')
-        self.root.resizable(False, False)
+        self.root.resizable(True, True)
+        self.root.minsize(760, 560)
 
         style = ttk.Style()
         style.configure('Green.TButton', foreground='green')
@@ -29,11 +35,17 @@ class MLTDReliveGUI:
         style.map('Red.TButton', foreground=[('disabled', 'grey'),
                                              ('active', 'red')])
 
+        self.root.columnconfigure(0, weight=1)
+        self.root.rowconfigure(0, weight=1)
+
         main_frame = ttk.Frame(self.root, padding=10)
-        main_frame.grid()
+        main_frame.grid(sticky=(N, S, W, E))
+        main_frame.columnconfigure(0, weight=1)
+        main_frame.columnconfigure(1, weight=1)
+        main_frame.rowconfigure(3, weight=1)
 
         status_frame = ttk.Frame(main_frame, padding=10)
-        status_frame.grid(column=0, row=0)
+        status_frame.grid(column=0, row=0, sticky=(W, E))
         self.server_status = 'Stopped'
         self.status_label = ttk.Label(
             status_frame, text=f'Server Status: {self.server_status}',
@@ -42,7 +54,7 @@ class MLTDReliveGUI:
         self.progress_bar = ttk.Progressbar(status_frame, mode='indeterminate')
 
         button_frame = ttk.Frame(main_frame, padding=10)
-        button_frame.grid(column=1, row=0)
+        button_frame.grid(column=1, row=0, sticky=(W, E))
         self.start_server_button = ttk.Button(
             button_frame, text='Start Server', command=self.start_server,
             style='Green.TButton', width=20
@@ -105,6 +117,123 @@ class MLTDReliveGUI:
             column=1, row=2, sticky=W, pady=(6, 0))
         self.asset_mode_combobox.bind(
             '<<ComboboxSelected>>', self.change_asset_mode)
+
+        log_frame = ttk.Labelframe(main_frame, text='Server Log', padding=6)
+        log_frame.grid(
+            column=0, row=3, columnspan=2, pady=(10, 0),
+            sticky=(N, S, W, E))
+        log_frame.columnconfigure(0, weight=1)
+        log_frame.rowconfigure(1, weight=1)
+
+        log_toolbar = ttk.Frame(log_frame)
+        log_toolbar.grid(column=0, row=0, sticky=(W, E), pady=(0, 5))
+        self.log_autoscroll = BooleanVar(value=True)
+        ttk.Checkbutton(
+            log_toolbar,
+            text='Auto-scroll',
+            variable=self.log_autoscroll,
+        ).pack(side=LEFT)
+        ttk.Button(
+            log_toolbar,
+            text='Clear View',
+            command=self.clear_log_view,
+        ).pack(side=RIGHT)
+
+        self.log_view = ScrolledText(
+            log_frame,
+            height=18,
+            width=100,
+            wrap='none',
+            state=DISABLED,
+            font='TkFixedFont',
+        )
+        self.log_view.grid(column=0, row=1, sticky=(N, S, W, E))
+
+        self._log_offset = 0
+        self._log_identity = None
+        self._load_initial_log_tail()
+        self.root.after(LOG_POLL_MS, self.update_log_view)
+
+    @staticmethod
+    def _log_identity_for(stat_result):
+        return (
+            stat_result.st_dev,
+            stat_result.st_ino,
+            getattr(stat_result, 'st_ctime_ns',
+                    int(stat_result.st_ctime * 1_000_000_000)),
+        )
+
+    def _replace_log_text(self, text):
+        self.log_view.configure(state=NORMAL)
+        self.log_view.delete('1.0', END)
+        if text:
+            self.log_view.insert(END, text)
+        self.log_view.configure(state=DISABLED)
+        if self.log_autoscroll.get():
+            self.log_view.see(END)
+
+    def _append_log_text(self, text):
+        if not text:
+            return
+        self.log_view.configure(state=NORMAL)
+        self.log_view.insert(END, text)
+        self.log_view.configure(state=DISABLED)
+        if self.log_autoscroll.get():
+            self.log_view.see(END)
+
+    def _load_initial_log_tail(self):
+        try:
+            stat_result = os.stat(LOG_PATH)
+            start = max(0, stat_result.st_size - LOG_TAIL_BYTES)
+            with open(LOG_PATH, 'rb') as log_file:
+                log_file.seek(start)
+                data = log_file.read()
+            if start:
+                newline = data.find(b'\n')
+                if newline >= 0:
+                    data = data[newline + 1:]
+            self._replace_log_text(data.decode('utf-8', errors='replace'))
+            self._log_offset = stat_result.st_size
+            self._log_identity = self._log_identity_for(stat_result)
+        except FileNotFoundError:
+            self._replace_log_text('')
+            self._log_offset = 0
+            self._log_identity = None
+        except OSError as exc:
+            self._replace_log_text(f'[GUI] Unable to read {LOG_PATH}: {exc}\n')
+            self._log_offset = 0
+            self._log_identity = None
+
+    def update_log_view(self):
+        try:
+            stat_result = os.stat(LOG_PATH)
+            identity = self._log_identity_for(stat_result)
+
+            if self._log_identity is not None and identity != self._log_identity:
+                self._append_log_text('\n--- log rotated ---\n')
+                self._log_offset = 0
+            elif stat_result.st_size < self._log_offset:
+                self._append_log_text('\n--- log truncated ---\n')
+                self._log_offset = 0
+
+            self._log_identity = identity
+
+            if stat_result.st_size > self._log_offset:
+                with open(LOG_PATH, 'rb') as log_file:
+                    log_file.seek(self._log_offset)
+                    data = log_file.read()
+                    self._log_offset = log_file.tell()
+                self._append_log_text(data.decode('utf-8', errors='replace'))
+        except FileNotFoundError:
+            self._log_offset = 0
+            self._log_identity = None
+        except OSError as exc:
+            self._append_log_text(f'\n[GUI] Unable to update log view: {exc}\n')
+        finally:
+            self.root.after(LOG_POLL_MS, self.update_log_view)
+
+    def clear_log_view(self):
+        self._replace_log_text('')
 
     def update_server_status(self):
         if self.proxy_process.is_alive() or self.dns_process.is_alive():
