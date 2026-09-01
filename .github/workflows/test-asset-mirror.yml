@@ -23,9 +23,11 @@ on:
       - 'tools/verify_asset_mirror.py'
       - 'tests/test_asset_mirror.py'
       - 'tests/test_asset_prefetch_fastpath.py'
+      - 'tests/test_asset_server_hotpath.py'
       - 'tests/test_local_asset_runtime.py'
       - 'tests/test_strict_local_and_api.py'
       - 'tests/api_transport_benchmark.py'
+      - 'tests/asset_server_benchmark.py'
       - 'tests/remote_asset_compat.py'
       - '.github/workflows/test-asset-mirror.yml'
   pull_request:
@@ -46,9 +48,11 @@ on:
       - 'tools/verify_asset_mirror.py'
       - 'tests/test_asset_mirror.py'
       - 'tests/test_asset_prefetch_fastpath.py'
+      - 'tests/test_asset_server_hotpath.py'
       - 'tests/test_local_asset_runtime.py'
       - 'tests/test_strict_local_and_api.py'
       - 'tests/api_transport_benchmark.py'
+      - 'tests/asset_server_benchmark.py'
       - 'tests/remote_asset_compat.py'
       - '.github/workflows/test-asset-mirror.yml'
 
@@ -81,14 +85,18 @@ jobs:
           tools/verify_asset_mirror.py
           tests/test_asset_mirror.py
           tests/test_asset_prefetch_fastpath.py
+          tests/test_asset_server_hotpath.py
           tests/test_local_asset_runtime.py
           tests/test_strict_local_and_api.py
           tests/api_transport_benchmark.py
+          tests/asset_server_benchmark.py
           tests/remote_asset_compat.py
       - name: Run local asset and transport tests
         run: python -m unittest discover -s tests -p 'test_*.py' -v
       - name: Benchmark API transport
         run: python tests/api_transport_benchmark.py
+      - name: Benchmark asset serving
+        run: python tests/asset_server_benchmark.py
 
   api-runtime:
     runs-on: ubuntu-22.04
