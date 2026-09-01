@@ -12,14 +12,25 @@ _asset_mode = 'hybrid'
 _asset_cache_root = 'asset-cache'
 _asset_prefetch_workers = 48
 _asset_upstream_proxy = ''
-_asset_local_platforms = 'android'
+_asset_local_scopes = 'zh-android'
 
 ASSET_MODES = ('remote', 'hybrid', 'local')
+ASSET_LANGUAGES = ('zh', 'ko')
 ASSET_PLATFORMS = ('android', 'ios')
 
 
 def version_tuple(v):
     return tuple(map(int, v.split('.')))
+
+
+def _normalize_asset_scope(value):
+    value = str(value).strip().lower()
+    if '-' not in value:
+        raise ValueError(f'Unsupported asset scope: {value}')
+    language, platform = value.split('-', 1)
+    if language not in ASSET_LANGUAGES or platform not in ASSET_PLATFORMS:
+        raise ValueError(f'Unsupported asset scope: {value}')
+    return f'{language}-{platform}'
 
 
 class CustomConfigParser(ConfigParser):
@@ -36,15 +47,13 @@ class CustomConfigParser(ConfigParser):
                 'asset_cache_root': _asset_cache_root,
                 'asset_prefetch_workers': _asset_prefetch_workers,
                 'asset_upstream_proxy': _asset_upstream_proxy,
-                'asset_local_platforms': _asset_local_platforms,
+                'asset_local_scopes': _asset_local_scopes,
             }
         })
         if not self.read('config.ini'):
             self.write_config()
         stored_version = self['default']['version']
         if version_tuple(stored_version) < version_tuple(version):
-            # v0.1.6 moves the performance-oriented default from 24 to 48.
-            # Preserve explicit user tuning while upgrading untouched defaults.
             workers = self.getint(
                 'default', 'asset_prefetch_workers', fallback=24
             )
@@ -53,6 +62,9 @@ class CustomConfigParser(ConfigParser):
                 self['default']['asset_prefetch_workers'] = str(
                     _asset_prefetch_workers
                 )
+            # v0.1.6 strict-local defaults to one explicit scope only.
+            if 'asset_local_scopes' not in self['default']:
+                self['default']['asset_local_scopes'] = _asset_local_scopes
             self['default']['version'] = version
             self.write_config()
 
@@ -129,37 +141,35 @@ class CustomConfigParser(ConfigParser):
         self.write_config()
 
     @property
-    def asset_local_platforms(self):
-        raw = self['default'].get(
-            'asset_local_platforms', _asset_local_platforms
-        )
+    def asset_local_scopes(self):
+        raw = self['default'].get('asset_local_scopes', _asset_local_scopes)
         values = []
         for item in raw.replace(';', ',').split(','):
-            platform = item.strip().lower()
-            if not platform or platform in values:
+            item = item.strip()
+            if not item:
                 continue
-            if platform not in ASSET_PLATFORMS:
+            try:
+                scope = _normalize_asset_scope(item)
+            except ValueError:
                 continue
-            values.append(platform)
-        return tuple(values or ('android',))
+            if scope not in values:
+                values.append(scope)
+        return tuple(values or (_asset_local_scopes,))
 
-    @asset_local_platforms.setter
-    def asset_local_platforms(self, value):
+    @asset_local_scopes.setter
+    def asset_local_scopes(self, value):
         if isinstance(value, str):
             raw_values = value.replace(';', ',').split(',')
         else:
             raw_values = value
         values = []
         for item in raw_values:
-            platform = str(item).strip().lower()
-            if not platform or platform in values:
-                continue
-            if platform not in ASSET_PLATFORMS:
-                raise ValueError(f'Unsupported asset platform: {platform}')
-            values.append(platform)
+            scope = _normalize_asset_scope(item)
+            if scope not in values:
+                values.append(scope)
         if not values:
-            raise ValueError('At least one local asset platform is required')
-        self['default']['asset_local_platforms'] = ','.join(values)
+            raise ValueError('At least one local asset scope is required')
+        self['default']['asset_local_scopes'] = ','.join(values)
         self.write_config()
 
     def write_config(self):
