@@ -10,6 +10,7 @@ _log_level = logging.INFO
 _is_local = False
 _asset_mode = 'remote'
 _asset_cache_root = 'asset-cache'
+_asset_prefetch_workers = 8
 
 ASSET_MODES = ('remote', 'hybrid', 'local')
 
@@ -30,6 +31,7 @@ class CustomConfigParser(ConfigParser):
                 'is_local': _is_local,
                 'asset_mode': _asset_mode,
                 'asset_cache_root': _asset_cache_root,
+                'asset_prefetch_workers': _asset_prefetch_workers,
             }
         })
         if not self.read('config.ini'):
@@ -84,6 +86,18 @@ class CustomConfigParser(ConfigParser):
     @asset_cache_root.setter
     def asset_cache_root(self, value):
         self['default']['asset_cache_root'] = value
+        self.write_config()
+
+    @property
+    def asset_prefetch_workers(self):
+        workers = self.getint(
+            'default', 'asset_prefetch_workers', fallback=_asset_prefetch_workers
+        )
+        return max(1, workers)
+
+    @asset_prefetch_workers.setter
+    def asset_prefetch_workers(self, value):
+        self['default']['asset_prefetch_workers'] = str(max(1, int(value)))
         self.write_config()
 
     def write_config(self):
