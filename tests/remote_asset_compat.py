@@ -15,6 +15,7 @@ from mltd.servers.asset_cache import (  # noqa: E402
     AssetMirror,
     AssetStore,
     manifest_name,
+    parse_manifest_objects,
     scope_name,
 )
 from mltd.servers.asset_server import create_server  # noqa: E402
@@ -43,6 +44,30 @@ def check_equal(label, actual, expected):
         raise AssertionError(f'{label}: local={actual!r}, remote={expected!r}')
 
 
+def choose_small_asset(remote, scope, names, max_size=2 * 1024 * 1024):
+    """Pick one real CDN object small enough for a full byte comparison."""
+    for name in names[:64]:
+        url = f'{REMOTE_ASSET_ROOT}/{scope}/{name}'
+        probe = remote.get(
+            url,
+            headers={'Range': 'bytes=0-0', 'Accept-Encoding': 'identity'},
+            timeout=30,
+        )
+        if probe.status_code not in (200, 206):
+            continue
+        total = None
+        content_range = probe.headers.get('Content-Range', '')
+        if '/' in content_range:
+            tail = content_range.rsplit('/', 1)[1]
+            if tail.isdigit():
+                total = int(tail)
+        if total is None and probe.headers.get('Content-Length', '').isdigit():
+            total = int(probe.headers['Content-Length'])
+        if total is not None and 0 < total <= max_size:
+            return name, total
+    raise AssertionError(f'{scope}: no <= {max_size} byte sample in first 64 objects')
+
+
 def main():
     remote = requests.Session()
     remote.headers['Accept-Encoding'] = 'identity'
@@ -52,7 +77,7 @@ def main():
         mirror = AssetMirror(store)
 
         # Populate the local cache using the exact public manifest bytes and
-        # response metadata, then validate local HTTP behavior against the
+        # response metadata, then validate the local HTTP behavior against the
         # public host before any game-facing routing is changed.
         for language, platform in SCOPES:
             mirror.fetch_manifest(language, platform, force=True)
@@ -131,8 +156,50 @@ def main():
                     f'{scope} missing status', l_status, r_missing.status_code
                 )
 
+                objects = parse_manifest_objects(r_get.content)
+                sample_name, sample_size = choose_small_asset(remote, scope, objects)
+                mirror.download(language, platform, sample_name, force=True)
+                sample_path = f'/{scope}/{sample_name}'
+                sample_url = f'{REMOTE_ASSET_ROOT}/{scope}/{sample_name}'
+                r_sample = remote.get(sample_url, timeout=60)
+                r_sample.raise_for_status()
+                l_status, l_headers, l_body = local_request(port, 'GET', sample_path)
+                check_equal(f'{scope} sample GET status', l_status, r_sample.status_code)
+                check_equal(f'{scope} sample GET body', l_body, r_sample.content)
+                check_equal(f'{scope} sample size', len(l_body), sample_size)
+                sample_remote_headers = {
+                    k.lower(): v for k, v in r_sample.headers.items()
+                }
+                for header in REPLAY_HEADERS:
+                    if header in sample_remote_headers:
+                        check_equal(
+                            f'{scope} sample GET {header}',
+                            l_headers.get(header),
+                            sample_remote_headers[header],
+                        )
+
+                sample_range_headers = {
+                    'Range': 'bytes=0-63',
+                    'Accept-Encoding': 'identity',
+                }
+                r_sample_range = remote.get(
+                    sample_url, headers=sample_range_headers, timeout=60
+                )
+                l_status, _, l_body = local_request(
+                    port, 'GET', sample_path, {'Range': 'bytes=0-63'}
+                )
+                check_equal(
+                    f'{scope} sample Range status',
+                    l_status,
+                    r_sample_range.status_code,
+                )
+                check_equal(
+                    f'{scope} sample Range body', l_body, r_sample_range.content
+                )
+
                 print(
-                    f'  ok: {len(r_get.content)} bytes, '
+                    f'  ok: manifest={len(r_get.content)} bytes, '
+                    f'sample={sample_name} ({sample_size} bytes), '
                     f'Range={r_range.status_code}, ETag={etag!r}',
                     flush=True,
                 )
