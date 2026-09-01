@@ -1,5 +1,7 @@
 from jsonrpc import dispatcher
 
+from mltd.servers.asset_cache import REMOTE_ASSET_ROOT, scope_name
+from mltd.servers.asset_server import asset_port
 from mltd.servers.config import config
 
 
@@ -27,9 +29,25 @@ def get_asset_version(params):
                        120000).
     """
     os_name = 'android' if params['os_name'] == 'Android' else 'ios'
+    scope = scope_name(config.language, os_name)
+
+    if config.asset_mode == 'remote':
+        asset_url = f'{REMOTE_ASSET_ROOT}/{scope}/'
+    elif config.is_local:
+        # Termux / same-device mode talks directly to the local HTTP asset
+        # server and therefore needs no extra certificate or DNS handling.
+        asset_url = f'http://127.0.0.1:{asset_port}/{scope}/'
+    else:
+        # Desktop clients already trust and resolve the existing API hostname
+        # to the standalone TLS proxy. Reuse that trust path instead of
+        # introducing a second local certificate for the public asset domain.
+        asset_url = (
+            f'https://theaterdays-{config.language}.appspot.com/'
+            f'__mltd_assets/{scope}/'
+        )
+
     return {
-        'asset_url': ('https://assets.rainbowunicorn7297.com/'
-                      + f'{config.language}-{os_name}/'),
+        'asset_url': asset_url,
         'asset_index_name': (
             '85822153578df611a4f852d4e02660f6f34401e4.data'
             if config.language == 'zh'
@@ -37,4 +55,3 @@ def get_asset_version(params):
         ),
         'asset_version': 120000
     }
-
