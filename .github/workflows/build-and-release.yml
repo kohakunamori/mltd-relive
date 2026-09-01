@@ -5,8 +5,10 @@ on:
     tags:
       - 'standalone-v*'
 
-jobs:
+permissions:
+  contents: write
 
+jobs:
   build:
     name: Build packages
     runs-on: ${{ matrix.os }}
@@ -56,34 +58,109 @@ jobs:
             out-name: macos
             out-path: standalone/dist/mltd-relive-${{ github.ref_name }}-macos.zip
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-    - name: Set up Python 3.11
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
-    - name: Install dependencies for ${{ matrix.target }}
-      run: ${{ matrix.cmd-install }}    
-    - name: Build with PyInstaller for ${{ matrix.target }}
-      run: ${{ matrix.cmd-build }}
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v3
-      with:
-        name: ${{ matrix.out-name }}
-        path: ${{ matrix.out-path }}
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies for ${{ matrix.target }}
+        run: ${{ matrix.cmd-install }}
+
+      - name: Build with PyInstaller for ${{ matrix.target }}
+        run: ${{ matrix.cmd-build }}
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.out-name }}
+          path: ${{ matrix.out-path }}
+          if-no-files-found: error
+
+  gameclient:
+    name: Prepare corrected game clients
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install MEGA download tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y megatools unzip
+
+      - name: Download corrected Traditional Chinese client
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p game-client
+          output='game-client/mltd-relive-game-client-zh-fixed.apk'
+          modern='https://mega.nz/file/HMgiTSbI#cy7z52H6zBOSdSX5Xok1GKQ4yT7k6K1ctjV6Heceu3I'
+          legacy='https://mega.nz/#!HMgiTSbI!cy7z52H6zBOSdSX5Xok1GKQ4yT7k6K1ctjV6Heceu3I'
+          if ! megatools dl --no-progress --path - "$modern" > "${output}.part"; then
+            rm -f "${output}.part"
+            megatools dl --no-progress --path - "$legacy" > "${output}.part"
+          fi
+          mv "${output}.part" "$output"
+
+      - name: Download corrected Korean client
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p game-client
+          output='game-client/mltd-relive-game-client-ko-fixed.apk'
+          modern='https://mega.nz/file/2dBgiBQY#NBgo-1rTW7g1Jtm9FLYZ61KoOP4HFoElxO75dzMyXew'
+          legacy='https://mega.nz/#!2dBgiBQY!NBgo-1rTW7g1Jtm9FLYZ61KoOP4HFoElxO75dzMyXew'
+          if ! megatools dl --no-progress --path - "$modern" > "${output}.part"; then
+            rm -f "${output}.part"
+            megatools dl --no-progress --path - "$legacy" > "${output}.part"
+          fi
+          mv "${output}.part" "$output"
+
+      - name: Validate game client packages
+        shell: bash
+        run: |
+          set -euo pipefail
+          for apk in game-client/*.apk; do
+            test "$(stat -c%s "$apk")" -gt 10000000
+            unzip -tq "$apk"
+            unzip -l "$apk" | grep -q 'AndroidManifest.xml'
+          done
+          cp GAME_CLIENT_NOTICE.txt game-client/GAME_CLIENT_NOTICE.txt
+          (
+            cd game-client
+            sha256sum *.apk > SHA256SUMS.txt
+          )
+
+      - name: Upload game client artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: game-client
+          path: game-client/*
+          if-no-files-found: error
 
   createrelease:
     name: Create Release
-    needs: build
+    needs:
+      - build
+      - gameclient
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-    - name: Download build actifacts
-      uses: actions/download-artifact@v3
-    - name: Create Release
-      id: create_release
-      uses: ncipollo/release-action@v1
-      with:
-        name: mltd-relive-${{ github.ref_name }}
-        artifacts: 'LICENSE,windows/*,ubuntu/*,macos/*'
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-artifacts
+
+      - name: Create Release
+        id: create_release
+        uses: ncipollo/release-action@v1
+        with:
+          name: mltd-relive-${{ github.ref_name }}
+          bodyFile: GAME_CLIENT_NOTICE.txt
+          artifacts: 'LICENSE,release-artifacts/windows/*,release-artifacts/ubuntu/*,release-artifacts/macos/*,release-artifacts/game-client/*'
+          artifactErrorsFailBuild: true
