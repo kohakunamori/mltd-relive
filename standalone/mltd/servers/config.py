@@ -8,6 +8,10 @@ api_port = 7650
 _language = 'zh'
 _log_level = logging.INFO
 _is_local = False
+_asset_mode = 'remote'
+_asset_cache_root = 'asset-cache'
+
+ASSET_MODES = ('remote', 'hybrid', 'local')
 
 
 def version_tuple(v):
@@ -23,7 +27,9 @@ class CustomConfigParser(ConfigParser):
                 'version': version,
                 'language': _language,
                 'log_level': _log_level,
-                'is_local': _is_local
+                'is_local': _is_local,
+                'asset_mode': _asset_mode,
+                'asset_cache_root': _asset_cache_root,
             }
         })
         if not self.read('config.ini'):
@@ -58,10 +64,31 @@ class CustomConfigParser(ConfigParser):
         self['default']['is_local'] = str(value)
         self.write_config()
 
+    @property
+    def asset_mode(self):
+        mode = self['default'].get('asset_mode', _asset_mode).lower()
+        return mode if mode in ASSET_MODES else _asset_mode
+
+    @asset_mode.setter
+    def asset_mode(self, value):
+        value = value.lower()
+        if value not in ASSET_MODES:
+            raise ValueError(f'Unsupported asset mode: {value}')
+        self['default']['asset_mode'] = value
+        self.write_config()
+
+    @property
+    def asset_cache_root(self):
+        return self['default'].get('asset_cache_root', _asset_cache_root)
+
+    @asset_cache_root.setter
+    def asset_cache_root(self, value):
+        self['default']['asset_cache_root'] = value
+        self.write_config()
+
     def write_config(self):
         with open('config.ini', 'w') as config_file:
             self.write(config_file)
 
 
 config = CustomConfigParser()
-
