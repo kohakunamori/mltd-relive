@@ -2,7 +2,7 @@ import logging
 from configparser import ConfigParser
 from datetime import timedelta, timezone
 
-version = '0.1.4'
+version = '0.1.5'
 api_port = 7650
 # 'zh' for Traditional Chinese, 'ko' for Korean
 _language = 'zh'
@@ -10,7 +10,7 @@ _log_level = logging.INFO
 _is_local = False
 _asset_mode = 'hybrid'
 _asset_cache_root = 'asset-cache'
-_asset_prefetch_workers = 8
+_asset_prefetch_workers = 24
 _asset_upstream_proxy = ''
 
 ASSET_MODES = ('remote', 'hybrid', 'local')
@@ -38,7 +38,17 @@ class CustomConfigParser(ConfigParser):
         })
         if not self.read('config.ini'):
             self.write_config()
-        if version_tuple(self['default']['version']) < version_tuple(version):
+        stored_version = self['default']['version']
+        if version_tuple(stored_version) < version_tuple(version):
+            # v0.1.5 moves the legacy default from 8 to 24 workers. Preserve
+            # explicit user tuning while upgrading untouched old defaults.
+            if (version_tuple(stored_version) < (0, 1, 5)
+                    and self.getint(
+                        'default', 'asset_prefetch_workers', fallback=8
+                    ) == 8):
+                self['default']['asset_prefetch_workers'] = str(
+                    _asset_prefetch_workers
+                )
             self['default']['version'] = version
             self.write_config()
 
