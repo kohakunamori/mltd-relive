@@ -82,14 +82,16 @@ class ProxyHTTPRequestHandler(AssetHTTPRequestHandler):
     def do_POST(self):
         content_len = int(self.headers.get('Content-Length', '0'))
         req_body = self.rfile.read(content_len)
-        if self.api_application is not None:
+        if type(self).api_application is not None:
             self._dispatch_wsgi(req_body)
         else:
-            # Compatibility path used by isolated tests and callers that
-            # instantiate the handler without proxy.start().
             self._forward_to_local_api(req_body)
 
     def _dispatch_wsgi(self, req_body: bytes):
+        application = type(self).api_application
+        if application is None:
+            self.send_error(503)
+            return
         parsed = urlsplit(self.path)
         environ = {
             'REQUEST_METHOD': 'POST',
@@ -135,7 +137,7 @@ class ProxyHTTPRequestHandler(AssetHTTPRequestHandler):
 
         result = None
         try:
-            result = self.api_application(environ, start_response)
+            result = application(environ, start_response)
             chunks = written + list(result)
             content = b''.join(chunks)
             if not response_status:
@@ -209,8 +211,6 @@ def key_path():
 
 
 def start(port=proxy_port, conn=None):
-    # Import here so lightweight transport tests can instantiate the proxy
-    # without importing the complete service/ORM graph.
     from mltd.servers.handler import application
 
     ProxyHTTPRequestHandler.api_application = application
@@ -234,8 +234,7 @@ def start(port=proxy_port, conn=None):
         allow_connect_proxy=fetch_on_miss,
     )
 
-    server_address = ('', port)
-    httpd = ThreadedProxyServer(server_address, ProxyHTTPRequestHandler)
+    httpd = ThreadedProxyServer(('', port), ProxyHTTPRequestHandler)
     certfile = path.join(key_path(), 'api.crt')
     keyfile = path.join(key_path(), 'api.key')
     context = SSLContext(PROTOCOL_TLS_SERVER)
