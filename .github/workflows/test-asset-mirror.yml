@@ -9,10 +9,12 @@ on:
     paths:
       - 'standalone/console.py'
       - 'standalone/gui.pyw'
+      - 'standalone/main.py'
       - 'standalone/mltd/models/engine.py'
       - 'standalone/mltd/services/asset.py'
       - 'standalone/mltd/servers/api_server.py'
       - 'standalone/mltd/servers/asset_cache.py'
+      - 'standalone/mltd/servers/asset_prepare.py'
       - 'standalone/mltd/servers/asset_server.py'
       - 'standalone/mltd/servers/config.py'
       - 'standalone/mltd/servers/handler.py'
@@ -21,6 +23,7 @@ on:
       - 'tools/verify_asset_mirror.py'
       - 'tests/test_asset_mirror.py'
       - 'tests/test_local_asset_runtime.py'
+      - 'tests/test_strict_local_and_api.py'
       - 'tests/remote_asset_compat.py'
       - '.github/workflows/test-asset-mirror.yml'
 
@@ -39,10 +42,12 @@ jobs:
           python -m py_compile
           standalone/console.py
           standalone/gui.pyw
+          standalone/main.py
           standalone/mltd/models/engine.py
           standalone/mltd/services/asset.py
           standalone/mltd/servers/api_server.py
           standalone/mltd/servers/asset_cache.py
+          standalone/mltd/servers/asset_prepare.py
           standalone/mltd/servers/asset_server.py
           standalone/mltd/servers/config.py
           standalone/mltd/servers/handler.py
@@ -51,9 +56,10 @@ jobs:
           tools/verify_asset_mirror.py
           tests/test_asset_mirror.py
           tests/test_local_asset_runtime.py
+          tests/test_strict_local_and_api.py
           tests/remote_asset_compat.py
-      - name: Run local asset protocol tests
-        run: python -m unittest discover -s tests -p 'test_*asset*.py' -v
+      - name: Run local asset and transport tests
+        run: python -m unittest discover -s tests -p 'test_*.py' -v
 
   remote-compat:
     runs-on: ubuntu-22.04
