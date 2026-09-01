@@ -1,7 +1,8 @@
 import socket
 import sys
 from os import path
-from wsgiref.simple_server import WSGIRequestHandler, make_server
+from socketserver import ThreadingMixIn
+from wsgiref.simple_server import WSGIRequestHandler, WSGIServer, make_server
 
 from mltd.servers.config import api_port
 from mltd.servers.handler import application
@@ -20,6 +21,11 @@ def bare_getfqdn(name=''):
 socket.getfqdn = bare_getfqdn
 
 
+class ThreadingWSGIServer(ThreadingMixIn, WSGIServer):
+    daemon_threads = True
+    allow_reuse_address = True
+
+
 class SilentWSGIRequestHandler(WSGIRequestHandler):
 
     def log_message(self, format, *args):
@@ -34,8 +40,9 @@ def key_path():
 
 def start(port=api_port, conn=None):
     with make_server('', port, application,
+                     server_class=ThreadingWSGIServer,
                      handler_class=SilentWSGIRequestHandler) as httpd:
-        logger.info(f'Serving HTTP on port {port}...')
+        logger.info(f'Serving threaded HTTP on port {port}...')
         if conn:
             conn.send(True)
             conn.close()
@@ -44,4 +51,3 @@ def start(port=api_port, conn=None):
 
 if __name__ == '__main__':
     start()
-
