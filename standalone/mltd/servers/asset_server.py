@@ -1,5 +1,4 @@
 import re
-import select
 import socket
 import threading
 from email.utils import parsedate_to_datetime
@@ -10,7 +9,6 @@ from urllib.parse import unquote, urlsplit
 import requests
 
 from mltd.servers.asset_cache import (
-    REMOTE_ASSET_ROOT,
     SUPPORTED_LANGUAGES,
     SUPPORTED_PLATFORMS,
     AssetMirror,
@@ -21,7 +19,6 @@ from mltd.servers.logging import logger
 asset_port = 7651
 _PATH_RE = re.compile(r'^/([a-z]{2})-(android|ios)/([^/]+)$')
 _RANGE_RE = re.compile(r'^bytes=(\d*)-(\d*)$')
-_PROXY_HOST = (urlsplit(REMOTE_ASSET_ROOT).hostname or '').lower()
 
 
 def _parse_range(value: str, size: int):
@@ -83,78 +80,23 @@ class AssetHTTPRequestHandler(BaseHTTPRequestHandler):
     store: AssetStore | None = None
     mirror: AssetMirror | None = None
     fetch_on_miss = False
-    allow_connect_proxy = False
     _download_locks_guard = threading.Lock()
     _download_locks = {}
 
     def do_HEAD(self):
-        request_path = self._resolve_request_path()
-        if request_path is not None:
-            self._serve_path(request_path, send_body=False)
+        if self._is_origin_form():
+            self._serve_path(self.path, send_body=False)
 
     def do_GET(self):
-        request_path = self._resolve_request_path()
-        if request_path is not None:
-            self._serve_path(request_path, send_body=True)
+        if self._is_origin_form():
+            self._serve_path(self.path, send_body=True)
 
-    def do_CONNECT(self):
-        """Restricted CONNECT support for standard HTTP proxy clients."""
-        if not self.allow_connect_proxy:
-            self.send_error(403, 'CONNECT disabled in strict local mode')
-            return
-
-        host, sep, port_s = self.path.rpartition(':')
-        if not sep:
-            host, port_s = self.path, '443'
-        host = host.strip('[]').lower()
-        try:
-            port = int(port_s)
-        except ValueError:
-            self.send_error(400)
-            return
-        if host != _PROXY_HOST or port not in {80, 443}:
-            self.send_error(403, 'Asset proxy host not allowed')
-            return
-
-        upstream = None
-        try:
-            upstream = socket.create_connection((host, port), timeout=10)
-            upstream.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
-            self.send_response(200, 'Connection Established')
-            self.end_headers()
-            self.close_connection = True
-            sockets = (self.connection, upstream)
-            while True:
-                readable, _, exceptional = select.select(
-                    sockets, [], sockets, 30
-                )
-                if exceptional or not readable:
-                    break
-                for source in readable:
-                    target = upstream if source is self.connection else self.connection
-                    data = source.recv(64 * 1024)
-                    if not data:
-                        return
-                    target.sendall(data)
-        except (OSError, TimeoutError) as exc:
-            logger.warning(f'Asset CONNECT proxy failed for {host}:{port}: {exc}')
-            if upstream is None:
-                self.send_error(502)
-        finally:
-            if upstream is not None:
-                upstream.close()
-
-    def _resolve_request_path(self):
+    def _is_origin_form(self):
         parsed = urlsplit(self.path)
         if parsed.scheme or parsed.netloc:
-            if parsed.scheme.lower() not in {'http', 'https'}:
-                self.send_error(400, 'Unsupported proxy URL scheme')
-                return None
-            if (parsed.hostname or '').lower() != _PROXY_HOST:
-                self.send_error(403, 'Asset proxy host not allowed')
-                return None
-            return parsed.path or '/'
-        return self.path
+            self.send_error(400, 'Forward proxy requests are not supported')
+            return False
+        return True
 
     def _serve_path(self, request_path: str, *, send_body: bool):
         path = unquote(urlsplit(request_path).path)
@@ -286,12 +228,10 @@ class AssetHTTPRequestHandler(BaseHTTPRequestHandler):
 
 def bind_asset_handler(handler_class, store: AssetStore,
                        mirror: AssetMirror | None = None,
-                       fetch_on_miss: bool = False,
-                       allow_connect_proxy: bool = False):
+                       fetch_on_miss: bool = False):
     handler_class.store = store
     handler_class.mirror = mirror
     handler_class.fetch_on_miss = fetch_on_miss
-    handler_class.allow_connect_proxy = allow_connect_proxy
     handler_class._download_locks_guard = threading.Lock()
     handler_class._download_locks = {}
     return handler_class
@@ -300,8 +240,7 @@ def bind_asset_handler(handler_class, store: AssetStore,
 def create_server(host: str = '', port: int = asset_port,
                   store: AssetStore | None = None,
                   mirror: AssetMirror | None = None,
-                  fetch_on_miss: bool = False,
-                  allow_connect_proxy: bool = False):
+                  fetch_on_miss: bool = False):
     if store is None:
         store = AssetStore()
     if fetch_on_miss and mirror is None:
@@ -315,7 +254,6 @@ def create_server(host: str = '', port: int = asset_port,
         store,
         mirror,
         fetch_on_miss,
-        allow_connect_proxy,
     )
     return ThreadedAssetServer((host, port), BoundAssetHTTPRequestHandler)
 
@@ -332,17 +270,20 @@ def start(port: int = asset_port, conn=None, root: str | None = None,
             config.language,
             root,
             workers=config.asset_prefetch_workers,
+            upstream_proxy=config.asset_upstream_proxy,
         )
     if fetch_on_miss is None:
         fetch_on_miss = config.asset_mode == 'hybrid'
     store = AssetStore(root)
-    mirror = AssetMirror(store) if fetch_on_miss else None
+    mirror = AssetMirror(
+        store,
+        upstream_proxy=config.asset_upstream_proxy,
+    ) if fetch_on_miss else None
     httpd = create_server(
         port=port,
         store=store,
         mirror=mirror,
         fetch_on_miss=fetch_on_miss,
-        allow_connect_proxy=config.asset_mode == 'hybrid',
     )
     logger.info(f'Asset mirror HTTP server is running on port {port}...')
     logger.info(f'Asset mirror root: {Path(root).resolve()}')
@@ -350,11 +291,8 @@ def start(port: int = asset_port, conn=None, root: str | None = None,
         'Asset cache misses: '
         + ('fetch from remote' if fetch_on_miss else 'return 404')
     )
-    logger.info(
-        'HTTP forward proxy: asset host only; '
-        + ('CONNECT enabled' if config.asset_mode == 'hybrid'
-           else 'CONNECT disabled')
-    )
+    if config.asset_upstream_proxy:
+        logger.info(f'Asset upstream proxy: {config.asset_upstream_proxy}')
     if conn:
         conn.send(True)
         conn.close()
