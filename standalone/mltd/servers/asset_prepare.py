@@ -16,17 +16,16 @@ def prepare_local_assets(language: str,
                          workers: int = 8,
                          verify_existing: bool = False,
                          remote_root: str = REMOTE_ASSET_ROOT,
+                         upstream_proxy: str | None = None,
                          conn=None) -> dict:
-    """Ensure a strict local mirror exists before serving local mode.
-
-    Local mode is deliberately different from hybrid mode: every object in
-    the current language's Android and iOS manifests must already be present
-    before the server becomes ready. Missing objects are downloaded here;
-    runtime cache misses never use the network.
-    """
+    """Ensure a strict local mirror exists before serving local mode."""
     platforms = tuple(sorted(platforms or SUPPORTED_PLATFORMS))
     store = AssetStore(root)
-    mirror = AssetMirror(store, remote_root=remote_root)
+    mirror = AssetMirror(
+        store,
+        remote_root=remote_root,
+        upstream_proxy=upstream_proxy,
+    )
     summary = {}
 
     for platform in platforms:
