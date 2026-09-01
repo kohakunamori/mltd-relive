@@ -28,6 +28,11 @@ def main():
     parser.add_argument('--root', default='asset-cache',
                         help='local asset cache directory (default: asset-cache)')
     parser.add_argument('--workers', type=int, default=8)
+    parser.add_argument(
+        '--proxy',
+        help='HTTP proxy used only for outbound asset CDN requests, e.g. '
+             'http://127.0.0.1:7890',
+    )
     parser.add_argument('--force', action='store_true',
                         help='redownload already cached objects (single platform only)')
     parser.add_argument('--verify-existing', action='store_true',
@@ -43,6 +48,7 @@ def main():
             args.root,
             workers=args.workers,
             verify_existing=args.verify_existing,
+            upstream_proxy=args.proxy,
         )
         print('\nStrict local cache ready:')
         for platform, summary in result.items():
@@ -53,7 +59,7 @@ def main():
         return
 
     store = AssetStore(args.root)
-    mirror = AssetMirror(store)
+    mirror = AssetMirror(store, upstream_proxy=args.proxy)
     result = mirror.prefetch(
         args.language,
         args.platform,
