@@ -1,0 +1,174 @@
+name: Fix and Publish APK Patcher v1.0.7
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/fix-and-publish-patcher-v1.0.7.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Remove redundant v1 ZIP heuristic
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          path = Path('tools/apk-patcher/apk-patcher.pyw')
+          text = path.read_text(encoding='utf-8')
+
+          text, count = re.subn(
+              r'\n\ndef _has_v1_signature\(apk_filename\):\n.*?(?=\n\ndef extract_signer_sha256)',
+              '',
+              text,
+              count=1,
+              flags=re.DOTALL,
+          )
+          if count != 1:
+              raise SystemExit(f'expected one _has_v1_signature helper, removed {count}')
+
+          text, count = re.subn(
+              r"\n    if not _has_v1_signature\(output_apk\):\n        raise RuntimeError\(\n            'Final APK does not contain a v1/JAR signature\.'\n        \)\n",
+              '',
+              text,
+              count=1,
+          )
+          if count != 1:
+              raise SystemExit(f'expected one redundant v1 check, removed {count}')
+
+          old_comment = (
+              '    # Parsing this block proves that the APK has a structurally valid v2\n'
+              "    # signer record without depending on apksigner's human-readable output.\n"
+          )
+          new_comment = (
+              '    # apksigner verify above is the authoritative signature verdict for\n'
+              '    # Android API 19+. Parse v2 only to compare signer identity without\n'
+              "    # depending on apksigner's human-readable output.\n"
+          )
+          if old_comment not in text:
+              raise SystemExit('expected signer verification comment was not found')
+          text = text.replace(old_comment, new_comment, 1)
+
+          path.write_text(text, encoding='utf-8')
+          Path('tools/apk-patcher/VERSION').write_text('1.0.7\n', encoding='utf-8')
+          PY
+
+          python -m py_compile tools/apk-patcher/apk-patcher.pyw
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add tools/apk-patcher/apk-patcher.pyw tools/apk-patcher/VERSION
+          git commit -m 'fix(apk-patcher): trust apksigner verifier for signature schemes'
+          git push origin HEAD:main
+
+  build:
+    needs: apply
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            target: Windows
+            cmd-install: |
+              python -m venv env
+              .\env\Scripts\activate
+              python -m pip install --upgrade pip
+              python -m pip install -r requirements.txt
+            cmd-build: |
+              cd tools\apk-patcher
+              ..\..\env\Scripts\pyinstaller apk-patcher_windows.spec
+            artifact-name: patcher-windows
+            artifact-path: tools/apk-patcher/dist/mltd-relive-apk-patcher.exe
+          - os: ubuntu-latest
+            target: Ubuntu
+            cmd-install: |
+              python -m venv env
+              source env/bin/activate
+              python -m pip install --upgrade pip
+              python -m pip install -r requirements.txt
+            cmd-build: |
+              cd tools/apk-patcher
+              ../../env/bin/pyinstaller apk-patcher_ubuntu.spec
+            artifact-name: patcher-ubuntu
+            artifact-path: tools/apk-patcher/dist/mltd-relive-apk-patcher
+          - os: macos-latest
+            target: macOS
+            cmd-install: |
+              python -m venv env
+              source env/bin/activate
+              python -m pip install --upgrade pip
+              python -m pip install -r requirements.txt
+            cmd-build: |
+              cd tools/apk-patcher
+              ../../env/bin/pyinstaller apk-patcher_macos.spec
+              cd dist
+              zip -r9 mltd-relive-apk-patcher-macos.zip mltd-relive-apk-patcher.app
+            artifact-name: patcher-macos
+            artifact-path: tools/apk-patcher/dist/mltd-relive-apk-patcher-macos.zip
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Confirm v1.0.7 source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(tr -d '\r\n' < tools/apk-patcher/VERSION)" = '1.0.7'
+          ! grep -q '_has_v1_signature' tools/apk-patcher/apk-patcher.pyw
+          python -m py_compile tools/apk-patcher/apk-patcher.pyw
+      - name: Install dependencies for ${{ matrix.target }}
+        run: ${{ matrix.cmd-install }}
+      - name: Build for ${{ matrix.target }}
+        run: ${{ matrix.cmd-build }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact-name }}
+          path: ${{ matrix.artifact-path }}
+          if-no-files-found: error
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: release-artifacts
+      - name: Replace old patcher assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp release-artifacts/patcher-windows/mltd-relive-apk-patcher.exe mltd-relive-apk-patcher-v1.0.7-windows.exe
+          cp release-artifacts/patcher-ubuntu/mltd-relive-apk-patcher mltd-relive-apk-patcher-v1.0.7-ubuntu
+          cp release-artifacts/patcher-macos/mltd-relive-apk-patcher-macos.zip mltd-relive-apk-patcher-v1.0.7-macos.zip
+
+          for old in \
+            mltd-relive-apk-patcher-v1.0.6-windows.exe \
+            mltd-relive-apk-patcher-v1.0.6-ubuntu \
+            mltd-relive-apk-patcher-v1.0.6-macos.zip; do
+            gh release delete-asset standalone-v0.1.3 "$old" --repo "$GITHUB_REPOSITORY" -y || true
+          done
+
+          gh release upload standalone-v0.1.3 \
+            mltd-relive-apk-patcher-v1.0.7-windows.exe \
+            mltd-relive-apk-patcher-v1.0.7-ubuntu \
+            mltd-relive-apk-patcher-v1.0.7-macos.zip \
+            --repo "$GITHUB_REPOSITORY" \
+            --clobber
