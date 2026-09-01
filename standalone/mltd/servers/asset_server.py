@@ -67,6 +67,17 @@ def _not_modified(headers, metadata) -> bool:
     return False
 
 
+class ThreadedAssetServer(ThreadingHTTPServer):
+    daemon_threads = True
+    allow_reuse_address = True
+    request_queue_size = 64
+
+    def get_request(self):
+        request, client_address = super().get_request()
+        request.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+        return request, client_address
+
+
 class AssetHTTPRequestHandler(BaseHTTPRequestHandler):
     protocol_version = 'HTTP/1.1'
     store: AssetStore | None = None
@@ -87,13 +98,7 @@ class AssetHTTPRequestHandler(BaseHTTPRequestHandler):
             self._serve_path(request_path, send_body=True)
 
     def do_CONNECT(self):
-        """Restricted CONNECT support for standard HTTP proxy clients.
-
-        CONNECT is intentionally allow-listed to the public MLTD asset host so
-        the embedded server can never become a general-purpose open proxy.
-        Local mode disables CONNECT because strict local mode must remain
-        network-independent after prefetch.
-        """
+        """Restricted CONNECT support for standard HTTP proxy clients."""
         if not self.allow_connect_proxy:
             self.send_error(403, 'CONNECT disabled in strict local mode')
             return
@@ -114,6 +119,7 @@ class AssetHTTPRequestHandler(BaseHTTPRequestHandler):
         upstream = None
         try:
             upstream = socket.create_connection((host, port), timeout=10)
+            upstream.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
             self.send_response(200, 'Connection Established')
             self.end_headers()
             self.close_connection = True
@@ -139,7 +145,6 @@ class AssetHTTPRequestHandler(BaseHTTPRequestHandler):
                 upstream.close()
 
     def _resolve_request_path(self):
-        """Resolve origin-form or HTTP-proxy absolute-form request targets."""
         parsed = urlsplit(self.path)
         if parsed.scheme or parsed.netloc:
             if parsed.scheme.lower() not in {'http', 'https'}:
@@ -230,7 +235,6 @@ class AssetHTTPRequestHandler(BaseHTTPRequestHandler):
             pass
 
     def _fetch_missing(self, language: str, platform: str, name: str):
-        """Fetch-through a cache miss in hybrid mode."""
         if not self.fetch_on_miss or self.mirror is None:
             return 404
 
@@ -313,9 +317,7 @@ def create_server(host: str = '', port: int = asset_port,
         fetch_on_miss,
         allow_connect_proxy,
     )
-    server = ThreadingHTTPServer((host, port), BoundAssetHTTPRequestHandler)
-    server.daemon_threads = True
-    return server
+    return ThreadedAssetServer((host, port), BoundAssetHTTPRequestHandler)
 
 
 def start(port: int = asset_port, conn=None, root: str | None = None,
