@@ -2,7 +2,7 @@ from uuid import UUID
 
 from jsonrpc import dispatcher
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from mltd.models.engine import engine
 from mltd.models.models import (Card, MstCard, MstLessonWear, SongUnit, Unit,
@@ -93,36 +93,44 @@ def set_unit(params, context):
         mission_process: Empty info. See the implementation below.
         mission_list: An empty list.
     """
-    with Session(engine) as session:
-        user = session.scalars(
-            select(User)
-            .where(User.user_id == UUID(context['user_id']))
-        ).one()
+    user_id = UUID(context['user_id'])
+    unit_nums = {p['unit_num'] for p in params['param_list']}
 
-        card_ids = set()
-        for p in params['param_list']:
-            for i in range(5):
-                card_ids.add(p['card_id_list'][i])
-        card_to_idol = {}
-        result = session.execute(
+    with Session(engine) as session:
+        # Load exactly the units being modified plus their five idol rows in
+        # two bounded queries. The old path loaded User first and then walked
+        # user.units -> unit.unit_idols, which could trigger relationship
+        # lazy-loads during both mutation and Marshmallow serialization.
+        loaded_units = session.scalars(
+            select(Unit)
+            .where(Unit.user_id == user_id)
+            .where(Unit.unit_num.in_(unit_nums))
+            .options(selectinload(Unit.unit_idols))
+        ).all()
+        unit_by_num = {unit.unit_num: unit for unit in loaded_units}
+
+        card_ids = {
+            card_id
+            for p in params['param_list']
+            for card_id in p['card_id_list'][:5]
+        }
+        card_to_idol = dict(session.execute(
             select(Card.card_id, MstCard.mst_idol_id)
             .join(MstCard)
-            .where(Card.user == user)
+            .where(Card.user_id == user_id)
             .where(Card.card_id.in_(card_ids))
-        )
-        for card_id, idol_id in result:
-            card_to_idol[card_id] = idol_id
+        ))
 
         units = []
         for p in params['param_list']:
-            unit_num: int = p['unit_num']
-            unit = user.units[unit_num-1]
+            unit = unit_by_num[p['unit_num']]
             unit.name = p['name']
             for i in range(5):
                 idol = unit.unit_idols[i]
-                if idol.card_id != p['card_id_list'][i]:
-                    idol.card_id = p['card_id_list'][i]
-                    idol.mst_lesson_wear_id = card_to_idol[idol.card_id]
+                new_card_id = p['card_id_list'][i]
+                if idol.card_id != new_card_id:
+                    idol.card_id = new_card_id
+                    idol.mst_lesson_wear_id = card_to_idol[new_card_id]
                 idol.mst_costume_id = p['mst_costume_id_list'][i]
                 idol.costume_is_random = p['costume_is_random_list'][i]
                 if p['mst_lesson_wear_id_list']:
@@ -149,8 +157,7 @@ def set_unit(params, context):
     }
 
 
-@dispatcher.add_method(name='UnitService.GetSongUnitList',
-                       context_arg='context')
+@dispatcher.add_method(name='UnitService.GetSongUnitList', context_arg='context')
 def get_song_unit_list(params, context):
     """Service for getting a list of song units.
 
@@ -197,8 +204,8 @@ def set_song_unit(params, context):
             card_id_list: A list of 5 or 13 card IDs (depending on unit
                           song type) representing the cards selected by
                           the user. The order of this list is important.
-                          The first card ID in this list is the center
-                          of this unit.
+                          The first card ID in this list is the center of
+                          this unit.
             mst_costume_id_list: A list of 5 or 13 master costume IDs
                                  representing the costumes selected by
                                  the user for each card in
