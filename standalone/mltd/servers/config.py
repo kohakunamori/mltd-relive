@@ -12,8 +12,10 @@ _asset_mode = 'hybrid'
 _asset_cache_root = 'asset-cache'
 _asset_prefetch_workers = 48
 _asset_upstream_proxy = ''
+_asset_local_platforms = 'android'
 
 ASSET_MODES = ('remote', 'hybrid', 'local')
+ASSET_PLATFORMS = ('android', 'ios')
 
 
 def version_tuple(v):
@@ -34,6 +36,7 @@ class CustomConfigParser(ConfigParser):
                 'asset_cache_root': _asset_cache_root,
                 'asset_prefetch_workers': _asset_prefetch_workers,
                 'asset_upstream_proxy': _asset_upstream_proxy,
+                'asset_local_platforms': _asset_local_platforms,
             }
         })
         if not self.read('config.ini'):
@@ -123,6 +126,40 @@ class CustomConfigParser(ConfigParser):
     @asset_upstream_proxy.setter
     def asset_upstream_proxy(self, value):
         self['default']['asset_upstream_proxy'] = (value or '').strip()
+        self.write_config()
+
+    @property
+    def asset_local_platforms(self):
+        raw = self['default'].get(
+            'asset_local_platforms', _asset_local_platforms
+        )
+        values = []
+        for item in raw.replace(';', ',').split(','):
+            platform = item.strip().lower()
+            if not platform or platform in values:
+                continue
+            if platform not in ASSET_PLATFORMS:
+                continue
+            values.append(platform)
+        return tuple(values or ('android',))
+
+    @asset_local_platforms.setter
+    def asset_local_platforms(self, value):
+        if isinstance(value, str):
+            raw_values = value.replace(';', ',').split(',')
+        else:
+            raw_values = value
+        values = []
+        for item in raw_values:
+            platform = str(item).strip().lower()
+            if not platform or platform in values:
+                continue
+            if platform not in ASSET_PLATFORMS:
+                raise ValueError(f'Unsupported asset platform: {platform}')
+            values.append(platform)
+        if not values:
+            raise ValueError('At least one local asset platform is required')
+        self['default']['asset_local_platforms'] = ','.join(values)
         self.write_config()
 
     def write_config(self):
