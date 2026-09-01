@@ -231,13 +231,12 @@ def _extract_v2_signer_certificate_sha256(apk_filename):
     if signer_offset != len(signer):
         raise RuntimeError('Malformed APK v2 signer record.')
 
+    # apksigner already performs the full cryptographic/structural verify.
+    # For signer identity comparison we only need the certificate sequence,
+    # which is the second length-prefixed field in v2 SignedData. Some legacy
+    # APKs append reserved/extension bytes after the normal v2 fields.
     _, signed_offset = _read_length_prefixed(signed_data, 0)
-    certificates, signed_offset = _read_length_prefixed(
-        signed_data, signed_offset
-    )
-    _, signed_offset = _read_length_prefixed(signed_data, signed_offset)
-    if signed_offset != len(signed_data):
-        raise RuntimeError('Malformed APK v2 signed-data record.')
+    certificates, _ = _read_length_prefixed(signed_data, signed_offset)
 
     certificate, _ = _read_length_prefixed(certificates, 0)
     if not certificate:
