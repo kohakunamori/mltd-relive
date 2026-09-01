@@ -8,32 +8,8 @@ on:
       - 'requirements.txt'
       - '.github/workflows/build-apk-patcher.yml'
 
-permissions:
-  contents: write
-
 jobs:
-  apply:
-    if: contains(github.event.head_commit.message, 'v1.0.9 run staged patch')
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: main
-      - name: Apply v1.0.9 source migration
-        run: |
-          python tools/apk-patcher/patch_v1_0_9.py
-          python -m py_compile tools/apk-patcher/apk-patcher.pyw
-          git diff --check
-      - name: Commit source fix
-        run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add tools/apk-patcher/apk-patcher.pyw tools/apk-patcher/VERSION
-          git commit -m 'fix(apk-patcher): execute apksigner jar directly'
-          git push origin HEAD:main
-
   build:
-    needs: apply
     name: Build packages
     runs-on: ${{ matrix.os }}
     strategy:
@@ -49,9 +25,7 @@ jobs:
             cmd-build: |
               cd tools\apk-patcher
               ..\..\env\Scripts\pyinstaller apk-patcher_windows.spec
-            package-source: tools/apk-patcher/dist/mltd-relive-apk-patcher.exe
-            package-name: mltd-relive-apk-patcher-v1.0.9-windows.exe
-            out-name: patcher-windows
+            out-name: mltd-relive-apk-patcher-windows
           - os: ubuntu-latest
             target: Ubuntu
             cmd-install: |
@@ -62,9 +36,7 @@ jobs:
             cmd-build: |
               cd tools/apk-patcher
               ../../env/bin/pyinstaller apk-patcher_ubuntu.spec
-            package-source: tools/apk-patcher/dist/mltd-relive-apk-patcher
-            package-name: mltd-relive-apk-patcher-v1.0.9-ubuntu
-            out-name: patcher-ubuntu
+            out-name: mltd-relive-apk-patcher-ubuntu
           - os: macos-latest
             target: macOS
             cmd-install: |
@@ -76,58 +48,21 @@ jobs:
               cd tools/apk-patcher
               ../../env/bin/pyinstaller apk-patcher_macos.spec
               cd dist
-              zip -r9 mltd-relive-apk-patcher-v1.0.9-macos.zip mltd-relive-apk-patcher.app
-            package-source: tools/apk-patcher/dist/mltd-relive-apk-patcher-v1.0.9-macos.zip
-            package-name: mltd-relive-apk-patcher-v1.0.9-macos.zip
-            out-name: patcher-macos
+              zip -r9 mltd-relive-apk-patcher-macos.zip mltd-relive-apk-patcher.app
+            out-name: mltd-relive-apk-patcher-macos
     steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: main
-      - uses: actions/setup-python@v5
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Confirm source fix
-        shell: bash
-        run: |
-          grep -qx '1.0.9' tools/apk-patcher/VERSION
-          grep -q "'-jar', apksigner_jar" tools/apk-patcher/apk-patcher.pyw
-          grep -q 'validate_apksigner_verification_output' tools/apk-patcher/apk-patcher.pyw
-          python -m py_compile tools/apk-patcher/apk-patcher.pyw
       - name: Install dependencies for ${{ matrix.target }}
         run: ${{ matrix.cmd-install }}
       - name: Build with PyInstaller for ${{ matrix.target }}
         run: ${{ matrix.cmd-build }}
-      - name: Stage release file
-        shell: bash
-        env:
-          SOURCE: ${{ matrix.package-source }}
-          NAME: ${{ matrix.package-name }}
-        run: |
-          mkdir -p release-output
-          cp "$SOURCE" "release-output/$NAME"
-      - uses: actions/upload-artifact@v4
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.out-name }}
-          path: release-output/*
-          if-no-files-found: error
-
-  publish:
-    needs: build
-    name: Publish v1.0.9
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          path: artifacts
-      - name: Replace release assets
-        env:
-          GH_TOKEN: ${{ github.token }}
-          RELEASE_TAG: standalone-v0.1.3
-        shell: bash
-        run: |
-          set -euo pipefail
-          for name in $(gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name' | grep '^mltd-relive-apk-patcher-v' || true); do
-            gh release delete-asset "$RELEASE_TAG" "$name" --repo "$GITHUB_REPOSITORY" -y
-          done
-          gh release upload "$RELEASE_TAG" artifacts/patcher-windows/* artifacts/patcher-ubuntu/* artifacts/patcher-macos/* --repo "$GITHUB_REPOSITORY" --clobber
+          path: tools/apk-patcher/dist
