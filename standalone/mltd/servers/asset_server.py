@@ -182,30 +182,28 @@ class AssetHTTPRequestHandler(BaseHTTPRequestHandler):
 
         key = (language, platform, name)
         with self._download_locks_guard:
+            # Keep one lock per object for the lifetime of the bound handler.
+            # Removing an unlocked lock is racy because a waiter may already
+            # hold a reference while a third request creates a second lock.
             lock = self._download_locks.setdefault(key, threading.Lock())
-        try:
-            with lock:
-                assert self.store is not None
-                if self.store.is_complete(language, platform, name):
-                    return None
-                try:
-                    self.mirror.download(language, platform, name)
-                except requests.HTTPError as exc:
-                    response = exc.response
-                    if response is not None and response.status_code == 404:
-                        return 404
-                    logger.warning(
-                        f'Asset upstream HTTP error for {key}: {exc}'
-                    )
-                    return 502
-                except (requests.RequestException, OSError) as exc:
-                    logger.warning(f'Asset upstream error for {key}: {exc}')
-                    return 502
+        with lock:
+            assert self.store is not None
+            if self.store.is_complete(language, platform, name):
                 return None
-        finally:
-            with self._download_locks_guard:
-                if not lock.locked():
-                    self._download_locks.pop(key, None)
+            try:
+                self.mirror.download(language, platform, name)
+            except requests.HTTPError as exc:
+                response = exc.response
+                if response is not None and response.status_code == 404:
+                    return 404
+                logger.warning(
+                    f'Asset upstream HTTP error for {key}: {exc}'
+                )
+                return 502
+            except (requests.RequestException, OSError) as exc:
+                logger.warning(f'Asset upstream error for {key}: {exc}')
+                return 502
+            return None
 
     def _send_replayed_headers(self, metadata, *, include_encoding: bool):
         self.send_header(
