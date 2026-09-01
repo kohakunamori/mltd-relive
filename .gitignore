@@ -1,18 +1,38 @@
-*.pyc
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+.venv/
+venv/
+env/
+*env/
+
+# Build / packaging outputs
+build/
+dist/
 *.exe
+*.msi
+*.dmg
+*.app
+*.apk
+*.aab
+*.whl
+*.egg-info/
+
+# PyInstaller / tooling runtime files
+*.toc
+*.pkg
+tools/imgui.ini
+
+# Local workspace files
 *.code-workspace
 config.ini
 asset-cache/
 assets-*/
-*env/
 obsolete/
-prototype/build/*
-tools/imgui.ini
-standalone/build/*
-standalone/dist/*
 standalone/mltd*.db
 standalone/mltd*.log*
 standalone/mltd/locales/*.cmd
 tools/burp-viewer(hardcoded_path).pyw
-tools/apk-patcher/build/*
-tools/apk-patcher/dist/*
