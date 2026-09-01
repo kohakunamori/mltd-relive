@@ -482,12 +482,23 @@ def apksigner():
     ], 'apksigner verify')
 
     # apksigner verify above is the authoritative signature verdict for
-    # Android API 19+. Parse v2 only to compare signer identity without
-    # depending on apksigner's human-readable output.
-    final_signer_sha256 = extract_signer_sha256(
-        output_apk, verify=False
-    )
-    if final_signer_sha256 != original_signer_sha256:
+    # Android API 19+. Old Build Tools such as 29.0.3 may successfully
+    # produce a verifier-approved v1/JAR-signed APK without a v2 block.
+    # If v2 exists, compare signer identity; otherwise trust apksigner
+    # verification plus the explicitly selected bundled signing key.
+    final_signer_sha256 = None
+    try:
+        final_signer_sha256 = extract_signer_sha256(
+            output_apk, verify=False
+        )
+    except RuntimeError as exc:
+        if 'APK Signature Scheme v2 block was not found' not in str(exc):
+            raise
+
+    if (
+        final_signer_sha256 is not None
+        and final_signer_sha256 != original_signer_sha256
+    ):
         raise RuntimeError(
             'Final APK signer does not match the input APK signer.\n\n'
             f'Input signer SHA-256: {original_signer_sha256}\n'
