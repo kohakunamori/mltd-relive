@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   apply:
-    if: github.event.head_commit.message == 'ci(apk-patcher): one-shot signing fix v1.0.9'
+    if: contains(github.event.head_commit.message, 'one-shot signing fix v1.0.9') || contains(github.event.head_commit.message, 'fix v1.0.9 workflow condition')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout main
