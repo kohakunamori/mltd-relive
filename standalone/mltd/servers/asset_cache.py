@@ -43,13 +43,6 @@ def manifest_name(language: str) -> str:
 
 
 def parse_manifest_objects(data: bytes) -> list[str]:
-    """Return remote object names referenced by an MLTD asset manifest.
-
-    The original prototype established that manifest[0] maps logical asset
-    names to records whose second field is the hashed CDN object name. This
-    parser intentionally validates only the shape needed for mirroring so it
-    remains tolerant of unrelated manifest fields.
-    """
     manifest = unpackb(data, raw=False)
     if not isinstance(manifest, (list, tuple)) or not manifest:
         raise ValueError('Invalid MLTD asset manifest: missing root table')
@@ -75,13 +68,6 @@ def parse_manifest_objects(data: bytes) -> list[str]:
 
 
 class AssetStore:
-    """On-disk mirror with a small SQLite metadata index.
-
-    Object bytes are stored at exactly <root>/<language>-<platform>/<name>.
-    This mirrors the public CDN path layout rather than the old prototype's
-    internal 120000/logical-name layout.
-    """
-
     def __init__(self, root: str | os.PathLike[str] = 'asset-cache'):
         self.root = Path(root)
         self.root.mkdir(parents=True, exist_ok=True)
@@ -194,21 +180,30 @@ class AssetStore:
 
 class AssetMirror:
     def __init__(self, store: AssetStore, remote_root: str = REMOTE_ASSET_ROOT,
-                 timeout: float = 60.0):
+                 timeout: float = 60.0, upstream_proxy: str | None = None):
         self.store = store
         self.remote_root = remote_root.rstrip('/')
         self.timeout = timeout
+        self.upstream_proxy = upstream_proxy.strip() if upstream_proxy else None
         self._local = threading.local()
 
     def _session(self) -> requests.Session:
         session = getattr(self._local, 'session', None)
         if session is None:
             session = requests.Session()
-            adapter = requests.adapters.HTTPAdapter(pool_connections=4,
-                                                    pool_maxsize=4,
-                                                    max_retries=3)
+            adapter = requests.adapters.HTTPAdapter(
+                pool_connections=4,
+                pool_maxsize=4,
+                max_retries=3,
+            )
+            session.mount('http://', adapter)
             session.mount('https://', adapter)
             session.headers['User-Agent'] = 'mltd-relive-asset-mirror/1'
+            if self.upstream_proxy:
+                session.proxies.update({
+                    'http': self.upstream_proxy,
+                    'https': self.upstream_proxy,
+                })
             self._local.session = session
         return session
 
@@ -283,6 +278,16 @@ class AssetMirror:
             headers=response.headers,
         )
         return destination
+
+    def head(self, language: str, platform: str, name: str):
+        response = self._session().head(
+            self.remote_url(language, platform, name),
+            headers={'Accept-Encoding': 'identity'},
+            allow_redirects=True,
+            timeout=self.timeout,
+        )
+        response.raise_for_status()
+        return response
 
     def fetch_manifest(self, language: str, platform: str,
                        *, force: bool = False) -> tuple[Path, list[str]]:
