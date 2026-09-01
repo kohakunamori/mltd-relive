@@ -1,12 +1,16 @@
 import re
+import threading
 from email.utils import parsedate_to_datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
 
+import requests
+
 from mltd.servers.asset_cache import (
     SUPPORTED_LANGUAGES,
     SUPPORTED_PLATFORMS,
+    AssetMirror,
     AssetStore,
 )
 from mltd.servers.logging import logger
@@ -62,15 +66,19 @@ def _not_modified(headers, metadata) -> bool:
 class AssetHTTPRequestHandler(BaseHTTPRequestHandler):
     protocol_version = 'HTTP/1.1'
     store: AssetStore | None = None
+    mirror: AssetMirror | None = None
+    fetch_on_miss = False
+    _download_locks_guard = threading.Lock()
+    _download_locks = {}
 
     def do_HEAD(self):
-        self._serve(send_body=False)
+        self._serve_path(self.path, send_body=False)
 
     def do_GET(self):
-        self._serve(send_body=True)
+        self._serve_path(self.path, send_body=True)
 
-    def _serve(self, *, send_body: bool):
-        path = unquote(urlsplit(self.path).path)
+    def _serve_path(self, request_path: str, *, send_body: bool):
+        path = unquote(urlsplit(request_path).path)
         match = _PATH_RE.fullmatch(path)
         if not match:
             self.send_error(404)
@@ -86,8 +94,14 @@ class AssetHTTPRequestHandler(BaseHTTPRequestHandler):
         assert self.store is not None
         object_path = self.store.object_path(language, platform, name)
         if not object_path.is_file():
-            self.send_error(404)
-            return
+            error_status = self._fetch_missing(language, platform, name)
+            if error_status is not None:
+                self.send_error(error_status)
+                return
+            object_path = self.store.object_path(language, platform, name)
+            if not object_path.is_file():
+                self.send_error(404)
+                return
 
         metadata = self.store.get_metadata(language, platform, name) or {}
         size = object_path.stat().st_size
@@ -141,6 +155,43 @@ class AssetHTTPRequestHandler(BaseHTTPRequestHandler):
         except (BrokenPipeError, ConnectionResetError):
             pass
 
+    def _fetch_missing(self, language: str, platform: str, name: str):
+        """Fetch-through a cache miss in hybrid mode.
+
+        Return None on success, otherwise the HTTP status to send to the
+        client. Per-object locks prevent concurrent requests from sharing the
+        same .part file in AssetMirror.
+        """
+        if not self.fetch_on_miss or self.mirror is None:
+            return 404
+
+        key = (language, platform, name)
+        with self._download_locks_guard:
+            lock = self._download_locks.setdefault(key, threading.Lock())
+        try:
+            with lock:
+                assert self.store is not None
+                if self.store.is_complete(language, platform, name):
+                    return None
+                try:
+                    self.mirror.download(language, platform, name)
+                except requests.HTTPError as exc:
+                    response = exc.response
+                    if response is not None and response.status_code == 404:
+                        return 404
+                    logger.warning(
+                        f'Asset upstream HTTP error for {key}: {exc}'
+                    )
+                    return 502
+                except (requests.RequestException, OSError) as exc:
+                    logger.warning(f'Asset upstream error for {key}: {exc}')
+                    return 502
+                return None
+        finally:
+            with self._download_locks_guard:
+                if not lock.locked():
+                    self._download_locks.pop(key, None)
+
     def _send_replayed_headers(self, metadata, *, include_encoding: bool):
         self.send_header(
             'Content-Type', metadata.get('content_type') or 'application/octet-stream'
@@ -160,25 +211,57 @@ class AssetHTTPRequestHandler(BaseHTTPRequestHandler):
         logger.debug('Asset server: ' + format, *args)
 
 
+def bind_asset_handler(handler_class, store: AssetStore,
+                       mirror: AssetMirror | None = None,
+                       fetch_on_miss: bool = False):
+    handler_class.store = store
+    handler_class.mirror = mirror
+    handler_class.fetch_on_miss = fetch_on_miss
+    handler_class._download_locks_guard = threading.Lock()
+    handler_class._download_locks = {}
+    return handler_class
+
+
 def create_server(host: str = '', port: int = asset_port,
-                  store: AssetStore | None = None):
+                  store: AssetStore | None = None,
+                  mirror: AssetMirror | None = None,
+                  fetch_on_miss: bool = False):
     if store is None:
         store = AssetStore()
+    if fetch_on_miss and mirror is None:
+        mirror = AssetMirror(store)
 
     class BoundAssetHTTPRequestHandler(AssetHTTPRequestHandler):
         pass
 
-    BoundAssetHTTPRequestHandler.store = store
+    bind_asset_handler(BoundAssetHTTPRequestHandler, store, mirror, fetch_on_miss)
     server = ThreadingHTTPServer((host, port), BoundAssetHTTPRequestHandler)
     server.daemon_threads = True
     return server
 
 
-def start(port: int = asset_port, conn=None, root: str = 'asset-cache'):
+def start(port: int = asset_port, conn=None, root: str | None = None,
+          fetch_on_miss: bool | None = None):
+    from mltd.servers.config import config
+
+    if root is None:
+        root = config.asset_cache_root
+    if fetch_on_miss is None:
+        fetch_on_miss = config.asset_mode == 'hybrid'
     store = AssetStore(root)
-    httpd = create_server(port=port, store=store)
+    mirror = AssetMirror(store) if fetch_on_miss else None
+    httpd = create_server(
+        port=port,
+        store=store,
+        mirror=mirror,
+        fetch_on_miss=fetch_on_miss,
+    )
     logger.info(f'Asset mirror HTTP server is running on port {port}...')
     logger.info(f'Asset mirror root: {Path(root).resolve()}')
+    logger.info(
+        'Asset cache misses: '
+        + ('fetch from remote' if fetch_on_miss else 'return 404')
+    )
     if conn:
         conn.send(True)
         conn.close()
