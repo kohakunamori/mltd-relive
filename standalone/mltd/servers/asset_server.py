@@ -1,9 +1,11 @@
 import re
 import socket
+import ssl
 import threading
 from email.utils import parsedate_to_datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from typing import NamedTuple
 from urllib.parse import unquote, urlsplit
 
 import requests
@@ -19,6 +21,15 @@ from mltd.servers.logging import logger
 asset_port = 7651
 _PATH_RE = re.compile(r'^/([a-z]{2})-(android|ios)/([^/]+)$')
 _RANGE_RE = re.compile(r'^bytes=(\d*)-(\d*)$')
+_STREAM_BUFFER_SIZE = 1024 * 1024
+_SOCKET_TIMEOUT = 60
+_REQUEST_QUEUE_SIZE = 512
+
+
+class _ServingEntry(NamedTuple):
+    path: Path
+    size: int
+    metadata: dict
 
 
 def _parse_range(value: str, size: int):
@@ -64,14 +75,63 @@ def _not_modified(headers, metadata) -> bool:
     return False
 
 
+def _load_serving_index(store: AssetStore) -> dict:
+    """Load all request-time metadata in one SQLite read at server startup.
+
+    A complete local mirror is immutable while the server is running.  Keeping
+    the small response metadata in memory removes one SQLite connection/query
+    and two filesystem stat calls from every GET/HEAD request.  Hybrid cache
+    misses update this index incrementally after the object is downloaded.
+    """
+    conn = store._connect()
+    try:
+        rows = conn.execute('''
+            SELECT scope, name, size, content_type, etag, last_modified,
+                   cache_control, content_encoding
+              FROM object_metadata
+        ''').fetchall()
+    finally:
+        conn.close()
+
+    index = {}
+    for (scope, name, size, content_type, etag, last_modified,
+         cache_control, content_encoding) in rows:
+        if '-' not in scope:
+            continue
+        language, platform = scope.split('-', 1)
+        if (language not in SUPPORTED_LANGUAGES
+                or platform not in SUPPORTED_PLATFORMS):
+            continue
+        metadata = {
+            'content_type': content_type,
+            'etag': etag,
+            'last_modified': last_modified,
+            'cache_control': cache_control,
+            'content_encoding': content_encoding,
+        }
+        index[(language, platform, name)] = _ServingEntry(
+            store.root / scope / name,
+            int(size),
+            metadata,
+        )
+    return index
+
+
+def _tune_client_socket(request):
+    request.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+    request.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+    request.settimeout(_SOCKET_TIMEOUT)
+
+
 class ThreadedAssetServer(ThreadingHTTPServer):
     daemon_threads = True
+    block_on_close = False
     allow_reuse_address = True
-    request_queue_size = 64
+    request_queue_size = _REQUEST_QUEUE_SIZE
 
     def get_request(self):
         request, client_address = super().get_request()
-        request.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+        _tune_client_socket(request)
         return request, client_address
 
 
@@ -82,6 +142,8 @@ class AssetHTTPRequestHandler(BaseHTTPRequestHandler):
     fetch_on_miss = False
     _download_locks_guard = threading.Lock()
     _download_locks = {}
+    _serving_index_lock = threading.Lock()
+    _serving_index = {}
 
     def do_HEAD(self):
         if self._is_origin_form():
@@ -98,6 +160,44 @@ class AssetHTTPRequestHandler(BaseHTTPRequestHandler):
             return False
         return True
 
+    def _lookup_entry(self, language: str, platform: str, name: str):
+        return type(self)._serving_index.get((language, platform, name))
+
+    def _refresh_entry(self, language: str, platform: str, name: str):
+        assert self.store is not None
+        metadata = self.store.get_metadata(language, platform, name)
+        if metadata is None:
+            return None
+        entry = _ServingEntry(
+            self.store.object_path(language, platform, name),
+            int(metadata['size']),
+            {
+                'content_type': metadata.get('content_type'),
+                'etag': metadata.get('etag'),
+                'last_modified': metadata.get('last_modified'),
+                'cache_control': metadata.get('cache_control'),
+                'content_encoding': metadata.get('content_encoding'),
+            },
+        )
+        key = (language, platform, name)
+        with type(self)._serving_index_lock:
+            type(self)._serving_index[key] = entry
+        return entry
+
+    def _invalidate_entry(self, language: str, platform: str, name: str):
+        key = (language, platform, name)
+        with type(self)._serving_index_lock:
+            type(self)._serving_index.pop(key, None)
+
+    def _resolve_entry(self, language: str, platform: str, name: str):
+        entry = self._lookup_entry(language, platform, name)
+        if entry is not None:
+            return entry
+        error_status = self._fetch_missing(language, platform, name)
+        if error_status is not None:
+            return error_status
+        return self._refresh_entry(language, platform, name) or 404
+
     def _serve_path(self, request_path: str, *, send_body: bool):
         path = unquote(urlsplit(request_path).path)
         match = _PATH_RE.fullmatch(path)
@@ -112,20 +212,13 @@ class AssetHTTPRequestHandler(BaseHTTPRequestHandler):
             self.send_error(404)
             return
 
-        assert self.store is not None
-        object_path = self.store.object_path(language, platform, name)
-        if not object_path.is_file():
-            error_status = self._fetch_missing(language, platform, name)
-            if error_status is not None:
-                self.send_error(error_status)
-                return
-            object_path = self.store.object_path(language, platform, name)
-            if not object_path.is_file():
-                self.send_error(404)
-                return
+        entry = self._resolve_entry(language, platform, name)
+        if isinstance(entry, int):
+            self.send_error(entry)
+            return
 
-        metadata = self.store.get_metadata(language, platform, name) or {}
-        size = object_path.stat().st_size
+        metadata = entry.metadata
+        size = entry.size
 
         if _not_modified(self.headers, metadata):
             self.send_response(304)
@@ -149,32 +242,89 @@ class AssetHTTPRequestHandler(BaseHTTPRequestHandler):
         if byte_range:
             start, end = byte_range
             content_length = end - start + 1
-            self.send_response(206)
-            self.send_header('Content-Range', f'bytes {start}-{end}/{size}')
         else:
             start, end = 0, size - 1
             content_length = size
-            self.send_response(200)
 
-        self._send_replayed_headers(metadata, include_encoding=True)
-        self.send_header('Accept-Ranges', 'bytes')
-        self.send_header('Content-Length', str(content_length))
-        self.end_headers()
+        file = None
+        if send_body and content_length:
+            try:
+                file = entry.path.open('rb')
+            except OSError:
+                # External cache mutation is not part of the normal local hot
+                # path.  In hybrid mode recover before sending headers; strict
+                # local returns 404 and the next preparation pass repairs it.
+                self._invalidate_entry(language, platform, name)
+                error_status = self._fetch_missing(language, platform, name)
+                if error_status is not None:
+                    self.send_error(error_status)
+                    return
+                entry = self._refresh_entry(language, platform, name)
+                if entry is None:
+                    self.send_error(404)
+                    return
+                metadata = entry.metadata
+                size = entry.size
+                if byte_range:
+                    parsed_range = _parse_range(range_header, size)
+                    if not isinstance(parsed_range, tuple):
+                        self.send_response(416)
+                        self.send_header('Content-Range', f'bytes */{size}')
+                        self.send_header('Content-Length', '0')
+                        self.end_headers()
+                        return
+                    start, end = parsed_range
+                    content_length = end - start + 1
+                else:
+                    start, end = 0, size - 1
+                    content_length = size
+                try:
+                    file = entry.path.open('rb')
+                except OSError:
+                    self.send_error(404)
+                    return
 
-        if not send_body or content_length == 0:
-            return
         try:
-            with object_path.open('rb') as file:
-                file.seek(start)
-                remaining = content_length
-                while remaining:
-                    chunk = file.read(min(1024 * 1024, remaining))
-                    if not chunk:
-                        break
-                    self.wfile.write(chunk)
-                    remaining -= len(chunk)
-        except (BrokenPipeError, ConnectionResetError):
+            if byte_range:
+                self.send_response(206)
+                self.send_header('Content-Range', f'bytes {start}-{end}/{size}')
+            else:
+                self.send_response(200)
+
+            self._send_replayed_headers(metadata, include_encoding=True)
+            self.send_header('Accept-Ranges', 'bytes')
+            self.send_header('Content-Length', str(content_length))
+            self.end_headers()
+
+            if file is not None:
+                self._transfer_file(file, start, content_length)
+        except (BrokenPipeError, ConnectionResetError, TimeoutError):
             pass
+        finally:
+            if file is not None:
+                file.close()
+
+    def _transfer_file(self, file, start: int, content_length: int):
+        """Use kernel sendfile on plaintext sockets, reusable buffers on TLS."""
+        connection = self.connection
+        if not isinstance(connection, ssl.SSLSocket) and hasattr(connection, 'sendfile'):
+            try:
+                connection.sendfile(file, offset=start, count=content_length)
+                return
+            except (OSError, ValueError):
+                pass
+
+        file.seek(start)
+        remaining = content_length
+        buffer = bytearray(min(_STREAM_BUFFER_SIZE, max(1, remaining)))
+        view = memoryview(buffer)
+        while remaining:
+            size = min(len(buffer), remaining)
+            read = file.readinto(view[:size])
+            if not read:
+                break
+            self.wfile.write(view[:read])
+            remaining -= read
 
     def _fetch_missing(self, language: str, platform: str, name: str):
         if not self.fetch_on_miss or self.mirror is None:
@@ -232,6 +382,12 @@ def bind_asset_handler(handler_class, store: AssetStore,
     handler_class.fetch_on_miss = fetch_on_miss
     handler_class._download_locks_guard = threading.Lock()
     handler_class._download_locks = {}
+    handler_class._serving_index_lock = threading.Lock()
+    handler_class._serving_index = _load_serving_index(store)
+    logger.info(
+        f'Asset serving index: {len(handler_class._serving_index)} objects '
+        '(request hot path does not query SQLite)'
+    )
     return handler_class
 
 
