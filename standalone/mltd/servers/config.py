@@ -2,7 +2,7 @@ import logging
 from configparser import ConfigParser
 from datetime import timedelta, timezone
 
-version = '0.1.3'
+version = '0.1.4'
 api_port = 7650
 # 'zh' for Traditional Chinese, 'ko' for Korean
 _language = 'zh'
@@ -11,6 +11,7 @@ _is_local = False
 _asset_mode = 'remote'
 _asset_cache_root = 'asset-cache'
 _asset_prefetch_workers = 8
+_asset_upstream_proxy = ''
 
 ASSET_MODES = ('remote', 'hybrid', 'local')
 
@@ -32,6 +33,7 @@ class CustomConfigParser(ConfigParser):
                 'asset_mode': _asset_mode,
                 'asset_cache_root': _asset_cache_root,
                 'asset_prefetch_workers': _asset_prefetch_workers,
+                'asset_upstream_proxy': _asset_upstream_proxy,
             }
         })
         if not self.read('config.ini'):
@@ -98,6 +100,18 @@ class CustomConfigParser(ConfigParser):
     @asset_prefetch_workers.setter
     def asset_prefetch_workers(self, value):
         self['default']['asset_prefetch_workers'] = str(max(1, int(value)))
+        self.write_config()
+
+    @property
+    def asset_upstream_proxy(self):
+        value = self['default'].get(
+            'asset_upstream_proxy', _asset_upstream_proxy
+        ).strip()
+        return value or None
+
+    @asset_upstream_proxy.setter
+    def asset_upstream_proxy(self, value):
+        self['default']['asset_upstream_proxy'] = (value or '').strip()
         self.write_config()
 
     def write_config(self):
