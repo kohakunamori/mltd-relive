@@ -20,6 +20,11 @@ class ThreadingWSGIServer(ThreadingMixIn, WSGIServer):
     allow_reuse_address = True
     request_queue_size = 64
 
+    def get_request(self):
+        request, client_address = super().get_request()
+        request.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+        return request, client_address
+
 
 class SilentWSGIRequestHandler(WSGIRequestHandler):
     protocol_version = 'HTTP/1.1'
