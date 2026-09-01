@@ -304,7 +304,10 @@ class MLTDReliveGUI:
             self.asset_progress_label.configure(
                 text='Asset status: starting strict local preparation...')
             self.asset_progress_details.configure(
-                text=f'Preparing {platform_count} platform(s).')
+                text=(
+                    f'Preparing {platform_count} platform(s) with '
+                    f'{config.asset_prefetch_workers} workers.'
+                ))
             return
 
         if phase == 'manifest':
@@ -342,7 +345,8 @@ class MLTDReliveGUI:
                     f'Cached {cached:,}  •  Downloaded {downloaded:,}  •  '
                     f'Failed {failed:,}  •  '
                     f'{self._format_rate(status.get("rate_bps", 0))}  •  '
-                    f'Prefetch {completed:,}/{pending_total:,}'
+                    f'Prefetch {completed:,}/{pending_total:,}  •  '
+                    f'Workers {config.asset_prefetch_workers}'
                 )
             )
             return
@@ -416,30 +420,37 @@ class MLTDReliveGUI:
                 ASSET_PROGRESS_POLL_MS, self.update_asset_progress)
 
     def update_server_status(self):
-        if self.proxy_process.is_alive() or self.dns_process.is_alive():
-            if self.proxy_process.exception:
-                self.stop_server_on_error(self.proxy_process.exception)
-                return
-            elif self.dns_process.exception:
-                self.stop_server_on_error(self.dns_process.exception)
-                return
-            if (self.server_status == 'Starting'
-                    and self.proxy_process.is_ready()
-                    and self.dns_process.is_ready()):
-                self.server_status = 'Started'
-                self.status_label.config(
-                    text=f'Server Status: {self.server_status}',
-                    foreground='green')
-                self.start_server_button.grid_forget()
-                self.stop_server_button.grid(column=1, row=0)
-                self.stop_server_button.configure(state=NORMAL)
-                self.progress_bar.stop()
-                self.progress_bar.grid_forget()
-                logger.info('Server started.')
+        proxy_alive = getattr(self, 'proxy_process', None) is not None \
+            and self.proxy_process.is_alive()
+        dns_alive = getattr(self, 'dns_process', None) is not None \
+            and self.dns_process.is_alive()
+
+        if proxy_alive or dns_alive:
+            if self.server_status != 'Stopping':
+                if self.proxy_process.exception:
+                    self.stop_server_on_error(self.proxy_process.exception)
+                    return
+                elif self.dns_process.exception:
+                    self.stop_server_on_error(self.dns_process.exception)
+                    return
+                if (self.server_status == 'Starting'
+                        and self.proxy_process.is_ready()
+                        and self.dns_process.is_ready()):
+                    self.server_status = 'Started'
+                    self.status_label.config(
+                        text=f'Server Status: {self.server_status}',
+                        foreground='green')
+                    self.stop_server_button.configure(state=NORMAL)
+                    self.progress_bar.stop()
+                    self.progress_bar.grid_forget()
+                    logger.info('Server started.')
             self.root.after(200, self.update_server_status)
             return
-        self.proxy_process.join()
-        self.dns_process.join()
+
+        if getattr(self, 'proxy_process', None) is not None:
+            self.proxy_process.join()
+        if getattr(self, 'dns_process', None) is not None:
+            self.dns_process.join()
         if self.server_status == 'Stopping':
             self.server_status = 'Stopped'
             self.status_label.config(
@@ -452,6 +463,13 @@ class MLTDReliveGUI:
             self.zh_radio_button.config(state=NORMAL)
             self.ko_radio_button.config(state=NORMAL)
             self.asset_mode_combobox.config(state='readonly')
+            self.progress_bar.stop()
+            self.progress_bar.grid_forget()
+            if config.asset_mode == 'local':
+                self.asset_progress_label.configure(
+                    text='Asset status: preparation stopped', foreground='red')
+                self.asset_progress_details.configure(
+                    text='Local asset preparation was interrupted by Stop Server.')
             logger.info('Server stopped.')
 
     def start_server(self):
@@ -474,15 +492,27 @@ class MLTDReliveGUI:
             except OSError as exc:
                 logger.debug(f'Unable to clear old asset progress status: {exc}')
             self._reset_asset_progress(preparing=True)
+            platforms = ','.join(config.asset_local_platforms)
             logger.info(
-                'Strict local mode pre-downloads all Android and iOS assets '
-                'before the server becomes ready.'
+                f'Strict local prefetch: language={config.language}, '
+                f'platforms={platforms}, workers={config.asset_prefetch_workers}. '
+                'Stop Server may interrupt preparation safely.'
             )
+            self.asset_progress_details.configure(
+                text=(
+                    f'Preparing {config.language}-'
+                    f'{"/".join(config.asset_local_platforms)} with '
+                    f'{config.asset_prefetch_workers} workers. '
+                    'Stop Server can interrupt this operation.'
+                ))
         else:
             self._reset_asset_progress(preparing=False)
             self.asset_progress_details.configure(
                 text=f'Asset mode {config.asset_mode}: full prefetch is disabled.')
         self.start_server_button.config(state=DISABLED)
+        self.start_server_button.grid_forget()
+        self.stop_server_button.grid(column=1, row=0)
+        self.stop_server_button.configure(state=NORMAL)
         self.reset_button.config(state=DISABLED)
         self.zh_radio_button.config(state=DISABLED)
         self.ko_radio_button.config(state=DISABLED)
@@ -496,13 +526,26 @@ class MLTDReliveGUI:
         self.root.after(200, self.update_server_status)
 
     def stop_server(self):
+        if self.server_status == 'Stopping':
+            return
+        was_preparing = (
+            self.server_status == 'Starting' and config.asset_mode == 'local'
+        )
         self.server_status = 'Stopping'
-        self.status_label.config(text='Stopping Server...',
-                                 foreground='black')
-        logger.info('Stopping server...')
+        self.status_label.config(
+            text=('Stopping Asset Preparation...'
+                  if was_preparing else 'Stopping Server...'),
+            foreground='black')
+        logger.info(
+            'Stopping local asset preparation...'
+            if was_preparing else 'Stopping server...'
+        )
+        self.stop_server_button.config(state=DISABLED)
         self.start_server_button.config(state=DISABLED)
-        self.proxy_process.terminate()
-        self.dns_process.terminate()
+        for process_name in ('proxy_process', 'dns_process'):
+            process = getattr(self, process_name, None)
+            if process is not None and process.is_alive():
+                process.terminate()
         self.root.after(200, self.update_server_status)
 
     def stop_server_on_error(self, message):
