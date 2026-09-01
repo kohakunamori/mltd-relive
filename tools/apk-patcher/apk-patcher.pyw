@@ -141,18 +141,51 @@ def extract_signer_sha256(apk_filename):
         '--verbose',
         '--print-certs',
         apk_filename
-    ], 'apksigner input verification')
+    ], 'apksigner certificate verification')
 
-    match = re.search(
-        r'certificate SHA-256 digest:\s*([0-9a-fA-F:]+)',
-        result.stdout or '',
-        flags=re.IGNORECASE
-    )
-    if not match:
-        raise RuntimeError(
-            'Could not read the signing certificate SHA-256 digest from the input APK.'
+    output = result.stdout or ''
+
+    # apksigner has used slightly different labels across Android Build Tools
+    # releases. Parse line-by-line first so punctuation/label wording does not
+    # become a compatibility requirement.
+    for line in output.splitlines():
+        normalized_label = (
+            line.lower()
+            .replace('–', '-')
+            .replace('—', '-')
+            .replace('−', '-')
         )
-    return match.group(1).replace(':', '').lower()
+        if 'sha' not in normalized_label or '256' not in normalized_label:
+            continue
+
+        if ':' in line:
+            candidate = line.split(':', 1)[1]
+        elif '=' in line:
+            candidate = line.split('=', 1)[1]
+        else:
+            candidate = line
+
+        digest = re.sub(r'[^0-9a-fA-F]', '', candidate)
+        if len(digest) >= 64:
+            return digest[:64].lower()
+
+    # Fallback for versions whose label changed completely: a SHA-256 digest
+    # is the only 32-byte hexadecimal value printed by --print-certs.
+    hex64 = re.search(
+        r'(?<![0-9a-fA-F])(?:[0-9a-fA-F]{2}[:\s-]?){31}[0-9a-fA-F]{2}(?![0-9a-fA-F])',
+        output
+    )
+    if hex64:
+        return re.sub(r'[^0-9a-fA-F]', '', hex64.group(0)).lower()
+
+    diagnostic = output.strip()
+    if len(diagnostic) > 5000:
+        diagnostic = diagnostic[-5000:]
+    raise RuntimeError(
+        'apksigner verified the APK, but the patcher could not parse the '
+        'certificate SHA-256 digest from this Build Tools version.\n\n'
+        'Raw apksigner output:\n' + (diagnostic or '<no output>')
+    )
 
 
 def payload_snapshot(apk_filename):
