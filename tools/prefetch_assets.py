@@ -23,12 +23,12 @@ def main():
     parser.add_argument(
         'platform',
         choices=('android', 'ios', 'all'),
-        help='use "all" to prepare strict local mode for Android and iOS',
+        help='use "all" only when an Android+iOS mirror is explicitly needed',
     )
     parser.add_argument('--root', default='asset-cache',
                         help='local asset cache directory (default: asset-cache)')
-    parser.add_argument('--workers', type=int, default=24,
-                        help='parallel asset downloads (default: 24)')
+    parser.add_argument('--workers', type=int, default=48,
+                        help='parallel asset downloads (default: 48)')
     parser.add_argument(
         '--proxy',
         help='HTTP proxy used only for outbound asset CDN requests, e.g. '
@@ -47,6 +47,7 @@ def main():
         result = prepare_local_assets(
             args.language,
             args.root,
+            platforms=('android', 'ios'),
             workers=args.workers,
             verify_existing=args.verify_existing,
             upstream_proxy=args.proxy,
@@ -68,6 +69,7 @@ def main():
         force=args.force,
         verify_existing=args.verify_existing,
         progress=progress,
+        durable_writes=False,
     )
     print('\nSummary:')
     for key in ('manifest', 'total_manifest_objects', 'requested',
