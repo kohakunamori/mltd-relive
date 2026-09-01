@@ -47,6 +47,12 @@ def _upstream_session():
     return session
 
 
+class ThreadedProxyServer(ThreadingHTTPServer):
+    daemon_threads = True
+    allow_reuse_address = True
+    request_queue_size = 64
+
+
 class ProxyHTTPRequestHandler(AssetHTTPRequestHandler):
     protocol_version = 'HTTP/1.1'
     api_application = None
@@ -79,8 +85,8 @@ class ProxyHTTPRequestHandler(AssetHTTPRequestHandler):
         if self.api_application is not None:
             self._dispatch_wsgi(req_body)
         else:
-            # Compatibility path used by isolated tests and by callers that
-            # explicitly instantiate the handler without proxy.start().
+            # Compatibility path used by isolated tests and callers that
+            # instantiate the handler without proxy.start().
             self._forward_to_local_api(req_body)
 
     def _dispatch_wsgi(self, req_body: bytes):
@@ -108,8 +114,6 @@ class ProxyHTTPRequestHandler(AssetHTTPRequestHandler):
             if normalized == 'CONTENT_TYPE':
                 environ['CONTENT_TYPE'] = value
             elif normalized == 'CONTENT_LENGTH':
-                # The byte length above is authoritative after reading the
-                # request body from BaseHTTPRequestHandler.
                 continue
             else:
                 environ[f'HTTP_{normalized}'] = value
@@ -196,7 +200,6 @@ class ProxyHTTPRequestHandler(AssetHTTPRequestHandler):
             pass
 
     def log_message(self, format, *args):
-        # Disable stderr output
         pass
 
 
@@ -212,6 +215,14 @@ def start(port=proxy_port, conn=None):
 
     ProxyHTTPRequestHandler.api_application = application
 
+    if config.asset_mode == 'local':
+        from mltd.servers.asset_prepare import prepare_local_assets
+        prepare_local_assets(
+            config.language,
+            config.asset_cache_root,
+            workers=config.asset_prefetch_workers,
+        )
+
     store = AssetStore(config.asset_cache_root)
     fetch_on_miss = config.asset_mode == 'hybrid'
     mirror = AssetMirror(store) if fetch_on_miss else None
@@ -220,18 +231,18 @@ def start(port=proxy_port, conn=None):
         store,
         mirror=mirror,
         fetch_on_miss=fetch_on_miss,
+        allow_connect_proxy=fetch_on_miss,
     )
 
     server_address = ('', port)
-    httpd = ThreadingHTTPServer(server_address, ProxyHTTPRequestHandler)
-    httpd.daemon_threads = True
+    httpd = ThreadedProxyServer(server_address, ProxyHTTPRequestHandler)
     certfile = path.join(key_path(), 'api.crt')
     keyfile = path.join(key_path(), 'api.key')
     context = SSLContext(PROTOCOL_TLS_SERVER)
     context.load_cert_chain(certfile, keyfile)
     httpd.socket = context.wrap_socket(httpd.socket, server_side=True)
 
-    logger.info(f'Reverse proxy is running on port {port}...')
+    logger.info(f'TLS API server is running on port {port}...')
     logger.info('API dispatch: direct WSGI (no localhost HTTP hop)')
     logger.info(f'Asset mode: {config.asset_mode}')
     if conn:
