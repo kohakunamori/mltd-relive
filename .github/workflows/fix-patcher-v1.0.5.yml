@@ -172,7 +172,7 @@ jobs:
 
           text, count = re.subn(
               r'def extract_signer_sha256\(apk_filename\):\n.*?\n\ndef payload_snapshot',
-              new_signer_parser + '\n\ndef payload_snapshot',
+              lambda _: new_signer_parser + '\n\ndef payload_snapshot',
               text,
               count=1,
               flags=re.DOTALL,
@@ -219,7 +219,7 @@ jobs:
 
               validate_payload_changes(output_apk)'''
 
-          text, count = old_verify_pattern.subn(new_verify, text, count=1)
+          text, count = old_verify_pattern.subn(lambda _: new_verify, text, count=1)
           if count != 1:
               raise SystemExit(f'expected one apksigner verification block, replaced {count}')
 
