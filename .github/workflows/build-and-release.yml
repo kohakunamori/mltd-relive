@@ -32,10 +32,9 @@ jobs:
             cmd-build: |
               cd standalone
               ..\env\Scripts\pyinstaller gui_windows.spec
-              cd dist
-              ren mltd-relive-standalone.exe mltd-relive-${{ env.RELEASE_TAG }}-windows.exe
+            package-source: standalone/dist/mltd-relive-standalone.exe
+            package-suffix: windows.exe
             out-name: windows
-            out-path: standalone/dist/mltd-relive-${{ env.RELEASE_TAG }}-windows.exe
           - os: ubuntu-latest
             target: Ubuntu
             cmd-install: |
@@ -46,10 +45,9 @@ jobs:
             cmd-build: |
               cd standalone
               ../env/bin/pyinstaller gui_ubuntu.spec
-              cd dist
-              mv mltd-relive-standalone mltd-relive-${{ env.RELEASE_TAG }}-ubuntu
+            package-source: standalone/dist/mltd-relive-standalone
+            package-suffix: ubuntu
             out-name: ubuntu
-            out-path: standalone/dist/mltd-relive-${{ env.RELEASE_TAG }}-ubuntu
           - os: macos-latest
             target: macOS
             cmd-install: |
@@ -60,10 +58,9 @@ jobs:
             cmd-build: |
               cd standalone
               ../env/bin/pyinstaller gui_macos.spec
-              cd dist
-              zip -r9 mltd-relive-${{ env.RELEASE_TAG }}-macos.zip mltd-relive-standalone.app
+            package-source: standalone/dist/mltd-relive-standalone.app
+            package-suffix: macos.zip
             out-name: macos
-            out-path: standalone/dist/mltd-relive-${{ env.RELEASE_TAG }}-macos.zip
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -79,11 +76,28 @@ jobs:
       - name: Build with PyInstaller for ${{ matrix.target }}
         run: ${{ matrix.cmd-build }}
 
+      - name: Package release file
+        shell: bash
+        env:
+          PACKAGE_SOURCE: ${{ matrix.package-source }}
+          PACKAGE_SUFFIX: ${{ matrix.package-suffix }}
+        run: |
+          set -euo pipefail
+          mkdir -p standalone/dist/release-output
+          if [[ "$PACKAGE_SOURCE" == *.app ]]; then
+            (
+              cd standalone/dist
+              zip -r9 "release-output/mltd-relive-${RELEASE_TAG}-${PACKAGE_SUFFIX}" "$(basename "$PACKAGE_SOURCE")"
+            )
+          else
+            cp "$PACKAGE_SOURCE" "standalone/dist/release-output/mltd-relive-${RELEASE_TAG}-${PACKAGE_SUFFIX}"
+          fi
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.out-name }}
-          path: ${{ matrix.out-path }}
+          path: standalone/dist/release-output/*
           if-no-files-found: error
 
   gameclient:
