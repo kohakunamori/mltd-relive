@@ -245,22 +245,6 @@ def _extract_v2_signer_certificate_sha256(apk_filename):
     return hashlib.sha256(certificate).hexdigest()
 
 
-def _has_v1_signature(apk_filename):
-    with zipfile.ZipFile(apk_filename, 'r') as apk:
-        names = [name.upper() for name in apk.namelist()]
-
-    has_sf = any(
-        name.startswith('META-INF/') and name.endswith('.SF')
-        for name in names
-    )
-    has_signature_block = any(
-        name.startswith('META-INF/')
-        and name.endswith(('.RSA', '.DSA', '.EC'))
-        for name in names
-    )
-    return has_sf and has_signature_block
-
-
 def extract_signer_sha256(apk_filename, verify=True):
     if verify:
         # Some old Build Tools versions (notably 29.0.3 on Windows)
@@ -497,13 +481,9 @@ def apksigner():
         output_apk
     ], 'apksigner verify')
 
-    if not _has_v1_signature(output_apk):
-        raise RuntimeError(
-            'Final APK does not contain a v1/JAR signature.'
-        )
-
-    # Parsing this block proves that the APK has a structurally valid v2
-    # signer record without depending on apksigner's human-readable output.
+    # apksigner verify above is the authoritative signature verdict for
+    # Android API 19+. Parse v2 only to compare signer identity without
+    # depending on apksigner's human-readable output.
     final_signer_sha256 = extract_signer_sha256(
         output_apk, verify=False
     )
