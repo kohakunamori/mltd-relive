@@ -6,6 +6,7 @@ import types
 import unittest
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from unittest.mock import patch
 
 from msgpack import packb
 
@@ -33,6 +34,7 @@ from mltd.servers.asset_cache import (  # noqa: E402
     manifest_name,
 )
 from mltd.servers.asset_prepare import prepare_local_assets  # noqa: E402
+from mltd.servers.config import config  # noqa: E402
 
 
 class CountingStore(AssetStore):
@@ -139,7 +141,6 @@ class AssetPrefetchFastPathTest(unittest.TestCase):
                 )
                 self.assertEqual(result['downloaded'], 130)
                 self.assertEqual(ManyObjectsHandler.requests, 130)
-                # One cache snapshot plus ceil(130 / 64) metadata commits.
                 self.assertEqual(store.connect_count, 4)
                 self.assertEqual(
                     len(store.complete_names('zh', 'android', names)),
@@ -150,7 +151,63 @@ class AssetPrefetchFastPathTest(unittest.TestCase):
             server.server_close()
             thread.join(timeout=2)
 
-    def test_prepare_fetches_each_manifest_once(self):
+    def test_bulk_prefetch_skips_per_object_fsync_by_default(self):
+        ManyObjectsHandler.requests = 0
+        server = ThreadingHTTPServer(('127.0.0.1', 0), ManyObjectsHandler)
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        try:
+            with tempfile.TemporaryDirectory() as temp:
+                mirror = AssetMirror(
+                    AssetStore(temp),
+                    remote_root=f'http://127.0.0.1:{server.server_address[1]}',
+                )
+                with patch('mltd.servers.asset_cache.os.fsync') as fsync:
+                    result = mirror.prefetch(
+                        'zh',
+                        'android',
+                        workers=4,
+                        manifest_objects=['a.bin', 'b.bin'],
+                    )
+                self.assertEqual(result['downloaded'], 2)
+                fsync.assert_not_called()
+        finally:
+            server.shutdown()
+            server.server_close()
+            thread.join(timeout=2)
+
+    def test_prepare_uses_configured_android_only_default(self):
+        ManifestHandler.counts = {}
+        server = ThreadingHTTPServer(('127.0.0.1', 0), ManifestHandler)
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        old_value = config['default'].get('asset_local_platforms', 'android')
+        config['default']['asset_local_platforms'] = 'android'
+        try:
+            with tempfile.TemporaryDirectory() as temp:
+                remote = f'http://127.0.0.1:{server.server_address[1]}'
+                result = prepare_local_assets(
+                    'zh',
+                    temp,
+                    workers=8,
+                    remote_root=remote,
+                )
+                self.assertEqual(tuple(result), ('android',))
+                self.assertEqual(result['android']['complete'], 2)
+                manifest = manifest_name('zh')
+                self.assertEqual(
+                    ManifestHandler.counts[f'/zh-android/{manifest}'], 1
+                )
+                self.assertFalse(any(
+                    path.startswith('/zh-ios/')
+                    for path in ManifestHandler.counts
+                ))
+        finally:
+            config['default']['asset_local_platforms'] = old_value
+            server.shutdown()
+            server.server_close()
+            thread.join(timeout=2)
+
+    def test_prepare_fetches_each_manifest_once_when_all_explicit(self):
         ManifestHandler.counts = {}
         server = ThreadingHTTPServer(('127.0.0.1', 0), ManifestHandler)
         thread = threading.Thread(target=server.serve_forever, daemon=True)
