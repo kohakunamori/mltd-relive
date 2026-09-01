@@ -158,7 +158,7 @@ def _extract_apk_v2_block(apk_filename):
         apk_file.seek(file_size - tail_size)
         tail = apk_file.read(tail_size)
 
-        eocd_offset = tail.rfind(b'PK\x05\x06')
+        eocd_offset = tail.rfind(bytes((0x50, 0x4B, 0x05, 0x06)))
         if eocd_offset < 0:
             raise RuntimeError('APK ZIP End of Central Directory was not found.')
 
