@@ -1,16 +1,26 @@
-name: Test asset mirror
+name: Test local asset and server transport
 
 on:
   push:
     branches:
       - perf/asset-mirror
+      - perf/local-assets-and-server
   pull_request:
     paths:
+      - 'standalone/console.py'
+      - 'standalone/gui.pyw'
+      - 'standalone/mltd/models/engine.py'
+      - 'standalone/mltd/services/asset.py'
+      - 'standalone/mltd/servers/api_server.py'
       - 'standalone/mltd/servers/asset_cache.py'
       - 'standalone/mltd/servers/asset_server.py'
+      - 'standalone/mltd/servers/config.py'
+      - 'standalone/mltd/servers/handler.py'
+      - 'standalone/mltd/servers/proxy.py'
       - 'tools/prefetch_assets.py'
       - 'tools/verify_asset_mirror.py'
       - 'tests/test_asset_mirror.py'
+      - 'tests/test_local_asset_runtime.py'
       - 'tests/remote_asset_compat.py'
       - '.github/workflows/test-asset-mirror.yml'
 
@@ -24,17 +34,26 @@ jobs:
           python-version: '3.11'
       - name: Install minimal dependencies
         run: python -m pip install requests==2.31.0 msgpack==1.0.5
-      - name: Compile asset mirror modules
+      - name: Compile changed server modules
         run: >-
           python -m py_compile
+          standalone/console.py
+          standalone/gui.pyw
+          standalone/mltd/models/engine.py
+          standalone/mltd/services/asset.py
+          standalone/mltd/servers/api_server.py
           standalone/mltd/servers/asset_cache.py
           standalone/mltd/servers/asset_server.py
+          standalone/mltd/servers/config.py
+          standalone/mltd/servers/handler.py
+          standalone/mltd/servers/proxy.py
           tools/prefetch_assets.py
           tools/verify_asset_mirror.py
           tests/test_asset_mirror.py
+          tests/test_local_asset_runtime.py
           tests/remote_asset_compat.py
-      - name: Run asset mirror tests
-        run: python -m unittest discover -s tests -p 'test_asset_mirror.py' -v
+      - name: Run local asset protocol tests
+        run: python -m unittest discover -s tests -p 'test_*asset*.py' -v
 
   remote-compat:
     runs-on: ubuntu-22.04
@@ -45,5 +64,5 @@ jobs:
           python-version: '3.11'
       - name: Install minimal dependencies
         run: python -m pip install requests==2.31.0 msgpack==1.0.5
-      - name: Compare local mirror with live CDN manifests
+      - name: Compare local mirror with live CDN manifests and assets
         run: python tests/remote_asset_compat.py
