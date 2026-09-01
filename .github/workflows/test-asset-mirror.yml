@@ -65,6 +65,44 @@ jobs:
       - name: Benchmark API transport
         run: python tests/api_transport_benchmark.py
 
+  api-runtime:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install API runtime dependencies
+        run: >-
+          python -m pip install
+          requests==2.31.0
+          msgpack==1.0.5
+          json-rpc==1.15.0
+          marshmallow==3.20.1
+          marshmallow-sqlalchemy==0.29.0
+          SQLAlchemy==2.0.19
+          SQLAlchemy-Utils==0.41.1
+          pycryptodome==3.18.0
+      - name: Import complete API service graph and verify SQLite mode
+        working-directory: standalone
+        run: |
+          python - <<'PY'
+          from mltd.models.engine import engine
+          from mltd.servers.handler import application
+          from mltd.servers.proxy import ProxyHTTPRequestHandler
+
+          assert callable(application)
+          assert ProxyHTTPRequestHandler.protocol_version == 'HTTP/1.1'
+          with engine.connect() as conn:
+              journal = conn.exec_driver_sql('PRAGMA journal_mode').scalar_one()
+              synchronous = conn.exec_driver_sql('PRAGMA synchronous').scalar_one()
+              busy_timeout = conn.exec_driver_sql('PRAGMA busy_timeout').scalar_one()
+          assert journal.lower() == 'wal', journal
+          assert synchronous == 1, synchronous
+          assert busy_timeout == 5000, busy_timeout
+          print('API runtime import OK; SQLite WAL/NORMAL/busy_timeout active')
+          PY
+
   remote-compat:
     runs-on: ubuntu-22.04
     steps:
