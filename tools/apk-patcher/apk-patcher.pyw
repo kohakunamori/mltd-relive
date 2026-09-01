@@ -1,11 +1,13 @@
+import hashlib
 import os
+import re
 import shutil
 import struct
 import subprocess
 import sys
 import traceback
+import zipfile
 from tkinter.filedialog import askopenfilename
-from xml.etree import ElementTree as ET
 
 import glfw
 import imgui
@@ -20,9 +22,18 @@ apk_path = ''
 apk_name = ''
 ascii_apk_name = ''
 original_apk_path = ''
+game_language = ''
+original_signer_sha256 = ''
+original_payload = {}
 
 resolution = 720
 frame_rate = 60
+
+EXPECTED_APKTOOL_VERSION = (2, 12, 1)
+EXPECTED_CHANGED_ENTRIES = {
+    'classes.dex',
+    'lib/arm64-v8a/libil2cpp.so',
+}
 
 
 def fonts_path():
@@ -42,6 +53,10 @@ def patched_apk_path():
     )
 
 
+def unsigned_apk_path():
+    return os.path.join(ascii_apk_name, 'dist', f'{ascii_apk_name}.apk')
+
+
 def run_command(command, name):
     result = subprocess.run(
         command,
@@ -53,8 +68,8 @@ def run_command(command, name):
     )
     if result.returncode != 0:
         output = (result.stdout or '').strip()
-        if len(output) > 8000:
-            output = output[-8000:]
+        if len(output) > 12000:
+            output = output[-12000:]
         message = f'{name} failed with exit code {result.returncode}'
         if output:
             message += f'\n\n{output}'
@@ -62,53 +77,145 @@ def run_command(command, name):
     return result
 
 
+def parse_apktool_version():
+    result = run_command([apktool_path, '--version'], 'apktool version check')
+    match = re.search(r'(\d+)\.(\d+)\.(\d+)', result.stdout or '')
+    if not match:
+        raise RuntimeError(
+            'Unable to detect Apktool version.\n'
+            'This patcher requires Apktool 2.12.1.'
+        )
+    return tuple(int(part) for part in match.groups())
+
+
 def validate_input():
+    if not os.path.isfile(apktool_path):
+        return 'Invalid apktool Path'
     if not apktool_path.endswith('apktool.bat') and not apktool_path.endswith('apktool'):
         return 'Invalid apktool.bat Path'
+    if not os.path.isfile(zipalign_path):
+        return 'Invalid zipalign Path'
     if not zipalign_path.endswith('zipalign.exe') and not zipalign_path.endswith('zipalign'):
         return 'Invalid zipalign.exe Path'
+    if not os.path.isfile(apksigner_path):
+        return 'Invalid apksigner Path'
     if not apksigner_path.endswith('apksigner.bat') and not apksigner_path.endswith('apksigner'):
         return 'Invalid apksigner.bat Path'
-    if not apk_path.endswith('.apk'):
+    if not os.path.isfile(apk_path) or not apk_path.lower().endswith('.apk'):
         return 'Invalid Game APK Path'
     if not os.path.isfile(os.path.join(current_path(), 'mltd.jks')):
         return 'Bundled signing keystore mltd.jks was not found'
+
+    try:
+        version = parse_apktool_version()
+    except Exception as exc:
+        return str(exc)
+
+    if version != EXPECTED_APKTOOL_VERSION:
+        return (
+            f'Unsupported Apktool version: {version[0]}.{version[1]}.{version[2]}\n\n'
+            'This patcher is pinned to Apktool 2.12.1 to avoid unintended '
+            'AndroidManifest/resources.arsc/resource rewrites. Apktool 3.x is '
+            'a breaking major release and is not accepted for this legacy APK.'
+        )
     return ''
+
+
+def detect_game_language(apk_filename):
+    with zipfile.ZipFile(apk_filename, 'r') as apk:
+        manifest = apk.read('AndroidManifest.xml')
+
+    package_prefixes = {
+        'ch': 'com.bandainamcoent.imas_millionlive_theaterdays_ch.',
+        'kr': 'com.bandainamcoent.imas_millionlive_theaterdays_kr.',
+    }
+    for lang, prefix in package_prefixes.items():
+        if prefix.encode('utf-8') in manifest or prefix.encode('utf-16le') in manifest:
+            return lang
+    raise RuntimeError('Unrecognized game APK package')
+
+
+def extract_signer_sha256(apk_filename):
+    result = run_command([
+        apksigner_path, 'verify',
+        '--verbose',
+        '--print-certs',
+        apk_filename
+    ], 'apksigner input verification')
+
+    match = re.search(
+        r'certificate SHA-256 digest:\s*([0-9a-fA-F:]+)',
+        result.stdout or '',
+        flags=re.IGNORECASE
+    )
+    if not match:
+        raise RuntimeError(
+            'Could not read the signing certificate SHA-256 digest from the input APK.'
+        )
+    return match.group(1).replace(':', '').lower()
+
+
+def payload_snapshot(apk_filename):
+    snapshot = {}
+    with zipfile.ZipFile(apk_filename, 'r') as apk:
+        for info in apk.infolist():
+            if info.is_dir() or info.filename.startswith('META-INF/'):
+                continue
+            data = apk.read(info.filename)
+            snapshot[info.filename] = {
+                'sha256': hashlib.sha256(data).hexdigest(),
+                'compress_type': info.compress_type,
+                'size': info.file_size,
+            }
+    return snapshot
 
 
 def initialize():
     global apk_path, apk_name, ascii_apk_name, original_apk_path
+    global game_language, original_signer_sha256, original_payload
+
+    original_apk_path = apk_path
+    game_language = detect_game_language(original_apk_path)
+    original_signer_sha256 = extract_signer_sha256(original_apk_path)
+    original_payload = payload_snapshot(original_apk_path)
 
     apk_name = os.path.basename(apk_path).removesuffix('.apk')
     ascii_apk_name = apk_name.replace('劇場時光', '~~MLTD_CH~~')
     ascii_apk_name = ascii_apk_name.replace('밀리언 라이브!', '~~MLTD_KR~~')
+
     if apk_name != ascii_apk_name:
-        shutil.copyfile(os.path.join(apk_path), os.path.abspath(f'{ascii_apk_name}.apk'))
-        original_apk_path = apk_path
-        apk_path = os.path.abspath(f'{ascii_apk_name}.apk')
+        ascii_source = os.path.abspath(f'{ascii_apk_name}.apk')
+        shutil.copyfile(apk_path, ascii_source)
+        apk_path = ascii_source
 
 
 def apktool_decode():
-    run_command([apktool_path, 'd', apk_path], 'apktool decode')
+    # The patch only needs smali + libil2cpp.so. Do not decode resources.
+    # This keeps AndroidManifest.xml/resources.arsc/res payloads intact instead
+    # of round-tripping them through aapt/aapt2.
+    run_command([
+        apktool_path, 'd',
+        '-f',
+        '-r',
+        '-o', ascii_apk_name,
+        apk_path
+    ], 'apktool decode (no resources)')
 
 
 def apply_patch():
-    lang = ''
-    tree = ET.parse(os.path.join(ascii_apk_name, 'AndroidManifest.xml'))
-    package = tree.getroot().get('package')
-    if package.startswith('com.bandainamcoent.imas_millionlive_theaterdays_ch.'):
-        lang = 'ch'
-    elif package.startswith('com.bandainamcoent.imas_millionlive_theaterdays_kr.'):
-        lang = 'kr'
-    else:
+    lang = game_language
+    if lang not in ('ch', 'kr'):
         raise RuntimeError('Unrecognized game APK')
 
-    with open(os.path.join(ascii_apk_name, 'lib', 'arm64-v8a', 'libil2cpp.so'), 'rb') as f:
+    il2cpp_path = os.path.join(
+        ascii_apk_name, 'lib', 'arm64-v8a', 'libil2cpp.so'
+    )
+    with open(il2cpp_path, 'rb') as f:
         il2cpp = bytearray(f.read())
 
     resolution_addr = 0x01950494 if lang == 'ch' else 0x01947404
     resolution_inst = 0x52800009 | (resolution << 5)
-    il2cpp[resolution_addr:resolution_addr+4] = struct.pack('<i', resolution_inst)
+    il2cpp[resolution_addr:resolution_addr+4] = struct.pack('<I', resolution_inst)
 
     frame_rate_addrs = [
         0x01e35c94,     # OnBeginScene
@@ -127,65 +234,202 @@ def apply_patch():
             0x01e2bd4c,     # SetupCommuSpecialPlusLevel
             0x01e2bef4      # SetupGashaSpecialPlusLevel
         ]
+
     frame_rate_inst = 0x52800000 | (frame_rate << 5)
     for frame_rate_addr in frame_rate_addrs:
-        il2cpp[frame_rate_addr:frame_rate_addr+4] = struct.pack('<i', frame_rate_inst)
+        il2cpp[frame_rate_addr:frame_rate_addr+4] = struct.pack(
+            '<I', frame_rate_inst
+        )
 
-    with open(os.path.join(ascii_apk_name, 'lib', 'arm64-v8a', 'libil2cpp.so'), 'wb') as f:
+    with open(il2cpp_path, 'wb') as f:
         f.write(il2cpp)
 
+    target_smali = os.path.join(
+        ascii_apk_name,
+        'smali',
+        'com',
+        'bandainamcoent',
+        'imas_millionlive_theaterdays',
+        'player',
+        'OverrideActivity.smali'
+    )
+    if not os.path.isfile(target_smali):
+        raise RuntimeError(
+            'OverrideActivity.smali was not found in the decoded APK. '
+            'The APK layout does not match the supported MLTD client.'
+        )
+
     shutil.copyfile(
-        os.path.join(current_path(), 'OverrideActivity_device_max_refresh_rate.smali'),
-        os.path.join(ascii_apk_name, 'smali', 'com', 'bandainamcoent', 'imas_millionlive_theaterdays', 'player', 'OverrideActivity.smali')
+        os.path.join(
+            current_path(),
+            'OverrideActivity_device_max_refresh_rate.smali'
+        ),
+        target_smali
     )
 
 
 def apktool_build():
-    run_command([apktool_path, 'b', ascii_apk_name], 'apktool build')
+    run_command([
+        apktool_path, 'b',
+        ascii_apk_name
+    ], 'apktool build (preserved resources)')
+
+
+def validate_payload_changes(apk_filename):
+    rebuilt = payload_snapshot(apk_filename)
+
+    original_names = set(original_payload)
+    rebuilt_names = set(rebuilt)
+    if original_names != rebuilt_names:
+        missing = sorted(original_names - rebuilt_names)
+        added = sorted(rebuilt_names - original_names)
+        raise RuntimeError(
+            'APK payload entry set changed unexpectedly.\n'
+            f'Missing: {missing[:20]}\n'
+            f'Added: {added[:20]}'
+        )
+
+    changed = set()
+    metadata_changed = set()
+
+    for name in original_names:
+        before = original_payload[name]
+        after = rebuilt[name]
+
+        if before['sha256'] != after['sha256']:
+            changed.add(name)
+
+        if before['compress_type'] != after['compress_type']:
+            metadata_changed.add(name)
+
+    unexpected = changed - EXPECTED_CHANGED_ENTRIES
+    missing_expected = EXPECTED_CHANGED_ENTRIES - changed
+
+    if unexpected:
+        raise RuntimeError(
+            'Apktool changed files that this patcher must preserve.\n\n'
+            'Unexpected content changes:\n' +
+            '\n'.join(sorted(unexpected)[:100])
+        )
+
+    if missing_expected:
+        raise RuntimeError(
+            'Expected patch payload did not change:\n' +
+            '\n'.join(sorted(missing_expected))
+        )
+
+    unexpected_metadata = metadata_changed - EXPECTED_CHANGED_ENTRIES
+    if unexpected_metadata:
+        raise RuntimeError(
+            'Compression metadata changed for preserved APK entries:\n' +
+            '\n'.join(sorted(unexpected_metadata)[:100])
+        )
+
+    # The patched native library must keep the original compression mode.
+    lib_name = 'lib/arm64-v8a/libil2cpp.so'
+    if (
+        original_payload[lib_name]['compress_type']
+        != rebuilt[lib_name]['compress_type']
+    ):
+        raise RuntimeError(
+            'libil2cpp.so compression mode changed unexpectedly.'
+        )
 
 
 def zipalign():
+    validate_payload_changes(unsigned_apk_path())
+
     run_command([
         zipalign_path, '-f', '-v', '4',
-        os.path.join(ascii_apk_name, 'dist', f'{ascii_apk_name}.apk'),
+        unsigned_apk_path(),
         patched_apk_path()
     ], 'zipalign')
+
+    run_command([
+        zipalign_path, '-c', '-v', '4',
+        patched_apk_path()
+    ], 'zipalign verification')
+
+    # zipalign must not alter uncompressed file contents.
+    validate_payload_changes(patched_apk_path())
 
 
 def apksigner():
     output_apk = patched_apk_path()
+
     run_command([
         apksigner_path, 'sign',
         '--ks', os.path.join(current_path(), 'mltd.jks'),
         '--ks-type', 'PKCS12',
         '--ks-key-alias', 'bndltool',
         '--ks-pass', 'pass:changeit',
+        '--key-pass', 'pass:changeit',
+        '--min-sdk-version', '19',
+        '--v1-signing-enabled', 'true',
+        '--v2-signing-enabled', 'true',
         output_apk
     ], 'apksigner sign')
 
-    run_command([
+    verify = run_command([
         apksigner_path, 'verify',
         '--verbose',
         '--print-certs',
+        '--min-sdk-version', '19',
         output_apk
     ], 'apksigner verify')
+
+    verify_text = verify.stdout or ''
+    if not re.search(
+        r'v1 scheme.*:\s*true',
+        verify_text,
+        flags=re.IGNORECASE
+    ):
+        raise RuntimeError(
+            'Final APK does not have a valid v1/JAR signature.'
+        )
+    if not re.search(
+        r'v2 scheme.*:\s*true',
+        verify_text,
+        flags=re.IGNORECASE
+    ):
+        raise RuntimeError(
+            'Final APK does not have a valid APK Signature Scheme v2 signature.'
+        )
+
+    final_signer_sha256 = extract_signer_sha256(output_apk)
+    if final_signer_sha256 != original_signer_sha256:
+        raise RuntimeError(
+            'Final APK signer does not match the input APK signer.\n\n'
+            f'Input signer SHA-256: {original_signer_sha256}\n'
+            f'Output signer SHA-256: {final_signer_sha256}'
+        )
+
+    validate_payload_changes(output_apk)
 
 
 def collect_output():
     output_apk = patched_apk_path()
     if not os.path.isfile(output_apk):
         raise RuntimeError('Patched APK was not produced')
-    os.replace(output_apk, f'{apk_name}_{resolution}p_{frame_rate}fps.apk')
+
+    destination = os.path.abspath(
+        f'{apk_name}_{resolution}p_{frame_rate}fps.apk'
+    )
+    os.replace(output_apk, destination)
 
 
 def cleanup():
     global apk_path
 
-    if os.path.isdir(os.path.abspath(ascii_apk_name)):
+    if ascii_apk_name and os.path.isdir(os.path.abspath(ascii_apk_name)):
         shutil.rmtree(os.path.abspath(ascii_apk_name))
-    if apk_name != ascii_apk_name:
-        if os.path.isfile(os.path.abspath(f'{ascii_apk_name}.apk')):
-            os.remove(os.path.abspath(f'{ascii_apk_name}.apk'))
+
+    if apk_name and apk_name != ascii_apk_name:
+        ascii_source = os.path.abspath(f'{ascii_apk_name}.apk')
+        if os.path.isfile(ascii_source):
+            os.remove(ascii_source)
+
+    if original_apk_path:
         apk_path = original_apk_path
 
 
@@ -242,81 +486,141 @@ def main():
 
         imgui.set_next_window_position(0, 0)
         imgui.set_next_window_size(io.display_size.x, io.display_size.y)
-        imgui.begin('', flags=imgui.WINDOW_NO_TITLE_BAR | imgui.WINDOW_NO_RESIZE)
+        imgui.begin(
+            '',
+            flags=imgui.WINDOW_NO_TITLE_BAR | imgui.WINDOW_NO_RESIZE
+        )
 
-        imgui.text('apktool.bat Path:')
+        imgui.text('apktool.bat Path (requires Apktool 2.12.1):')
         if not apktool_path.endswith('apktool.bat') and not apktool_path.endswith('apktool'):
-            imgui.push_style_color(imgui.COLOR_FRAME_BACKGROUND, 0.5, 0.0, 0.0)
-        _, apktool_path = imgui.input_text('##apktool', apktool_path, 1024, flags=imgui.INPUT_TEXT_READ_ONLY)
+            imgui.push_style_color(
+                imgui.COLOR_FRAME_BACKGROUND, 0.5, 0.0, 0.0
+            )
+        _, apktool_path = imgui.input_text(
+            '##apktool', apktool_path, 1024,
+            flags=imgui.INPUT_TEXT_READ_ONLY
+        )
         if not apktool_path.endswith('apktool.bat') and not apktool_path.endswith('apktool'):
             imgui.pop_style_color(1)
         imgui.same_line()
         if imgui.button('Browse apktool.bat...'):
-            new_path = askopenfilename(filetypes=[('apktool', 'apktool.bat apktool')])
+            new_path = askopenfilename(
+                filetypes=[('apktool', 'apktool.bat apktool')]
+            )
             if new_path:
                 apktool_path = os.path.abspath(new_path)
 
         imgui.text('zipalign.exe Path:')
         if not zipalign_path.endswith('zipalign.exe') and not zipalign_path.endswith('zipalign'):
-            imgui.push_style_color(imgui.COLOR_FRAME_BACKGROUND, 0.5, 0.0, 0.0)
-        _, zipalign_path = imgui.input_text('##zipalign', zipalign_path, 1024, flags=imgui.INPUT_TEXT_READ_ONLY)
+            imgui.push_style_color(
+                imgui.COLOR_FRAME_BACKGROUND, 0.5, 0.0, 0.0
+            )
+        _, zipalign_path = imgui.input_text(
+            '##zipalign', zipalign_path, 1024,
+            flags=imgui.INPUT_TEXT_READ_ONLY
+        )
         if not zipalign_path.endswith('zipalign.exe') and not zipalign_path.endswith('zipalign'):
             imgui.pop_style_color(1)
         imgui.same_line()
         if imgui.button('Browse zipalign.exe...'):
-            new_path = askopenfilename(filetypes=[('zipalign', 'zipalign.exe zipalign')])
+            new_path = askopenfilename(
+                filetypes=[('zipalign', 'zipalign.exe zipalign')]
+            )
             if new_path:
                 zipalign_path = os.path.abspath(new_path)
-                if not apksigner_path.endswith('apksigner.bat') and not apksigner_path.endswith('apksigner'):
+                if (
+                    not apksigner_path.endswith('apksigner.bat')
+                    and not apksigner_path.endswith('apksigner')
+                ):
                     zipalign_dir = os.path.dirname(zipalign_path)
-                    if os.path.isfile(os.path.join(zipalign_dir, 'apksigner.bat')):
-                        apksigner_path = os.path.abspath(os.path.join(zipalign_dir, 'apksigner.bat'))
-                    elif os.path.isfile(os.path.join(zipalign_dir, 'apksigner')):
-                        apksigner_path = os.path.abspath(os.path.join(zipalign_dir, 'apksigner'))
+                    if os.path.isfile(
+                        os.path.join(zipalign_dir, 'apksigner.bat')
+                    ):
+                        apksigner_path = os.path.abspath(
+                            os.path.join(zipalign_dir, 'apksigner.bat')
+                        )
+                    elif os.path.isfile(
+                        os.path.join(zipalign_dir, 'apksigner')
+                    ):
+                        apksigner_path = os.path.abspath(
+                            os.path.join(zipalign_dir, 'apksigner')
+                        )
 
         imgui.text('apksigner.bat Path:')
         if not apksigner_path.endswith('apksigner.bat') and not apksigner_path.endswith('apksigner'):
-            imgui.push_style_color(imgui.COLOR_FRAME_BACKGROUND, 0.5, 0.0, 0.0)
-        _, apksigner_path = imgui.input_text('##apksigner', apksigner_path, 1024, flags=imgui.INPUT_TEXT_READ_ONLY)
+            imgui.push_style_color(
+                imgui.COLOR_FRAME_BACKGROUND, 0.5, 0.0, 0.0
+            )
+        _, apksigner_path = imgui.input_text(
+            '##apksigner', apksigner_path, 1024,
+            flags=imgui.INPUT_TEXT_READ_ONLY
+        )
         if not apksigner_path.endswith('apksigner.bat') and not apksigner_path.endswith('apksigner'):
             imgui.pop_style_color(1)
         imgui.same_line()
         if imgui.button('Browse apksigner.bat...'):
-            new_path = askopenfilename(filetypes=[('apksigner', 'apksigner.bat apksigner')])
+            new_path = askopenfilename(
+                filetypes=[('apksigner', 'apksigner.bat apksigner')]
+            )
             if new_path:
                 apksigner_path = os.path.abspath(new_path)
-                if not zipalign_path.endswith('zipalign.exe') and not zipalign_path.endswith('zipalign'):
+                if (
+                    not zipalign_path.endswith('zipalign.exe')
+                    and not zipalign_path.endswith('zipalign')
+                ):
                     apksigner_dir = os.path.dirname(apksigner_path)
-                    if os.path.isfile(os.path.join(apksigner_dir, 'zipalign.exe')):
-                        zipalign_path = os.path.abspath(os.path.join(apksigner_dir, 'zipalign.exe'))
-                    elif os.path.isfile(os.path.join(apksigner_dir, 'zipalign')):
-                        zipalign_path = os.path.abspath(os.path.join(apksigner_dir, 'zipalign'))
+                    if os.path.isfile(
+                        os.path.join(apksigner_dir, 'zipalign.exe')
+                    ):
+                        zipalign_path = os.path.abspath(
+                            os.path.join(apksigner_dir, 'zipalign.exe')
+                        )
+                    elif os.path.isfile(
+                        os.path.join(apksigner_dir, 'zipalign')
+                    ):
+                        zipalign_path = os.path.abspath(
+                            os.path.join(apksigner_dir, 'zipalign')
+                        )
 
         imgui.text('Game APK Path:')
         if not apk_path.endswith('.apk'):
-            imgui.push_style_color(imgui.COLOR_FRAME_BACKGROUND, 0.5, 0.0, 0.0)
+            imgui.push_style_color(
+                imgui.COLOR_FRAME_BACKGROUND, 0.5, 0.0, 0.0
+            )
         if '劇場時光' in apk_path:
             imgui.push_font(tc_font)
         elif '밀리언 라이브!' in apk_path:
             imgui.push_font(kr_font)
-        _, apk_path = imgui.input_text('##apk', apk_path, 1024, flags=imgui.INPUT_TEXT_READ_ONLY)
+        _, apk_path = imgui.input_text(
+            '##apk', apk_path, 1024,
+            flags=imgui.INPUT_TEXT_READ_ONLY
+        )
         if '劇場時光' in apk_path or '밀리언 라이브!' in apk_path:
             imgui.pop_font()
         if not apk_path.endswith('.apk'):
             imgui.pop_style_color(1)
         imgui.same_line()
         if imgui.button('Browse .apk...'):
-            new_path = askopenfilename(filetypes=[('Android Package', '*.apk')])
+            new_path = askopenfilename(
+                filetypes=[('Android Package', '*.apk')]
+            )
             if new_path:
                 apk_path = os.path.abspath(new_path)
 
         imgui.text('Resolution:')
         imgui.columns(2, border=False)
         if not custom_resolution_flag:
-            _, selected_resolution = imgui.slider_int('##resolution', selected_resolution, min_value=0, max_value=len(resolutions)-1, format='')
+            _, selected_resolution = imgui.slider_int(
+                '##resolution', selected_resolution,
+                min_value=0, max_value=len(resolutions)-1,
+                format=''
+            )
             resolution = resolutions[selected_resolution]
         else:
-            _, custom_resolution_text = imgui.input_text('##custom_res', custom_resolution_text, 5, flags=imgui.INPUT_TEXT_CHARS_DECIMAL)
+            _, custom_resolution_text = imgui.input_text(
+                '##custom_res', custom_resolution_text, 5,
+                flags=imgui.INPUT_TEXT_CHARS_DECIMAL
+            )
             try:
                 resolution = int(custom_resolution_text)
             except ValueError:
@@ -326,16 +630,25 @@ def main():
         imgui.same_line()
         imgui.text(f'{resolution}p')
         imgui.next_column()
-        _, custom_resolution_flag = imgui.checkbox('Custom Resolution', custom_resolution_flag)
+        _, custom_resolution_flag = imgui.checkbox(
+            'Custom Resolution', custom_resolution_flag
+        )
         imgui.columns(1)
 
         imgui.text('Frame Rate:')
         imgui.columns(2, border=False)
         if not custom_frame_rate_flag:
-            _, selected_frame_rate = imgui.slider_int('##frame_rate', selected_frame_rate, min_value=0, max_value=len(frame_rates)-1, format='')
+            _, selected_frame_rate = imgui.slider_int(
+                '##frame_rate', selected_frame_rate,
+                min_value=0, max_value=len(frame_rates)-1,
+                format=''
+            )
             frame_rate = frame_rates[selected_frame_rate]
         else:
-            _, custom_frame_rate_text = imgui.input_text('##custom_fps', custom_frame_rate_text, 4, flags=imgui.INPUT_TEXT_CHARS_DECIMAL)
+            _, custom_frame_rate_text = imgui.input_text(
+                '##custom_fps', custom_frame_rate_text, 4,
+                flags=imgui.INPUT_TEXT_CHARS_DECIMAL
+            )
             try:
                 frame_rate = int(custom_frame_rate_text)
             except ValueError:
@@ -345,7 +658,9 @@ def main():
         imgui.same_line()
         imgui.text(f'{frame_rate}fps')
         imgui.next_column()
-        _, custom_frame_rate_flag = imgui.checkbox('Custom Frame Rate', custom_frame_rate_flag)
+        _, custom_frame_rate_flag = imgui.checkbox(
+            'Custom Frame Rate', custom_frame_rate_flag
+        )
         imgui.columns(1)
 
         imgui.text('')
@@ -358,7 +673,10 @@ def main():
 
         if is_patching:
             imgui.open_popup('Patching')
-        if imgui.begin_popup_modal('Patching', flags=imgui.WINDOW_NO_RESIZE)[0]:
+        if imgui.begin_popup_modal(
+            'Patching',
+            flags=imgui.WINDOW_NO_RESIZE
+        )[0]:
             imgui.text('Please wait...')
             if not is_patching:
                 imgui.close_current_popup()
@@ -366,8 +684,14 @@ def main():
 
         if error_message:
             imgui.open_popup('Error')
-            imgui.set_next_window_size(io.display_size.x-10, io.display_size.y*2/3)
-        if imgui.begin_popup_modal('Error', flags=imgui.WINDOW_NO_RESIZE)[0]:
+            imgui.set_next_window_size(
+                io.display_size.x-10,
+                io.display_size.y*2/3
+            )
+        if imgui.begin_popup_modal(
+            'Error',
+            flags=imgui.WINDOW_NO_RESIZE
+        )[0]:
             imgui.text(error_message)
             if imgui.button('Close'):
                 error_message = ''
