@@ -13,6 +13,7 @@ from mltd.servers.utilities import format_datetime
 from mltd.services import *
 
 _SLOW_REQUEST_MS = 25
+_BATCH_METHOD_PREVIEW = 12
 
 
 class CustomJSONEncoder(json.JSONEncoder):
@@ -31,6 +32,17 @@ def _method_name(request):
         payload = json.loads(request)
         if isinstance(payload, dict):
             return payload.get('method') or '?'
+        if isinstance(payload, list):
+            methods = [
+                item.get('method') or '?'
+                for item in payload
+                if isinstance(item, dict)
+            ]
+            preview = methods[:_BATCH_METHOD_PREVIEW]
+            label = ','.join(preview)
+            if len(methods) > len(preview):
+                label += f',+{len(methods) - len(preview)} more'
+            return f'batch[{len(payload)}]({label})'
     except (TypeError, ValueError, UnicodeDecodeError):
         pass
     return '?'
@@ -58,10 +70,11 @@ def application(environ, start_response):
         decrypt_start_time = time.perf_counter_ns()
         request = decrypt_request(encrypted_request)
         decrypt_end_time = time.perf_counter_ns()
+        method = _method_name(request)
 
         if debug:
             logger.debug(
-                f'Request received for {_method_name(request)} '
+                f'Request received for {method} '
                 f'at {environ["PATH_INFO"]}'
             )
             logger.debug(request)
@@ -99,7 +112,6 @@ def application(environ, start_response):
         full_ms = (full_end_time - full_start_time) / 1_000_000
 
         if debug or full_ms >= _SLOW_REQUEST_MS:
-            method = _method_name(request)
             message = (
                 f'API timing {method}: full={full_ms:.2f} ms '
                 f'decrypt={decrypt_ms:.2f} ms service={svc_ms:.2f} ms '
