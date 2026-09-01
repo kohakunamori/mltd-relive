@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - 'standalone-v*'
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -126,7 +127,7 @@ jobs:
           for apk in game-client/*.apk; do
             test "$(stat -c%s "$apk")" -gt 10000000
             unzip -tq "$apk"
-            unzip -l "$apk" | grep -q 'AndroidManifest.xml'
+            unzip -p "$apk" AndroidManifest.xml > /dev/null
           done
           cp GAME_CLIENT_NOTICE.txt game-client/GAME_CLIENT_NOTICE.txt
           (
@@ -143,6 +144,7 @@ jobs:
 
   createrelease:
     name: Create Release
+    if: github.ref_type == 'tag'
     needs:
       - build
       - gameclient
