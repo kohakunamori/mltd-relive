@@ -13,10 +13,11 @@ permissions:
 
 env:
   RELEASE_TAG: ${{ github.ref_type == 'tag' && github.ref_name || 'standalone-v0.1.3' }}
+  PATCHER_VERSION: v1.0.2
 
 jobs:
   build:
-    name: Build packages
+    name: Build standalone packages
     if: github.ref_type == 'tag' || contains(github.event.head_commit.message, '[release standalone-v0.1.3]')
     runs-on: ${{ matrix.os }}
     strategy:
@@ -100,6 +101,91 @@ jobs:
           path: standalone/dist/release-output/*
           if-no-files-found: error
 
+  patcher:
+    name: Build APK Patcher packages
+    if: github.ref_type == 'tag' || contains(github.event.head_commit.message, '[release standalone-v0.1.3]')
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            target: Windows
+            cmd-install: |
+              python -m venv env
+              .\env\Scripts\activate
+              python -m pip install --upgrade pip
+              python -m pip install -r requirements.txt
+            cmd-build: |
+              cd tools\apk-patcher
+              ..\..\env\Scripts\pyinstaller apk-patcher_windows.spec
+            package-source: tools/apk-patcher/dist/mltd-relive-apk-patcher.exe
+            package-suffix: windows.exe
+            out-name: patcher-windows
+          - os: ubuntu-latest
+            target: Ubuntu
+            cmd-install: |
+              python -m venv env
+              source env/bin/activate
+              python -m pip install --upgrade pip
+              python -m pip install -r requirements.txt
+            cmd-build: |
+              cd tools/apk-patcher
+              ../../env/bin/pyinstaller apk-patcher_ubuntu.spec
+            package-source: tools/apk-patcher/dist/mltd-relive-apk-patcher
+            package-suffix: ubuntu
+            out-name: patcher-ubuntu
+          - os: macos-latest
+            target: macOS
+            cmd-install: |
+              python -m venv env
+              source env/bin/activate
+              python -m pip install --upgrade pip
+              python -m pip install -r requirements.txt
+            cmd-build: |
+              cd tools/apk-patcher
+              ../../env/bin/pyinstaller apk-patcher_macos.spec
+            package-source: tools/apk-patcher/dist/mltd-relive-apk-patcher.app
+            package-suffix: macos.zip
+            out-name: patcher-macos
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies for ${{ matrix.target }}
+        run: ${{ matrix.cmd-install }}
+
+      - name: Build APK Patcher for ${{ matrix.target }}
+        run: ${{ matrix.cmd-build }}
+
+      - name: Package APK Patcher
+        shell: bash
+        env:
+          PACKAGE_SOURCE: ${{ matrix.package-source }}
+          PACKAGE_SUFFIX: ${{ matrix.package-suffix }}
+        run: |
+          set -euo pipefail
+          mkdir -p tools/apk-patcher/dist/release-output
+          if [[ "$PACKAGE_SOURCE" == *.app ]]; then
+            (
+              cd tools/apk-patcher/dist
+              zip -r9 "release-output/mltd-relive-apk-patcher-${PATCHER_VERSION}-${PACKAGE_SUFFIX}" "$(basename "$PACKAGE_SOURCE")"
+            )
+          else
+            cp "$PACKAGE_SOURCE" "tools/apk-patcher/dist/release-output/mltd-relive-apk-patcher-${PATCHER_VERSION}-${PACKAGE_SUFFIX}"
+          fi
+
+      - name: Upload APK Patcher artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.out-name }}
+          path: tools/apk-patcher/dist/release-output/*
+          if-no-files-found: error
+
   gameclient:
     name: Prepare corrected game clients
     if: github.ref_type == 'tag' || contains(github.event.head_commit.message, '[release standalone-v0.1.3]')
@@ -164,10 +250,11 @@ jobs:
           if-no-files-found: error
 
   createrelease:
-    name: Create Release
+    name: Create or update Release
     if: github.ref_type == 'tag' || contains(github.event.head_commit.message, '[release standalone-v0.1.3]')
     needs:
       - build
+      - patcher
       - gameclient
     runs-on: ubuntu-latest
     steps:
@@ -179,7 +266,7 @@ jobs:
         with:
           path: release-artifacts
 
-      - name: Create Release
+      - name: Create or update Release
         id: create_release
         uses: ncipollo/release-action@v1
         with:
@@ -187,6 +274,8 @@ jobs:
           commit: ${{ github.sha }}
           name: mltd-relive-${{ env.RELEASE_TAG }}
           bodyFile: GAME_CLIENT_NOTICE.txt
-          artifacts: 'LICENSE,release-artifacts/windows/*,release-artifacts/ubuntu/*,release-artifacts/macos/*,release-artifacts/game-client/*'
+          artifacts: 'LICENSE,release-artifacts/windows/*,release-artifacts/ubuntu/*,release-artifacts/macos/*,release-artifacts/patcher-windows/*,release-artifacts/patcher-ubuntu/*,release-artifacts/patcher-macos/*,release-artifacts/game-client/*'
           artifactErrorsFailBuild: true
+          allowUpdates: true
+          replacesArtifacts: true
           makeLatest: true
