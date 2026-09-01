@@ -1,4 +1,5 @@
 import io
+import socket
 import sys
 import threading
 import traceback
@@ -51,6 +52,11 @@ class ThreadedProxyServer(ThreadingHTTPServer):
     daemon_threads = True
     allow_reuse_address = True
     request_queue_size = 64
+
+    def get_request(self):
+        request, client_address = super().get_request()
+        request.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+        return request, client_address
 
 
 class ProxyHTTPRequestHandler(AssetHTTPRequestHandler):
