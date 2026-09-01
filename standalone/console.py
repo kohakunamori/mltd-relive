@@ -7,7 +7,7 @@ from multiprocessing import freeze_support, set_start_method
 
 from mltd.models.setup import (check_database_version, cleanup, setup,
                                upgrade_database)
-from mltd.servers import api_server
+from mltd.servers import api_server, asset_server
 from mltd.servers.config import config
 from mltd.servers.logging import formatter, handler, logger
 from mltd.servers.process import CustomProcess
@@ -24,12 +24,26 @@ def start_server(reset=False):
 
     handler.doRollover()
     logger.info(f'Starting server...')
+    processes = []
+
     api_process = CustomProcess(target=api_server.start, daemon=True)
     api_process.start()
+    processes.append(api_process)
 
-    while not api_process.is_ready():
+    if config.asset_mode != 'remote':
+        asset_process = CustomProcess(target=asset_server.start, daemon=True)
+        asset_process.start()
+        processes.append(asset_process)
+
+    while not all(process.is_ready() for process in processes):
+        for process in processes:
+            if process.exception:
+                raise RuntimeError(process.exception)
         time.sleep(0.2)
-    logger.info(f'Server started.')
+
+    logger.info(f'Server started. Asset mode: {config.asset_mode}')
+    # The child processes are daemons and will exit with the parent. Joining
+    # the API server preserves the previous console lifetime behavior.
     api_process.join()
 
 
@@ -57,11 +71,15 @@ if __name__ == '__main__':
                         help='reset data')
     parser.add_argument('-c', '--config-only', action='store_true',
                         help='only update config; do not start server')
+    parser.add_argument('--asset-mode', choices=['remote', 'hybrid', 'local'],
+                        help='asset source mode')
     args = parser.parse_args()
 
     config.is_local = True
     if args.language:
         config.language = args.language
+    if args.asset_mode:
+        config.asset_mode = args.asset_mode
     if args.config_only:
         sys.exit()
     start_server(args.reset)
@@ -71,4 +89,3 @@ if __name__ == '__main__':
             time.sleep(1)
     except KeyboardInterrupt:
         pass
-
