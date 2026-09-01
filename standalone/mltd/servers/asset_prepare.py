@@ -6,7 +6,6 @@ from pathlib import Path
 
 from mltd.servers.asset_cache import (
     REMOTE_ASSET_ROOT,
-    SUPPORTED_PLATFORMS,
     AssetMirror,
     AssetStore,
 )
@@ -53,13 +52,22 @@ def prepare_local_assets(language: str,
                          root: str = 'asset-cache',
                          *,
                          platforms: Iterable[str] | None = None,
-                         workers: int = 24,
+                         workers: int = 48,
                          verify_existing: bool = False,
                          remote_root: str = REMOTE_ASSET_ROOT,
                          upstream_proxy: str | None = None,
                          conn=None) -> dict:
-    """Ensure a strict local mirror exists before serving local mode."""
-    platforms = tuple(sorted(platforms or SUPPORTED_PLATFORMS))
+    """Ensure the configured strict local mirror exists before serving."""
+    if platforms is None:
+        # Keep runtime local mode narrow by default. The game client platform
+        # set is configured independently from the UI language; v0.1.6 defaults
+        # to Android only. Manual tooling can still request Android+iOS.
+        from mltd.servers.config import config
+        platforms = config.asset_local_platforms
+    platforms = tuple(dict.fromkeys(str(p).lower() for p in platforms))
+    if not platforms:
+        raise ValueError('At least one local asset platform is required')
+
     store = AssetStore(root)
     mirror = AssetMirror(
         store,
@@ -95,8 +103,6 @@ def prepare_local_assets(language: str,
                 manifest_total=0,
             )
 
-            # Fetch and parse the manifest exactly once. The parsed object list
-            # is passed into prefetch and reused for the final strict check.
             _, manifest_names = mirror.fetch_manifest(language, platform)
             manifest_total = len(manifest_names)
             reporter.emit(
@@ -166,6 +172,7 @@ def prepare_local_assets(language: str,
                 verify_existing=verify_existing,
                 progress=progress,
                 manifest_objects=manifest_names,
+                durable_writes=False,
             )
             if result['failed']:
                 examples = ', '.join(name for name, _ in result['failed'][:5])
@@ -190,8 +197,6 @@ def prepare_local_assets(language: str,
                     f'{len(result["failed"])} download(s) failed; examples: {examples}'
                 )
 
-            # One SQLite snapshot + one directory scan replaces the previous
-            # N individual SQLite connections/queries in the final check.
             reporter.emit(
                 force=True,
                 phase='verify',
