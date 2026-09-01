@@ -1,9 +1,14 @@
 name: Build APK Patcher
 
-on: [workflow_dispatch]
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'tools/apk-patcher/**'
+      - 'requirements.txt'
+      - '.github/workflows/build-apk-patcher.yml'
 
 jobs:
-
   build:
     name: Build packages
     runs-on: ${{ matrix.os }}
@@ -46,18 +51,18 @@ jobs:
               zip -r9 mltd-relive-apk-patcher-macos.zip mltd-relive-apk-patcher.app
             out-name: mltd-relive-apk-patcher-macos
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-    - name: Set up Python 3.11
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
-    - name: Install dependencies for ${{ matrix.target }}
-      run: ${{ matrix.cmd-install }}    
-    - name: Build with PyInstaller for ${{ matrix.target }}
-      run: ${{ matrix.cmd-build }}
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v3
-      with:
-        name: ${{ matrix.out-name }}
-        path: tools/apk-patcher/dist
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies for ${{ matrix.target }}
+        run: ${{ matrix.cmd-install }}
+      - name: Build with PyInstaller for ${{ matrix.target }}
+        run: ${{ matrix.cmd-build }}
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.out-name }}
+          path: tools/apk-patcher/dist
