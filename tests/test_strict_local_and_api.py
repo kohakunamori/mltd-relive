@@ -31,7 +31,11 @@ class DummyLogger:
 logging_module.logger = DummyLogger()
 sys.modules.setdefault('mltd.servers.logging', logging_module)
 
-from mltd.servers.asset_cache import AssetStore, manifest_name  # noqa: E402
+from mltd.servers.asset_cache import (  # noqa: E402
+    AssetMirror,
+    AssetStore,
+    manifest_name,
+)
 from mltd.servers.asset_prepare import prepare_local_assets  # noqa: E402
 from mltd.servers.asset_server import create_server  # noqa: E402
 from mltd.servers import proxy  # noqa: E402
@@ -102,21 +106,10 @@ class StrictLocalPrefetchTest(unittest.TestCase):
             thread.join(timeout=2)
 
 
-class AssetHTTPProxyTest(unittest.TestCase):
+class AssetInboundProxyTest(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.store = AssetStore(self.temp.name)
-        self.name = 'proxy-object.unity3d'
-        self.body = b'http-proxy-cache' * 64
-        path = self.store.object_path('zh', 'android', self.name)
-        path.write_bytes(self.body)
-        self.store.put_metadata(
-            'zh', 'android', self.name,
-            status=200,
-            size=len(self.body),
-            sha256=hashlib.sha256(self.body).hexdigest(),
-            headers={'Content-Type': 'application/octet-stream'},
-        )
         self.server = create_server('127.0.0.1', 0, self.store)
         self.thread = threading.Thread(target=self.server.serve_forever, daemon=True)
         self.thread.start()
@@ -137,26 +130,62 @@ class AssetHTTPProxyTest(unittest.TestCase):
         conn.close()
         return status, body
 
-    def test_absolute_form_asset_proxy_uses_local_cache(self):
-        target = (
-            'http://assets.rainbowunicorn7297.com/'
-            f'zh-android/{self.name}'
-        )
-        status, body = self.request('GET', target)
-        self.assertEqual(status, 200)
-        self.assertEqual(body, self.body)
-
-    def test_absolute_form_rejects_other_hosts(self):
+    def test_absolute_form_forward_proxy_is_rejected(self):
         status, _ = self.request(
-            'GET', 'http://example.com/zh-android/proxy-object.unity3d'
+            'GET',
+            'http://assets.rainbowunicorn7297.com/zh-android/object.unity3d',
         )
-        self.assertEqual(status, 403)
+        self.assertEqual(status, 400)
 
-    def test_connect_is_disabled_for_strict_local_server(self):
+    def test_connect_is_not_exposed(self):
         status, _ = self.request(
             'CONNECT', 'assets.rainbowunicorn7297.com:443'
         )
-        self.assertEqual(status, 403)
+        self.assertEqual(status, 501)
+
+
+class RecordingHTTPProxy(BaseHTTPRequestHandler):
+    requests = []
+    body = b'outbound-proxy-asset' * 64
+
+    def do_GET(self):
+        type(self).requests.append(self.path)
+        self.send_response(200)
+        self.send_header('Content-Type', 'application/octet-stream')
+        self.send_header('Content-Length', str(len(self.body)))
+        self.end_headers()
+        self.wfile.write(self.body)
+
+    def log_message(self, format, *args):
+        pass
+
+
+class AssetOutboundProxyTest(unittest.TestCase):
+    def test_asset_mirror_uses_configured_http_proxy(self):
+        RecordingHTTPProxy.requests = []
+        proxy_server = ThreadingHTTPServer(('127.0.0.1', 0), RecordingHTTPProxy)
+        thread = threading.Thread(target=proxy_server.serve_forever, daemon=True)
+        thread.start()
+        try:
+            with tempfile.TemporaryDirectory() as temp:
+                proxy_url = f'http://127.0.0.1:{proxy_server.server_address[1]}'
+                store = AssetStore(temp)
+                mirror = AssetMirror(
+                    store,
+                    remote_root='http://upstream.invalid',
+                    upstream_proxy=proxy_url,
+                )
+                path = mirror.download('zh', 'android', 'proxy-object.unity3d')
+                self.assertEqual(path.read_bytes(), RecordingHTTPProxy.body)
+                self.assertEqual(len(RecordingHTTPProxy.requests), 1)
+                self.assertEqual(
+                    RecordingHTTPProxy.requests[0],
+                    'http://upstream.invalid/zh-android/proxy-object.unity3d',
+                )
+        finally:
+            proxy_server.shutdown()
+            proxy_server.server_close()
+            thread.join(timeout=2)
 
 
 class FakeAPIHandler(BaseHTTPRequestHandler):
