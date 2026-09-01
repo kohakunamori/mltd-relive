@@ -135,57 +135,146 @@ def detect_game_language(apk_filename):
     raise RuntimeError('Unrecognized game APK package')
 
 
-def extract_signer_sha256(apk_filename):
-    result = run_command([
-        apksigner_path, 'verify',
-        '--verbose',
-        '--print-certs',
-        apk_filename
-    ], 'apksigner certificate verification')
+APK_SIG_BLOCK_MAGIC = b'APK Sig Block 42'
+APK_SIGNATURE_SCHEME_V2_ID = 0x7109871A
 
-    output = result.stdout or ''
 
-    # apksigner has used slightly different labels across Android Build Tools
-    # releases. Parse line-by-line first so punctuation/label wording does not
-    # become a compatibility requirement.
-    for line in output.splitlines():
-        normalized_label = (
-            line.lower()
-            .replace('–', '-')
-            .replace('—', '-')
-            .replace('−', '-')
-        )
-        if 'sha' not in normalized_label or '256' not in normalized_label:
-            continue
+def _read_length_prefixed(data, offset):
+    if offset + 4 > len(data):
+        raise RuntimeError('Malformed APK v2 signing structure (missing length).')
+    length = struct.unpack_from('<I', data, offset)[0]
+    start = offset + 4
+    end = start + length
+    if end > len(data):
+        raise RuntimeError('Malformed APK v2 signing structure (length out of range).')
+    return data[start:end], end
 
-        if ':' in line:
-            candidate = line.split(':', 1)[1]
-        elif '=' in line:
-            candidate = line.split('=', 1)[1]
-        else:
-            candidate = line
 
-        digest = re.sub(r'[^0-9a-fA-F]', '', candidate)
-        if len(digest) >= 64:
-            return digest[:64].lower()
+def _extract_apk_v2_block(apk_filename):
+    with open(apk_filename, 'rb') as apk_file:
+        apk_file.seek(0, os.SEEK_END)
+        file_size = apk_file.tell()
+        tail_size = min(file_size, 22 + 65535)
+        apk_file.seek(file_size - tail_size)
+        tail = apk_file.read(tail_size)
 
-    # Fallback for versions whose label changed completely: a SHA-256 digest
-    # is the only 32-byte hexadecimal value printed by --print-certs.
-    hex64 = re.search(
-        r'(?<![0-9a-fA-F])(?:[0-9a-fA-F]{2}[:\s-]?){31}[0-9a-fA-F]{2}(?![0-9a-fA-F])',
-        output
+        eocd_offset = tail.rfind(b'PK\x05\x06')
+        if eocd_offset < 0:
+            raise RuntimeError('APK ZIP End of Central Directory was not found.')
+
+        if eocd_offset + 20 > len(tail):
+            raise RuntimeError('Malformed APK ZIP End of Central Directory.')
+
+        central_dir_offset = struct.unpack_from(
+            '<I', tail, eocd_offset + 16
+        )[0]
+        if central_dir_offset == 0xFFFFFFFF:
+            raise RuntimeError('ZIP64 APKs are not supported by this patcher.')
+        if central_dir_offset < 24:
+            raise RuntimeError('APK does not contain an APK Signing Block.')
+
+        apk_file.seek(central_dir_offset - 24)
+        trailer = apk_file.read(24)
+        if len(trailer) != 24 or trailer[8:] != APK_SIG_BLOCK_MAGIC:
+            raise RuntimeError(
+                'APK Signature Scheme v2 block was not found. '
+                'Use the corrected MLTD client from this repository release.'
+            )
+
+        block_size = struct.unpack_from('<Q', trailer, 0)[0]
+        block_start = central_dir_offset - (block_size + 8)
+        if block_start < 0 or block_size < 24:
+            raise RuntimeError('Malformed APK Signing Block size.')
+
+        apk_file.seek(block_start)
+        first_size_raw = apk_file.read(8)
+        if len(first_size_raw) != 8:
+            raise RuntimeError('Malformed APK Signing Block header.')
+        first_size = struct.unpack('<Q', first_size_raw)[0]
+        if first_size != block_size:
+            raise RuntimeError('APK Signing Block size fields do not match.')
+
+        pairs = apk_file.read(block_size - 24)
+
+    offset = 0
+    while offset < len(pairs):
+        if offset + 8 > len(pairs):
+            raise RuntimeError('Malformed APK Signing Block entry length.')
+        pair_size = struct.unpack_from('<Q', pairs, offset)[0]
+        offset += 8
+        if pair_size < 4 or offset + pair_size > len(pairs):
+            raise RuntimeError('Malformed APK Signing Block entry.')
+
+        pair_id = struct.unpack_from('<I', pairs, offset)[0]
+        offset += 4
+        value_size = pair_size - 4
+        value = pairs[offset:offset + value_size]
+        offset += value_size
+
+        if pair_id == APK_SIGNATURE_SCHEME_V2_ID:
+            return value
+
+    raise RuntimeError('APK Signature Scheme v2 entry was not found.')
+
+
+def _extract_v2_signer_certificate_sha256(apk_filename):
+    v2_block = _extract_apk_v2_block(apk_filename)
+
+    signers, signers_end = _read_length_prefixed(v2_block, 0)
+    if signers_end != len(v2_block):
+        raise RuntimeError('Malformed APK v2 signers sequence.')
+
+    signer, _ = _read_length_prefixed(signers, 0)
+    signed_data, signer_offset = _read_length_prefixed(signer, 0)
+    _, signer_offset = _read_length_prefixed(signer, signer_offset)
+    _, signer_offset = _read_length_prefixed(signer, signer_offset)
+    if signer_offset != len(signer):
+        raise RuntimeError('Malformed APK v2 signer record.')
+
+    _, signed_offset = _read_length_prefixed(signed_data, 0)
+    certificates, signed_offset = _read_length_prefixed(
+        signed_data, signed_offset
     )
-    if hex64:
-        return re.sub(r'[^0-9a-fA-F]', '', hex64.group(0)).lower()
+    _, signed_offset = _read_length_prefixed(signed_data, signed_offset)
+    if signed_offset != len(signed_data):
+        raise RuntimeError('Malformed APK v2 signed-data record.')
 
-    diagnostic = output.strip()
-    if len(diagnostic) > 5000:
-        diagnostic = diagnostic[-5000:]
-    raise RuntimeError(
-        'apksigner verified the APK, but the patcher could not parse the '
-        'certificate SHA-256 digest from this Build Tools version.\n\n'
-        'Raw apksigner output:\n' + (diagnostic or '<no output>')
+    certificate, _ = _read_length_prefixed(certificates, 0)
+    if not certificate:
+        raise RuntimeError('APK v2 signer certificate is empty.')
+
+    return hashlib.sha256(certificate).hexdigest()
+
+
+def _has_v1_signature(apk_filename):
+    with zipfile.ZipFile(apk_filename, 'r') as apk:
+        names = [name.upper() for name in apk.namelist()]
+
+    has_sf = any(
+        name.startswith('META-INF/') and name.endswith('.SF')
+        for name in names
     )
+    has_signature_block = any(
+        name.startswith('META-INF/')
+        and name.endswith(('.RSA', '.DSA', '.EC'))
+        for name in names
+    )
+    return has_sf and has_signature_block
+
+
+def extract_signer_sha256(apk_filename, verify=True):
+    if verify:
+        # Some old Build Tools versions (notably 29.0.3 on Windows)
+        # return success here but emit no --print-certs/--verbose text.
+        # Treat apksigner's exit code as the cryptographic verdict and
+        # read the actual signer certificate from the APK v2 block.
+        run_command([
+            apksigner_path, 'verify',
+            '--min-sdk-version', '19',
+            apk_filename
+        ], 'apksigner certificate verification')
+
+    return _extract_v2_signer_certificate_sha256(apk_filename)
 
 
 def payload_snapshot(apk_filename):
@@ -403,33 +492,22 @@ def apksigner():
         output_apk
     ], 'apksigner sign')
 
-    verify = run_command([
+    run_command([
         apksigner_path, 'verify',
-        '--verbose',
-        '--print-certs',
         '--min-sdk-version', '19',
         output_apk
     ], 'apksigner verify')
 
-    verify_text = verify.stdout or ''
-    if not re.search(
-        r'v1 scheme.*:\s*true',
-        verify_text,
-        flags=re.IGNORECASE
-    ):
+    if not _has_v1_signature(output_apk):
         raise RuntimeError(
-            'Final APK does not have a valid v1/JAR signature.'
-        )
-    if not re.search(
-        r'v2 scheme.*:\s*true',
-        verify_text,
-        flags=re.IGNORECASE
-    ):
-        raise RuntimeError(
-            'Final APK does not have a valid APK Signature Scheme v2 signature.'
+            'Final APK does not contain a v1/JAR signature.'
         )
 
-    final_signer_sha256 = extract_signer_sha256(output_apk)
+    # Parsing this block proves that the APK has a structurally valid v2
+    # signer record without depending on apksigner's human-readable output.
+    final_signer_sha256 = extract_signer_sha256(
+        output_apk, verify=False
+    )
     if final_signer_sha256 != original_signer_sha256:
         raise RuntimeError(
             'Final APK signer does not match the input APK signer.\n\n'
