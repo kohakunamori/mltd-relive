@@ -12,6 +12,8 @@ from mltd.servers.logging import logger
 from mltd.servers.utilities import format_datetime
 from mltd.services import *
 
+_SLOW_REQUEST_MS = 100
+
 
 class CustomJSONEncoder(json.JSONEncoder):
     def default(self, o):
@@ -30,8 +32,10 @@ def application(environ, start_response):
     if ('theaterdays-zh.appspot.com' in host
             or 'theaterdays-ko.appspot.com' in host
             or '127.0.0.1' in host):
-        logger.info(f'Request received for service {environ["PATH_INFO"]}')
+        debug = logger.isEnabledFor(logging.DEBUG)
         full_start_time = time.perf_counter_ns()
+        if debug:
+            logger.debug(f'Request received for service {environ["PATH_INFO"]}')
 
         status = '200 OK'
         headers = [
@@ -39,12 +43,12 @@ def application(environ, start_response):
             ('X-Encryption', 'on'),
             ('X-Encryption-Compress', 'gzip'),
             ('X-Encryption-Mode', '3'),
-            # ('X-Server-Date', '2022-02-01T20:00:00+0000'),
         ]
 
         request_len = int(environ['CONTENT_LENGTH'])
         request = environ['wsgi.input'].read(request_len)
-        logger.debug(request)
+        if debug:
+            logger.debug(request)
         request = decrypt_request(request)
 
         context = {
@@ -53,24 +57,35 @@ def application(environ, start_response):
         svc_start_time = time.perf_counter_ns()
         response = JSONRPCResponseManager.handle(request, dispatcher, context)
         svc_end_time = time.perf_counter_ns()
-        if logger.isEnabledFor(logging.DEBUG):
+        if debug:
             logger.debug(
                 json.dumps(response.data, cls=CustomJSONEncoder, indent=2))
-        response = json.dumps(response.data, cls=CustomJSONEncoder,
-                              separators=(',', ':'))
+        response = json.dumps(
+            response.data,
+            cls=CustomJSONEncoder,
+            separators=(',', ':'),
+            check_circular=False,
+        )
         response = encrypt_response(response)
 
         full_end_time = time.perf_counter_ns()
-        logger.info('Service execution time: '
-                     + f'{(svc_end_time-svc_start_time) // 1_000_000} ms')
-        logger.info('Full execution time: '
-                     + f'{(full_end_time-full_start_time) // 1_000_000} ms')
+        svc_ms = (svc_end_time - svc_start_time) / 1_000_000
+        full_ms = (full_end_time - full_start_time) / 1_000_000
+        if debug:
+            logger.debug(
+                f'API timing {environ["PATH_INFO"]}: '
+                f'service={svc_ms:.2f} ms full={full_ms:.2f} ms'
+            )
+        elif full_ms >= _SLOW_REQUEST_MS:
+            logger.warning(
+                f'Slow API request {environ["PATH_INFO"]}: '
+                f'service={svc_ms:.1f} ms full={full_ms:.1f} ms'
+            )
 
         start_response(status, headers)
         return [response]
 
-    else:
-        status = '503 Service Unavailable'
-        headers = [('Content-Type', 'text/html')]
-        start_response(status, headers)
-        return [b'503 Service Unavailable']
+    status = '503 Service Unavailable'
+    headers = [('Content-Type', 'text/html')]
+    start_response(status, headers)
+    return [b'503 Service Unavailable']
