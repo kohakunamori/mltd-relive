@@ -11,14 +11,51 @@ on:
 permissions:
   contents: write
 
-env:
-  RELEASE_TAG: ${{ github.ref_type == 'tag' && github.ref_name || 'standalone-v0.1.3' }}
-  PATCHER_VERSION: v1.0.9
-
 jobs:
+  metadata:
+    name: Resolve release metadata
+    if: github.event_name == 'workflow_dispatch' || github.ref_type == 'tag' || contains(github.event.head_commit.message, '[release standalone]')
+    runs-on: ubuntu-latest
+    outputs:
+      standalone_version: ${{ steps.meta.outputs.standalone_version }}
+      release_tag: ${{ steps.meta.outputs.release_tag }}
+      patcher_version: ${{ steps.meta.outputs.patcher_version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Resolve versions from source
+        id: meta
+        shell: bash
+        run: |
+          set -euo pipefail
+          standalone_version="$(python - <<'PY'
+          import pathlib
+          import re
+
+          text = pathlib.Path('standalone/mltd/servers/config.py').read_text(encoding='utf-8')
+          match = re.search(r"^version\s*=\s*['\"]([^'\"]+)['\"]", text, re.MULTILINE)
+          if not match:
+              raise SystemExit('Could not resolve standalone version from config.py')
+          print(match.group(1))
+          PY
+          )"
+          patcher_version="v$(tr -d '\r\n ' < tools/apk-patcher/VERSION)"
+          release_tag="standalone-v${standalone_version}"
+
+          if [[ "${GITHUB_REF_TYPE}" == "tag" && "${GITHUB_REF_NAME}" != "${release_tag}" ]]; then
+            echo "Tag ${GITHUB_REF_NAME} does not match source version ${release_tag}." >&2
+            exit 1
+          fi
+
+          echo "standalone_version=${standalone_version}" >> "$GITHUB_OUTPUT"
+          echo "release_tag=${release_tag}" >> "$GITHUB_OUTPUT"
+          echo "patcher_version=${patcher_version}" >> "$GITHUB_OUTPUT"
+
   build:
     name: Build standalone packages
-    if: github.ref_type == 'tag' || contains(github.event.head_commit.message, '[release standalone-v0.1.3]')
+    needs: metadata
+    if: needs.metadata.result == 'success'
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -82,6 +119,7 @@ jobs:
         env:
           PACKAGE_SOURCE: ${{ matrix.package-source }}
           PACKAGE_SUFFIX: ${{ matrix.package-suffix }}
+          RELEASE_TAG: ${{ needs.metadata.outputs.release_tag }}
         run: |
           set -euo pipefail
           mkdir -p standalone/dist/release-output
@@ -103,7 +141,8 @@ jobs:
 
   patcher:
     name: Build APK Patcher packages
-    if: github.ref_type == 'tag' || contains(github.event.head_commit.message, '[release standalone-v0.1.3]')
+    needs: metadata
+    if: needs.metadata.result == 'success'
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -167,6 +206,7 @@ jobs:
         env:
           PACKAGE_SOURCE: ${{ matrix.package-source }}
           PACKAGE_SUFFIX: ${{ matrix.package-suffix }}
+          PATCHER_VERSION: ${{ needs.metadata.outputs.patcher_version }}
         run: |
           set -euo pipefail
           mkdir -p tools/apk-patcher/dist/release-output
@@ -188,7 +228,8 @@ jobs:
 
   gameclient:
     name: Prepare corrected game clients
-    if: github.ref_type == 'tag' || contains(github.event.head_commit.message, '[release standalone-v0.1.3]')
+    needs: metadata
+    if: needs.metadata.result == 'success'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -236,7 +277,7 @@ jobs:
             unzip -tq "$apk"
             unzip -p "$apk" AndroidManifest.xml > /dev/null
           done
-          cp GAME_CLIENT_NOTICE.txt game-client/GAME_CLIENT_NOTICE.txt
+          cp RELEASE_NOTES.md game-client/RELEASE_NOTES.md
           (
             cd game-client
             sha256sum *.apk > SHA256SUMS.txt
@@ -251,11 +292,12 @@ jobs:
 
   createrelease:
     name: Create or update Release
-    if: github.ref_type == 'tag' || contains(github.event.head_commit.message, '[release standalone-v0.1.3]')
     needs:
+      - metadata
       - build
       - patcher
       - gameclient
+    if: needs.metadata.result == 'success' && needs.build.result == 'success' && needs.patcher.result == 'success' && needs.gameclient.result == 'success'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -267,15 +309,27 @@ jobs:
           path: release-artifacts
 
       - name: Create or update Release
-        id: create_release
         uses: ncipollo/release-action@v1
         with:
-          tag: ${{ env.RELEASE_TAG }}
+          tag: ${{ needs.metadata.outputs.release_tag }}
           commit: ${{ github.sha }}
-          name: mltd-relive-${{ env.RELEASE_TAG }}
-          bodyFile: GAME_CLIENT_NOTICE.txt
+          name: mltd-relive-${{ needs.metadata.outputs.release_tag }}
+          bodyFile: RELEASE_NOTES.md
           artifacts: 'LICENSE,release-artifacts/windows/*,release-artifacts/ubuntu/*,release-artifacts/macos/*,release-artifacts/patcher-windows/*,release-artifacts/patcher-ubuntu/*,release-artifacts/patcher-macos/*,release-artifacts/game-client/*'
           artifactErrorsFailBuild: true
           allowUpdates: true
           replacesArtifacts: true
           makeLatest: true
+
+      - name: Remove mislabelled standalone-v0.1.3 release
+        if: needs.metadata.outputs.release_tag == 'standalone-v0.1.4'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          old_release_id="$(gh api "repos/${GITHUB_REPOSITORY}/releases/tags/standalone-v0.1.3" --jq '.id' 2>/dev/null || true)"
+          if [[ -n "$old_release_id" ]]; then
+            gh api -X DELETE "repos/${GITHUB_REPOSITORY}/releases/${old_release_id}"
+          fi
+          gh api -X DELETE "repos/${GITHUB_REPOSITORY}/git/refs/tags/standalone-v0.1.3" >/dev/null 2>&1 || true
