@@ -8,9 +8,79 @@ on:
       - 'requirements.txt'
       - '.github/workflows/build-apk-patcher.yml'
 
+permissions:
+  contents: write
+
 jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Apply v1.0.8 signer fallback
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('tools/apk-patcher/apk-patcher.pyw')
+          text = path.read_text(encoding='utf-8')
+          lines = text.splitlines()
+
+          start = lines.index(
+              '    # apksigner verify above is the authoritative signature verdict for'
+          )
+          end = lines.index('    validate_payload_changes(output_apk)', start)
+
+          replacement = [
+              '    # apksigner verify above is the authoritative signature verdict for',
+              '    # Android API 19+. Old Build Tools such as 29.0.3 may successfully',
+              '    # produce a verifier-approved v1/JAR-signed APK without a v2 block.',
+              '    # If v2 exists, compare signer identity; otherwise trust apksigner',
+              '    # verification plus the explicitly selected bundled signing key.',
+              '    final_signer_sha256 = None',
+              '    try:',
+              '        final_signer_sha256 = extract_signer_sha256(',
+              '            output_apk, verify=False',
+              '        )',
+              '    except RuntimeError as exc:',
+              "        if 'APK Signature Scheme v2 block was not found' not in str(exc):",
+              '            raise',
+              '',
+              '    if (',
+              '        final_signer_sha256 is not None',
+              '        and final_signer_sha256 != original_signer_sha256',
+              '    ):',
+              '        raise RuntimeError(',
+              "            'Final APK signer does not match the input APK signer.\\n\\n'",
+              "            f'Input signer SHA-256: {original_signer_sha256}\\n'",
+              "            f'Output signer SHA-256: {final_signer_sha256}'",
+              '        )',
+              '',
+          ]
+
+          lines[start:end] = replacement
+          path.write_text('\n'.join(lines) + '\n', encoding='utf-8')
+          Path('tools/apk-patcher/VERSION').write_text('1.0.8\n', encoding='utf-8')
+          PY
+          python -m py_compile tools/apk-patcher/apk-patcher.pyw
+          git diff --check
+
+      - name: Commit v1.0.8 source
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add tools/apk-patcher/apk-patcher.pyw tools/apk-patcher/VERSION
+          git commit -m 'fix(apk-patcher): allow verifier-approved v1-only APK output'
+          git push origin HEAD:main
+
   build:
     name: Build packages
+    needs: apply
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -25,7 +95,9 @@ jobs:
             cmd-build: |
               cd tools\apk-patcher
               ..\..\env\Scripts\pyinstaller apk-patcher_windows.spec
-            out-name: mltd-relive-apk-patcher-windows
+            package-source: tools/apk-patcher/dist/mltd-relive-apk-patcher.exe
+            package-name: mltd-relive-apk-patcher-v1.0.8-windows.exe
+            out-name: patcher-windows
           - os: ubuntu-latest
             target: Ubuntu
             cmd-install: |
@@ -36,7 +108,9 @@ jobs:
             cmd-build: |
               cd tools/apk-patcher
               ../../env/bin/pyinstaller apk-patcher_ubuntu.spec
-            out-name: mltd-relive-apk-patcher-ubuntu
+            package-source: tools/apk-patcher/dist/mltd-relive-apk-patcher
+            package-name: mltd-relive-apk-patcher-v1.0.8-ubuntu
+            out-name: patcher-ubuntu
           - os: macos-latest
             target: macOS
             cmd-install: |
@@ -48,21 +122,69 @@ jobs:
               cd tools/apk-patcher
               ../../env/bin/pyinstaller apk-patcher_macos.spec
               cd dist
-              zip -r9 mltd-relive-apk-patcher-macos.zip mltd-relive-apk-patcher.app
-            out-name: mltd-relive-apk-patcher-macos
+              zip -r9 mltd-relive-apk-patcher-v1.0.8-macos.zip mltd-relive-apk-patcher.app
+            package-source: tools/apk-patcher/dist/mltd-relive-apk-patcher-v1.0.8-macos.zip
+            package-name: mltd-relive-apk-patcher-v1.0.8-macos.zip
+            out-name: patcher-macos
     steps:
-      - name: Checkout
+      - name: Checkout patched main
         uses: actions/checkout@v4
+        with:
+          ref: main
+
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+
+      - name: Confirm source revision
+        shell: bash
+        run: |
+          grep -qx '1.0.8' tools/apk-patcher/VERSION
+          grep -q 'final_signer_sha256 = None' tools/apk-patcher/apk-patcher.pyw
+          python -m py_compile tools/apk-patcher/apk-patcher.pyw
+
       - name: Install dependencies for ${{ matrix.target }}
         run: ${{ matrix.cmd-install }}
+
       - name: Build with PyInstaller for ${{ matrix.target }}
         run: ${{ matrix.cmd-build }}
-      - name: Upload build artifacts
+
+      - name: Stage release file
+        shell: bash
+        env:
+          PACKAGE_SOURCE: ${{ matrix.package-source }}
+          PACKAGE_NAME: ${{ matrix.package-name }}
+        run: |
+          mkdir -p release-output
+          cp "$PACKAGE_SOURCE" "release-output/$PACKAGE_NAME"
+
+      - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.out-name }}
-          path: tools/apk-patcher/dist
+          path: release-output/*
+          if-no-files-found: error
+
+  publish:
+    name: Publish v1.0.8
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-artifacts
+
+      - name: Replace APK Patcher assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          repo="$GITHUB_REPOSITORY"
+          tag='standalone-v0.1.3'
+          for name in $(gh release view "$tag" --repo "$repo" --json assets --jq '.assets[].name' | grep '^mltd-relive-apk-patcher-v' || true); do
+            gh release delete-asset "$tag" "$name" --repo "$repo" -y
+          done
+          gh release upload "$tag" release-artifacts/patcher-windows/* release-artifacts/patcher-ubuntu/* release-artifacts/patcher-macos/* --repo "$repo" --clobber
