@@ -1,16 +1,18 @@
-# mltd-relive Standalone v0.1.6
+# mltd-relive Standalone v0.1.7
 
-本 Release 同时包含 **Standalone v0.1.6 服务器、修正版游戏客户端和 APK Patcher v1.0.9**。
+本 Release 同时包含 **Standalone v0.1.7 服务器、修正版游戏客户端和 APK Patcher v1.0.9**。
 
-## v0.1.6 重点更新
+## v0.1.7 重点更新
 
-- `local` 默认只准备 `zh-android`，不再自动下载 iOS / Korean 资源。
-- 可在 `config.ini` 通过 `asset_local_scopes` 精确配置额外 scope，例如 `zh-android,ko-android` 或 `zh-android,zh-ios`。
-- 默认 prefetch 并发提升到 **48 workers**；可通过 `asset_prefetch_workers` 自行调整。
-- bulk prefetch 不再对每个对象执行 `fsync()`，仍保留 `.part`、Content-Length 校验、SHA-256 metadata、原子 rename；未完成/未登记对象会在下次启动重新获取。
-- metadata 批量提交从 64 提升到 256，降低大量小文件预取时的 SQLite 提交频率。
-- GUI 在 `Preparing Local Assets` 阶段即可使用 **Stop Server**，可立即中断正在进行的 local prefetch，并恢复到 Stopped 状态。
-- GUI 的 Asset Preparation 面板显示实际 worker 数，便于确认 `config.ini` 配置是否生效。
+- 修复 `local` cache 已完整后每次启动仍长时间停留在 `Preparing Local Assets` 的问题。
+- 每个完整 strict-local scope 现在会生成可自动失效的 **ready stamp**。
+- 后续启动只进行常数级状态检查：scope 目录时间戳、manifest 时间戳/大小和 ready stamp；命中后直接跳过 SQLite 初始化、manifest 解析和全目录完整性扫描。
+- cache 中发生新增、删除、重命名或 manifest 替换/修改时，ready stamp 会自动失效，下一次启动回退到完整扫描并重新建立 stamp。
+- `verify_existing` 会强制绕过 fast-start，仍可执行完整 SHA-256 验证。
+- fast-start 回归测试明确要求命中 ready stamp 时不得实例化 `AssetStore`，从而保证不会暗中执行 SQLite/cache scan。
+- 保留 v0.1.6 的激进 prefetch：默认 `zh-android`、48 workers、可通过 `config.ini` 配置并发和额外 scope、bulk metadata commit、可在 Preparing 阶段 Stop Server。
+
+首次使用 v0.1.7 且已有旧版完整 cache 时，需要进行一次正常完整性扫描以建立 ready stamp；之后未改动 cache 的启动将直接走 fast-start。
 
 ## local 配置示例
 
@@ -21,21 +23,15 @@ asset_local_scopes = zh-android
 asset_prefetch_workers = 48
 ```
 
-如果需要额外资源：
-
-```ini
-asset_local_scopes = zh-android,ko-android,zh-ios
-```
-
 ## 下载哪个文件
 
 | 文件 | 用途 |
 |---|---|
-| `mltd-relive-standalone-v0.1.6-windows.exe` | Windows GUI/服务器 |
-| `mltd-relive-standalone-v0.1.6-ubuntu` | Ubuntu/Linux 服务器 |
-| `mltd-relive-standalone-v0.1.6-macos.zip` | macOS 服务器 |
+| `mltd-relive-standalone-v0.1.7-windows.exe` | Windows GUI/服务器 |
+| `mltd-relive-standalone-v0.1.7-ubuntu` | Ubuntu/Linux 服务器 |
+| `mltd-relive-standalone-v0.1.7-macos.zip` | macOS 服务器 |
 | `mltd-relive-game-client-zh-fixed.apk` | 繁中修正版客户端 |
 | `mltd-relive-game-client-ko-fixed.apk` | 韩文修正版客户端 |
 | `mltd-relive-apk-patcher-v1.0.9-windows.exe` | Windows APK Patcher |
 
-Windows + 繁中客户端使用 `mltd-relive-standalone-v0.1.6-windows.exe` 和 `mltd-relive-game-client-zh-fixed.apk` 即可。日常联网缓存仍推荐 `hybrid`；需要严格离线镜像时使用 `local`。
+Windows + 繁中客户端使用 `mltd-relive-standalone-v0.1.7-windows.exe` 和 `mltd-relive-game-client-zh-fixed.apk` 即可。
