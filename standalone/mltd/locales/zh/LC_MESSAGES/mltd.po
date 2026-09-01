@@ -235,7 +235,7 @@ msgstr "櫻守歌織"
 msgid "Shika"
 msgstr "詩花"
 
-#: .\mltd\services\live.py:1130
+#: .\mltd\services\live.py:1130 .\mltd\services\job.py:1130
 msgid "Reward obtained from reaching Producer Rank \"{rank}.\""
 msgstr "製作人階級晉升為「{rank}」的達成報酬。"
 
@@ -832,3 +832,6 @@ msgstr "啾！吸血鬼女孩"
 msgid "Kiramekirari"
 msgstr "閃閃發光"
 
+#: .\mltd\services\theater.py:545
+msgid "Reward obtained from interacting with {idol_name}"
+msgstr "與 {idol_name} 互動獲得的報酬。"

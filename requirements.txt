@@ -3,7 +3,7 @@ certifi==2023.7.22
 charset-normalizer==3.2.0
 dnslib==0.9.23
 glfw==2.6.2
-greenlet==2.0.2
+greenlet==3.0.0
 idna==3.4
 imgui==1.4.1
 json-rpc==1.15.0

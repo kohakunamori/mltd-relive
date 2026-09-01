@@ -501,6 +501,18 @@ class MstVoiceCategorySchema(SQLAlchemyAutoSchema):
             data['release_date']).astimezone(config.timezone)
         return data
 
+class MstDirectionCategorySchema(SQLAlchemyAutoSchema):
+    class Meta:
+        model = MstDirectionCategory
+        ordered = True
+
+    @post_dump
+    def _convert(self, data, **kwargs):
+        data['release_date'] = str_to_datetime(
+            data['release_date']).astimezone(config.timezone)
+        return data
+
+
 
 class MstLessonWearSchema(SQLAlchemyAutoSchema):
     class Meta:
@@ -1541,6 +1553,20 @@ class MstWhiteBoardSchema(SQLAlchemyAutoSchema):
     def _convert(self, data, **kwargs):
         data['display_date'] = str_to_datetime(
             data['display_date']).astimezone(config.timezone)
+        data['begin_date'] = str_to_datetime(data['begin_date']).astimezone(
+            config.timezone)
+        data['end_date'] = str_to_datetime(data['end_date']).astimezone(
+            config.timezone)
+        return data
+
+
+class MstComicSchema(SQLAlchemyAutoSchema):
+    class Meta:
+        model = MstComic
+        ordered = True
+
+    @post_dump
+    def _convert(self, data, **kwargs):
         data['begin_date'] = str_to_datetime(data['begin_date']).astimezone(
             config.timezone)
         data['end_date'] = str_to_datetime(data['end_date']).astimezone(
@@ -2667,3 +2693,19 @@ class RandomLiveIdolSchema(SQLAlchemyAutoSchema):
             data['mst_lesson_wear_id'] = 0
         return data
 
+class IdolDetailAlbumSchema(AlbumSchema):
+    class Meta(AlbumSchema.Meta):
+        exclude = AlbumSchema.Meta.exclude + ('ex_type', 'resource_id')
+
+class MstTheaterContactSchema(SQLAlchemyAutoSchema):
+    class Meta:
+        model = MstTheaterContact
+        ordered = True
+
+    @post_dump
+    def _convert(self, data, **kwargs):
+        if not data['motion_id']:
+            data['motion_id'] = 'null'
+        if not data['position_id']:
+            data['position_id'] = 'null'
+        return data

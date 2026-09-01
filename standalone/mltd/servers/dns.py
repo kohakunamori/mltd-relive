@@ -31,12 +31,14 @@ def start(port=dns_port, conn=None):
         zone_record = cleandoc(f"""
             theaterdays-zh.appspot.com. 60 IN A {lan_ipv4}
             theaterdays-ko.appspot.com. 60 IN A {lan_ipv4}
+            theaterdays.appspot.com. 60 IN A {lan_ipv4}
         """)
         zone_record += '\n'
     if lan_ipv6:
         zone_record = cleandoc(f"""
             theaterdays-zh.appspot.com. 60 IN A {lan_ipv6}
             theaterdays-ko.appspot.com. 60 IN A {lan_ipv6}
+            theaterdays.appspot.com. 60 IN A {lan_ipv6}
         """)
         zone_record += '\n'
 
@@ -67,4 +69,3 @@ if __name__ == '__main__':
             sleep(1)
     except KeyboardInterrupt:
         pass
-

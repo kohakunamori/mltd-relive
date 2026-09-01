@@ -13,7 +13,7 @@ from mltd.servers.config import config
 from mltd.servers.i18n import translation
 from mltd.services.birthday import get_birthday_entrance_direction_resource
 from mltd.services.mission import update_mission_progress
-from mltd.services.present import add_present
+from mltd.services.utils import add_present
 
 _ = translation.gettext
 
