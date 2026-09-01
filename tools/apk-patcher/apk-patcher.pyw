@@ -34,6 +34,34 @@ def current_path():
     return getattr(sys, '_MEIPASS', os.path.abspath('.'))
 
 
+def patched_apk_path():
+    return os.path.join(
+        ascii_apk_name,
+        'dist',
+        f'{ascii_apk_name}_{resolution}p_{frame_rate}fps.apk'
+    )
+
+
+def run_command(command, name):
+    result = subprocess.run(
+        command,
+        stdin=subprocess.DEVNULL,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+        errors='replace'
+    )
+    if result.returncode != 0:
+        output = (result.stdout or '').strip()
+        if len(output) > 8000:
+            output = output[-8000:]
+        message = f'{name} failed with exit code {result.returncode}'
+        if output:
+            message += f'\n\n{output}'
+        raise RuntimeError(message)
+    return result
+
+
 def validate_input():
     if not apktool_path.endswith('apktool.bat') and not apktool_path.endswith('apktool'):
         return 'Invalid apktool.bat Path'
@@ -43,6 +71,8 @@ def validate_input():
         return 'Invalid apksigner.bat Path'
     if not apk_path.endswith('.apk'):
         return 'Invalid Game APK Path'
+    if not os.path.isfile(os.path.join(current_path(), 'mltd.jks')):
+        return 'Bundled signing keystore mltd.jks was not found'
     return ''
 
 
@@ -59,7 +89,7 @@ def initialize():
 
 
 def apktool_decode():
-    subprocess.run([apktool_path, 'd', apk_path], stdin=subprocess.DEVNULL)
+    run_command([apktool_path, 'd', apk_path], 'apktool decode')
 
 
 def apply_patch():
@@ -111,35 +141,46 @@ def apply_patch():
 
 
 def apktool_build():
-    subprocess.run([apktool_path, 'b', ascii_apk_name], stdin=subprocess.DEVNULL)
+    run_command([apktool_path, 'b', ascii_apk_name], 'apktool build')
 
 
 def zipalign():
-    subprocess.run([
+    run_command([
         zipalign_path, '-f', '-v', '4',
         os.path.join(ascii_apk_name, 'dist', f'{ascii_apk_name}.apk'),
-        os.path.join(ascii_apk_name, 'dist', f'{ascii_apk_name}_{resolution}p_{frame_rate}fps.apk')
-    ])
+        patched_apk_path()
+    ], 'zipalign')
 
 
 def apksigner():
-    subprocess.run([
+    output_apk = patched_apk_path()
+    run_command([
         apksigner_path, 'sign',
         '--ks', os.path.join(current_path(), 'mltd.jks'),
+        '--ks-type', 'PKCS12',
         '--ks-key-alias', 'bndltool',
         '--ks-pass', 'pass:changeit',
-        os.path.join(ascii_apk_name, 'dist', f'{ascii_apk_name}_{resolution}p_{frame_rate}fps.apk')
-    ])
+        output_apk
+    ], 'apksigner sign')
+
+    run_command([
+        apksigner_path, 'verify',
+        '--verbose',
+        '--print-certs',
+        output_apk
+    ], 'apksigner verify')
 
 
-def collect_and_cleanup():
+def collect_output():
+    output_apk = patched_apk_path()
+    if not os.path.isfile(output_apk):
+        raise RuntimeError('Patched APK was not produced')
+    os.replace(output_apk, f'{apk_name}_{resolution}p_{frame_rate}fps.apk')
+
+
+def cleanup():
     global apk_path
 
-    if os.path.isfile(os.path.join(ascii_apk_name, 'dist', f'{ascii_apk_name}_{resolution}p_{frame_rate}fps.apk')):
-        os.replace(
-            os.path.join(ascii_apk_name, 'dist', f'{ascii_apk_name}_{resolution}p_{frame_rate}fps.apk'),
-            f'{apk_name}_{resolution}p_{frame_rate}fps.apk'
-        )
     if os.path.isdir(os.path.abspath(ascii_apk_name)):
         shutil.rmtree(os.path.abspath(ascii_apk_name))
     if apk_name != ascii_apk_name:
@@ -354,10 +395,11 @@ def main():
                     apktool_build()
                     zipalign()
                     apksigner()
+                    collect_output()
                 except Exception:
                     error_message = traceback.format_exc()
                 finally:
-                    collect_and_cleanup()
+                    cleanup()
                     is_patching = False
 
     impl.shutdown()
