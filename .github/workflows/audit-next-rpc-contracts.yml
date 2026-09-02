@@ -6,6 +6,7 @@ on:
       - fix/story-service-compat
     paths:
       - '.github/workflows/audit-next-rpc-contracts.yml'
+  workflow_dispatch:
 
 jobs:
   audit:
@@ -13,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: git fetch origin client-decompiled-zh-fixed-v1 --depth=1
-      - name: Dump client mission contracts
+      - name: Dump core offline RPC contracts
         shell: bash
         run: |
           set -euo pipefail
@@ -21,22 +22,49 @@ jobs:
           python - <<'PY'
           import pathlib, re
           dump = pathlib.Path('/tmp/dump.cs').read_text(encoding='utf-8', errors='ignore')
-          targets = (
-              'ClientMission',
-              'DoClientMissionArgs',
-              'DoClientMissionReply',
-              'MissionProcessStatus',
-              'MissionStatus',
-              'TrainingPointDiff',
-          )
+          methods = [
+              'FriendService.GetFriendList', 'FriendService.RequestFriend',
+              'FriendService.AcceptFriend', 'FriendService.RemoveFriend',
+              'FriendService.GetCommentList', 'FriendService.SendComment',
+              'FriendService.GetFlowerStandList', 'FriendService.SendFlowerStand',
+              'FriendService.SendFlowerStandMulti', 'FriendService.ExecFlowerStandReward',
+              'CostumeService.GetCostumeList', 'CostumeService.SetCostume',
+              'PresentService.GetPresentHistory', 'NaviService.GetNaviList',
+              'DramaService.GetDramaList', 'BlogService.GetBlogList',
+              'BlogService.LikeBlog', 'BlogService.ReadBlog',
+              'MailService.GetMailList', 'MailService.ReadMail', 'MailService.ResponseMail',
+          ]
+          for method in methods:
+              print(f'=== RPC {method} ===')
+              pos = dump.find(method)
+              if pos < 0:
+                  print('NOT FOUND')
+              else:
+                  lo = max(0, pos - 1800); hi = min(len(dump), pos + 2200)
+                  print(dump[lo:hi])
+
+          targets = [
+              'GetFriendListArgs','GetFriendListReply','RequestFriendArgs','RequestFriendReply',
+              'AcceptFriendArgs','AcceptFriendReply','RemoveFriendArgs','RemoveFriendReply',
+              'GetCommentListArgs','GetCommentListReply','SendCommentArgs','SendCommentReply',
+              'GetFlowerStandListArgs','GetFlowerStandListReply','SendFlowerStandArgs','SendFlowerStandReply',
+              'SendFlowerStandMultiArgs','SendFlowerStandMultiReply','ExecFlowerStandRewardArgs','ExecFlowerStandRewardReply',
+              'GetCostumeListArgs','GetCostumeListReply','SetCostumeArgs','SetCostumeReply',
+              'GetPresentHistoryArgs','GetPresentHistoryReply','GetNaviListArgs','GetNaviListReply',
+              'GetDramaListArgs','GetDramaListReply','GetBlogListArgs','GetBlogListReply',
+              'LikeBlogArgs','LikeBlogReply','ReadBlogArgs','ReadBlogReply',
+              'GetMailListArgs','GetMailListReply','ReadMailArgs','ReadMailReply','ResponseMailArgs','ResponseMailReply',
+              'FriendStatus','FriendSummary','FriendComment','FlowerStand','CostumeStatus','NaviStatus','BlogStatus','MailStatus',
+          ]
           for name in targets:
-              print(f'=== {name} ===')
               match = re.search(rf'public class {name}\b.*?\{{(.*?)\n\s*// Methods', dump, flags=re.S)
               if not match:
-                  print('NOT FOUND')
                   continue
+              print(f'=== CLASS {name} ===')
               for typ, field in re.findall(r'^\s*public\s+([^;\n]+?)\s+([A-Za-z0-9_]+);', match.group(1), flags=re.M):
                   print(typ.strip(), field)
           PY
-          echo '=== CURRENT CLIENT-MISSION CLASS IDS ==='
-          grep -RIn -C 3 'mst_mission_class_id.*==' standalone/mltd/services | head -n 500 || true
+          echo '=== SERVER FRIEND/COSTUME MODELS ==='
+          grep -n -A90 -B5 -E '^class (Friend|Costume|Profile|Present|MstCostume)\b' standalone/mltd/models/models.py | head -n 900 || true
+          echo '=== EXISTING FRIEND/COSTUME SCHEMAS/USAGE ==='
+          grep -RIn -C 4 -E 'FriendSchema|GuestSchema|CostumeSchema|Friend\(|Costume\(' standalone/mltd | head -n 1200 || true
