@@ -125,6 +125,14 @@ def _owned_card(session, user_id, card_id):
     )
 
 
+def _store_achievement_list(profile, values):
+    achievement_ids = [int(value) for value in (values or [])][:52]
+    profile.mst_achievement_id_list = (
+        ','.join(str(value) for value in achievement_ids)
+        if achievement_ids else None
+    )
+
+
 @dispatcher.add_method(name='UserService.GetProfile', context_arg='context')
 def get_profile(params, context):
     """Return the client-exact GetProfileReply shape from local save data."""
@@ -209,12 +217,7 @@ def set_self_profile(params, context):
         if 'mst_achievement_id' in params:
             profile.mst_achievement_id = int(params['mst_achievement_id'])
         if 'mst_achievement_id_list' in params:
-            raw_ids = params.get('mst_achievement_id_list') or []
-            achievement_ids = [int(value) for value in raw_ids][:52]
-            profile.mst_achievement_id_list = (
-                ','.join(str(value) for value in achievement_ids)
-                if achievement_ids else None
-            )
+            _store_achievement_list(profile, params.get('mst_achievement_id_list'))
 
         for helper in params.get('helper_card_id_list') or []:
             idol_type = int(helper.get('idol_type', 0))
@@ -240,3 +243,25 @@ def set_self_profile(params, context):
         result = _mission_reply(session, user)
         session.commit()
         return result
+
+
+@dispatcher.add_method(name='UserService.SetAchievementList', context_arg='context')
+def set_achievement_list(params, context):
+    """Persist the producer-card achievement list.
+
+    The current client defines SetAchievementListReply as an empty class, so
+    the exact successful wire payload is simply ``{}``.
+    """
+    user_id = _requester_id(context)
+    with Session(engine) as session:
+        profile = session.scalar(
+            select(Profile).where(Profile.id_ == user_id)
+        )
+        if profile is None:
+            raise LookupError('self profile not found')
+        _store_achievement_list(
+            profile,
+            (params or {}).get('mst_achievement_id_list'),
+        )
+        session.commit()
+    return {}
