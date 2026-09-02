@@ -11,6 +11,32 @@ from mltd.servers.encryption import decrypt_request, encrypt_response
 from mltd.servers.logging import logger
 from mltd.servers.utilities import format_datetime
 from mltd.services import *
+from mltd.services import theater as theater_service
+
+
+# Diagnostic A/B override: keep dynamic Theater contacts, but suppress the
+# card-specific placeholder resource_id that is absent from the zh-android
+# manifest. This isolates card_0000_contact from the rest of TheaterService.
+@dispatcher.add_method(name='TheaterService.GetTheater', context_arg='context')
+def _diagnostic_get_theater_without_card_contacts(params, context):
+    result = theater_service.get_theater(params, context)
+    theater = result['theater']
+    safe_rooms = []
+    safe_idols = []
+    for room in theater.get('room_list') or []:
+        balloon = room.get('balloon') or {}
+        if balloon.get('resource_id') == 'card_0000_contact':
+            continue
+        safe_rooms.append(room)
+        for idol in balloon.get('room_idol_list') or []:
+            mst_idol_id = idol.get('mst_idol_id')
+            if mst_idol_id is not None:
+                safe_idols.append(mst_idol_id)
+    theater['room_list'] = safe_rooms
+    theater['idol_booking_list'] = safe_idols
+    theater.setdefault('prior_lot_rate_table_list', [])
+    return result
+
 
 _SLOW_REQUEST_MS = 25
 _BATCH_METHOD_PREVIEW = 12
