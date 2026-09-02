@@ -12,7 +12,7 @@ from mltd.services.utils import add_present
 
 
 # These option families are emitted by the client for second-anniversary
-# training missions.  They map uniquely with option2 (idol ID) to mission
+# training missions. They map uniquely with option2 (idol ID) to mission
 # classes 74/75 in mst_mission.csv.
 _SUPPORTED_OPTIONS = {'dress', 'mobile', 'thirteen', '25,26'}
 _SUPPORTED_CLASSES = {74, 75}
@@ -34,7 +34,7 @@ def _grant_training_mission_rewards(session, user, mst_mission):
     """Grant the item rewards used by client-managed training missions.
 
     All class 74/75 rows in the bundled master data have exactly one item
-    reward (the corresponding idol-specific anniversary item).  Keep this
+    reward (the corresponding idol-specific anniversary item). Keep this
     validation explicit so a future master-data change cannot silently grant a
     reward with semantics this compatibility path does not implement.
     """
@@ -68,7 +68,7 @@ def _complete_client_mission(session, user, mission, progress):
     """Apply one client-reported progress value.
 
     Returns True only when the mission transitions from in-progress to
-    completed.  Closed and already-completed missions are intentionally
+    completed. Closed and already-completed missions are intentionally
     idempotent no-ops.
     """
     if mission.mission_state != 1 or progress <= mission.progress:
@@ -83,6 +83,20 @@ def _complete_client_mission(session, user, mission, progress):
     mission.finish_date = now
     mission.mission_state = 3
     _grant_training_mission_rewards(session, user, mission.mst_mission)
+
+    next_missions = session.scalars(
+        select(Mission)
+        .join(MstMission)
+        .where(Mission.user_id == user.user_id)
+        .where(
+            MstMission.premise_mst_mission_id_list
+            == mission.mst_mission_id
+        )
+        .where(Mission.mission_state == 0)
+    ).all()
+    for next_mission in next_missions:
+        next_mission.mission_state = 1
+
     return True
 
 
@@ -93,7 +107,7 @@ def do_client_mission(params, context):
     """Process client-managed training mission progress.
 
     The client identifies these missions by ``option`` + ``option2`` rather
-    than a mission ID.  Only the four option families verified in the client
+    than a mission ID. Only the four option families verified in the client
     and bundled master data are accepted. Unknown/stale reports are safe
     no-ops, which matches the nature of client-side mission checks.
     """
@@ -144,10 +158,6 @@ def do_client_mission(params, context):
             if _complete_client_mission(session, user, mission, progress):
                 completed.append(mission)
 
-        # Preserve the prerequisite-opening behavior used by the normal mission
-        # helper.  The current class 74/75 data does not normally open chained
-        # missions, but collecting this delta keeps the reply contract correct
-        # if compatible master data adds one later.
         opened = []
         if closed_before:
             opened = session.scalars(
