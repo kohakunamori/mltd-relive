@@ -1,0 +1,424 @@
+{
+  "mprotect_calls": [
+    {
+      "callsite": 28280,
+      "root": "DT_INIT",
+      "block": 28264,
+      "consensus": {
+        "x2": 7
+      },
+      "paths": [
+        {
+          "path": [
+            "0x6e50",
+            "0x6e60",
+            "0x6e68"
+          ],
+          "args": {
+            "x0": null,
+            "x1": null,
+            "x2": 7
+          },
+          "trace": [
+            {
+              "address": 28240,
+              "text": "add x10, x10, #1"
+            },
+            {
+              "address": 28244,
+              "text": "sub x8, x8, #1"
+            },
+            {
+              "address": 28248,
+              "text": "add x11, x11, #0x38"
+            },
+            {
+              "address": 28252,
+              "text": "cbnz x8, #0x6e30"
+            },
+            {
+              "address": 28256,
+              "text": "b #0x6e68"
+            },
+            {
+              "address": 28264,
+              "text": "eor x8, x9, #0xfff"
+            },
+            {
+              "address": 28268,
+              "text": "and x20, x8, x9"
+            },
+            {
+              "address": 28272,
+              "text": "mov w2, #7"
+            },
+            {
+              "address": 28276,
+              "text": "mov x1, x20"
+            },
+            {
+              "address": 28280,
+              "text": "bl #0x1707f0",
+              "args_before": {
+                "x0": null,
+                "x1": null,
+                "x2": 7
+              }
+            }
+          ]
+        },
+        {
+          "path": [
+            "0x6e3c",
+            "0x6e60",
+            "0x6e68"
+          ],
+          "args": {
+            "x0": null,
+            "x1": null,
+            "x2": 7
+          },
+          "trace": [
+            {
+              "address": 28232,
+              "text": "add x9, x9, x12"
+            },
+            {
+              "address": 28236,
+              "text": "add x9, x9, x28"
+            },
+            {
+              "address": 28240,
+              "text": "add x10, x10, #1"
+            },
+            {
+              "address": 28244,
+              "text": "sub x8, x8, #1"
+            },
+            {
+              "address": 28248,
+              "text": "add x11, x11, #0x38"
+            },
+            {
+              "address": 28252,
+              "text": "cbnz x8, #0x6e30"
+            },
+            {
+              "address": 28256,
+              "text": "b #0x6e68"
+            },
+            {
+              "address": 28264,
+              "text": "eor x8, x9, #0xfff"
+            },
+            {
+              "address": 28268,
+              "text": "and x20, x8, x9"
+            },
+            {
+              "address": 28272,
+              "text": "mov w2, #7"
+            },
+            {
+              "address": 28276,
+              "text": "mov x1, x20"
+            },
+            {
+              "address": 28280,
+              "text": "bl #0x1707f0",
+              "args_before": {
+                "x0": null,
+                "x1": null,
+                "x2": 7
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "callsite": 29180,
+      "root": "DT_INIT",
+      "block": 29144,
+      "consensus": {
+        "x2": 7
+      },
+      "paths": [
+        {
+          "path": [
+            "0x71c0",
+            "0x71d0",
+            "0x71d8"
+          ],
+          "args": {
+            "x0": null,
+            "x1": null,
+            "x2": 7
+          },
+          "trace": [
+            {
+              "address": 29132,
+              "text": "cbnz x8, #0x71a0"
+            },
+            {
+              "address": 29136,
+              "text": "b #0x71d8"
+            },
+            {
+              "address": 29144,
+              "text": "mov x8, #-0x685000000000000"
+            },
+            {
+              "address": 29148,
+              "text": "movk x8, #0xbc51, lsl #32"
+            },
+            {
+              "address": 29152,
+              "text": "movk x8, #0xcf02, lsl #16"
+            },
+            {
+              "address": 29156,
+              "text": "movk x8, #0xdbd3"
+            },
+            {
+              "address": 29160,
+              "text": "orn x8, x8, x8"
+            },
+            {
+              "address": 29164,
+              "text": "and x8, x9, x8"
+            },
+            {
+              "address": 29168,
+              "text": "and x20, x8, #0xfffffffffffff000"
+            },
+            {
+              "address": 29172,
+              "text": "mov w2, #7"
+            },
+            {
+              "address": 29176,
+              "text": "mov x1, x20"
+            },
+            {
+              "address": 29180,
+              "text": "bl #0x1707f0",
+              "args_before": {
+                "x0": null,
+                "x1": null,
+                "x2": 7
+              }
+            }
+          ]
+        },
+        {
+          "path": [
+            "0x71ac",
+            "0x71d0",
+            "0x71d8"
+          ],
+          "args": {
+            "x0": null,
+            "x1": null,
+            "x2": 7
+          },
+          "trace": [
+            {
+              "address": 29132,
+              "text": "cbnz x8, #0x71a0"
+            },
+            {
+              "address": 29136,
+              "text": "b #0x71d8"
+            },
+            {
+              "address": 29144,
+              "text": "mov x8, #-0x685000000000000"
+            },
+            {
+              "address": 29148,
+              "text": "movk x8, #0xbc51, lsl #32"
+            },
+            {
+              "address": 29152,
+              "text": "movk x8, #0xcf02, lsl #16"
+            },
+            {
+              "address": 29156,
+              "text": "movk x8, #0xdbd3"
+            },
+            {
+              "address": 29160,
+              "text": "orn x8, x8, x8"
+            },
+            {
+              "address": 29164,
+              "text": "and x8, x9, x8"
+            },
+            {
+              "address": 29168,
+              "text": "and x20, x8, #0xfffffffffffff000"
+            },
+            {
+              "address": 29172,
+              "text": "mov w2, #7"
+            },
+            {
+              "address": 29176,
+              "text": "mov x1, x20"
+            },
+            {
+              "address": 29180,
+              "text": "bl #0x1707f0",
+              "args_before": {
+                "x0": null,
+                "x1": null,
+                "x2": 7
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "callsite": 30236,
+      "root": "DT_INIT",
+      "block": 30216,
+      "consensus": {
+        "x2": 7
+      },
+      "paths": [
+        {
+          "path": [
+            "0x75f0",
+            "0x7600",
+            "0x7608"
+          ],
+          "args": {
+            "x0": null,
+            "x1": null,
+            "x2": 7
+          },
+          "trace": [
+            {
+              "address": 30192,
+              "text": "add x11, x11, #1"
+            },
+            {
+              "address": 30196,
+              "text": "sub x9, x9, #1"
+            },
+            {
+              "address": 30200,
+              "text": "add x12, x12, #0x38"
+            },
+            {
+              "address": 30204,
+              "text": "cbnz x9, #0x75d4"
+            },
+            {
+              "address": 30208,
+              "text": "b #0x7608"
+            },
+            {
+              "address": 30216,
+              "text": "orn x8, x8, x8"
+            },
+            {
+              "address": 30220,
+              "text": "and x8, x10, x8"
+            },
+            {
+              "address": 30224,
+              "text": "and x21, x8, #0xfffffffffffff000"
+            },
+            {
+              "address": 30228,
+              "text": "mov w2, #7"
+            },
+            {
+              "address": 30232,
+              "text": "mov x1, x21"
+            },
+            {
+              "address": 30236,
+              "text": "bl #0x1707f0",
+              "args_before": {
+                "x0": null,
+                "x1": null,
+                "x2": 7
+              }
+            }
+          ]
+        },
+        {
+          "path": [
+            "0x75e0",
+            "0x7600",
+            "0x7608"
+          ],
+          "args": {
+            "x0": null,
+            "x1": null,
+            "x2": 7
+          },
+          "trace": [
+            {
+              "address": 30188,
+              "text": "sub x10, x13, x10"
+            },
+            {
+              "address": 30192,
+              "text": "add x11, x11, #1"
+            },
+            {
+              "address": 30196,
+              "text": "sub x9, x9, #1"
+            },
+            {
+              "address": 30200,
+              "text": "add x12, x12, #0x38"
+            },
+            {
+              "address": 30204,
+              "text": "cbnz x9, #0x75d4"
+            },
+            {
+              "address": 30208,
+              "text": "b #0x7608"
+            },
+            {
+              "address": 30216,
+              "text": "orn x8, x8, x8"
+            },
+            {
+              "address": 30220,
+              "text": "and x8, x10, x8"
+            },
+            {
+              "address": 30224,
+              "text": "and x21, x8, #0xfffffffffffff000"
+            },
+            {
+              "address": 30228,
+              "text": "mov w2, #7"
+            },
+            {
+              "address": 30232,
+              "text": "mov x1, x21"
+            },
+            {
+              "address": 30236,
+              "text": "bl #0x1707f0",
+              "args_before": {
+                "x0": null,
+                "x1": null,
+                "x2": 7
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
