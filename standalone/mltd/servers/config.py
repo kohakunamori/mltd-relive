@@ -10,15 +10,15 @@ _language = 'zh'
 _log_level = logging.INFO
 _is_local = False
 _asset_mode = 'remote'
+_asset_remote_url = ''
 _asset_cache_root = 'asset-cache'
 _asset_prefetch_workers = 48
 _asset_upstream_proxy = ''
 _asset_local_scopes = 'zh-android'
-_asset_public_url = ''
-_asset_tls_cert = ''
-_asset_tls_key = ''
 
-ASSET_MODES = ('remote', 'hybrid', 'local')
+# Standalone now exposes one client-facing asset mode: remote HTTPS.
+# The URL may point directly at Rainbow's CDN or at a trusted HTTPS relay.
+ASSET_MODES = ('remote',)
 ASSET_LANGUAGES = ('zh', 'ko')
 ASSET_PLATFORMS = ('android', 'ios')
 
@@ -37,6 +37,19 @@ def _normalize_asset_scope(value):
     return f'{language}-{platform}'
 
 
+def _normalize_remote_url(value):
+    value = (value or '').strip().rstrip('/')
+    if not value:
+        return ''
+    parsed = urlsplit(value)
+    if parsed.scheme.lower() != 'https' or not parsed.hostname:
+        raise ValueError(
+            'asset_remote_url must be an HTTPS URL, for example '
+            'https://assets.example.com'
+        )
+    return value
+
+
 class CustomConfigParser(ConfigParser):
 
     def __init__(self):
@@ -48,17 +61,20 @@ class CustomConfigParser(ConfigParser):
                 'log_level': _log_level,
                 'is_local': _is_local,
                 'asset_mode': _asset_mode,
+                'asset_remote_url': _asset_remote_url,
+                # Kept for optional relay/cache tooling and backwards config
+                # compatibility. Standalone remote client traffic does not
+                # traverse asset_upstream_proxy.
                 'asset_cache_root': _asset_cache_root,
                 'asset_prefetch_workers': _asset_prefetch_workers,
                 'asset_upstream_proxy': _asset_upstream_proxy,
                 'asset_local_scopes': _asset_local_scopes,
-                'asset_public_url': _asset_public_url,
-                'asset_tls_cert': _asset_tls_cert,
-                'asset_tls_key': _asset_tls_key,
             }
         })
         if not self.read('config.ini'):
             self.write_config()
+
+        changed = False
         stored_version = self['default']['version']
         if version_tuple(stored_version) < version_tuple(version):
             workers = self.getint(
@@ -72,14 +88,32 @@ class CustomConfigParser(ConfigParser):
             self['default']['asset_local_scopes'] = self['default'].get(
                 'asset_local_scopes', _asset_local_scopes
             )
-            if (version_tuple(stored_version) < (0, 1, 10)
-                    and self['default'].get('asset_mode', '').lower() == 'hybrid'):
-                # v0.1.9 made desktop hybrid the default, but its self-signed
-                # HTTPS AssetBundle path is incompatible with the corrected
-                # client. Move existing v0.1.9 default-like configs back to
-                # the known-good remote mode.
-                self['default']['asset_mode'] = 'remote'
             self['default']['version'] = version
+            changed = True
+
+        # v0.1.9/v0.1.10 experiments exposed hybrid/local modes which require
+        # local Asset interception. Device tests showed both self-signed HTTPS
+        # and cleartext HTTP are unsuitable for the corrected client. Collapse
+        # every existing config back to remote regardless of stored version so
+        # a previously-tested v0.1.10 config cannot remain stuck on hybrid.
+        if self['default'].get('asset_mode', '').lower() != 'remote':
+            self['default']['asset_mode'] = 'remote'
+            changed = True
+
+        # Validate an explicitly configured relay URL. Invalid legacy/manual
+        # values fail safe to the default Rainbow CDN rather than breaking
+        # client login or data download.
+        try:
+            normalized_remote = _normalize_remote_url(
+                self['default'].get('asset_remote_url', '')
+            )
+        except ValueError:
+            normalized_remote = ''
+        if self['default'].get('asset_remote_url', '') != normalized_remote:
+            self['default']['asset_remote_url'] = normalized_remote
+            changed = True
+
+        if changed:
             self.write_config()
 
     @property
@@ -110,15 +144,29 @@ class CustomConfigParser(ConfigParser):
 
     @property
     def asset_mode(self):
-        mode = self['default'].get('asset_mode', _asset_mode).lower()
-        return mode if mode in ASSET_MODES else _asset_mode
+        # Compatibility property for existing GUI/config users. There is now
+        # only one standalone client-facing Asset mode.
+        return 'remote'
 
     @asset_mode.setter
     def asset_mode(self, value):
-        value = value.lower()
-        if value not in ASSET_MODES:
-            raise ValueError(f'Unsupported asset mode: {value}')
-        self['default']['asset_mode'] = value
+        if str(value).lower() != 'remote':
+            raise ValueError(
+                'hybrid/local asset modes were removed; use remote with '
+                'asset_remote_url for an HTTPS relay'
+            )
+        self['default']['asset_mode'] = 'remote'
+        self.write_config()
+
+    @property
+    def asset_remote_url(self):
+        return _normalize_remote_url(
+            self['default'].get('asset_remote_url', _asset_remote_url)
+        )
+
+    @asset_remote_url.setter
+    def asset_remote_url(self, value):
+        self['default']['asset_remote_url'] = _normalize_remote_url(value)
         self.write_config()
 
     @property
@@ -188,58 +236,10 @@ class CustomConfigParser(ConfigParser):
 
     @property
     def asset_local_platforms(self):
-        """Compatibility view used by the current GUI progress text."""
+        """Compatibility view retained for optional relay/prefetch tooling."""
         return tuple(dict.fromkeys(
             scope.split('-', 1)[1] for scope in self.asset_local_scopes
         ))
-
-    @property
-    def asset_public_url(self):
-        return self['default'].get(
-            'asset_public_url', _asset_public_url
-        ).strip().rstrip('/')
-
-    @asset_public_url.setter
-    def asset_public_url(self, value):
-        self['default']['asset_public_url'] = (value or '').strip().rstrip('/')
-        self.write_config()
-
-    @property
-    def asset_public_host(self):
-        value = self.asset_public_url
-        if not value:
-            return None
-        return urlsplit(value).hostname
-
-    @property
-    def asset_public_port(self):
-        value = self.asset_public_url
-        if not value:
-            return None
-        parsed = urlsplit(value)
-        if parsed.port is not None:
-            return parsed.port
-        return 443 if parsed.scheme.lower() == 'https' else 80
-
-    @property
-    def asset_tls_cert(self):
-        value = self['default'].get('asset_tls_cert', _asset_tls_cert).strip()
-        return value or None
-
-    @asset_tls_cert.setter
-    def asset_tls_cert(self, value):
-        self['default']['asset_tls_cert'] = (value or '').strip()
-        self.write_config()
-
-    @property
-    def asset_tls_key(self):
-        value = self['default'].get('asset_tls_key', _asset_tls_key).strip()
-        return value or None
-
-    @asset_tls_key.setter
-    def asset_tls_key(self, value):
-        self['default']['asset_tls_key'] = (value or '').strip()
-        self.write_config()
 
     def write_config(self):
         with open('config.ini', 'w') as config_file:
