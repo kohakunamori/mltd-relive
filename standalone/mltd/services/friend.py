@@ -1,33 +1,57 @@
 from jsonrpc import dispatcher
 
 
+def _flower_stand_count():
+    """Return the offline-compatible flower stand counters.
+
+    The standalone server does not currently persist flower stand history.
+    Keep the historical count values used by relive for the login/theater
+    display, while endpoints that require actual history return empty lists.
+    """
+    return {
+        'send_count': 5,
+        'recv_count': 5,
+        'all_recv_count': 0,
+    }
+
+
 @dispatcher.add_method(name='FriendService.GetFlowerStandCount')
 def get_flower_stand_count(params):
     """Service for getting flower stand counts for a user.
 
-    Invoked as part of the initial batch requests after logging in.
-    Args:
-        params: An empty dict.
-    Returns:
-        A dict containing a single key 'flower_stand_count', whose value
-        is a dict that represents flower stand count info and contains
-        the following keys.
-            send_count: Number of flower stands sent by the user on the
-                        previous day.
-            recv_count: Number of flower stands received by the user on
-                        previous day.
-            all_recv_count: Total receive count used by the client.
+    The EoS client contract is GetFlowerStandCountReply, which contains
+    exactly one FlowerStandCountStatus field named ``flower_stand_count``.
+    Older relive builds incorrectly returned the counters at the top level.
+    """
+    return {'flower_stand_count': _flower_stand_count()}
 
-    The original relive implementation returned the three counters at the
-    top level. The EoS client contract is GetFlowerStandCountReply, which
-    contains exactly one FlowerStandCountStatus field named
-    ``flower_stand_count``. Keep the static compatibility values for now,
-    but preserve the wire shape expected by the client.
+
+@dispatcher.add_method(name='FriendService.GetFlowerStandList')
+def get_flower_stand_list(params):
+    """Return an empty flower stand history with the exact client shape.
+
+    There is no flower-stand history/state table in the standalone database,
+    so manufacturing sender/receiver rows would create fake social state.
+    Empty arrays are the truthful offline fallback and avoid JSON-RPC -32601
+    when the flower-stand page is opened.
     """
     return {
-        'flower_stand_count': {
-            'send_count': 5,
-            'recv_count': 5,
-            'all_recv_count': 0,
-        }
+        'flower_stand_count': _flower_stand_count(),
+        'sent_flower_stand_list': [],
+        'received_flower_stand_list': [],
+    }
+
+
+@dispatcher.add_method(name='FriendService.ExecFlowerStandReward')
+def exec_flower_stand_reward(params):
+    """Safely report that no persisted flower-stand reward is available.
+
+    The endpoint has an empty request. Without persisted received flower
+    stands there is no legitimate reward to grant; returning the client's
+    zero-reward state is both idempotent and avoids fabricating inventory.
+    """
+    return {
+        'recv_count': 0,
+        'is_received': False,
+        'flower_stand_name_list': [],
     }
