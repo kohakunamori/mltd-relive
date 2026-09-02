@@ -1,0 +1,42 @@
+{
+  "bootstrap_stop": "libcompatible loader callback ready",
+  "predecrypted_ranges": [
+    {
+      "start": 112224,
+      "end": 315856,
+      "key_source": 460812,
+      "name": "SoLibrary helper range",
+      "size": 203632,
+      "xor_bytes": 203632,
+      "remainder": 0,
+      "key16": "a80b00d008d18db9c90b00f029e12291",
+      "before_sha256": "7abdb0514bfca1e908ea124cf92d5324b8e604a940b748661d16bb437fd47808",
+      "after_sha256": "b2250ff2c6be56fc488055331559cb6517794a5e8c65f5f4027acbc9d4f134fb",
+      "head_before": "a00b402901edcd00cb13404928e96268a2f27f4237d88dc8890a886a2ee12285a00b402901edcd00c3f27f6216e822e0e80a884ac8d2d26f3f5cbd59ddae2338",
+      "head_after": "080040f9093c40b9021840b9010840f90af97f923f0900714001889a07000014080040f9093c40b90af97f923f0900714001889ac0035fd6f657bda9f44f01a9"
+    },
+    {
+      "start": 315856,
+      "end": 336380,
+      "key_source": 1512104,
+      "name": "runtime loader range",
+      "size": 20524,
+      "xor_bytes": 20512,
+      "remainder": 12,
+      "key16": "a80300b008d18db9c90300d029e12291",
+      "before_sha256": "4c14838ab64b90c6e4650fc5b5119c3e20ec2501af9ba97e9fe90056594bba8c",
+      "after_sha256": "d8c5c2f017a56b410f8d7f83548a2e6ea5cb72aa3c3d0e3e670c416875f20686",
+      "head_before": "546cba19f2b68c10315c0279dfb621385c4c0419f5aa881034400141d6e22040088013484001b66cc1164029e0ed220181de4649c2dd8d098396402981623869",
+      "head_after": "fc6fbaa9fa6701a9f85f02a9f65703a9f44f04a9fd7b05a9fd430191ff0302d1a08313f848d03bd5081540f9c90c009029dd46f9ca0c00b04a9540f9a8831af8"
+    }
+  ],
+  "init_array": {
+    "va": null,
+    "size": 0,
+    "entries": []
+  },
+  "slot_initial": 0,
+  "constructors": [],
+  "slot_final": 0,
+  "slot_writes": []
+}
