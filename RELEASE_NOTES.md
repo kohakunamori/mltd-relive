@@ -1,73 +1,146 @@
-# mltd-relive Standalone v0.1.9
+# mltd-relive Standalone v0.1.10
 
-本 Release 是 **Standalone v0.1.9 登录兼容性 Hotfix**，同时重新构建 Windows / Ubuntu / macOS Standalone、APK Patcher，并继续附带既有修正版繁中/韩文游戏客户端。
+本版本修复 v0.1.9 的 Asset 登录回归与 `UnitService.SetUnit` 演唱会入口异常，并将 Asset 架构收敛为更简单、兼容性更高的 **remote-only HTTPS** 模式。
 
-## v0.1.9 Hotfix
+> 当前文件为 `fix/live-asset-compat` 分支的发布候选说明；最终 Release 仍以合并后的构建与设备 smoke test 为准。
 
-### 恢复 v0.1.6 TLS 客户端兼容路径
+## Asset：移除 hybrid/local 运行模式
 
-- 回退 v0.1.8 新引入的“accept 明文 socket 后在线程内执行 TLS handshake”实现。
-- 恢复已经由 v0.1.6 修正版客户端验证过的 listener-wrapped TLS accept 路径：443 监听 socket 在进入 `serve_forever()` 前直接由 `SSLContext.wrap_socket(..., server_side=True)` 包装。
-- 此修复只调整 TLS 接入方式，不修改客户端请求、JSON-RPC 请求体、加密协议或 API 路径。
-- 保留 v0.1.8 的连接 backlog 512、`TCP_NODELAY`、TCP keepalive、连接超时、direct WSGI API dispatch 等其余性能优化。
+v0.1.9 的本地 self-signed HTTPS Asset 路径已被设备测试确认不兼容：
 
-### 修复 DNS / API Host 不一致
+```text
+hybrid -> 登录 ErrorCode [-404 / 0]
+remote -> 登录正常
+```
 
-- v0.1.8 已将 `theaterdays.appspot.com` 加入本地 DNS 映射，但 API handler 此前仍只接受：
-  - `theaterdays-zh.appspot.com`
-  - `theaterdays-ko.appspot.com`
-  - `127.0.0.1`
-- 这会导致被本地 DNS 接管的 `theaterdays.appspot.com` 请求进入本地 443 后收到 `503 Service Unavailable`。
-- v0.1.9 将 `theaterdays.appspot.com` 纳入允许列表，使 DNS interception 与 API handler 保持一致。
-- Host 校验同时由 substring matching 改为标准化后的严格 hostname matching，并兼容 `:443` 端口与大小写差异。
+v0.1.10 曾进一步测试独立 cleartext HTTP Asset 路径，设备返回：
 
-### 回归验证
+```text
+資料下載失敗
+ErrorCode -21990
+```
 
-新增自动化覆盖：
+因此 Standalone runtime 不再运行 Asset Server，也不再支持 `hybrid/local`。
 
-- TLS server 必须保持 v0.1.6 listener-wrapped compatibility model。
-- 三个 Theater Days Appspot hostname 均必须被 API handler 接受。
-- 伪造的后缀/前缀 hostname 不得因 substring matching 被误接受。
+最终运行模型：
 
-修复分支在合并前已通过：
+```text
+client -> remote HTTPS Asset storage
+```
 
-- local asset / transport tests
-- API runtime import 与 SQLite runtime 检查
-- remote asset compatibility
-- API transport benchmark
-- Asset serving benchmark
+默认：
 
-## 保留的 v0.1.8 功能
+```text
+https://assets.rainbowunicorn7297.com/
+```
 
-v0.1.9 除上述兼容性修复外继续包含 v0.1.8 的功能和性能改造，包括：
+可通过：
 
-- Asset serving index 与缓存热路径零 SQLite 查询。
-- hybrid/local Asset mirror、prefetch 与 self-heal serving index。
-- HTTP/1.1 keep-alive、backlog 512、TCP keepalive / `TCP_NODELAY`。
-- 明文 Asset `sendfile()` 与 TLS 大缓冲传输路径。
-- direct WSGI API dispatch。
-- `UnitService.SetUnit` eager-load 优化与 JSON-RPC batch slow-log 诊断。
-- yuyueryuyu Standalone 的偶像详情、Job、Present、Theater interaction、model/schema/master data/locale/service 更新。
-- local Asset fast-start、48 workers 与 configurable scopes。
+```ini
+asset_remote_url = https://assets.example.com
+```
 
-## 客户端兼容性
+切换到其它受信任 HTTPS 对象存储。
 
-本次 Hotfix **不修改游戏客户端请求行为**。Release 中继续提供既有修正版客户端：
+DNS interception 只负责 MLTD API hostname，不再接管 Asset hostname。
+
+## Asset 灾备：新增独立 cache tool
+
+为了防止当前 remote/R2 将来失联，新增：
+
+```text
+tools/cache_assets.py
+```
+
+同步完整繁中 Android Asset：
+
+```bash
+python tools/cache_assets.py sync \
+  --scope zh-android \
+  --root /path/to/durable/mltd-assets \
+  --workers 48
+```
+
+功能包括：
+
+- 当前 manifest 驱动的全量缓存；
+- 48 workers 默认并发；
+- `.part` + HTTP Range 断点续传；
+- size / SHA256 / ETag / Last-Modified 等元数据；
+- 已完成对象复用；
+- 可选 `--verify-existing`；
+- 可选 `--proxy`；
+- 可直接保存到 NAS 挂载目录；
+- `cache-snapshot.json` 保存每次同步快照信息。
+
+即使原始 remote/R2 已完全不可访问，也可以纯本地验证：
+
+```bash
+python tools/cache_assets.py verify \
+  --scope zh-android \
+  --root /path/to/durable/mltd-assets
+```
+
+详细说明见 `ASSET_CACHE.md`。
+
+## 修复 Live：SQLAlchemy 2.x SetUnit
+
+设备日志定位到：
+
+```text
+UnitService.SetUnit
+TypeError: 'ChunkedIteratorResult' object is not subscriptable
+```
+
+优化后的 SetUnit 将 SQLAlchemy 2.x Result 直接传给 `dict()`，触发 mapping/subscript 接口冲突。
+
+修复为：
+
+```python
+card_rows = session.execute(...).all()
+card_to_idol = dict(card_rows)
+```
+
+修复后设备已确认完整 Live 流程可以正常进入、完成并返回。
+
+## API compatibility
+
+保留：
+
+- v0.1.6 已验证的 listener-wrapped TLS accept path；
+- direct WSGI API dispatch；
+- TCP_NODELAY / keepalive / backlog 优化；
+- 当前测试分支中的 API `Connection: close` 与串行 dispatch 兼容措施。
+
+后两项并不是本次 Live 故障根因，将在最终发布前或后续版本独立 A/B，以决定是否恢复更高 API 并发。
+
+## 配置迁移
+
+v0.1.10 会把旧 `hybrid/local` 自动迁移为：
+
+```ini
+asset_mode = remote
+```
+
+并从 server runtime config 删除以下旧字段：
+
+```text
+asset_cache_root
+asset_prefetch_workers
+asset_upstream_proxy
+asset_local_scopes
+asset_public_url
+asset_tls_cert
+asset_tls_key
+```
+
+这些缓存相关参数改由 `tools/cache_assets.py` 自己的 CLI 管理。
+
+## 客户端
+
+继续使用现有修正版：
 
 - `mltd-relive-game-client-zh-fixed.apk`
 - `mltd-relive-game-client-ko-fixed.apk`
 
-服务器侧恢复与修正版客户端兼容的 TLS 行为，并修复 Host routing。
-
-## 下载哪个文件
-
-| 文件 | 用途 |
-|---|---|
-| `mltd-relive-standalone-v0.1.9-windows.exe` | Windows GUI/服务器 |
-| `mltd-relive-standalone-v0.1.9-ubuntu` | Ubuntu/Linux 服务器 |
-| `mltd-relive-standalone-v0.1.9-macos.zip` | macOS 服务器 |
-| `mltd-relive-game-client-zh-fixed.apk` | 繁中修正版客户端 |
-| `mltd-relive-game-client-ko-fixed.apk` | 韩文修正版客户端 |
-| `mltd-relive-apk-patcher-*-windows.exe` | Windows APK Patcher |
-
-Windows + 繁中客户端通常使用 `mltd-relive-standalone-v0.1.9-windows.exe` 和 `mltd-relive-game-client-zh-fixed.apk`。
+无需为了 v0.1.10 的 remote-only Asset 架构重新修改 APK。
