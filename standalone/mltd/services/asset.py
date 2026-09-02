@@ -38,12 +38,19 @@ def get_asset_version(params):
         # server and therefore needs no TLS interception or DNS handling.
         asset_url = f'http://127.0.0.1:{asset_port}/{scope}/'
     else:
-        # Keep the exact public asset URL shape used by the original server.
-        # In hybrid/local desktop mode DNS redirects only the public asset
-        # hostname to the standalone TLS listener, where SNI/Host routing
-        # serves the local mirror.  This avoids changing paths visible to the
-        # game client (for example by inserting /__mltd_assets/).
-        asset_url = f'{REMOTE_ASSET_ROOT}/{scope}/'
+        # Desktop hybrid/local intentionally uses cleartext HTTP on the
+        # dedicated asset port. The corrected client accepts self-signed TLS
+        # for API RPCs but its AssetBundle downloader performs stricter TLS
+        # validation, causing the previous HTTPS /__mltd_assets/ topology to
+        # fail as AssetBundle NotFoundError(-404).
+        #
+        # Reuse the already-intercepted API hostname so the client does not
+        # need a literal LAN IP in its asset_url; DNS points this hostname at
+        # the standalone server and port 7651 is served by AssetServer.
+        asset_url = (
+            f'http://theaterdays-{config.language}.appspot.com:'
+            f'{asset_port}/{scope}/'
+        )
 
     return {
         'asset_url': asset_url,
