@@ -42,7 +42,7 @@ jobs:
           printf '%s\n' \
             'Branch: fix/live-asset-compat' \
             "Commit: ${GITHUB_SHA}" \
-            'Purpose: corrected-client test for HTTP :7651 hybrid assets and serialized Connection: close API transport.' \
+            'Purpose: corrected-client smoke test for remote-only assets, optional HTTPS Asset Remote URL, and Live/API compatibility.' \
             > test-output/TEST_BUILD_INFO.txt
       - uses: actions/upload-artifact@v4
         with:
