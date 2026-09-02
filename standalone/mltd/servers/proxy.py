@@ -11,8 +11,6 @@ from urllib.parse import unquote, urlsplit
 import requests
 import urllib3
 
-from mltd.servers.asset_cache import AssetMirror, AssetStore
-from mltd.servers.asset_server import asset_port, create_server as create_asset_server
 from mltd.servers.config import api_port, config
 from mltd.servers.logging import logger
 
@@ -56,105 +54,6 @@ def _tune_client_socket(request):
     request.settimeout(_SOCKET_TIMEOUT)
 
 
-def _resolve_config_path(value):
-    if not value:
-        return None
-    return value if path.isabs(value) else path.abspath(value)
-
-
-def _start_asset_server():
-    """Start the independent Asset listener for cache modes.
-
-    Remote opens no local Asset listener. Same-device mode retains loopback
-    HTTP. Desktop hybrid/local requires a separately controlled HTTPS hostname
-    and publicly trusted certificate; its DNS name is redirected to LAN by the
-    local DNS server while the client continues to validate normal public TLS.
-    """
-    if config.asset_mode == 'remote':
-        return None
-
-    if config.asset_mode == 'local':
-        from mltd.servers.asset_prepare import prepare_local_assets
-        prepare_local_assets(
-            config.language,
-            config.asset_cache_root,
-            workers=config.asset_prefetch_workers,
-            upstream_proxy=config.asset_upstream_proxy,
-        )
-
-    store = AssetStore(config.asset_cache_root)
-    fetch_on_miss = config.asset_mode == 'hybrid'
-    mirror = AssetMirror(
-        store,
-        upstream_proxy=config.asset_upstream_proxy,
-    ) if fetch_on_miss else None
-
-    use_tls = not config.is_local
-    listen_port = asset_port
-    public_host = None
-    if use_tls:
-        public_url = config.asset_public_url
-        parsed = urlsplit(public_url)
-        if parsed.scheme.lower() != 'https' or not parsed.hostname:
-            raise RuntimeError(
-                'Desktop hybrid/local requires asset_public_url such as '
-                'https://assets.example.com:7651'
-            )
-        public_host = parsed.hostname
-        listen_port = parsed.port or 443
-        if listen_port == proxy_port:
-            raise RuntimeError(
-                'The independent Asset listener cannot share API port 443. '
-                'Use an explicit HTTPS Asset port, for example :7651.'
-            )
-
-    httpd = create_asset_server(
-        port=listen_port,
-        store=store,
-        mirror=mirror,
-        fetch_on_miss=fetch_on_miss,
-    )
-
-    if use_tls:
-        certfile = _resolve_config_path(config.asset_tls_cert)
-        keyfile = _resolve_config_path(config.asset_tls_key)
-        if not certfile or not keyfile:
-            httpd.server_close()
-            raise RuntimeError(
-                'Desktop hybrid/local requires asset_tls_cert and '
-                'asset_tls_key for the configured Asset hostname.'
-            )
-        if not path.isfile(certfile) or not path.isfile(keyfile):
-            httpd.server_close()
-            raise RuntimeError(
-                'Configured Asset TLS certificate/key file was not found: '
-                f'cert={certfile!r} key={keyfile!r}'
-            )
-        context = SSLContext(PROTOCOL_TLS_SERVER)
-        context.load_cert_chain(certfile, keyfile)
-        httpd.socket = context.wrap_socket(httpd.socket, server_side=True)
-
-    thread = threading.Thread(
-        target=httpd.serve_forever,
-        name='mltd-asset-https' if use_tls else 'mltd-asset-http',
-        daemon=True,
-    )
-    thread.start()
-    if use_tls:
-        logger.info(
-            f'Asset HTTPS server is running on port {listen_port} '
-            f'for {public_host} (mode={config.asset_mode}, '
-            f'fetch_on_miss={"yes" if fetch_on_miss else "no"})...'
-        )
-    else:
-        logger.info(
-            f'Asset HTTP server is running on port {listen_port} '
-            f'(same-device mode={config.asset_mode}, '
-            f'fetch_on_miss={"yes" if fetch_on_miss else "no"})...'
-        )
-    return httpd, thread
-
-
 class ThreadedProxyServer(ThreadingHTTPServer):
     daemon_threads = True
     block_on_close = False
@@ -178,10 +77,8 @@ class ProxyHTTPRequestHandler(BaseHTTPRequestHandler):
         self.send_error(404)
 
     def do_POST(self):
-        # The corrected game clients were developed against the original
-        # standalone proxy which closed every API connection and dispatched
-        # API requests serially. Preserve both properties for stateful RPC
-        # sequences. Asset traffic remains independently concurrent.
+        # Preserve the original corrected-client API behavior while Asset
+        # traffic is fully remote and no longer shares this process/listener.
         self.close_connection = True
 
         with _API_COMPAT_LOCK:
@@ -331,10 +228,6 @@ def start(port=proxy_port, conn=None):
 
     ProxyHTTPRequestHandler.api_application = application
 
-    # Start/validate the independent Asset endpoint first so Desktop cache
-    # modes never hand the client an unusable URL.
-    _start_asset_server()
-
     httpd = ThreadedProxyServer(('', port), ProxyHTTPRequestHandler)
     certfile = path.join(key_path(), 'api.crt')
     keyfile = path.join(key_path(), 'api.key')
@@ -350,12 +243,10 @@ def start(port=proxy_port, conn=None):
     logger.info(
         'API dispatch: direct WSGI, serialized Connection: close compatibility'
     )
-    if config.asset_mode == 'remote':
-        logger.info('Asset transport: remote CDN')
-    elif config.is_local:
-        logger.info(f'Asset transport: same-device HTTP on port {asset_port}')
+    if config.asset_remote_url:
+        logger.info(f'Asset transport: remote relay {config.asset_remote_url}')
     else:
-        logger.info(f'Asset transport: trusted HTTPS {config.asset_public_url}')
+        logger.info('Asset transport: Rainbow remote CDN')
     if conn:
         conn.send(True)
         conn.close()
