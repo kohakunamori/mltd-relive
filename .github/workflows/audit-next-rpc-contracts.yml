@@ -14,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: git fetch origin client-decompiled-zh-fixed-v1 --depth=1
-      - name: Dump core offline RPC contracts
+      - name: Dump exact core DTOs, enums and server support
         shell: bash
         run: |
           set -euo pipefail
@@ -22,49 +22,53 @@ jobs:
           python - <<'PY'
           import pathlib, re
           dump = pathlib.Path('/tmp/dump.cs').read_text(encoding='utf-8', errors='ignore')
-          methods = [
-              'FriendService.GetFriendList', 'FriendService.RequestFriend',
-              'FriendService.AcceptFriend', 'FriendService.RemoveFriend',
-              'FriendService.GetCommentList', 'FriendService.SendComment',
-              'FriendService.GetFlowerStandList', 'FriendService.SendFlowerStand',
-              'FriendService.SendFlowerStandMulti', 'FriendService.ExecFlowerStandReward',
-              'CostumeService.GetCostumeList', 'CostumeService.SetCostume',
-              'PresentService.GetPresentHistory', 'NaviService.GetNaviList',
-              'DramaService.GetDramaList', 'BlogService.GetBlogList',
-              'BlogService.LikeBlog', 'BlogService.ReadBlog',
-              'MailService.GetMailList', 'MailService.ReadMail', 'MailService.ResponseMail',
-          ]
-          for method in methods:
-              print(f'=== RPC {method} ===')
-              pos = dump.find(method)
-              if pos < 0:
-                  print('NOT FOUND')
-              else:
-                  lo = max(0, pos - 1800); hi = min(len(dump), pos + 2200)
-                  print(dump[lo:hi])
 
-          targets = [
-              'GetFriendListArgs','GetFriendListReply','RequestFriendArgs','RequestFriendReply',
-              'AcceptFriendArgs','AcceptFriendReply','RemoveFriendArgs','RemoveFriendReply',
-              'GetCommentListArgs','GetCommentListReply','SendCommentArgs','SendCommentReply',
-              'GetFlowerStandListArgs','GetFlowerStandListReply','SendFlowerStandArgs','SendFlowerStandReply',
-              'SendFlowerStandMultiArgs','SendFlowerStandMultiReply','ExecFlowerStandRewardArgs','ExecFlowerStandRewardReply',
-              'GetCostumeListArgs','GetCostumeListReply','SetCostumeArgs','SetCostumeReply',
-              'GetPresentHistoryArgs','GetPresentHistoryReply','GetNaviListArgs','GetNaviListReply',
-              'GetDramaListArgs','GetDramaListReply','GetBlogListArgs','GetBlogListReply',
-              'LikeBlogArgs','LikeBlogReply','ReadBlogArgs','ReadBlogReply',
-              'GetMailListArgs','GetMailListReply','ReadMailArgs','ReadMailReply','ResponseMailArgs','ResponseMailReply',
-              'FriendStatus','FriendSummary','FriendComment','FlowerStand','CostumeStatus','NaviStatus','BlogStatus','MailStatus',
-          ]
-          for name in targets:
-              match = re.search(rf'public class {name}\b.*?\{{(.*?)\n\s*// Methods', dump, flags=re.S)
+          wanted_exact = {
+              'CommentStatus','FlowerStandCountStatus','FlowerStandStatus',
+              'PresentHistoryStatus','DramaStatus','NaviStatus','CostumeStatus',
+              'FriendStatus','GetFriendListArgs','GetFriendListReply',
+              'RequestFriendArgs','RequestFriendReply','AcceptFriendArgs','AcceptFriendReply',
+              'RemoveFriendArgs','RemoveFriendReply',
+          }
+          # Also discover every API DTO whose class name contains one of these
+          # domain terms so we do not depend on guessed Args/Reply names.
+          domain_terms = ('Costume', 'PresentHistory', 'Drama', 'Friend', 'FlowerStand', 'Comment')
+          names = []
+          for m in re.finditer(r'public class ([A-Za-z0-9_.+`]+)\b[^\n]*\n\{', dump):
+              raw = m.group(1)
+              short = raw.rsplit('.', 1)[-1]
+              if short in wanted_exact or any(term in short for term in domain_terms):
+                  names.append(short)
+          seen = set()
+          for name in names:
+              if name in seen:
+                  continue
+              seen.add(name)
+              match = re.search(rf'public class (?:[A-Za-z0-9_.]+\.)?{re.escape(name)}\b.*?\{{(.*?)\n\s*// Methods', dump, flags=re.S)
               if not match:
                   continue
+              fields = re.findall(r'^\s*public\s+([^;\n]+?)\s+([A-Za-z0-9_]+);', match.group(1), flags=re.M)
+              if not fields:
+                  continue
               print(f'=== CLASS {name} ===')
-              for typ, field in re.findall(r'^\s*public\s+([^;\n]+?)\s+([A-Za-z0-9_]+);', match.group(1), flags=re.M):
+              for typ, field in fields:
                   print(typ.strip(), field)
+
+          print('=== FRIEND ENUM/STATE CONTEXT ===')
+          for pat in ('FriendState', 'friend_state'):
+              for m in list(re.finditer(pat, dump))[:30]:
+                  lo=max(0,m.start()-500); hi=min(len(dump),m.start()+900)
+                  print(dump[lo:hi].replace('\x00',''))
+                  print('---')
           PY
-          echo '=== SERVER FRIEND/COSTUME MODELS ==='
-          grep -n -A90 -B5 -E '^class (Friend|Costume|Profile|Present|MstCostume)\b' standalone/mltd/models/models.py | head -n 900 || true
-          echo '=== EXISTING FRIEND/COSTUME SCHEMAS/USAGE ==='
-          grep -RIn -C 4 -E 'FriendSchema|GuestSchema|CostumeSchema|Friend\(|Costume\(' standalone/mltd | head -n 1200 || true
+
+          echo '=== SERVER CORE MODELS ==='
+          grep -n -A100 -B5 -E '^class (MstNavi|Navi|MstDrama|Drama|MstBlog|Blog|MstMail|Mail|PresentHistory|Friend|Costume|MstCostume)\b' standalone/mltd/models/models.py || true
+          echo '=== CORE MODEL/DATA FILE REFERENCES ==='
+          grep -RIn -E 'MstNavi|NaviStatus|mst_navi|MstDrama|DramaStatus|mst_drama|MstBlog|BlogStatus|mst_blog|MstMail|MailStatus|mst_mail|PresentHistory|present_history' standalone/mltd | head -n 1400 || true
+          echo '=== COSTUME/FRIEND UNIT STATE FIELDS ==='
+          grep -n -A100 -B5 -E '^class (UnitIdol|SongUnitIdol|RandomLiveIdol|TheaterRoomIdol|Friend)\b' standalone/mltd/models/models.py | head -n 900 || true
+          echo '=== PRESENT SCHEMAS ==='
+          grep -n -A180 -B10 -E '^class (PresentSchema|ItemSchema)\b' standalone/mltd/models/schemas.py | head -n 500 || true
+          echo '=== PRESENT RECEIVE DELETE/STATE ==='
+          grep -n -A18 -B10 -E 'session\.delete\(present\)|present_state' standalone/mltd/services/present.py | head -n 500 || true
