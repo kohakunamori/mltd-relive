@@ -2,10 +2,11 @@
 
 > Date: 2026-09-02
 > Branch: `fix/live-asset-compat`
+> Status: **device-confirmed fixed**
 
 ## Device evidence
 
-With `asset_mode = remote`, the corrected Traditional Chinese client successfully logs in and reaches the Live flow, then the server logs:
+With `asset_mode = remote`, the corrected Traditional Chinese client successfully logs in and reaches the Live flow, then the server previously logged:
 
 ```text
 jsonrpc.manager - ERROR - API Exception:
@@ -14,7 +15,15 @@ TypeError: 'ChunkedIteratorResult' object is not subscriptable
 File "mltd/services/unit.py", line 117, in set_unit
 ```
 
-This is a direct server-side exception in `UnitService.SetUnit`. It is independent of the hybrid Asset TLS regression.
+This was a direct server-side exception in `UnitService.SetUnit`. It was independent of the hybrid Asset TLS regression.
+
+After applying commit:
+
+```text
+351161e8df288fce8ab478953c34701010106ca0
+```
+
+the same corrected client was tested again in `asset_mode = remote` and Live now operates normally. This confirms the observed Live-entry failure was caused by the `SetUnit` SQLAlchemy result-conversion bug.
 
 ## Root cause
 
@@ -47,34 +56,23 @@ card_rows = session.execute(
 card_to_idol = dict(card_rows)
 ```
 
-Fix commit:
-
-```text
-351161e8df288fce8ab478953c34701010106ca0
-```
-
-A regression test using SQLAlchemy 2.0.19 now proves both behaviors:
+A regression test using SQLAlchemy 2.0.19 proves both behaviors:
 
 - `dict(result)` raises the same non-subscriptable TypeError.
 - `dict(result.all())` succeeds.
 
 CI job: `unit-sqlalchemy`.
 
-## Updated Live diagnosis
+## Updated diagnosis
 
-This exception is now the primary known cause of the currently observed failure while entering/configuring a Live performance.
+The Live failure observed on 2026-09-02 is now considered **resolved and device-confirmed**.
 
-The earlier API transport hypothesis (`Connection: close`, serialized RPC dispatch, localhost HTTP hop) is downgraded to a secondary compatibility question. The branch still contains the connection-close/serialization experiment for the next device test, but those changes should not be considered proven necessary until a full Live start/finish cycle succeeds and is A/B-tested without them.
+The earlier API transport hypothesis (`Connection: close`, serialized RPC dispatch, localhost HTTP hop) is no longer considered the root cause of this observed failure. The branch still contains `Connection: close` and serialized API dispatch as compatibility experiments; these should be A/B-tested separately before deciding whether they belong in the final release.
 
-## Next device test
+## Remaining work
 
-Use `asset_mode = remote` first and verify:
+The active blocker is now the Desktop `hybrid/local` Asset transport:
 
-1. enter Live;
-2. unit confirmation / SetUnit completes without JSON-RPC exception;
-3. guest selection;
-4. StartSong;
-5. normal song completion / FinishSong;
-6. return to song selection.
-
-If a new exception appears, use that exact RPC traceback as the next root cause rather than returning to Asset/TLS speculation.
+- v0.1.9 self-signed HTTPS Asset routing is confirmed incompatible;
+- v0.1.10 currently tests a dedicated cleartext HTTP `:7651` Asset listener;
+- if the corrected APK rejects cleartext Asset traffic, move to a dedicated Asset hostname with a public-CA certificate.
