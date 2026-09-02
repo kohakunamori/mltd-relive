@@ -70,7 +70,7 @@ jobs:
         shell: bash
         env:
           DOTNET_ROOT: ${{ runner.temp }}/dotnet6
-          DOTNET_ROLL_FORWARD: Disable
+          DOTNET_ROLL_FORWARD: LatestPatch
         run: |
           set -euo pipefail
           export PATH="$DOTNET_ROOT:$PATH"
