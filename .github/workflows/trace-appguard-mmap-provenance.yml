@@ -1,0 +1,50 @@
+name: Trace AppGuard mmap provenance
+on:
+  workflow_dispatch:
+  push:
+    branches: [client-zh-fixed-reconstruction]
+    paths:
+      - 'tools/client-source/trace-appguard-mmap-provenance.py'
+      - '.github/workflows/trace-appguard-mmap-provenance.yml'
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - run: python -m pip install --disable-pip-version-check unicorn capstone pyelftools
+      - name: Download exact official libcompatible
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p work/xapk work/native
+          curl -L --fail --retry 3 --connect-timeout 20 --max-time 300 -A 'Mozilla/5.0' -o work/original.xapk \
+            'https://d.apkpure.net/b/XAPK/com.bandainamcoent.imas_millionlive_theaterdays_ch?version=latest'
+          test "$(sha1sum work/original.xapk | awk '{print $1}')" = '1b77ddd342a4020ba032ec63ae7ef9288551b6e7'
+          unzip -q work/original.xapk -d work/xapk
+          unzip -q work/xapk/config.arm64_v8a.apk 'lib/arm64-v8a/libcompatible.so' -d work/native
+          test "$(sha256sum work/native/lib/arm64-v8a/libcompatible.so | awk '{print $1}')" = '8880c415e1ab82c31858be68ce12b76b95dc8ff8875b76c1246a8bc0679647bc'
+      - name: Trace mapping provenance
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT=client/reconstruction/appguard-analysis/callback-installer/mmap-provenance
+          rm -rf "$OUT"
+          python tools/client-source/trace-appguard-mmap-provenance.py \
+            --libcompatible work/native/lib/arm64-v8a/libcompatible.so --out "$OUT"
+      - name: Commit evidence safely
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add client/reconstruction/appguard-analysis/callback-installer/mmap-provenance
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'client: record AppGuard mmap provenance'
+          git fetch origin client-zh-fixed-reconstruction
+          git rebase origin/client-zh-fixed-reconstruction
+          git push origin HEAD:client-zh-fixed-reconstruction
