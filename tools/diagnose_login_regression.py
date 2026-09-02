@@ -5,10 +5,8 @@ import os
 import socket
 import ssl
 import subprocess
-import sys
 import threading
 import time
-from pathlib import Path
 
 REFS = {
     "v0.1.6": "794f42f868268dc964c9ac0aa7b1ba82c019b53e",
@@ -72,7 +70,7 @@ def theater_smoke(iterations: int) -> None:
     upgrade_database()
     context = {"user_id": "ffffffff-ffff-ffff-ffff-ffffffffffff"}
     nonempty = 0
-    for i in range(iterations):
+    for _ in range(iterations):
         result = get_theater({}, context)
         assert isinstance(result, dict)
         theater = result.get("theater")
@@ -87,11 +85,6 @@ def theater_smoke(iterations: int) -> None:
 
 
 def theater_failure_guards() -> None:
-    """Exercise two edge states against the dynamic implementation.
-
-    These are diagnostic, not expected production states. They prove whether the
-    implementation fails closed or raises if migration/master data is incomplete.
-    """
     from sqlalchemy import delete
     from sqlalchemy.orm import Session
     from mltd.models.engine import engine
@@ -110,6 +103,17 @@ def theater_failure_guards() -> None:
     raise AssertionError("dynamic Theater unexpectedly tolerated empty mst_theater_contact; update diagnostic")
 
 
+def make_tcp_pair():
+    listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    listener.bind(("127.0.0.1", 0))
+    listener.listen(1)
+    client = socket.create_connection(listener.getsockname(), timeout=3)
+    server, _ = listener.accept()
+    listener.close()
+    return server, client
+
+
 def timeout_socket_property() -> None:
     import mltd.servers.proxy as proxy
 
@@ -117,25 +121,20 @@ def timeout_socket_property() -> None:
         print("socket timeout tuning absent on this ref")
         return
     old = proxy._SOCKET_TIMEOUT
-    a, b = socket.socketpair()
+    server, client = make_tcp_pair()
     try:
         proxy._SOCKET_TIMEOUT = 1.25
-        proxy._tune_client_socket(a)
-        actual = a.gettimeout()
+        proxy._tune_client_socket(server)
+        actual = server.gettimeout()
         print(f"accepted-socket timeout after tuning: {actual}")
         assert actual == 1.25
     finally:
         proxy._SOCKET_TIMEOUT = old
-        a.close()
-        b.close()
+        server.close()
+        client.close()
 
 
 def tls_persistent_idle_test() -> None:
-    """Start the historical proxy with timeout shortened to 1s.
-
-    Confirms that the accepted-socket timeout survives TLS wrapping and can close
-    an HTTP/1.1 keep-alive connection while it is idle.
-    """
     import mltd.servers.proxy as proxy
 
     if not hasattr(proxy, "_SOCKET_TIMEOUT") or not hasattr(proxy, "_tune_client_socket"):
