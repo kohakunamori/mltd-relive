@@ -9,7 +9,11 @@ from sqlalchemy.orm import Session
 
 from mltd.models.engine import engine
 from mltd.models.models import Friend
-from mltd.services.friend import get_flower_stand_count
+from mltd.services.friend import (
+    exec_flower_stand_reward,
+    get_flower_stand_count,
+    get_flower_stand_list,
+)
 from mltd.services.friend_core import (
     FRIEND_ACCEPTED,
     FRIEND_RECEIVED,
@@ -57,12 +61,34 @@ class FriendCoreRuntimeTest(unittest.TestCase):
                 .where(Friend.friend_id == target)
             ) is not None
 
-    def test_flower_stand_count_matches_client_reply_shape(self):
-        reply = get_flower_stand_count({})
-        self.assertEqual(set(reply), {'flower_stand_count'})
+    def test_flower_stand_read_contracts(self):
+        count_reply = get_flower_stand_count({})
+        self.assertEqual(set(count_reply), {'flower_stand_count'})
         self.assertEqual(
-            set(reply['flower_stand_count']),
+            set(count_reply['flower_stand_count']),
             {'send_count', 'recv_count', 'all_recv_count'},
+        )
+
+        list_reply = get_flower_stand_list({})
+        self.assertEqual(
+            set(list_reply),
+            {
+                'flower_stand_count',
+                'sent_flower_stand_list',
+                'received_flower_stand_list',
+            },
+        )
+        self.assertEqual(list_reply['sent_flower_stand_list'], [])
+        self.assertEqual(list_reply['received_flower_stand_list'], [])
+
+        reward_reply = exec_flower_stand_reward({})
+        self.assertEqual(
+            reward_reply,
+            {
+                'recv_count': 0,
+                'is_received': False,
+                'flower_stand_name_list': [],
+            },
         )
 
     def test_get_friend_list_reports_existing_bidirectional_friend(self):
