@@ -98,7 +98,19 @@ This avoids:
 
 The 443 listener is API-only. Asset GET/HEAD remains a separate high-concurrency `ThreadingHTTPServer` on 7651.
 
-If the corrected client rejects desktop cleartext Asset HTTP, the next preferred design is a separately controlled public hostname with a valid public-CA certificate and DNS pointing to the LAN server. APK TLS patching remains a fallback, not the first choice.
+### Corrected APK cleartext caveat
+
+A direct parse of `mltd-relive-game-client-zh-fixed.apk` shows:
+
+```text
+targetSdkVersion = 29
+```
+
+The `<application>` element does not explicitly set `android:usesCleartextTraffic="true"` and does not reference an Android `networkSecurityConfig`.
+
+Therefore the desktop HTTP `:7651` transport must be treated as an empirical compatibility experiment rather than assumed to work. Android's framework cleartext policy for a target-SDK-29 application may reject HTTP if the Asset download stack consults `NetworkSecurityPolicy`. Unity/native AssetBundle networking may use a path that does not enforce the same framework policy, so the corrected game client must be tested directly.
+
+If the corrected client rejects desktop cleartext Asset HTTP, the next preferred design is a separately controlled public hostname with a valid public-CA certificate and DNS pointing to the LAN server. That preserves local caching while satisfying the stricter Asset TLS stack. APK cleartext/TLS patching remains a fallback, not the first choice.
 
 ## Live performance issue
 
@@ -136,6 +148,7 @@ If Live remains broken after client testing, the next A/B step is to restore the
    - second request is served from local cache;
    - Range requests work;
    - Theater contact assets load.
+   - If the client fails before any request reaches port 7651, treat Android cleartext policy as the primary next suspect.
 
 3. Live compatibility
    - song selection;
