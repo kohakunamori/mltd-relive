@@ -1,0 +1,154 @@
+name: Recover original zh-TW 2.1.000 APK
+
+on:
+  push:
+    branches:
+      - client-original-apk-recovery
+    paths:
+      - '.github/workflows/recover-original-zh-apk.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install browser tooling
+        run: |
+          python -m pip install --disable-pip-version-check playwright
+          python -m playwright install --with-deps chromium
+
+      - name: Probe APKFab and capture download
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p recovery
+          cat > "$RUNNER_TEMP/recover.py" <<'PY'
+          import asyncio
+          import json
+          import re
+          from pathlib import Path
+          from playwright.async_api import async_playwright
+
+          PAGE = 'https://apkfab.com/%E5%81%B6%E5%83%8F%E5%A4%A7%E5%B8%AB-%E7%99%BE%E8%90%AC%E4%BA%BA%E6%BC%94%E5%94%B1%E6%9C%83-%E5%8A%87%E5%A0%B4%E6%99%82%E5%85%89/com.bandainamcoent.imas_millionlive_theaterdays_ch'
+          DOWNLOAD = PAGE + '/download?sha1=1b77ddd342a4020ba032ec63ae7ef9288551b6e7'
+          out = Path('recovery')
+          seen = []
+          saved = []
+
+          async def main():
+              async with async_playwright() as p:
+                  browser = await p.chromium.launch(headless=True)
+                  context = await browser.new_context(
+                      accept_downloads=True,
+                      user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/147.0.0.0 Safari/537.36'
+                  )
+                  page = await context.new_page()
+                  page.on('request', lambda r: seen.append(('request', r.method, r.url)))
+                  page.on('response', lambda r: seen.append(('response', str(r.status), r.url)))
+
+                  async def save_download(d):
+                      try:
+                          name = d.suggested_filename or 'download.bin'
+                          dest = out / name
+                          await d.save_as(str(dest))
+                          saved.append(str(dest))
+                          print('DOWNLOAD_SAVED', dest, dest.stat().st_size)
+                      except Exception as e:
+                          print('DOWNLOAD_SAVE_ERROR', repr(e))
+                  page.on('download', lambda d: asyncio.create_task(save_download(d)))
+
+                  print('OPEN', DOWNLOAD)
+                  try:
+                      resp = await page.goto(DOWNLOAD, wait_until='domcontentloaded', timeout=60000)
+                      print('NAV_STATUS', resp.status if resp else None, page.url)
+                  except Exception as e:
+                      print('NAV_ERROR', repr(e), page.url)
+                  await page.wait_for_timeout(10000)
+                  (out / 'download-page.html').write_text(await page.content(), encoding='utf-8')
+
+                  anchors = await page.locator('a').evaluate_all("els => els.map(a => ({text:(a.innerText||'').trim(), href:a.href}))")
+                  buttons = await page.locator('button').evaluate_all("els => els.map(b => ({text:(b.innerText||'').trim(), id:b.id, cls:b.className}))")
+                  (out / 'dom-links.json').write_text(json.dumps({'anchors': anchors, 'buttons': buttons}, ensure_ascii=False, indent=2), encoding='utf-8')
+                  print('ANCHORS', json.dumps(anchors[:80], ensure_ascii=False))
+                  print('BUTTONS', json.dumps(buttons[:80], ensure_ascii=False))
+
+                  candidates = []
+                  for a in anchors:
+                      h = a.get('href') or ''
+                      t = (a.get('text') or '').lower()
+                      if any(x in h.lower() for x in ('.apk', '.xapk', 'download', 'winudf')) or 'download' in t:
+                          candidates.append(h)
+                  print('CANDIDATE_URLS', json.dumps(candidates, ensure_ascii=False))
+
+                  # Try visible elements likely to trigger the real file transfer.
+                  selectors = [
+                      "a:has-text('Download')",
+                      "button:has-text('Download')",
+                      "a[href*='download']",
+                  ]
+                  for sel in selectors:
+                      loc = page.locator(sel)
+                      count = await loc.count()
+                      print('SELECTOR', sel, 'COUNT', count)
+                      for i in range(min(count, 5)):
+                          try:
+                              text = await loc.nth(i).inner_text(timeout=1000)
+                              href = await loc.nth(i).get_attribute('href')
+                              print('TRY_CLICK', sel, i, repr(text), href)
+                              await loc.nth(i).click(timeout=5000, force=True)
+                              await page.wait_for_timeout(5000)
+                          except Exception as e:
+                              print('CLICK_ERROR', sel, i, repr(e))
+                          if saved:
+                              break
+                      if saved:
+                          break
+
+                  await page.wait_for_timeout(10000)
+                  (out / 'network.json').write_text(json.dumps(seen, ensure_ascii=False, indent=2), encoding='utf-8')
+                  print('FINAL_URL', page.url)
+                  print('SAVED', saved)
+                  await browser.close()
+
+          asyncio.run(main())
+          PY
+          python "$RUNNER_TEMP/recover.py"
+          echo 'Recovery directory:'
+          find recovery -maxdepth 2 -type f -printf '%s %p\n' | sort -n
+
+      - name: Inspect any downloaded APK/XAPK
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib, json, zipfile
+          from pathlib import Path
+          out=Path('recovery')
+          rows=[]
+          for p in out.iterdir():
+              if not p.is_file() or p.suffix.lower() not in {'.apk','.xapk','.apks','.zip'}:
+                  continue
+              b=p.read_bytes()
+              row={'file':p.name,'size':len(b),'sha1':hashlib.sha1(b).hexdigest(),'sha256':hashlib.sha256(b).hexdigest()}
+              try:
+                  with zipfile.ZipFile(p) as z:
+                      row['zip_entries']=z.namelist()
+              except Exception as e:
+                  row['zip_error']=repr(e)
+              rows.append(row)
+          Path('recovery/download-hashes.json').write_text(json.dumps(rows,indent=2),encoding='utf-8')
+          print(json.dumps(rows,indent=2))
+          PY
+
+      - name: Upload recovery evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: original-zh-2.1.000-recovery
+          path: recovery/
+          retention-days: 7
