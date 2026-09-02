@@ -1,0 +1,95 @@
+name: Extract original AppGuard Java bridge smali
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - client-zh-fixed-reconstruction
+    paths:
+      - '.github/workflows/extract-original-appguard-smali.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Install apktool
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/tools"
+          curl -L --fail --retry 3 \
+            'https://github.com/iBotPeaches/Apktool/releases/download/v2.12.1/apktool_2.12.1.jar' \
+            -o "$RUNNER_TEMP/tools/apktool.jar"
+      - name: Download and decode exact official base APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p work/xapk work/original
+          curl -L --fail --retry 3 -A 'Mozilla/5.0' -o work/original/original.xapk \
+            'https://d.apkpure.net/b/XAPK/com.bandainamcoent.imas_millionlive_theaterdays_ch?version=latest'
+          test "$(sha1sum work/original/original.xapk | awk '{print $1}')" = '1b77ddd342a4020ba032ec63ae7ef9288551b6e7'
+          unzip -q work/original/original.xapk -d work/xapk
+          cp work/xapk/com.bandainamcoent.imas_millionlive_theaterdays_ch.apk work/original/base.apk
+          test "$(sha256sum work/original/base.apk | awk '{print $1}')" = '8b8a3976687f606cba2fe3a605d80ae0f7d9cbaa72e6b97ab4bed8c556ba9081'
+          java -jar "$RUNNER_TEMP/tools/apktool.jar" d -f -o work/apktool work/original/base.apk
+      - name: Preserve compact AppGuard bridge source and native-call report
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT='client/reconstruction/android/original-appguard-smali'
+          rm -rf "$OUT"
+          mkdir -p "$OUT/smali"
+          if [[ -d work/apktool/smali/com/inca/security ]]; then
+            mkdir -p "$OUT/smali/com/inca"
+            cp -a work/apktool/smali/com/inca/security "$OUT/smali/com/inca/"
+          fi
+          find work/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays/player \
+            -maxdepth 1 -type f -name 'OverrideEventListener*.smali' -print0 2>/dev/null | \
+            while IFS= read -r -d '' f; do
+              d="$OUT/smali/com/bandainamcoent/imas_millionlive_theaterdays/player"
+              mkdir -p "$d"; cp "$f" "$d/"
+            done
+          python - <<'PY'
+          from pathlib import Path
+          root=Path('client/reconstruction/android/original-appguard-smali')
+          rows=[]
+          for p in sorted((root/'smali').rglob('*.smali')):
+              text=p.read_text(encoding='utf-8',errors='replace').splitlines()
+              cls=next((x.strip() for x in text if x.lstrip().startswith('.class ')), '')
+              native=[x.strip() for x in text if x.lstrip().startswith('.method ') and ' native ' in (' '+x.strip()+' ')]
+              hits=[]
+              needles=('loadLibrary','System;->load','JNISoxProxy','setContext','native','libcompatible','libstub','AppGuard')
+              for i,line in enumerate(text,1):
+                  if any(n in line for n in needles): hits.append((i,line.strip()))
+              if native or hits:
+                  rows.append((p.relative_to(root).as_posix(),cls,native,hits))
+          out=['# Official AppGuard Java/native bridge','',
+               'This is a compact preservation of only the AppGuard/loader smali removed by zh-fixed, decoded from the verified official 2.1.000 base APK.','',
+               '## Native and loader references','']
+          for path,cls,native,hits in rows:
+              out += [f'### `{path}`','',f'- class: `{cls}`']
+              for m in native: out.append(f'- native method: `{m}`')
+              for n,line in hits[:120]: out.append(f'- L{n}: `{line}`')
+              out.append('')
+          (root/'JAVA_NATIVE_FLOW.md').write_text('\n'.join(out)+'\n',encoding='utf-8')
+          print('\n'.join(out[:300]))
+          PY
+      - name: Commit result safely
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add client/reconstruction/android/original-appguard-smali
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'client: preserve official AppGuard Java-native bridge smali'
+          git fetch origin client-zh-fixed-reconstruction
+          git rebase origin/client-zh-fixed-reconstruction
+          git push origin HEAD:client-zh-fixed-reconstruction
