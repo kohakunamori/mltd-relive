@@ -31,6 +31,7 @@ _HOP_BY_HOP_HEADERS = {
     'upgrade',
 }
 _thread_local = threading.local()
+_API_COMPAT_LOCK = threading.Lock()
 _REQUEST_QUEUE_SIZE = 512
 _SOCKET_TIMEOUT = 60
 
@@ -118,17 +119,19 @@ class ProxyHTTPRequestHandler(AssetHTTPRequestHandler):
 
     def do_POST(self):
         # The corrected game clients were developed against the original
-        # standalone proxy which closed every API connection. Preserve that
-        # wire-level behavior for stateful RPC sequences (notably LiveService)
-        # while leaving Asset GET/HEAD connections reusable and concurrent.
+        # standalone proxy which closed every API connection and dispatched
+        # API requests serially. Preserve both properties for stateful RPC
+        # sequences (notably LiveService), while Asset GET/HEAD stays fully
+        # concurrent on ThreadingHTTPServer.
         self.close_connection = True
 
-        content_len = int(self.headers.get('Content-Length', '0'))
-        req_body = self.rfile.read(content_len)
-        if type(self).api_application is not None:
-            self._dispatch_wsgi(req_body)
-        else:
-            self._forward_to_local_api(req_body)
+        with _API_COMPAT_LOCK:
+            content_len = int(self.headers.get('Content-Length', '0'))
+            req_body = self.rfile.read(content_len)
+            if type(self).api_application is not None:
+                self._dispatch_wsgi(req_body)
+            else:
+                self._forward_to_local_api(req_body)
 
     def _dispatch_wsgi(self, req_body: bytes):
         application = type(self).api_application
@@ -315,7 +318,9 @@ def start(port=proxy_port, conn=None):
 
     logger.info(f'TLS API/asset server is running on port {port}...')
     logger.info('TLS handshakes: listener-wrapped compatibility mode')
-    logger.info('API dispatch: direct WSGI, Connection: close compatibility')
+    logger.info(
+        'API dispatch: direct WSGI, serialized Connection: close compatibility'
+    )
     logger.info(f'Asset mode: {config.asset_mode}')
     logger.info(
         'Asset routing: original public host via DNS/SNI in hybrid/local mode'
