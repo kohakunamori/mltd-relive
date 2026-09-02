@@ -1,0 +1,174 @@
+name: Reconstruct zh-fixed from official 2.1.000
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - client-zh-fixed-reconstruction
+    paths:
+      - '.github/workflows/reconstruct-zh-fixed-client.yml'
+      - 'tools/client-source/reconstruct-zh-fixed.py'
+
+permissions:
+  contents: write
+
+jobs:
+  reconstruct:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Install analysis dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check pyelftools pyyaml
+          mkdir -p "$RUNNER_TEMP/mltd-reconstruct-tools"
+          APKTOOL_VERSION=2.12.1
+          curl -L --fail --retry 3 \
+            "https://github.com/iBotPeaches/Apktool/releases/download/v${APKTOOL_VERSION}/apktool_${APKTOOL_VERSION}.jar" \
+            -o "$RUNNER_TEMP/mltd-reconstruct-tools/apktool.jar"
+          java -jar "$RUNNER_TEMP/mltd-reconstruct-tools/apktool.jar" --version
+
+      - name: Download and verify exact official zh-TW 2.1.000 bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p work/original work/fixed work/xapk
+          URL='https://d.apkpure.net/b/XAPK/com.bandainamcoent.imas_millionlive_theaterdays_ch?version=latest'
+          curl -L --fail --retry 3 --connect-timeout 20 --max-time 300 \
+            -A 'Mozilla/5.0' -o work/original/original-2.1.000.xapk "$URL"
+          test "$(stat -c %s work/original/original-2.1.000.xapk)" -eq 106437938
+          test "$(sha1sum work/original/original-2.1.000.xapk | awk '{print $1}')" = '1b77ddd342a4020ba032ec63ae7ef9288551b6e7'
+          unzip -q work/original/original-2.1.000.xapk -d work/xapk
+          cp work/xapk/com.bandainamcoent.imas_millionlive_theaterdays_ch.apk work/original/base.apk
+          cp work/xapk/config.arm64_v8a.apk work/original/arm64.apk
+          test "$(sha256sum work/original/base.apk | awk '{print $1}')" = '8b8a3976687f606cba2fe3a605d80ae0f7d9cbaa72e6b97ab4bed8c556ba9081'
+          test "$(sha256sum work/original/arm64.apk | awk '{print $1}')" = '9932366bd357dc33701a6e7282d26ed67630db95486f596328aade8523032e46'
+
+      - name: Download and verify current zh-fixed baseline
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          source release/game-client.env
+          TAG=$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName --jq .tagName)
+          gh release download "$TAG" --repo "$GITHUB_REPOSITORY" \
+            --pattern 'mltd-relive-game-client-zh-fixed.apk' --dir work/fixed
+          mv work/fixed/mltd-relive-game-client-zh-fixed.apk work/fixed/fixed.apk
+          echo "${ZH_SHA256}  work/fixed/fixed.apk" | sha256sum -c -
+
+      - name: Decode original and fixed Android layers
+        shell: bash
+        run: |
+          set -euo pipefail
+          JAR="$RUNNER_TEMP/mltd-reconstruct-tools/apktool.jar"
+          java -jar "$JAR" d -f -o work/original-apktool work/original/base.apk
+          java -jar "$JAR" d -f -o work/fixed-apktool work/fixed/fixed.apk
+          # The official Play-distributed app keeps arm64 native libraries in a split APK.
+          # Inject that split payload into the decoded original tree so Il2CppDumper sees
+          # the same logical application contents as the merged zh-fixed APK.
+          mkdir -p work/original-apktool/lib/arm64-v8a
+          unzip -p work/original/arm64.apk lib/arm64-v8a/libil2cpp.so > work/original-apktool/lib/arm64-v8a/libil2cpp.so
+          unzip -p work/original/arm64.apk lib/arm64-v8a/libunity.so > work/original-apktool/lib/arm64-v8a/libunity.so
+
+      - name: Generate semantic reconstruction
+        shell: bash
+        run: |
+          set -euo pipefail
+          python tools/client-source/reconstruct-zh-fixed.py \
+            --original-base work/original/base.apk \
+            --original-arm64 work/original/arm64.apk \
+            --fixed work/fixed/fixed.apk \
+            --original-apktool work/original-apktool \
+            --fixed-apktool work/fixed-apktool \
+            --patch-points client/il2cpp/patch-points.yml \
+            --out client/reconstruction
+
+      - name: Attempt IL2CPP symbol recovery on both sides
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p work/original-src work/fixed-src client/reconstruction/il2cpp/dumper
+          ln -s ../original-apktool work/original-src/apktool
+          ln -s ../fixed-apktool work/fixed-src/apktool
+          set +e
+          bash tools/client-source/extract-il2cpp.sh work/original-src
+          ORIG_RC=$?
+          bash tools/client-source/extract-il2cpp.sh work/fixed-src
+          FIXED_RC=$?
+          set -e
+          printf '%s\n' "$ORIG_RC" > client/reconstruction/il2cpp/dumper/original-script-exit.txt
+          printf '%s\n' "$FIXED_RC" > client/reconstruction/il2cpp/dumper/fixed-script-exit.txt
+          for side in original fixed; do
+            root="work/${side}-src"
+            if [[ -f "$root/report/il2cppdumper.result" ]]; then
+              cp "$root/report/il2cppdumper.result" "client/reconstruction/il2cpp/dumper/${side}-result.txt"
+            fi
+            if [[ -f "$root/report/il2cppdumper.log" ]]; then
+              tail -n 200 "$root/report/il2cppdumper.log" > "client/reconstruction/il2cpp/dumper/${side}-log-tail.txt"
+            fi
+            if [[ -f "$root/report/client-core-network-symbols.txt" ]]; then
+              cp "$root/report/client-core-network-symbols.txt" "client/reconstruction/il2cpp/dumper/${side}-core-network-symbols.txt"
+            fi
+            if [[ -f "$root/report/client-rpc-methods.txt" ]]; then
+              cp "$root/report/client-rpc-methods.txt" "client/reconstruction/il2cpp/dumper/${side}-rpc-methods.txt"
+            fi
+            if [[ -f "$root/report/il2cpp-dump-summary.json" ]]; then
+              cp "$root/report/il2cpp-dump-summary.json" "client/reconstruction/il2cpp/dumper/${side}-dump-summary.json"
+            fi
+          done
+          if [[ -f client/reconstruction/il2cpp/dumper/original-core-network-symbols.txt && -f client/reconstruction/il2cpp/dumper/fixed-core-network-symbols.txt ]]; then
+            diff -u \
+              client/reconstruction/il2cpp/dumper/original-core-network-symbols.txt \
+              client/reconstruction/il2cpp/dumper/fixed-core-network-symbols.txt \
+              > client/reconstruction/il2cpp/dumper/core-network-symbols.patch || true
+          fi
+          if [[ -f client/reconstruction/il2cpp/dumper/original-rpc-methods.txt && -f client/reconstruction/il2cpp/dumper/fixed-rpc-methods.txt ]]; then
+            diff -u \
+              client/reconstruction/il2cpp/dumper/original-rpc-methods.txt \
+              client/reconstruction/il2cpp/dumper/fixed-rpc-methods.txt \
+              > client/reconstruction/il2cpp/dumper/rpc-methods.patch || true
+          fi
+
+      - name: Add machine-readable reconstruction status
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('client/reconstruction')
+          p=root/'il2cpp'/'dumper'
+          def text(name):
+              f=p/name
+              return f.read_text(encoding='utf-8',errors='replace').strip() if f.exists() else None
+          data={
+              'original_il2cppdumper_result': text('original-result.txt'),
+              'fixed_il2cppdumper_result': text('fixed-result.txt'),
+              'original_has_symbol_dump': (p/'original-dump-summary.json').exists(),
+              'fixed_has_symbol_dump': (p/'fixed-dump-summary.json').exists(),
+              'rpc_diff_present': (p/'rpc-methods.patch').exists() and (p/'rpc-methods.patch').stat().st_size>0,
+              'core_network_diff_present': (p/'core-network-symbols.patch').exists() and (p/'core-network-symbols.patch').stat().st_size>0,
+          }
+          (root/'IL2CPP_DUMPER_STATUS.json').write_text(json.dumps(data,indent=2)+'\n',encoding='utf-8')
+          print(json.dumps(data,indent=2))
+          PY
+
+      - name: Commit reconstruction result to branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add client/reconstruction
+          if git diff --cached --quiet; then
+            echo 'No reconstruction changes to commit.'
+            exit 0
+          fi
+          git commit -m 'client: record reconstructed zh-fixed semantic delta'
+          git push origin HEAD:client-zh-fixed-reconstruction
