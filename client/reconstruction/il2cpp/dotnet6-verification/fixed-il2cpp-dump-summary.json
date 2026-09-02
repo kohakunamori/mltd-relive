@@ -1,0 +1,272 @@
+{
+  "files": [
+    {
+      "path": "DummyDll/Apple.dll",
+      "bytes": 5120
+    },
+    {
+      "path": "DummyDll/Assembly-CSharp-firstpass.dll",
+      "bytes": 671744
+    },
+    {
+      "path": "DummyDll/Assembly-CSharp.dll",
+      "bytes": 19735552
+    },
+    {
+      "path": "DummyDll/ChannelPurchase.dll",
+      "bytes": 12288
+    },
+    {
+      "path": "DummyDll/ConditionalExpression.dll",
+      "bytes": 2560
+    },
+    {
+      "path": "DummyDll/DOTween.dll",
+      "bytes": 197632
+    },
+    {
+      "path": "DummyDll/DOTween46.dll",
+      "bytes": 8192
+    },
+    {
+      "path": "DummyDll/FacebookStore.dll",
+      "bytes": 3072
+    },
+    {
+      "path": "DummyDll/Firebase.App.dll",
+      "bytes": 123904
+    },
+    {
+      "path": "DummyDll/Firebase.Messaging.dll",
+      "bytes": 18944
+    },
+    {
+      "path": "DummyDll/Firebase.Platform.dll",
+      "bytes": 41984
+    },
+    {
+      "path": "DummyDll/Il2CppDummyDll.dll",
+      "bytes": 4096
+    },
+    {
+      "path": "DummyDll/Mono.Security.dll",
+      "bytes": 300544
+    },
+    {
+      "path": "DummyDll/MsgPack.dll",
+      "bytes": 1059840
+    },
+    {
+      "path": "DummyDll/PlayMaker.dll",
+      "bytes": 340480
+    },
+    {
+      "path": "DummyDll/Purchasing.Common.dll",
+      "bytes": 8704
+    },
+    {
+      "path": "DummyDll/Security.dll",
+      "bytes": 36864
+    },
+    {
+      "path": "DummyDll/Stores.dll",
+      "bytes": 111616
+    },
+    {
+      "path": "DummyDll/System.Configuration.dll",
+      "bytes": 12288
+    },
+    {
+      "path": "DummyDll/System.Core.dll",
+      "bytes": 156160
+    },
+    {
+      "path": "DummyDll/System.Diagnostics.StackTrace.dll",
+      "bytes": 2048
+    },
+    {
+      "path": "DummyDll/System.Globalization.Extensions.dll",
+      "bytes": 2048
+    },
+    {
+      "path": "DummyDll/System.IO.Compression.dll",
+      "bytes": 2048
+    },
+    {
+      "path": "DummyDll/System.Numerics.dll",
+      "bytes": 20480
+    },
+    {
+      "path": "DummyDll/System.Runtime.Serialization.dll",
+      "bytes": 2560
+    },
+    {
+      "path": "DummyDll/System.Xml.dll",
+      "bytes": 1091584
+    },
+    {
+      "path": "DummyDll/System.dll",
+      "bytes": 2053120
+    },
+    {
+      "path": "DummyDll/Tizen.dll",
+      "bytes": 3584
+    },
+    {
+      "path": "DummyDll/Unity.Burst.dll",
+      "bytes": 2048
+    },
+    {
+      "path": "DummyDll/Unity.Compat.dll",
+      "bytes": 2048
+    },
+    {
+      "path": "DummyDll/Unity.Tasks.dll",
+      "bytes": 2048
+    },
+    {
+      "path": "DummyDll/UnityEngine.AIModule.dll",
+      "bytes": 4096
+    },
+    {
+      "path": "DummyDll/UnityEngine.AnimationModule.dll",
+      "bytes": 74752
+    },
+    {
+      "path": "DummyDll/UnityEngine.AssetBundleModule.dll",
+      "bytes": 8704
+    },
+    {
+      "path": "DummyDll/UnityEngine.AudioModule.dll",
+      "bytes": 29184
+    },
+    {
+      "path": "DummyDll/UnityEngine.CoreModule.dll",
+      "bytes": 679424
+    },
+    {
+      "path": "DummyDll/UnityEngine.GameCenterModule.dll",
+      "bytes": 24576
+    },
+    {
+      "path": "DummyDll/UnityEngine.IMGUIModule.dll",
+      "bytes": 132608
+    },
+    {
+      "path": "DummyDll/UnityEngine.ImageConversionModule.dll",
+      "bytes": 3072
+    },
+    {
+      "path": "DummyDll/UnityEngine.InputModule.dll",
+      "bytes": 5120
+    },
+    {
+      "path": "DummyDll/UnityEngine.JSONSerializeModule.dll",
+      "bytes": 3584
+    },
+    {
+      "path": "DummyDll/UnityEngine.ParticleSystemModule.dll",
+      "bytes": 24064
+    },
+    {
+      "path": "DummyDll/UnityEngine.Physics2DModule.dll",
+      "bytes": 40448
+    },
+    {
+      "path": "DummyDll/UnityEngine.PhysicsModule.dll",
+      "bytes": 37376
+    },
+    {
+      "path": "DummyDll/UnityEngine.Purchasing.dll",
+      "bytes": 39936
+    },
+    {
+      "path": "DummyDll/UnityEngine.ScreenCaptureModule.dll",
+      "bytes": 3072
+    },
+    {
+      "path": "DummyDll/UnityEngine.SharedInternalsModule.dll",
+      "bytes": 26624
+    },
+    {
+      "path": "DummyDll/UnityEngine.TextRenderingModule.dll",
+      "bytes": 18432
+    },
+    {
+      "path": "DummyDll/UnityEngine.UI.dll",
+      "bytes": 337408
+    },
+    {
+      "path": "DummyDll/UnityEngine.UIModule.dll",
+      "bytes": 19456
+    },
+    {
+      "path": "DummyDll/UnityEngine.UnityAnalyticsModule.dll",
+      "bytes": 11776
+    },
+    {
+      "path": "DummyDll/UnityEngine.UnityWebRequestModule.dll",
+      "bytes": 27136
+    },
+    {
+      "path": "DummyDll/UnityEngine.UnityWebRequestTextureModule.dll",
+      "bytes": 4096
+    },
+    {
+      "path": "DummyDll/UnityEngine.UnityWebRequestWWWModule.dll",
+      "bytes": 5120
+    },
+    {
+      "path": "DummyDll/UnityEngine.VRModule.dll",
+      "bytes": 6656
+    },
+    {
+      "path": "DummyDll/UnityEngine.VideoModule.dll",
+      "bytes": 15872
+    },
+    {
+      "path": "DummyDll/UnityEngine.XRModule.dll",
+      "bytes": 36352
+    },
+    {
+      "path": "DummyDll/UnityEngine.dll",
+      "bytes": 3584
+    },
+    {
+      "path": "DummyDll/UnityStore.dll",
+      "bytes": 11776
+    },
+    {
+      "path": "DummyDll/mscorlib.dll",
+      "bytes": 2834432
+    },
+    {
+      "path": "DummyDll/netstandard.dll",
+      "bytes": 2048
+    },
+    {
+      "path": "DummyDll/winrt.dll",
+      "bytes": 6656
+    },
+    {
+      "path": "DummyDll/zxing.unity.dll",
+      "bytes": 395776
+    },
+    {
+      "path": "dump.cs",
+      "bytes": 34739049
+    },
+    {
+      "path": "il2cpp.h",
+      "bytes": 67330720
+    },
+    {
+      "path": "script.json",
+      "bytes": 90475124
+    },
+    {
+      "path": "stringliteral.json",
+      "bytes": 2115860
+    }
+  ]
+}

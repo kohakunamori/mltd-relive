@@ -1,0 +1,59 @@
+
+// Namespace: Imas
+public class AssetBundleDownloader // TypeDefIndex: 9601
+{
+
+
+// Namespace: 
+public class AssetBundleDownloader.DownloadFileInfo // TypeDefIndex: 9602
+{
+
+// Namespace: 
+[DefaultMemberAttribute] // RVA: 0x15390BC Offset: 0x15390BC VA: 0x15390BC
+public class AssetBundleDownloader.DownloadResult // TypeDefIndex: 9603
+{
+
+
+// Namespace: 
+public class AssetBundleDownloader.DownloadAsset // TypeDefIndex: 9606
+{
+
+
+// Namespace: Imas
+public class ConnectionManager : MBSingleton<ConnectionManager> // TypeDefIndex: 10971
+{
+
+
+// Namespace: Imas
+public class WebviewUrl // TypeDefIndex: 12484
+{
+
+
+// Namespace: Imas.Connection
+public class API // TypeDefIndex: 12746
+{
+
+
+	// RVA: 0x1AAC27C Offset: 0x1AAC27C VA: 0x1AAC27C
+	public static string GetAuthURL() { }
+
+
+
+	// RVA: 0x1AAC354 Offset: 0x1AAC354 VA: 0x1AAC354
+	public static string GetRpcURL() { }
+
+
+
+	// RVA: 0x1AAC2EC Offset: 0x1AAC2EC VA: 0x1AAC2EC
+	public static string GetRootURL() { }
+
+
+
+	// RVA: 0x1AAC3C8 Offset: 0x1AAC3C8 VA: 0x1AAC3C8
+	public static void SetGameServerUrl(string game_url) { }
+
+
+
+	// RVA: 0x1AAC434 Offset: 0x1AAC434 VA: 0x1AAC434
+	public static int GetResponseJson(ref string json, HTTPRequest request, string DecLastPattern) { }
+

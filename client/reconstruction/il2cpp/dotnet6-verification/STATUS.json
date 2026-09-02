@@ -1,7 +1,7 @@
 {
   "original_result": "failed-no-dump",
-  "fixed_result": "failed-no-dump",
+  "fixed_result": "success-output-generated-nonzero-exit-134",
   "original_dump_generated": false,
-  "fixed_dump_generated": false,
-  "fixed_rpc_count": null
+  "fixed_dump_generated": true,
+  "fixed_rpc_count": 309
 }
