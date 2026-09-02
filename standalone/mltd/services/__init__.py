@@ -30,6 +30,7 @@ __all__ = [
     'mission',
     'mission_client',
     'offer',
+    'offline_content_compat',
     'present',
     'song',
     'song_ranking',
