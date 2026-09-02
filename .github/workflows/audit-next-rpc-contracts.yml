@@ -34,13 +34,10 @@ jobs:
               sed -n "${line},$((line+45))p" /tmp/dump.cs
             fi
           done
-          echo '=== VITALITY RECOVERY CLIENT CALCULATION REFERENCES ==='
-          grep -n -E 'RecoverVitalityBy(Item|ItemMulti|Jewel)|full_recover_date|before_jewel|after_free_jewel|after_paid_jewel' /tmp/dump.cs | head -n 350 || true
       - name: Show every server vitality timeline reference
         shell: bash
         run: |
-          set -euo pipefail
-          grep -RIn -C 8 -E 'vitality_recovery_time|full_recover_date|auto_recover_interval|recovery_value|recovery_max_value' standalone/mltd || true
+          grep -RIn -C 8 -E 'full_recover_date|auto_recover_interval' standalone/mltd || true
       - name: Initialize DB and query vitality master data
         working-directory: standalone
         shell: bash
@@ -51,20 +48,25 @@ jobs:
           from sqlalchemy.orm import Session
           from mltd.models.setup import setup
           from mltd.models.engine import engine
-          from mltd.models.models import MstItem, MstGameSetting, User
+          from mltd.models.models import Jewel, MstItem, MstGameSetting, User
           setup()
           with Session(engine) as s:
               print('=== ITEM_TYPE_6 ===')
               for i in s.scalars(select(MstItem).where(MstItem.item_type == 6).order_by(MstItem.mst_item_id)).all():
-                  print(i.mst_item_id, repr(i.name), 'value1=', i.value1, 'value2=', i.value2, 'recovery_value=', i.recovery_value, 'recovery_max_value=', i.recovery_max_value)
+                  print(i.mst_item_id, repr(i.name), 'value1=', i.value1, 'value2=', i.value2, 'max_amount=', i.max_amount)
               print('=== GAME_SETTING ===')
               gs = s.scalars(select(MstGameSetting)).first()
-              print('auto_recover_interval=', gs.auto_recover_interval, 'max_stamina=', gs.max_stamina)
-              print('=== ADMIN_USER ===')
-              u = s.scalars(select(User)).first()
-              print('vitality=', u.vitality, 'max_vitality=', u.max_vitality, 'vitality_recovery_time=', u.vitality_recovery_time, 'full_recover_date=', u.full_recover_date, 'free_jewel=', u.free_jewel, 'paid_jewel=', u.paid_jewel)
+              print('recover_jewel_amount=', gs.recover_jewel_amount)
+              print('recover_jewel_begin_date=', gs.recover_jewel_begin_date)
+              print('recover_jewel_end_date=', gs.recover_jewel_end_date)
+              print('=== USERS ===')
+              for u in s.scalars(select(User).limit(3)).all():
+                  print(str(u.user_id), 'vitality=', u.vitality, 'stored=', u._vitality, 'max=', u.max_vitality, 'full=', u.full_recover_date, 'interval=', u.auto_recover_interval, 'ticket=', u.live_ticket)
+              print('=== JEWELS ===')
+              for j in s.scalars(select(Jewel).limit(3)).all():
+                  print(str(j.user_id), 'free=', j.free_jewel_amount, 'paid=', j.paid_jewel_amount)
           PY
       - name: Print ItemSchema implementation
         shell: bash
         run: |
-          grep -RIn -A 55 -B 4 -E '^class ItemSchema\\b' standalone/mltd/models/schemas.py || true
+          grep -RIn -A 55 -B 4 -E '^class ItemSchema\\b' mltd/models/schemas.py || true
