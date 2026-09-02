@@ -1,0 +1,272 @@
+[
+  {
+    "name": "libcompatible.so",
+    "sha256": "8880c415e1ab82c31858be68ce12b76b95dc8ff8875b76c1246a8bc0679647bc",
+    "size": 1935632,
+    "machine": "EM_AARCH64",
+    "entry": 572160,
+    "executable_segments": [
+      {
+        "vaddr": 0,
+        "offset": 0,
+        "filesz": 1900748
+      }
+    ],
+    "asm_symbols": [
+      {
+        "name": "asm_close",
+        "address": 860992,
+        "size": 12,
+        "bind": "STB_GLOBAL",
+        "type": "STT_FUNC"
+      },
+      {
+        "name": "asm_fstatat",
+        "address": 865440,
+        "size": 12,
+        "bind": "STB_GLOBAL",
+        "type": "STT_FUNC"
+      },
+      {
+        "name": "asm_getdents64",
+        "address": 861040,
+        "size": 12,
+        "bind": "STB_GLOBAL",
+        "type": "STT_FUNC"
+      },
+      {
+        "name": "asm_getpid",
+        "address": 861216,
+        "size": 12,
+        "bind": "STB_GLOBAL",
+        "type": "STT_FUNC"
+      },
+      {
+        "name": "asm_inotify_add_watch",
+        "address": 861200,
+        "size": 12,
+        "bind": "STB_GLOBAL",
+        "type": "STT_FUNC"
+      },
+      {
+        "name": "asm_inotify_init",
+        "address": 861184,
+        "size": 12,
+        "bind": "STB_GLOBAL",
+        "type": "STT_FUNC"
+      },
+      {
+        "name": "asm_kill",
+        "address": 861056,
+        "size": 12,
+        "bind": "STB_GLOBAL",
+        "type": "STT_FUNC"
+      },
+      {
+        "name": "asm_lseek",
+        "address": 861072,
+        "size": 12,
+        "bind": "STB_GLOBAL",
+        "type": "STT_FUNC"
+      },
+      {
+        "name": "asm_mmap2",
+        "address": 861008,
+        "size": 12,
+        "bind": "STB_GLOBAL",
+        "type": "STT_FUNC"
+      },
+      {
+        "name": "asm_mprotect",
+        "address": 861088,
+        "size": 12,
+        "bind": "STB_GLOBAL",
+        "type": "STT_FUNC"
+      },
+      {
+        "name": "asm_munmap",
+        "address": 861104,
+        "size": 12,
+        "bind": "STB_GLOBAL",
+        "type": "STT_FUNC"
+      },
+      {
+        "name": "asm_openat",
+        "address": 861024,
+        "size": 12,
+        "bind": "STB_GLOBAL",
+        "type": "STT_FUNC"
+      },
+      {
+        "name": "asm_prctl",
+        "address": 861152,
+        "size": 12,
+        "bind": "STB_GLOBAL",
+        "type": "STT_FUNC"
+      },
+      {
+        "name": "asm_ptrace",
+        "address": 861232,
+        "size": 12,
+        "bind": "STB_GLOBAL",
+        "type": "STT_FUNC"
+      },
+      {
+        "name": "asm_read",
+        "address": 861120,
+        "size": 12,
+        "bind": "STB_GLOBAL",
+        "type": "STT_FUNC"
+      },
+      {
+        "name": "asm_readlink_64",
+        "address": 861168,
+        "size": 12,
+        "bind": "STB_GLOBAL",
+        "type": "STT_FUNC"
+      },
+      {
+        "name": "asm_waitpid",
+        "address": 866576,
+        "size": 12,
+        "bind": "STB_GLOBAL",
+        "type": "STT_FUNC"
+      },
+      {
+        "name": "asm_write",
+        "address": 861136,
+        "size": 12,
+        "bind": "STB_GLOBAL",
+        "type": "STT_FUNC"
+      }
+    ],
+    "asm_wrapper_disassembly": {
+      "asm_close": {
+        "address": 860992,
+        "size": 12,
+        "instructions": []
+      },
+      "asm_fstatat": {
+        "address": 865440,
+        "size": 12,
+        "instructions": []
+      },
+      "asm_getdents64": {
+        "address": 861040,
+        "size": 12,
+        "instructions": []
+      },
+      "asm_getpid": {
+        "address": 861216,
+        "size": 12,
+        "instructions": []
+      },
+      "asm_inotify_add_watch": {
+        "address": 861200,
+        "size": 12,
+        "instructions": []
+      },
+      "asm_inotify_init": {
+        "address": 861184,
+        "size": 12,
+        "instructions": []
+      },
+      "asm_kill": {
+        "address": 861056,
+        "size": 12,
+        "instructions": []
+      },
+      "asm_lseek": {
+        "address": 861072,
+        "size": 12,
+        "instructions": []
+      },
+      "asm_mmap2": {
+        "address": 861008,
+        "size": 12,
+        "instructions": []
+      },
+      "asm_mprotect": {
+        "address": 861088,
+        "size": 12,
+        "instructions": []
+      },
+      "asm_munmap": {
+        "address": 861104,
+        "size": 12,
+        "instructions": []
+      },
+      "asm_openat": {
+        "address": 861024,
+        "size": 12,
+        "instructions": []
+      },
+      "asm_prctl": {
+        "address": 861152,
+        "size": 12,
+        "instructions": []
+      },
+      "asm_ptrace": {
+        "address": 861232,
+        "size": 12,
+        "instructions": []
+      },
+      "asm_read": {
+        "address": 861120,
+        "size": 12,
+        "instructions": []
+      },
+      "asm_readlink_64": {
+        "address": 861168,
+        "size": 12,
+        "instructions": []
+      },
+      "asm_waitpid": {
+        "address": 866576,
+        "size": 12,
+        "instructions": []
+      },
+      "asm_write": {
+        "address": 861136,
+        "size": 12,
+        "instructions": []
+      }
+    },
+    "direct_asm_calls": [],
+    "svc_sites": [],
+    "loader_candidates": []
+  },
+  {
+    "name": "libstub.so",
+    "sha256": "041c81c97b77bc182c08207a6ac174e422795c9857c5d71076b16ec48dde201b",
+    "size": 813143,
+    "machine": "EM_AARCH64",
+    "entry": 178640,
+    "executable_segments": [
+      {
+        "vaddr": 0,
+        "offset": 0,
+        "filesz": 264960
+      }
+    ],
+    "asm_symbols": [],
+    "asm_wrapper_disassembly": {},
+    "direct_asm_calls": [],
+    "svc_sites": [],
+    "loader_candidates": []
+  },
+  {
+    "name": "libcompatible_x86.so",
+    "sha256": "6cca8c7be501e0fe8560cc229dec1b986f389832fdf83f11d068793a386f7e02",
+    "size": 2026048,
+    "machine": "EM_X86_64",
+    "skipped": "not AArch64"
+  },
+  {
+    "name": "libengine-hlp.so",
+    "sha256": "ceb581eda775b8a2dfa53483e7a994d4bda25e99c3565ad95cad5c2bd16b1b2e",
+    "size": 236400,
+    "machine": "EM_X86_64",
+    "skipped": "not AArch64"
+  }
+]
