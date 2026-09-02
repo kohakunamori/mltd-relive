@@ -15,55 +15,12 @@ jobs:
         with:
           fetch-depth: 1
       - run: git fetch origin client-decompiled-zh-fixed-v1 --depth=1
-      - name: Compare current server registrations to corrected client
-        shell: bash
-        run: |
-          set -euo pipefail
-          git show origin/client-decompiled-zh-fixed-v1:report/client-rpc-methods.txt > /tmp/client-rpcs.txt
-          python - <<'PY'
-          import ast
-          from pathlib import Path
-
-          client = {x.strip() for x in Path('/tmp/client-rpcs.txt').read_text().splitlines() if x.strip()}
-          server = set()
-          locations = {}
-          for path in sorted(Path('standalone/mltd/services').glob('*.py')):
-              try:
-                  tree = ast.parse(path.read_text(encoding='utf-8'))
-              except SyntaxError:
-                  continue
-              for node in ast.walk(tree):
-                  if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                      continue
-                  for dec in node.decorator_list:
-                      if not isinstance(dec, ast.Call):
-                          continue
-                      func = dec.func
-                      if not (isinstance(func, ast.Attribute) and func.attr == 'add_method'):
-                          continue
-                      for kw in dec.keywords:
-                          if kw.arg == 'name' and isinstance(kw.value, ast.Constant) and isinstance(kw.value.value, str):
-                              rpc = kw.value.value
-                              server.add(rpc)
-                              locations.setdefault(rpc, []).append(f'{path}:{node.lineno}')
-          implemented = sorted(client & server)
-          missing = sorted(client - server)
-          print(f'CLIENT_RPC_COUNT={len(client)}')
-          print(f'SERVER_REGISTERED_COUNT={len(server)}')
-          print(f'IMPLEMENTED_CLIENT_RPC_COUNT={len(implemented)}')
-          print(f'CLIENT_COVERAGE_PERCENT={len(implemented) * 100 / len(client):.2f}')
-          print(f'MISSING_COUNT={len(missing)}')
-          print('=== MISSING RPCS ===')
-          for rpc in missing:
-              print(rpc)
-          print('=== STORY REGISTERED ===')
-          for rpc in sorted(x for x in server if x.startswith('StoryService.')):
-              print(rpc, ','.join(locations[rpc]))
-          PY
       - name: Inspect corrected-client CostumeService contract
         shell: bash
         run: |
           set -euo pipefail
           git show origin/client-decompiled-zh-fixed-v1:il2cpp-dump/dump.cs > /tmp/dump.cs
-          echo '=== COSTUME DTO / API CONTEXT ==='
-          grep -n -C 12 -E 'GetCostumeList(Args|Reply)|SetCostume(Args|Reply)|CostumeService\.GetCostumeList|CostumeService\.SetCostume|HTTPRequest (GetCostumeList|SetCostume)\(' /tmp/dump.cs || true
+          echo '=== COSTUME CLIENT REFERENCES ==='
+          grep -n -C 10 -E 'GetCostumeList|SetCostume|CreateRequestAndSend<[^>]*Costume|GetReply<[^>]*Costume|HTTPRequest [A-Za-z0-9_]*Costume|CostumeStatus\[\]' /tmp/dump.cs | head -n 1800 || true
+          echo '=== COSTUME SERVER MODELS ==='
+          grep -n -C 22 -E '^class (Costume|MstCostume)\b|^class .*Costume.*Schema\b' standalone/mltd/models/models.py standalone/mltd/models/schemas.py || true
