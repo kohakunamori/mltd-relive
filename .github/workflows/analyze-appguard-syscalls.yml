@@ -10,6 +10,7 @@ on:
       - 'tools/client-source/analyze-appguard-syscalls.py'
       - 'tools/client-source/analyze-appguard-direct-calls.py'
       - 'tools/client-source/analyze-appguard-bootstrap.py'
+      - 'tools/client-source/analyze-appguard-loader-slice.py'
 
 permissions:
   contents: write
@@ -58,6 +59,10 @@ jobs:
           python tools/client-source/analyze-appguard-bootstrap.py \
             --libcompatible work/native/libcompatible.so \
             --out client/reconstruction/appguard-analysis
+          python tools/client-source/analyze-appguard-loader-slice.py \
+            --libcompatible work/native/libcompatible.so \
+            --bootstrap-json client/reconstruction/appguard-analysis/bootstrap-cfg.json \
+            --out client/reconstruction/appguard-analysis
 
       - name: Commit maps
         shell: bash
@@ -70,7 +75,9 @@ jobs:
                   client/reconstruction/appguard-analysis/direct-call-map.json \
                   client/reconstruction/appguard-analysis/direct-call-map.md \
                   client/reconstruction/appguard-analysis/bootstrap-cfg.json \
-                  client/reconstruction/appguard-analysis/bootstrap-cfg.md
+                  client/reconstruction/appguard-analysis/bootstrap-cfg.md \
+                  client/reconstruction/appguard-analysis/loader-slice.json \
+                  client/reconstruction/appguard-analysis/loader-slice.md
           if git diff --cached --quiet; then exit 0; fi
-          git commit -m 'client: trace AppGuard bootstrap CFG from DT_INIT'
+          git commit -m 'client: recover SoLibraryStart imports and string xrefs'
           git push origin HEAD:client-zh-fixed-reconstruction
