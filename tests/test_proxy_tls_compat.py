@@ -19,17 +19,16 @@ class ProxyTLSCompatibilityTest(unittest.TestCase):
 
         source = inspect.getsource(proxy.start)
         self.assertIn(
-            'httpd.socket = api_context.wrap_socket(httpd.socket, server_side=True)',
+            'httpd.socket = context.wrap_socket(httpd.socket, server_side=True)',
             source,
         )
         self.assertNotIn('process_request_thread', source)
 
-    def test_asset_hostname_uses_sni_context_without_rewrapping_socket(self):
+    def test_api_tls_listener_does_not_load_asset_certificate(self):
         source = inspect.getsource(proxy.start)
-        self.assertIn('api_context.set_servername_callback', source)
-        self.assertIn('ssl_socket.context = asset_context', source)
-        self.assertIn('assets.rainbowunicorn7297.com.crt', source)
-        self.assertIn('assets.rainbowunicorn7297.com.key', source)
+        self.assertNotIn('assets.rainbowunicorn7297.com.crt', source)
+        self.assertNotIn('assets.rainbowunicorn7297.com.key', source)
+        self.assertNotIn('set_servername_callback', source)
 
     def test_api_post_restores_connection_close_semantics(self):
         post_source = inspect.getsource(proxy.ProxyHTTPRequestHandler.do_POST)
@@ -37,10 +36,16 @@ class ProxyTLSCompatibilityTest(unittest.TestCase):
         self.assertIn('self.close_connection = True', post_source)
         self.assertIn("self.send_header('Connection', 'close')", response_source)
 
-    def test_asset_requests_route_by_original_host(self):
-        source = inspect.getsource(proxy.ProxyHTTPRequestHandler._asset_path)
-        self.assertIn("self.headers.get('Host', '')", source)
-        self.assertIn('host == _ASSET_HOST', source)
+    def test_api_dispatch_is_serialized_for_live_compatibility(self):
+        post_source = inspect.getsource(proxy.ProxyHTTPRequestHandler.do_POST)
+        self.assertIn('with _API_COMPAT_LOCK:', post_source)
+
+    def test_cache_modes_start_independent_http_asset_listener(self):
+        source = inspect.getsource(proxy._start_asset_http_server)
+        self.assertIn("if config.asset_mode == 'remote':", source)
+        self.assertIn('create_asset_server(', source)
+        self.assertIn('fetch_on_miss = config.asset_mode == \'hybrid\'', source)
+        self.assertIn("name='mltd-asset-http'", source)
 
 
 if __name__ == '__main__':
