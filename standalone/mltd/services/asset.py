@@ -31,26 +31,15 @@ def get_asset_version(params):
     os_name = 'android' if params['os_name'] == 'Android' else 'ios'
     scope = scope_name(config.language, os_name)
 
-    if config.asset_mode == 'remote':
-        asset_url = f'{REMOTE_ASSET_ROOT}/{scope}/'
-    elif config.is_local:
-        # Termux / same-device mode talks directly to the local HTTP asset
-        # server and therefore needs no TLS interception or DNS handling.
+    if config.is_local:
+        # Same-device Termux mode keeps the original loopback HTTP behavior.
         asset_url = f'http://127.0.0.1:{asset_port}/{scope}/'
     else:
-        # Desktop hybrid/local intentionally uses cleartext HTTP on the
-        # dedicated asset port. The corrected client accepts self-signed TLS
-        # for API RPCs but its AssetBundle downloader performs stricter TLS
-        # validation, causing the previous HTTPS /__mltd_assets/ topology to
-        # fail as AssetBundle NotFoundError(-404).
-        #
-        # Reuse the already-intercepted API hostname so the client does not
-        # need a literal LAN IP in its asset_url; DNS points this hostname at
-        # the standalone server and port 7651 is served by AssetServer.
-        asset_url = (
-            f'http://theaterdays-{config.language}.appspot.com:'
-            f'{asset_port}/{scope}/'
-        )
+        # Keep the exact public URL shape expected by the original client and
+        # yuyu/RainbowUnicorn servers. In desktop hybrid/local mode the local
+        # DNS server redirects this hostname to the standalone TLS listener;
+        # remote mode leaves DNS untouched so the public CDN is reached.
+        asset_url = f'{REMOTE_ASSET_ROOT}/{scope}/'
 
     return {
         'asset_url': asset_url,
