@@ -10,7 +10,8 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from mltd.models.engine import engine
-from mltd.models.models import Card, HelperCard, Mission, MstMission, Profile, User
+from mltd.models.models import (Card, Friend, HelperCard, Mission, MstMission,
+                                Profile, User)
 from mltd.services.user_profile import (
     get_profile,
     set_achievement_list,
@@ -151,6 +152,7 @@ class UserProfileRuntimeTest(unittest.TestCase):
         self.assertEqual(reply['birthday'], '0102')
         self.assertFalse(reply['is_birthday_public'])
         self.assertFalse(reply['sendable'])
+        self.assertEqual(reply['friend_state'], 0)
         self.assertEqual(len(reply['helper_card_id_list']), 4)
         self.assertEqual(len(reply['helper_card_list']), 4)
         self.assertIsInstance(reply['favorite_card'], dict)
@@ -163,6 +165,42 @@ class UserProfileRuntimeTest(unittest.TestCase):
             {'search_user_id': self.search_id}, CONTEXT
         )
         self.assertEqual(by_search_id['user_id'], str(ADMIN_USER_ID))
+
+    def test_get_profile_reflects_directional_friend_state(self):
+        with Session(engine) as session:
+            edge = session.scalar(select(Friend).limit(1))
+            if edge is None:
+                self.skipTest('standalone setup has no friend edge')
+            source = edge.user_id
+            target = edge.friend_id
+
+            reverse = session.scalar(
+                select(Friend)
+                .where(Friend.user_id == target)
+                .where(Friend.friend_id == source)
+            )
+            if reverse is None:
+                session.add(Friend(user_id=target, friend_id=source))
+                session.commit()
+
+        source_context = {'user_id': str(source)}
+        accepted = get_profile({'user_id': str(target)}, source_context)
+        self.assertEqual(accepted['friend_state'], 3)
+
+        with Session(engine) as session:
+            reverse = session.scalar(
+                select(Friend)
+                .where(Friend.user_id == target)
+                .where(Friend.friend_id == source)
+            )
+            session.delete(reverse)
+            session.commit()
+        sent = get_profile({'user_id': str(target)}, source_context)
+        self.assertEqual(sent['friend_state'], 1)
+
+        with Session(engine) as session:
+            session.add(Friend(user_id=target, friend_id=source))
+            session.commit()
 
     def test_set_achievement_list_has_empty_wire_reply_and_persists(self):
         values = [3, 2, 1]
