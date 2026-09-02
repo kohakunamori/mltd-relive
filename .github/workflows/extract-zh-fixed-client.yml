@@ -35,6 +35,11 @@ jobs:
           distribution: temurin
           java-version: '17'
 
+      - name: Set up .NET 6 for Il2CppDumper
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '6.0.x'
+
       - name: Install analysis dependencies
         run: |
           sudo apt-get update
@@ -68,13 +73,19 @@ jobs:
           source release/game-client.env
           echo "${ZH_SHA256}  input/mltd-relive-game-client-zh-fixed.apk" | sha256sum -c -
 
-      - name: Extract source views
+      - name: Extract Android and JADX source views
         shell: bash
         run: |
           chmod +x tools/client-source/extract-zh-fixed.sh
           tools/client-source/extract-zh-fixed.sh \
             input/mltd-relive-game-client-zh-fixed.apk \
             client-source-output
+
+      - name: Extract IL2CPP metadata source view
+        shell: bash
+        run: |
+          chmod +x tools/client-source/extract-il2cpp.sh
+          tools/client-source/extract-il2cpp.sh client-source-output
 
       - name: Package full source bundle
         shell: bash
