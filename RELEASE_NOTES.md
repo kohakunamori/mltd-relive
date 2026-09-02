@@ -1,8 +1,6 @@
 # mltd-relive Standalone v0.1.10
 
-本版本修复 v0.1.9 的 Asset 登录回归与 `UnitService.SetUnit` 演唱会入口异常，并将 Asset 架构收敛为更简单、兼容性更高的 **remote-only HTTPS** 模式。
-
-> 当前文件为 `fix/live-asset-compat` 分支的发布候选说明；最终 Release 仍以合并后的构建与设备 smoke test 为准。
+本版本修复 v0.1.9 的 Asset 登录回归与 `UnitService.SetUnit` 演唱会入口异常，并将 Asset 架构收敛为更简单、兼容性更高的 **remote-only HTTPS** 模式。最终 remote-only GUI 与 API keep-alive / 并发版本均已通过修正版繁中客户端真机 smoke test。
 
 ## Asset：移除 hybrid/local 运行模式
 
@@ -40,7 +38,7 @@ https://assets.rainbowunicorn7297.com/
 asset_remote_url = https://assets.example.com
 ```
 
-切换到其它受信任 HTTPS 对象存储。
+切换到其它受信任 HTTPS 对象存储。GUI 中旧的 `Asset Mode` 与 `Asset Preparation` 已移除，只保留可选的 `Asset Remote URL`。
 
 DNS interception 只负责 MLTD API hostname，不再接管 Asset hostname。
 
@@ -103,16 +101,31 @@ card_to_idol = dict(card_rows)
 
 修复后设备已确认完整 Live 流程可以正常进入、完成并返回。
 
-## API compatibility
+## API transport：恢复 keep-alive 与并发
 
-保留：
+保留修正版客户端已验证的 listener-wrapped TLS accept path，同时移除排障阶段临时加入的全局 API 串行锁与强制 `Connection: close`。
 
-- v0.1.6 已验证的 listener-wrapped TLS accept path；
+最终实现：
+
+- listener-wrapped TLS；
 - direct WSGI API dispatch；
-- TCP_NODELAY / keepalive / backlog 优化；
-- 当前测试分支中的 API `Connection: close` 与串行 dispatch 兼容措施。
+- HTTP/1.1 keep-alive；
+- concurrent/threaded WSGI dispatch；
+- `wsgi.multithread = True`；
+- TCP_NODELAY / SO_KEEPALIVE / backlog 优化。
 
-后两项并不是本次 Live 故障根因，将在最终发布前或后续版本独立 A/B，以决定是否恢复更高 API 并发。
+A/B 构建已完成真机测试：
+
+```text
+登录
+-> Live
+-> SetUnit
+-> StartSong
+-> FinishSong
+-> 返回选曲
+```
+
+全流程正常，因此无需保留串行化或每请求断开连接的兼容措施。
 
 ## 配置迁移
 
@@ -144,3 +157,15 @@ asset_tls_key
 - `mltd-relive-game-client-ko-fixed.apk`
 
 无需为了 v0.1.10 的 remote-only Asset 架构重新修改 APK。
+
+## 验证状态
+
+已确认：
+
+- remote 登录正常；
+- remote Asset 下载正常；
+- Theater 流程正常；
+- SetUnit / Live 正常；
+- remote-only GUI 正常；
+- API keep-alive + 并发 A/B 正常；
+- 最终 targeted compatibility 与 Asset/cache/transport CI 全部通过。
