@@ -1,0 +1,75 @@
+name: Build live asset SNI compatibility test
+
+on:
+  push:
+    branches:
+      - fix/live-asset-sni-compat
+    paths:
+      - 'key/**'
+      - 'standalone/**'
+      - 'requirements.txt'
+      - '.github/workflows/build-live-asset-sni-compat.yml'
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build ${{ matrix.target }} SNI test binary
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            target: Windows
+            install: |
+              python -m venv env
+              .\env\Scripts\activate
+              python -m pip install --upgrade pip
+              python -m pip install -r requirements.txt
+            build: |
+              cd standalone
+              ..\env\Scripts\pyinstaller gui_windows.spec
+            source: standalone/dist/mltd-relive-standalone.exe
+            output: mltd-relive-live-asset-sni-compat-windows.exe
+            artifact: live-asset-sni-compat-windows
+          - os: ubuntu-latest
+            target: Ubuntu
+            install: |
+              python -m venv env
+              source env/bin/activate
+              python -m pip install --upgrade pip
+              python -m pip install -r requirements.txt
+            build: |
+              cd standalone
+              ../env/bin/pyinstaller gui_ubuntu.spec
+            source: standalone/dist/mltd-relive-standalone
+            output: mltd-relive-live-asset-sni-compat-ubuntu
+            artifact: live-asset-sni-compat-ubuntu
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: requirements.txt
+      - name: Install dependencies
+        run: ${{ matrix.install }}
+      - name: Build test binary
+        run: ${{ matrix.build }}
+      - name: Stage binary
+        shell: bash
+        env:
+          SOURCE: ${{ matrix.source }}
+          OUTPUT: ${{ matrix.output }}
+        run: |
+          mkdir -p test-output
+          cp "$SOURCE" "test-output/$OUTPUT"
+          if [[ "$OUTPUT" != *.exe ]]; then
+            chmod +x "test-output/$OUTPUT"
+          fi
+          sha256sum "test-output/$OUTPUT" > "test-output/$OUTPUT.sha256"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: test-output/*
+          if-no-files-found: error
+          retention-days: 7
