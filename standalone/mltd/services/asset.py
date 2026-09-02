@@ -34,23 +34,23 @@ def get_asset_version(params):
     if config.asset_mode == 'remote':
         asset_url = f'{REMOTE_ASSET_ROOT}/{scope}/'
     elif config.is_local:
-        # Termux / same-device mode talks directly to the local HTTP asset
-        # server and therefore needs no TLS interception or DNS handling.
+        # Termux / same-device mode remains loopback HTTP. This path is not the
+        # Desktop cleartext topology that the corrected client rejected with
+        # data-download error -21990.
         asset_url = f'http://127.0.0.1:{asset_port}/{scope}/'
     else:
-        # Desktop hybrid/local intentionally uses cleartext HTTP on the
-        # dedicated asset port. The corrected client accepts self-signed TLS
-        # for API RPCs but its AssetBundle downloader performs stricter TLS
-        # validation, causing the previous HTTPS /__mltd_assets/ topology to
-        # fail as AssetBundle NotFoundError(-404).
-        #
-        # Reuse the already-intercepted API hostname so the client does not
-        # need a literal LAN IP in its asset_url; DNS points this hostname at
-        # the standalone server and port 7651 is served by AssetServer.
-        asset_url = (
-            f'http://theaterdays-{config.language}.appspot.com:'
-            f'{asset_port}/{scope}/'
-        )
+        base_url = config.asset_public_url
+        if not base_url:
+            raise RuntimeError(
+                'Desktop hybrid/local requires asset_public_url pointing to '
+                'a hostname with a publicly trusted TLS certificate.'
+            )
+        if not base_url.lower().startswith('https://'):
+            raise RuntimeError(
+                'Desktop hybrid/local asset_public_url must use HTTPS. '
+                'The corrected client rejects the cleartext Asset transport.'
+            )
+        asset_url = f'{base_url}/{scope}/'
 
     return {
         'asset_url': asset_url,
