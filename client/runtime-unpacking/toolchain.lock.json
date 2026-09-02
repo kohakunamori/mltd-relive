@@ -1,0 +1,29 @@
+{
+  "target": {
+    "package": "com.bandainamcoent.imas_millionlive_theaterdays_ch",
+    "version_code": 21000,
+    "version_name": "2.1.000",
+    "abi": "arm64-v8a"
+  },
+  "known_fixed_payloads": {
+    "libil2cpp_sha256": "52d0cdac0179ae4a5d61a00b9bfd500969730d1a3f157cf667d82c525836936b",
+    "metadata_sha256": "0b0913387be65fb046a7536e016cd9f8514b0ac23bd79b8b20540c73cb1d8cf0"
+  },
+  "tools": {
+    "zygisk_il2cpp_dumper": {
+      "repo": "https://github.com/Perfare/Zygisk-Il2CppDumper.git",
+      "commit": "ede65d18a795882e37a2d988943d77a72d132c5d",
+      "role": "runtime IL2CPP structure dump"
+    },
+    "frida_il2cpp_dumper": {
+      "repo": "https://github.com/IIIImmmyyy/frida-il2cppDumper.git",
+      "ref": "main",
+      "role": "runtime active-call IL2CPP dump"
+    },
+    "native_memory_dumper": {
+      "repo": "https://github.com/kp7742/IL2CPPDumper.git",
+      "ref": "master",
+      "role": "dump mapped libil2cpp.so and rebuild ELF"
+    }
+  }
+}
