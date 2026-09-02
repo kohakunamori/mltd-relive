@@ -1,7 +1,11 @@
-# AppGuard callback installer candidate
+# AppGuard callback installer
 
-- disassembly: `+0xc2980..+0xc2d80`
-- callback-cell fan-in begins near `+0xc2ab4`
+- installer: `+0xc2a30`
+- callback-cell fan-in: `+0xc2ab4`
+- direct `BL` callers in executable PT_LOAD: **0**
+- raw 64-bit occurrences of installer VA: **0**
+
+## Installer body
 
 ```asm
 0xc2980: ldr x8, [x8, #0x28]
@@ -262,12 +266,10 @@
 0xc2d7c: cbz x13, #0xc2e10
 ```
 
-## Direct calls
+## Direct callers
 
-- `+0xc299c` -> `0x1708c0`
-- `+0xc29a8` -> `0xc2150`
-- `+0xc29b0` -> `0x1d4b0`
-- `+0xc2a38` -> `0xcac34`
+- none
 
-## Indirect branches
+## Data occurrences of installer VA
 
+- none

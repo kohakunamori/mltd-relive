@@ -3,6 +3,7 @@
     797056,
     798080
   ],
+  "installer": 797232,
   "fan_in": 797364,
   "instructions": [
     {
@@ -1652,5 +1653,8 @@
       "op_str": "w14, [x11], #1",
       "bytes": "6e150038"
     }
-  ]
+  ],
+  "direct_installer_callers": [],
+  "caller_contexts": [],
+  "raw_u64_installer_occurrences": []
 }
