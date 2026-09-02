@@ -1,0 +1,70 @@
+name: Update final server compatibility handoff
+
+on:
+  push:
+    branches: [fix/story-service-compat]
+    paths: ['.github/workflows/update-server-compat-handoff-final.yml']
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/story-service-compat
+          fetch-depth: 0
+      - name: Append final pre-device checkpoint
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('docs/SERVER_COMPAT_AGENT_HANDOFF.md')
+          text = p.read_text(encoding='utf-8')
+          marker = '## 13. Final pre-device acceptance checkpoint (2026-09-03)'
+          if marker not in text:
+              text += r'''
+
+## 13. Final pre-device acceptance checkpoint (2026-09-03)
+
+The five-RPC closeout cluster from section 7 is now resolved. Do not reopen these conclusions without new client/native evidence:
+
+- `ItemService.UseItem`: **intentionally not registered**. Reverse audit found the API constant/wrapper/DTO but no active UI/business request callsite. Actual gift flows use `UseGiftForCard` / `UseGiftForIdolGift`; vitality items use `RecoverVitalityByItem*`. Adding a generic handler would risk inventing consumption semantics.
+- `BirthdayService.ExecuteBirthdayPresent`: implemented with persistent, replay-safe semantics using preserved birthday/master data. The handler validates live/present/idol IDs, derives the reward from `MstBirthdayPresent`, updates birthday execution state atomically, applies supported idol-affection/result state, and preserves overflow rewards through the present path rather than dropping them. Attendant/macaron behavior is covered separately from idol mutation.
+- `IdolService.SetFavoriteCostume`: implemented as real persistent ordered state. `favorite_costume` stores per-user-idol selections; the RPC validates ownership and idol membership before mutation, atomically replaces the list, supports clearing, is idempotent on replay, and `IdolSchema.favorite_costume_list` reflects persisted state after reload. Existing saves get the additive table via idempotent `checkfirst` creation.
+- `IdolService.GetSalesCostumeList`: exact empty-list compatibility is intentional. The preserved database has costume ownership/master rows but not the separate sales catalogue/price/prerequisite state required to construct truthful `SalesCostumeStatus` rows.
+- `PresentService.GetPresentHistory`: exact empty-history compatibility remains intentional because received presents are consumed/deleted and the preserved database has no historical present ledger.
+
+### Final automated acceptance before device smoke
+
+Acceptance workflow run `33663584900` tested commit `60d852b7286995707a013d29ba3c99a099761136` and succeeded in all three jobs:
+
+1. **Full standalone runtime suite**: fresh SQLite database created through normal `mltd.models.setup`; `python -m unittest discover` ran **80 tests**, all passing. This includes real SQLAlchemy state tests for Birthday, FavoriteCostume, Story, Friend, interrupted Job recovery, Profile, Producer Rank, System Setting, Vitality, offline-content fallbacks, Unit compatibility, API transport, and related regressions.
+2. **Current client/server RPC audit**: success. The raw IL2CPP string surface contains 309 RPC constants and the current server registers 111 handlers; 198 names remain unmatched. This raw difference is **not** an active-RPC backlog: it includes event, shop/payment, Lounge, historical/minigame and legacy/dead surfaces. For the five closeout targets, Birthday/FavoriteCostume/SalesCostume/PresentHistory are registered and `ItemService.UseItem` is deliberately not registered for the evidence-backed reason above.
+3. **Ubuntu standalone GUI build**: PyInstaller build, executable check and artifact upload all succeeded. Artifact ID `9859679800`, artifact name `mltd-relive-story-compat-ubuntu-60d852b7286995707a013d29ba3c99a099761136`. The executable SHA-256 was independently rechecked as `3bd32fa4e7c3df84fa80fd725c05a618a252f71958f3eae75aedf76c93128962`.
+
+A non-fatal SQLAlchemy 2.0 deprecation warning remains in legacy `job.py` for `Row.tuple()`; it did not affect the 80-test acceptance run and is not a compatibility blocker.
+
+### State after automated acceptance
+
+The server-side/reverse-engineering acceptance gates are complete. The only remaining required gate before PR/merge/release is the centralized **real-device smoke** in section 10. Do not merge to `main` and do not create a new standalone release until that device smoke passes.
+
+Post-acceptance commits may remove temporary CI helpers or update this handoff without changing runtime server semantics. Always fetch the actual branch HEAD, but use the acceptance run and its tested code SHA above to distinguish documentation/CI-only movement from runtime changes.
+'''
+              p.write_text(text, encoding='utf-8')
+          PY
+      - name: Commit handoff update
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add docs/SERVER_COMPAT_AGENT_HANDOFF.md
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m 'docs: record final server compatibility acceptance'
+          git push origin HEAD:fix/story-service-compat
