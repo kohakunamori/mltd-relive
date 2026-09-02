@@ -1,0 +1,30 @@
+name: Audit affection mutation patterns
+
+on:
+  push:
+    branches: [fix/story-service-compat]
+    paths: ['.github/workflows/audit-affection-patterns.yml']
+
+jobs:
+  audit:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Extract affection/result-idol patterns
+        run: |
+          {
+            echo '===== before_affection/result_idol ====='
+            grep -RniE 'before_affection|after_affection|result_idol' standalone/mltd tests || true
+            echo '===== affection mutations ====='
+            grep -RniE 'affection[[:space:]]*\+=|affection[[:space:]]*=|values\([^)]*affection' standalone/mltd/services tests || true
+            echo '===== mission class 6/36 ====='
+            grep -RniE 'mst_mission_class_id.*(6|36)|class_id.*(6|36)' standalone/mltd/services tests || true
+            echo '===== UseGift ====='
+            grep -Rni 'UseGift' standalone/mltd/services tests || true
+          } > /tmp/affection-patterns.txt
+          cat /tmp/affection-patterns.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: affection-patterns
+          path: /tmp/affection-patterns.txt
+          retention-days: 7
