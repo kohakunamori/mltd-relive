@@ -5,6 +5,8 @@ on:
     branches:
       - fix/live-asset-compat
     paths:
+      - 'key/assets.rainbowunicorn7297.com.crt'
+      - 'key/assets.rainbowunicorn7297.com.key'
       - 'standalone/mltd/services/asset.py'
       - 'standalone/mltd/servers/dns.py'
       - 'standalone/mltd/servers/proxy.py'
@@ -14,6 +16,20 @@ on:
       - '.github/workflows/test-live-asset-compat.yml'
 
 jobs:
+  asset-cert:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate asset certificate
+        run: |
+          cert=key/assets.rainbowunicorn7297.com.crt
+          key=key/assets.rainbowunicorn7297.com.key
+          openssl x509 -in "$cert" -noout -checkend 2592000
+          openssl x509 -in "$cert" -noout -ext subjectAltName | grep -F 'DNS:assets.rainbowunicorn7297.com'
+          cert_pub="$(openssl x509 -in "$cert" -pubkey -noout | openssl pkey -pubin -outform DER | sha256sum | cut -d' ' -f1)"
+          key_pub="$(openssl pkey -in "$key" -pubout -outform DER | sha256sum | cut -d' ' -f1)"
+          test "$cert_pub" = "$key_pub"
+
   asset-host:
     runs-on: ubuntu-22.04
     steps:
