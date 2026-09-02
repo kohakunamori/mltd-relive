@@ -22778,6 +22778,28 @@
     },
     "stage_instruction": 219031,
     "target_slot": 0,
-    "pointer_cell": 270448728
-  }
+    "pointer_cell": 270448728,
+    "early_pointer_cell_rva": 1989912,
+    "early_pointer_cell_value": 270448696,
+    "early_pointer_target_rva": 2013240,
+    "early_pointer_target_value": 0
+  },
+  "early_cell_relocations": [
+    {
+      "table": "RELA",
+      "rela_va": 561216,
+      "offset": 1989912,
+      "type": 1027,
+      "addend": 2013240,
+      "symbol": {
+        "index": 0,
+        "name": "",
+        "value": 0,
+        "size": 0,
+        "type": 0,
+        "bind": 0,
+        "shndx": 0
+      }
+    }
+  ]
 }

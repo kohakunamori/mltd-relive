@@ -3,7 +3,14 @@
 - JNI stop: `reached PC=0 during JNI initialization`
 - JNI instructions: **219032**
 - source instruction: `{'address': 269695376, 'bytes': '00013fd6', 'mnemonic': 'blr', 'op_str': 'x8'}`
-- target callback slot: `0x0`
+- early pointer cell: `+0x1e5d18` -> `0x101eb838`
+- early pointee RVA: `0x1eb838`
+- early pointee value: `0x0`
+- later SoLibrary callback slot: `0x0`
+
+## ELF relocation for early pointer cell
+
+- type=1027 addend=`0x1eb838` symbol=`` value=`0x0`
 
 ## Last instructions
 
