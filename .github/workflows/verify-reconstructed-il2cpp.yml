@@ -1,0 +1,134 @@
+name: Verify reconstructed IL2CPP protection delta
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - client-zh-fixed-reconstruction
+    paths:
+      - '.github/workflows/verify-reconstructed-il2cpp.yml'
+      - 'tools/client-source/extract-il2cpp.sh'
+
+permissions:
+  contents: write
+
+jobs:
+  verify-il2cpp:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Install .NET 6 runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 https://dot.net/v1/dotnet-install.sh -o "$RUNNER_TEMP/dotnet-install.sh"
+          bash "$RUNNER_TEMP/dotnet-install.sh" \
+            --runtime dotnet \
+            --version 6.0.36 \
+            --install-dir "$RUNNER_TEMP/dotnet6"
+          echo "$RUNNER_TEMP/dotnet6" >> "$GITHUB_PATH"
+          "$RUNNER_TEMP/dotnet6/dotnet" --list-runtimes
+
+      - name: Download exact official and fixed clients
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p work/xapk work/original/apktool/lib/arm64-v8a \
+            work/original/apktool/assets/bin/Data/Managed/Metadata \
+            work/fixed/apktool/lib/arm64-v8a \
+            work/fixed/apktool/assets/bin/Data/Managed/Metadata
+
+          URL='https://d.apkpure.net/b/XAPK/com.bandainamcoent.imas_millionlive_theaterdays_ch?version=latest'
+          curl -L --fail --retry 3 --connect-timeout 20 --max-time 300 \
+            -A 'Mozilla/5.0' -o work/original.xapk "$URL"
+          test "$(sha1sum work/original.xapk | awk '{print $1}')" = '1b77ddd342a4020ba032ec63ae7ef9288551b6e7'
+          unzip -q work/original.xapk -d work/xapk
+          unzip -p work/xapk/config.arm64_v8a.apk lib/arm64-v8a/libil2cpp.so \
+            > work/original/apktool/lib/arm64-v8a/libil2cpp.so
+          unzip -p work/xapk/com.bandainamcoent.imas_millionlive_theaterdays_ch.apk \
+            assets/bin/Data/Managed/Metadata/global-metadata.dat \
+            > work/original/apktool/assets/bin/Data/Managed/Metadata/global-metadata.dat
+
+          source release/game-client.env
+          TAG=$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName --jq .tagName)
+          gh release download "$TAG" --repo "$GITHUB_REPOSITORY" \
+            --pattern 'mltd-relive-game-client-zh-fixed.apk' --dir work
+          mv work/mltd-relive-game-client-zh-fixed.apk work/fixed.apk
+          echo "${ZH_SHA256}  work/fixed.apk" | sha256sum -c -
+          unzip -p work/fixed.apk lib/arm64-v8a/libil2cpp.so \
+            > work/fixed/apktool/lib/arm64-v8a/libil2cpp.so
+          unzip -p work/fixed.apk assets/bin/Data/Managed/Metadata/global-metadata.dat \
+            > work/fixed/apktool/assets/bin/Data/Managed/Metadata/global-metadata.dat
+
+      - name: Run Il2CppDumper on protected and fixed payloads
+        shell: bash
+        env:
+          DOTNET_ROOT: ${{ runner.temp }}/dotnet6
+          DOTNET_ROLL_FORWARD: Disable
+        run: |
+          set -euo pipefail
+          export PATH="$DOTNET_ROOT:$PATH"
+          rm -rf client/reconstruction/il2cpp/dotnet6-verification
+          mkdir -p client/reconstruction/il2cpp/dotnet6-verification
+          set +e
+          bash tools/client-source/extract-il2cpp.sh work/original
+          ORIG_RC=$?
+          bash tools/client-source/extract-il2cpp.sh work/fixed
+          FIXED_RC=$?
+          set -e
+
+          OUT=client/reconstruction/il2cpp/dotnet6-verification
+          printf '%s\n' "$ORIG_RC" > "$OUT/original-wrapper-exit.txt"
+          printf '%s\n' "$FIXED_RC" > "$OUT/fixed-wrapper-exit.txt"
+          for side in original fixed; do
+            for f in il2cppdumper.result il2cppdumper.exit-code il2cppdumper.log \
+                     client-rpc-methods.txt client-core-network-symbols.txt \
+                     il2cpp-dump.cs.sha256 il2cpp-script.json.sha256 \
+                     il2cpp-dump-summary.json; do
+              if [[ -f "work/$side/report/$f" ]]; then
+                cp "work/$side/report/$f" "$OUT/${side}-${f}"
+              fi
+            done
+          done
+          if [[ -s work/fixed/il2cpp-dump/dump.cs ]]; then
+            grep -E '^// Namespace:|^public class API //|Get(Auth|Rpc|Root)URL|SetGameServerUrl' \
+              work/fixed/il2cpp-dump/dump.cs \
+              > "$OUT/fixed-symbol-proof.txt" || true
+          fi
+
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('client/reconstruction/il2cpp/dotnet6-verification')
+          def t(name):
+              f=p/name
+              return f.read_text(encoding='utf-8',errors='replace').strip() if f.exists() else None
+          result={
+              'original_result': t('original-il2cppdumper.result'),
+              'fixed_result': t('fixed-il2cppdumper.result'),
+              'original_dump_generated': (Path('work/original/il2cpp-dump/dump.cs').exists()),
+              'fixed_dump_generated': (Path('work/fixed/il2cpp-dump/dump.cs').exists()),
+              'fixed_rpc_count': sum(1 for _ in open('work/fixed/report/client-rpc-methods.txt', encoding='utf-8')) if Path('work/fixed/report/client-rpc-methods.txt').exists() else None,
+          }
+          (p/'STATUS.json').write_text(json.dumps(result,indent=2)+'\n',encoding='utf-8')
+          print(json.dumps(result,indent=2))
+          PY
+
+      - name: Commit verification evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add client/reconstruction/il2cpp/dotnet6-verification
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m 'client: verify IL2CPP deprotection delta with .NET 6'
+          git push origin HEAD:client-zh-fixed-reconstruction
