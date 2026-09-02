@@ -1,4 +1,3 @@
-import json
 import os
 import traceback
 from multiprocessing import freeze_support, set_start_method
@@ -9,8 +8,7 @@ from tkinter.scrolledtext import ScrolledText
 from mltd.models.setup import (check_database_version, cleanup, setup,
                                upgrade_database)
 from mltd.servers import dns, proxy
-from mltd.servers.asset_prepare import progress_status_path
-from mltd.servers.config import ASSET_MODES, config, version
+from mltd.servers.config import config, version
 from mltd.servers.dns import dns_port, get_lan_ips
 from mltd.servers.logging import handler, logger
 from mltd.servers.process import CustomProcess
@@ -19,7 +17,6 @@ from mltd.servers.proxy import proxy_port
 LOG_PATH = 'mltd-relive.log'
 LOG_TAIL_BYTES = 128 * 1024
 LOG_POLL_MS = 250
-ASSET_PROGRESS_POLL_MS = 250
 
 
 class MLTDReliveGUI:
@@ -28,7 +25,7 @@ class MLTDReliveGUI:
         self.root = Tk()
         self.root.title(f'mltd-relive Standalone v{version}')
         self.root.resizable(True, True)
-        self.root.minsize(760, 650)
+        self.root.minsize(860, 600)
 
         style = ttk.Style()
         style.configure('Green.TButton', foreground='green')
@@ -45,7 +42,7 @@ class MLTDReliveGUI:
         main_frame.grid(sticky=(N, S, W, E))
         main_frame.columnconfigure(0, weight=1)
         main_frame.columnconfigure(1, weight=1)
-        main_frame.rowconfigure(4, weight=1)
+        main_frame.rowconfigure(3, weight=1)
 
         status_frame = ttk.Frame(main_frame, padding=10)
         status_frame.grid(column=0, row=0, sticky=(W, E))
@@ -91,8 +88,9 @@ class MLTDReliveGUI:
 
         options_frame = ttk.Labelframe(main_frame, text='Options', padding=10)
         options_frame.grid(column=1, row=2, sticky=(N, S, W, E))
+        options_frame.columnconfigure(1, weight=1)
         ttk.Label(options_frame, text='Game Client Language:').grid(
-            column=0, row=0, rowspan=2, sticky=E)
+            column=0, row=0, rowspan=2, padx=(0, 8), sticky=E)
         self.language = StringVar()
         self.language.set(config['default']['language'])
         self.zh_radio_button = ttk.Radiobutton(
@@ -106,42 +104,27 @@ class MLTDReliveGUI:
         )
         self.ko_radio_button.grid(column=1, row=1, sticky=W)
 
-        ttk.Label(options_frame, text='Asset Mode:').grid(
-            column=0, row=2, sticky=E, pady=(6, 0))
-        self.asset_mode = StringVar(value=config.asset_mode)
-        self.asset_mode_combobox = ttk.Combobox(
+        ttk.Label(options_frame, text='Asset Remote URL:').grid(
+            column=0, row=2, padx=(0, 8), pady=(8, 0), sticky=E)
+        self.asset_remote_url = StringVar(value=config.asset_remote_url)
+        self.asset_remote_entry = ttk.Entry(
             options_frame,
-            textvariable=self.asset_mode,
-            values=ASSET_MODES,
-            state='readonly',
-            width=10,
+            textvariable=self.asset_remote_url,
+            width=42,
         )
-        self.asset_mode_combobox.grid(
-            column=1, row=2, sticky=W, pady=(6, 0))
-        self.asset_mode_combobox.bind(
-            '<<ComboboxSelected>>', self.change_asset_mode)
-
-        asset_frame = ttk.Labelframe(
-            main_frame, text='Asset Preparation', padding=8)
-        asset_frame.grid(
-            column=0, row=3, columnspan=2, pady=(10, 0),
-            sticky=(W, E))
-        asset_frame.columnconfigure(0, weight=1)
-
-        self.asset_progress_label = ttk.Label(
-            asset_frame, text='Asset status: idle')
-        self.asset_progress_label.grid(column=0, row=0, sticky=W)
-        self.asset_progress = ttk.Progressbar(
-            asset_frame, mode='determinate', maximum=100, value=0)
-        self.asset_progress.grid(
-            column=0, row=1, pady=(5, 3), sticky=(W, E))
-        self.asset_progress_details = ttk.Label(
-            asset_frame, text='No strict local asset preparation in progress.')
-        self.asset_progress_details.grid(column=0, row=2, sticky=W)
+        self.asset_remote_entry.grid(
+            column=1, row=2, pady=(8, 0), sticky=(W, E))
+        self.asset_remote_entry.bind('<Return>', self.change_asset_remote_url)
+        self.asset_remote_entry.bind('<FocusOut>', self.change_asset_remote_url)
+        ttk.Label(
+            options_frame,
+            text='Leave blank to use the default Rainbow CDN. HTTPS only.',
+            foreground='grey',
+        ).grid(column=1, row=3, sticky=W)
 
         log_frame = ttk.Labelframe(main_frame, text='Server Log', padding=6)
         log_frame.grid(
-            column=0, row=4, columnspan=2, pady=(10, 0),
+            column=0, row=3, columnspan=2, pady=(10, 0),
             sticky=(N, S, W, E))
         log_frame.columnconfigure(0, weight=1)
         log_frame.rowconfigure(1, weight=1)
@@ -172,10 +155,8 @@ class MLTDReliveGUI:
 
         self._log_offset = 0
         self._log_identity = None
-        self._asset_progress_mtime_ns = None
         self._load_initial_log_tail()
         self.root.after(LOG_POLL_MS, self.update_log_view)
-        self.root.after(ASSET_PROGRESS_POLL_MS, self.update_asset_progress)
 
     @staticmethod
     def _log_identity_for(stat_result):
@@ -185,15 +166,6 @@ class MLTDReliveGUI:
             getattr(stat_result, 'st_ctime_ns',
                     int(stat_result.st_ctime * 1_000_000_000)),
         )
-
-    @staticmethod
-    def _format_rate(rate_bps):
-        rate = max(0.0, float(rate_bps or 0.0))
-        if rate >= 1024 * 1024:
-            return f'{rate / (1024 * 1024):.1f} MiB/s'
-        if rate >= 1024:
-            return f'{rate / 1024:.1f} KiB/s'
-        return f'{rate:.0f} B/s'
 
     def _replace_log_text(self, text):
         self.log_view.configure(state=NORMAL)
@@ -267,157 +239,23 @@ class MLTDReliveGUI:
     def clear_log_view(self):
         self._replace_log_text('')
 
-    def _reset_asset_progress(self, preparing=False):
-        self._asset_progress_mtime_ns = None
-        self.asset_progress.configure(value=0)
-        self.asset_progress_label.configure(foreground='')
-        if preparing:
-            self.asset_progress_label.configure(
-                text='Asset status: waiting for preparation...')
-            self.asset_progress_details.configure(
-                text='Reading manifest and checking the local cache.')
-        else:
-            self.asset_progress_label.configure(text='Asset status: idle')
-            self.asset_progress_details.configure(
-                text='No strict local asset preparation in progress.')
+    def _set_options_state(self, enabled):
+        state = NORMAL if enabled else DISABLED
+        self.zh_radio_button.config(state=state)
+        self.ko_radio_button.config(state=state)
+        self.asset_remote_entry.config(state=state)
 
-    def _render_asset_progress(self, status):
-        phase = status.get('phase', '')
-        language = status.get('language', config.language)
-        platform = status.get('platform', '')
-        scope = f'{language}-{platform}' if platform else language
-        platform_index = int(status.get('platform_index', 0) or 0)
-        platform_count = int(status.get('platform_count', 0) or 0)
-        platform_suffix = (
-            f' [{platform_index}/{platform_count}]'
-            if platform_index and platform_count else ''
-        )
-        manifest_total = int(status.get('manifest_total', 0) or 0)
-        cached = int(status.get('cached', 0) or 0)
-        downloaded = int(status.get('downloaded', 0) or 0)
-        failed = int(status.get('failed', 0) or 0)
-
-        self.asset_progress_label.configure(foreground='')
-
-        if phase == 'starting':
-            self.asset_progress.configure(value=0)
-            self.asset_progress_label.configure(
-                text='Asset status: starting strict local preparation...')
-            self.asset_progress_details.configure(
-                text=(
-                    f'Preparing {platform_count} platform(s) with '
-                    f'{config.asset_prefetch_workers} workers.'
-                ))
-            return
-
-        if phase == 'manifest':
-            self.asset_progress.configure(value=0)
-            self.asset_progress_label.configure(
-                text=f'{scope}{platform_suffix}: fetching manifest...')
-            self.asset_progress_details.configure(
-                text='Checking the asset index before cache scanning.')
-            return
-
-        if phase == 'scan':
-            self.asset_progress.configure(value=0)
-            self.asset_progress_label.configure(
-                text=f'{scope}{platform_suffix}: checking local cache...')
-            self.asset_progress_details.configure(
-                text=f'Manifest objects: {manifest_total:,}')
-            return
-
-        if phase == 'prefetch':
-            pending_total = int(status.get('pending_total', 0) or 0)
-            completed = int(status.get('completed', 0) or 0)
-            ready = cached + downloaded
-            percent = (
-                ready * 100.0 / manifest_total if manifest_total else 0.0
-            )
-            self.asset_progress.configure(value=min(100.0, percent))
-            self.asset_progress_label.configure(
-                text=(
-                    f'{scope}{platform_suffix}: {ready:,}/{manifest_total:,} '
-                    f'ready ({percent:.1f}%)'
-                )
-            )
-            self.asset_progress_details.configure(
-                text=(
-                    f'Cached {cached:,}  •  Downloaded {downloaded:,}  •  '
-                    f'Failed {failed:,}  •  '
-                    f'{self._format_rate(status.get("rate_bps", 0))}  •  '
-                    f'Prefetch {completed:,}/{pending_total:,}  •  '
-                    f'Workers {config.asset_prefetch_workers}'
-                )
-            )
-            return
-
-        if phase == 'verify':
-            verify_completed = int(status.get('verify_completed', 0) or 0)
-            percent = (
-                verify_completed * 100.0 / manifest_total
-                if manifest_total else 0.0
-            )
-            self.asset_progress.configure(value=min(100.0, percent))
-            self.asset_progress_label.configure(
-                text=(
-                    f'{scope}{platform_suffix}: verifying '
-                    f'{verify_completed:,}/{manifest_total:,} ({percent:.1f}%)'
-                )
-            )
-            self.asset_progress_details.configure(
-                text=(
-                    f'Cached {cached:,}  •  Downloaded {downloaded:,}  •  '
-                    f'Failed {failed:,}'
-                )
-            )
-            return
-
-        if phase == 'platform_complete':
-            self.asset_progress.configure(value=100)
-            self.asset_progress_label.configure(
-                text=f'{scope}{platform_suffix}: complete')
-            self.asset_progress_details.configure(
-                text=(
-                    f'{manifest_total:,} objects ready  •  Cached {cached:,}  •  '
-                    f'Downloaded {downloaded:,}'
-                )
-            )
-            return
-
-        if phase == 'complete':
-            self.asset_progress.configure(value=100)
-            self.asset_progress_label.configure(
-                text='Asset status: local assets ready', foreground='green')
-            self.asset_progress_details.configure(
-                text=f'Completed {platform_count} platform(s).')
-            return
-
-        if phase == 'error':
-            self.asset_progress_label.configure(
-                text=f'{scope}{platform_suffix}: asset preparation failed',
-                foreground='red')
-            self.asset_progress_details.configure(
-                text=status.get('message', 'Unknown asset preparation error.'))
-
-    def update_asset_progress(self):
+    def _save_asset_remote_url(self, show_error=True):
+        value = self.asset_remote_url.get().strip()
         try:
-            status_path = progress_status_path(config.asset_cache_root)
-            stat_result = status_path.stat()
-            mtime_ns = getattr(
-                stat_result, 'st_mtime_ns',
-                int(stat_result.st_mtime * 1_000_000_000),
-            )
-            if mtime_ns != self._asset_progress_mtime_ns:
-                status = json.loads(status_path.read_text(encoding='utf-8'))
-                self._asset_progress_mtime_ns = mtime_ns
-                self._render_asset_progress(status)
-        except FileNotFoundError:
-            pass
-        except (OSError, ValueError, TypeError) as exc:
-            logger.debug(f'Unable to read asset progress status: {exc}')
-        finally:
-            self.root.after(
-                ASSET_PROGRESS_POLL_MS, self.update_asset_progress)
+            config.asset_remote_url = value
+        except ValueError as exc:
+            self.asset_remote_url.set(config.asset_remote_url)
+            if show_error:
+                messagebox.showerror('Invalid Asset Remote URL', str(exc))
+            return False
+        self.asset_remote_url.set(config.asset_remote_url)
+        return True
 
     def update_server_status(self):
         proxy_alive = getattr(self, 'proxy_process', None) is not None \
@@ -460,19 +298,15 @@ class MLTDReliveGUI:
             self.stop_server_button.grid_forget()
             self.start_server_button.configure(state=NORMAL)
             self.reset_button.config(state=NORMAL)
-            self.zh_radio_button.config(state=NORMAL)
-            self.ko_radio_button.config(state=NORMAL)
-            self.asset_mode_combobox.config(state='readonly')
+            self._set_options_state(True)
             self.progress_bar.stop()
             self.progress_bar.grid_forget()
-            if config.asset_mode == 'local':
-                self.asset_progress_label.configure(
-                    text='Asset status: preparation stopped', foreground='red')
-                self.asset_progress_details.configure(
-                    text='Local asset preparation was interrupted by Stop Server.')
             logger.info('Server stopped.')
 
     def start_server(self):
+        if not self._save_asset_remote_url():
+            return
+
         self.server_status = 'Starting'
         if not os.path.isfile('mltd-relive.db'):
             self.reset_data()
@@ -480,43 +314,19 @@ class MLTDReliveGUI:
         upgrade_database()
 
         handler.doRollover()
-        status = ('Preparing Local Assets...'
-                  if config.asset_mode == 'local'
-                  else 'Starting Server...')
-        self.status_label.config(text=status, foreground='black')
+        self.status_label.config(text='Starting Server...', foreground='black')
         logger.info('Starting server...')
-        if config.asset_mode == 'local':
-            try:
-                progress_status_path(config.asset_cache_root).unlink(
-                    missing_ok=True)
-            except OSError as exc:
-                logger.debug(f'Unable to clear old asset progress status: {exc}')
-            self._reset_asset_progress(preparing=True)
-            platforms = ','.join(config.asset_local_platforms)
-            logger.info(
-                f'Strict local prefetch: language={config.language}, '
-                f'platforms={platforms}, workers={config.asset_prefetch_workers}. '
-                'Stop Server may interrupt preparation safely.'
-            )
-            self.asset_progress_details.configure(
-                text=(
-                    f'Preparing {config.language}-'
-                    f'{"/".join(config.asset_local_platforms)} with '
-                    f'{config.asset_prefetch_workers} workers. '
-                    'Stop Server can interrupt this operation.'
-                ))
+        if config.asset_remote_url:
+            logger.info(f'Asset remote URL: {config.asset_remote_url}')
         else:
-            self._reset_asset_progress(preparing=False)
-            self.asset_progress_details.configure(
-                text=f'Asset mode {config.asset_mode}: full prefetch is disabled.')
+            logger.info('Asset remote URL: default Rainbow CDN')
+
         self.start_server_button.config(state=DISABLED)
         self.start_server_button.grid_forget()
         self.stop_server_button.grid(column=1, row=0)
         self.stop_server_button.configure(state=NORMAL)
         self.reset_button.config(state=DISABLED)
-        self.zh_radio_button.config(state=DISABLED)
-        self.ko_radio_button.config(state=DISABLED)
-        self.asset_mode_combobox.config(state=DISABLED)
+        self._set_options_state(False)
         self.progress_bar.grid(column=0, row=1, sticky=(W, E))
         self.progress_bar.start()
         self.proxy_process = CustomProcess(target=proxy.start, daemon=True)
@@ -528,18 +338,9 @@ class MLTDReliveGUI:
     def stop_server(self):
         if self.server_status == 'Stopping':
             return
-        was_preparing = (
-            self.server_status == 'Starting' and config.asset_mode == 'local'
-        )
         self.server_status = 'Stopping'
-        self.status_label.config(
-            text=('Stopping Asset Preparation...'
-                  if was_preparing else 'Stopping Server...'),
-            foreground='black')
-        logger.info(
-            'Stopping local asset preparation...'
-            if was_preparing else 'Stopping server...'
-        )
+        self.status_label.config(text='Stopping Server...', foreground='black')
+        logger.info('Stopping server...')
         self.stop_server_button.config(state=DISABLED)
         self.start_server_button.config(state=DISABLED)
         for process_name in ('proxy_process', 'dns_process'):
@@ -570,9 +371,7 @@ class MLTDReliveGUI:
             text=f'Server Status: {self.server_status}', foreground='red')
         self.start_server_button.config(state=NORMAL)
         self.reset_button.config(state=NORMAL)
-        self.zh_radio_button.config(state=NORMAL)
-        self.ko_radio_button.config(state=NORMAL)
-        self.asset_mode_combobox.config(state='readonly')
+        self._set_options_state(True)
         self.progress_bar.stop()
         self.progress_bar.grid_forget()
 
@@ -591,9 +390,7 @@ class MLTDReliveGUI:
                                  foreground='black')
         self.start_server_button.config(state=DISABLED)
         self.reset_button.config(state=DISABLED)
-        self.zh_radio_button.config(state=DISABLED)
-        self.ko_radio_button.config(state=DISABLED)
-        self.asset_mode_combobox.config(state=DISABLED)
+        self._set_options_state(False)
         self.progress_bar.grid(column=0, row=1, sticky=(W, E))
         self.progress_bar.start()
         self.process = CustomProcess(target=setup)
@@ -605,14 +402,10 @@ class MLTDReliveGUI:
         config.language = language
         logger.info(f'Changed language to {language}.')
 
-    def change_asset_mode(self, event=None):
-        mode = self.asset_mode.get()
-        config.asset_mode = mode
-        logger.info(f'Changed asset mode to {mode}.')
-        if mode != 'local' and self.server_status == 'Stopped':
-            self._reset_asset_progress(preparing=False)
-            self.asset_progress_details.configure(
-                text=f'Asset mode {mode}: full prefetch is disabled.')
+    def change_asset_remote_url(self, event=None):
+        if self._save_asset_remote_url():
+            value = config.asset_remote_url or 'default Rainbow CDN'
+            logger.info(f'Changed asset remote URL to {value}.')
 
 
 def report_callback_exception(self, exc, val, tb):
