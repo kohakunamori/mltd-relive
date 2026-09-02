@@ -11,16 +11,18 @@ from mltd.servers.dns import build_zone_record  # noqa: E402
 from mltd.services.asset import get_asset_version  # noqa: E402
 
 
-class AssetHttpRoutingTest(unittest.TestCase):
+class AssetHttpsRoutingTest(unittest.TestCase):
     def setUp(self):
         default = config['default']
         self.saved = {
             'language': default.get('language'),
             'asset_mode': default.get('asset_mode'),
             'is_local': default.get('is_local'),
+            'asset_public_url': default.get('asset_public_url'),
         }
         default['language'] = 'zh'
         default['is_local'] = 'False'
+        default['asset_public_url'] = 'https://mltd-assets.example.test:7651'
 
     def tearDown(self):
         default = config['default']
@@ -42,38 +44,59 @@ class AssetHttpRoutingTest(unittest.TestCase):
             f'{REMOTE_ASSET_ROOT}/zh-android/',
         )
 
-    def test_hybrid_desktop_uses_cleartext_asset_port_on_api_host(self):
+    def test_hybrid_desktop_uses_configured_https_asset_endpoint(self):
         config['default']['asset_mode'] = 'hybrid'
         self.assertEqual(
             self._asset_url(),
-            'http://theaterdays-zh.appspot.com:7651/zh-android/',
+            'https://mltd-assets.example.test:7651/zh-android/',
         )
 
-    def test_local_desktop_uses_cleartext_asset_port_on_api_host(self):
+    def test_local_desktop_uses_configured_https_asset_endpoint(self):
         config['default']['asset_mode'] = 'local'
         self.assertEqual(
             self._asset_url(),
-            'http://theaterdays-zh.appspot.com:7651/zh-android/',
+            'https://mltd-assets.example.test:7651/zh-android/',
         )
+
+    def test_desktop_cache_mode_rejects_missing_public_endpoint(self):
+        config['default']['asset_mode'] = 'hybrid'
+        config['default']['asset_public_url'] = ''
+        with self.assertRaisesRegex(RuntimeError, 'asset_public_url'):
+            self._asset_url()
+
+    def test_desktop_cache_mode_rejects_cleartext_public_endpoint(self):
+        config['default']['asset_mode'] = 'hybrid'
+        config['default']['asset_public_url'] = (
+            'http://mltd-assets.example.test:7651'
+        )
+        with self.assertRaisesRegex(RuntimeError, 'must use HTTPS'):
+            self._asset_url()
 
     def test_same_device_mode_keeps_loopback_http_path(self):
         config['default']['asset_mode'] = 'hybrid'
         config['default']['is_local'] = 'True'
+        config['default']['asset_public_url'] = ''
         self.assertEqual(
             self._asset_url(),
             'http://127.0.0.1:7651/zh-android/',
         )
 
-    def test_dns_intercepts_only_api_hosts(self):
-        config['default']['asset_mode'] = 'hybrid'
-        zone = build_zone_record('192.0.2.10', '2001:db8::10')
-        self.assertNotIn('assets.rainbowunicorn7297.com.', zone)
+    def test_dns_intercepts_configured_asset_hostname(self):
+        zone = build_zone_record(
+            '192.0.2.10',
+            '2001:db8::10',
+            'mltd-assets.example.test',
+        )
         self.assertIn(
-            'theaterdays-zh.appspot.com. 60 IN A 192.0.2.10',
+            'mltd-assets.example.test. 60 IN A 192.0.2.10',
             zone,
         )
         self.assertIn(
-            'theaterdays-zh.appspot.com. 60 IN AAAA 2001:db8::10',
+            'mltd-assets.example.test. 60 IN AAAA 2001:db8::10',
+            zone,
+        )
+        self.assertIn(
+            'theaterdays-zh.appspot.com. 60 IN A 192.0.2.10',
             zone,
         )
 
