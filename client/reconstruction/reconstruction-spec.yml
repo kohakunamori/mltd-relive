@@ -71,6 +71,16 @@ android:
 
 native:
   status: deprotection_not_yet_rederived
+  remove_libraries:
+    - lib/arm64-v8a/libcompatible.so
+    - lib/arm64-v8a/libcompatible_x86.so
+    - lib/arm64-v8a/libengine-hlp.so
+    - lib/arm64-v8a/libengine.so
+    - lib/arm64-v8a/libstub.so
+  remove_assets:
+    - assets/appguard/sign.axml
+    - assets/appguard/sign.crt
+    - assets/appguard/sign.mf
   observations:
     - official global-metadata.dat does not start with the standard IL2CPP AF1BB1FA magic
     - zh-fixed global-metadata.dat does start with standard IL2CPP AF1BB1FA magic
@@ -78,6 +88,8 @@ native:
     - no exact repeating XOR key of period <= 512 explains the metadata transform
     - official libil2cpp.so is 6715576 bytes larger than the zh-fixed library
     - official libil2cpp.so is AppGuard-protected/obfuscated; fixed library is a deprotected ELF baseline
+    - official libstub.so directly depends on libcompatible.so via ELF DT_NEEDED
+    - the five INCA loader/engine libraries and three assets/appguard signing files are absent from zh-fixed
   target_payloads:
     libil2cpp_sha256: 52d0cdac0179ae4a5d61a00b9bfd500969730d1a3f157cf667d82c525836936b
     global_metadata_sha256: 0b0913387be65fb046a7536e016cd9f8514b0ac23bd79b8b20540c73cb1d8cf0
