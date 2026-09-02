@@ -377,3 +377,29 @@ Only after runtime CI and this device smoke give confidence should this branch b
 6. Re-run current whole-branch audits once the target cluster is closed.
 7. Build a fresh standalone GUI artifact and ask the user only for the device smoke that cannot be simulated in CI.
 8. Update this document before the next handoff.
+
+## 13. Final pre-device acceptance checkpoint (2026-09-03)
+
+The five-RPC closeout cluster from section 7 is resolved:
+
+- `ItemService.UseItem`: intentionally not registered. Reverse audit found the API constant/wrapper/DTO but no active UI/business request callsite. Gift flows use `UseGiftForCard` / `UseGiftForIdolGift`; vitality items use `RecoverVitalityByItem*`.
+- `BirthdayService.ExecuteBirthdayPresent`: implemented with persistent, replay-safe semantics using preserved birthday/master data. IDs are validated, reward data comes from `MstBirthdayPresent`, execution state and supported idol-affection/result state are updated atomically, and overflow rewards are not silently lost.
+- `IdolService.SetFavoriteCostume`: implemented as persistent ordered per-user-idol state. Ownership/idol membership is validated before atomic replacement; clear/replay are supported; `IdolSchema.favorite_costume_list` reflects saved state; old saves get the additive table through idempotent `checkfirst` creation.
+- `IdolService.GetSalesCostumeList`: exact empty-list compatibility is intentional because the preserved database lacks the sales catalogue/price/prerequisite data required for truthful `SalesCostumeStatus` rows.
+- `PresentService.GetPresentHistory`: exact empty-history compatibility remains intentional because the preserved database has no historical present ledger.
+
+### Automated acceptance
+
+Acceptance workflow run `33663584900` tested commit `60d852b7286995707a013d29ba3c99a099761136` and all three jobs succeeded:
+
+1. Full standalone runtime suite: fresh SQLite database via normal `mltd.models.setup`; **80 tests passed**. This includes SQLAlchemy state tests for Birthday, FavoriteCostume, Story, Friend, interrupted Job recovery, Profile, Producer Rank, System Setting, Vitality, offline-content fallbacks, Unit compatibility, API transport, and related regressions.
+2. Current client/server RPC audit: success. Raw IL2CPP surface is 309 RPC constants; current server registers 111 handlers; 198 names are unmatched string surfaces. This is not an active-RPC backlog: it includes event, shop/payment, Lounge, historical/minigame, legacy and dead surfaces. For the five closeout targets, Birthday/FavoriteCostume/SalesCostume/PresentHistory are registered and `ItemService.UseItem` is deliberately not registered.
+3. Ubuntu standalone GUI: PyInstaller build, executable check and artifact upload succeeded. Artifact ID `9859679800`; executable SHA-256 `3bd32fa4e7c3df84fa80fd725c05a618a252f71958f3eae75aedf76c93128962`.
+
+A non-fatal SQLAlchemy 2.0 deprecation warning remains in legacy `job.py` for `Row.tuple()`; it did not affect the 80-test acceptance run.
+
+### Remaining gate
+
+Server-side/reverse-engineering acceptance is complete. The only required gate before PR/merge/release is the centralized real-device smoke in section 10. Do not merge to `main` and do not create a new standalone release until that device smoke passes.
+
+Post-acceptance commits may remove temporary CI helpers or update this handoff without changing runtime semantics. Always fetch actual branch HEAD and distinguish docs/CI-only movement from runtime changes.
