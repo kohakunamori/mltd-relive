@@ -13,7 +13,7 @@ import importlib.util
 import json
 from pathlib import Path
 
-from unicorn.arm64_const import UC_ARM64_REG_PC, UC_ARM64_REG_X0, UC_ARM64_REG_X1, UC_ARM64_REG_X30
+from unicorn.arm64_const import *
 
 HERE = Path(__file__).resolve().parent
 P = HERE / 'probe-appguard-cac34-conditions.py'
@@ -85,7 +85,6 @@ class LibcProbe(cond.VariantProbe):
             self.once_done.add(control)
             self.once_return_stack.append(caller)
             self.once_invocations.append({'control': control, 'init': init, 'caller': caller})
-            # STUB space is mapped by run_bootstrap() before this API can be reached.
             self.uc.mem_write(TRAMPOLINE, bytes.fromhex('c0035fd6'))
             self.uc.reg_write(UC_ARM64_REG_X30, TRAMPOLINE)
             self.uc.reg_write(UC_ARM64_REG_PC, init)
