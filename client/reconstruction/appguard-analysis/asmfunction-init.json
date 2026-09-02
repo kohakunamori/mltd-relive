@@ -1,0 +1,1768 @@
+{
+  "asmFunction": {
+    "name": "asmFunction",
+    "address": 2019000,
+    "size": 168
+  },
+  "slot_count": 21,
+  "got_slots": [
+    1989944
+  ],
+  "dt_init_blocks": 1245,
+  "references": [
+    {
+      "instruction": 33976,
+      "kind": "asmFunction_got_load",
+      "address": 1989944,
+      "context": [
+        {
+          "address": 33972,
+          "file_offset": 33972,
+          "mnemonic": "adrp",
+          "op_str": "x8, #0x1e5000"
+        },
+        {
+          "address": 33976,
+          "file_offset": 33976,
+          "mnemonic": "ldr",
+          "op_str": "x8, [x8, #0xd38]"
+        },
+        {
+          "address": 33980,
+          "file_offset": 33980,
+          "mnemonic": "str",
+          "op_str": "x27, [x8, #0x88]"
+        },
+        {
+          "address": 33984,
+          "file_offset": 33984,
+          "mnemonic": "b",
+          "op_str": "#0x88dc"
+        }
+      ]
+    },
+    {
+      "instruction": 34020,
+      "kind": "asmFunction_got_load",
+      "address": 1989944,
+      "context": [
+        {
+          "address": 34016,
+          "file_offset": 34016,
+          "mnemonic": "adrp",
+          "op_str": "x8, #0x1e5000"
+        },
+        {
+          "address": 34020,
+          "file_offset": 34020,
+          "mnemonic": "ldr",
+          "op_str": "x8, [x8, #0xd38]"
+        },
+        {
+          "address": 34024,
+          "file_offset": 34024,
+          "mnemonic": "str",
+          "op_str": "x27, [x8, #0x60]"
+        },
+        {
+          "address": 34028,
+          "file_offset": 34028,
+          "mnemonic": "b",
+          "op_str": "#0x88dc"
+        }
+      ]
+    },
+    {
+      "instruction": 34056,
+      "kind": "asmFunction_got_load",
+      "address": 1989944,
+      "context": [
+        {
+          "address": 34052,
+          "file_offset": 34052,
+          "mnemonic": "adrp",
+          "op_str": "x8, #0x1e5000"
+        },
+        {
+          "address": 34056,
+          "file_offset": 34056,
+          "mnemonic": "ldr",
+          "op_str": "x8, [x8, #0xd38]"
+        },
+        {
+          "address": 34060,
+          "file_offset": 34060,
+          "mnemonic": "str",
+          "op_str": "x27, [x8, #0x68]"
+        },
+        {
+          "address": 34064,
+          "file_offset": 34064,
+          "mnemonic": "b",
+          "op_str": "#0x88dc"
+        }
+      ]
+    },
+    {
+      "instruction": 34160,
+      "kind": "asmFunction_got_load",
+      "address": 1989944,
+      "context": [
+        {
+          "address": 34156,
+          "file_offset": 34156,
+          "mnemonic": "adrp",
+          "op_str": "x8, #0x1e5000"
+        },
+        {
+          "address": 34160,
+          "file_offset": 34160,
+          "mnemonic": "ldr",
+          "op_str": "x8, [x8, #0xd38]"
+        },
+        {
+          "address": 34164,
+          "file_offset": 34164,
+          "mnemonic": "str",
+          "op_str": "x27, [x8, #0x40]"
+        },
+        {
+          "address": 34168,
+          "file_offset": 34168,
+          "mnemonic": "b",
+          "op_str": "#0x88dc"
+        }
+      ]
+    },
+    {
+      "instruction": 34180,
+      "kind": "asmFunction_got_load",
+      "address": 1989944,
+      "context": [
+        {
+          "address": 34176,
+          "file_offset": 34176,
+          "mnemonic": "adrp",
+          "op_str": "x8, #0x1e5000"
+        },
+        {
+          "address": 34180,
+          "file_offset": 34180,
+          "mnemonic": "ldr",
+          "op_str": "x8, [x8, #0xd38]"
+        },
+        {
+          "address": 34184,
+          "file_offset": 34184,
+          "mnemonic": "str",
+          "op_str": "x27, [x8, #0x50]"
+        },
+        {
+          "address": 34188,
+          "file_offset": 34188,
+          "mnemonic": "b",
+          "op_str": "#0x88dc"
+        }
+      ]
+    },
+    {
+      "instruction": 34200,
+      "kind": "asmFunction_got_load",
+      "address": 1989944,
+      "context": [
+        {
+          "address": 34196,
+          "file_offset": 34196,
+          "mnemonic": "adrp",
+          "op_str": "x8, #0x1e5000"
+        },
+        {
+          "address": 34200,
+          "file_offset": 34200,
+          "mnemonic": "ldr",
+          "op_str": "x8, [x8, #0xd38]"
+        },
+        {
+          "address": 34204,
+          "file_offset": 34204,
+          "mnemonic": "str",
+          "op_str": "x27, [x8, #0x78]"
+        },
+        {
+          "address": 34208,
+          "file_offset": 34208,
+          "mnemonic": "b",
+          "op_str": "#0x88dc"
+        }
+      ]
+    },
+    {
+      "instruction": 34220,
+      "kind": "asmFunction_got_load",
+      "address": 1989944,
+      "context": [
+        {
+          "address": 34216,
+          "file_offset": 34216,
+          "mnemonic": "adrp",
+          "op_str": "x8, #0x1e5000"
+        },
+        {
+          "address": 34220,
+          "file_offset": 34220,
+          "mnemonic": "ldr",
+          "op_str": "x8, [x8, #0xd38]"
+        },
+        {
+          "address": 34224,
+          "file_offset": 34224,
+          "mnemonic": "str",
+          "op_str": "x27, [x8, #0x18]"
+        },
+        {
+          "address": 34228,
+          "file_offset": 34228,
+          "mnemonic": "b",
+          "op_str": "#0x88dc"
+        }
+      ]
+    },
+    {
+      "instruction": 34276,
+      "kind": "asmFunction_got_load",
+      "address": 1989944,
+      "context": [
+        {
+          "address": 34272,
+          "file_offset": 34272,
+          "mnemonic": "adrp",
+          "op_str": "x8, #0x1e5000"
+        },
+        {
+          "address": 34276,
+          "file_offset": 34276,
+          "mnemonic": "ldr",
+          "op_str": "x8, [x8, #0xd38]"
+        },
+        {
+          "address": 34280,
+          "file_offset": 34280,
+          "mnemonic": "str",
+          "op_str": "x27, [x8, #0x58]"
+        },
+        {
+          "address": 34284,
+          "file_offset": 34284,
+          "mnemonic": "b",
+          "op_str": "#0x88dc"
+        }
+      ]
+    },
+    {
+      "instruction": 34308,
+      "kind": "asmFunction_got_load",
+      "address": 1989944,
+      "context": [
+        {
+          "address": 34304,
+          "file_offset": 34304,
+          "mnemonic": "adrp",
+          "op_str": "x8, #0x1e5000"
+        },
+        {
+          "address": 34308,
+          "file_offset": 34308,
+          "mnemonic": "ldr",
+          "op_str": "x8, [x8, #0xd38]"
+        },
+        {
+          "address": 34312,
+          "file_offset": 34312,
+          "mnemonic": "str",
+          "op_str": "x27, [x8, #0x70]"
+        },
+        {
+          "address": 34316,
+          "file_offset": 34316,
+          "mnemonic": "b",
+          "op_str": "#0x88dc"
+        }
+      ]
+    },
+    {
+      "instruction": 34368,
+      "kind": "asmFunction_got_load",
+      "address": 1989944,
+      "context": [
+        {
+          "address": 34364,
+          "file_offset": 34364,
+          "mnemonic": "adrp",
+          "op_str": "x8, #0x1e5000"
+        },
+        {
+          "address": 34368,
+          "file_offset": 34368,
+          "mnemonic": "ldr",
+          "op_str": "x8, [x8, #0xd38]"
+        },
+        {
+          "address": 34372,
+          "file_offset": 34372,
+          "mnemonic": "str",
+          "op_str": "x27, [x8, #0x48]"
+        },
+        {
+          "address": 34376,
+          "file_offset": 34376,
+          "mnemonic": "b",
+          "op_str": "#0x88dc"
+        }
+      ]
+    },
+    {
+      "instruction": 34464,
+      "kind": "asmFunction_got_load",
+      "address": 1989944,
+      "context": [
+        {
+          "address": 34460,
+          "file_offset": 34460,
+          "mnemonic": "adrp",
+          "op_str": "x8, #0x1e5000"
+        },
+        {
+          "address": 34464,
+          "file_offset": 34464,
+          "mnemonic": "ldr",
+          "op_str": "x8, [x8, #0xd38]"
+        },
+        {
+          "address": 34468,
+          "file_offset": 34468,
+          "mnemonic": "str",
+          "op_str": "x27, [x8, #0x10]"
+        },
+        {
+          "address": 34472,
+          "file_offset": 34472,
+          "mnemonic": "b",
+          "op_str": "#0x88dc"
+        }
+      ]
+    },
+    {
+      "instruction": 34516,
+      "kind": "asmFunction_got_load",
+      "address": 1989944,
+      "context": [
+        {
+          "address": 34512,
+          "file_offset": 34512,
+          "mnemonic": "adrp",
+          "op_str": "x8, #0x1e5000"
+        },
+        {
+          "address": 34516,
+          "file_offset": 34516,
+          "mnemonic": "ldr",
+          "op_str": "x8, [x8, #0xd38]"
+        },
+        {
+          "address": 34520,
+          "file_offset": 34520,
+          "mnemonic": "str",
+          "op_str": "x27, [x8, #0x38]"
+        },
+        {
+          "address": 34524,
+          "file_offset": 34524,
+          "mnemonic": "b",
+          "op_str": "#0x88dc"
+        }
+      ]
+    },
+    {
+      "instruction": 34748,
+      "kind": "asmFunction_got_load",
+      "address": 1989944,
+      "context": [
+        {
+          "address": 34744,
+          "file_offset": 34744,
+          "mnemonic": "adrp",
+          "op_str": "x8, #0x1e5000"
+        },
+        {
+          "address": 34748,
+          "file_offset": 34748,
+          "mnemonic": "ldr",
+          "op_str": "x8, [x8, #0xd38]"
+        },
+        {
+          "address": 34752,
+          "file_offset": 34752,
+          "mnemonic": "str",
+          "op_str": "x27, [x8]"
+        },
+        {
+          "address": 34756,
+          "file_offset": 34756,
+          "mnemonic": "b",
+          "op_str": "#0x88dc"
+        }
+      ]
+    },
+    {
+      "instruction": 34768,
+      "kind": "asmFunction_got_load",
+      "address": 1989944,
+      "context": [
+        {
+          "address": 34764,
+          "file_offset": 34764,
+          "mnemonic": "adrp",
+          "op_str": "x8, #0x1e5000"
+        },
+        {
+          "address": 34768,
+          "file_offset": 34768,
+          "mnemonic": "ldr",
+          "op_str": "x8, [x8, #0xd38]"
+        },
+        {
+          "address": 34772,
+          "file_offset": 34772,
+          "mnemonic": "str",
+          "op_str": "x27, [x8, #8]"
+        },
+        {
+          "address": 34776,
+          "file_offset": 34776,
+          "mnemonic": "b",
+          "op_str": "#0x88dc"
+        }
+      ]
+    },
+    {
+      "instruction": 34856,
+      "kind": "asmFunction_got_load",
+      "address": 1989944,
+      "context": [
+        {
+          "address": 34852,
+          "file_offset": 34852,
+          "mnemonic": "adrp",
+          "op_str": "x8, #0x1e5000"
+        },
+        {
+          "address": 34856,
+          "file_offset": 34856,
+          "mnemonic": "ldr",
+          "op_str": "x8, [x8, #0xd38]"
+        },
+        {
+          "address": 34860,
+          "file_offset": 34860,
+          "mnemonic": "str",
+          "op_str": "x27, [x8, #0x30]"
+        },
+        {
+          "address": 34864,
+          "file_offset": 34864,
+          "mnemonic": "b",
+          "op_str": "#0x88dc"
+        }
+      ]
+    },
+    {
+      "instruction": 34928,
+      "kind": "asmFunction_got_load",
+      "address": 1989944,
+      "context": [
+        {
+          "address": 34924,
+          "file_offset": 34924,
+          "mnemonic": "adrp",
+          "op_str": "x8, #0x1e5000"
+        },
+        {
+          "address": 34928,
+          "file_offset": 34928,
+          "mnemonic": "ldr",
+          "op_str": "x8, [x8, #0xd38]"
+        },
+        {
+          "address": 34932,
+          "file_offset": 34932,
+          "mnemonic": "str",
+          "op_str": "x27, [x8, #0x80]"
+        },
+        {
+          "address": 34936,
+          "file_offset": 34936,
+          "mnemonic": "b",
+          "op_str": "#0x88dc"
+        }
+      ]
+    },
+    {
+      "instruction": 34944,
+      "kind": "asmFunction_got_load",
+      "address": 1989944,
+      "context": [
+        {
+          "address": 34940,
+          "file_offset": 34940,
+          "mnemonic": "adrp",
+          "op_str": "x8, #0x1e5000"
+        },
+        {
+          "address": 34944,
+          "file_offset": 34944,
+          "mnemonic": "ldr",
+          "op_str": "x8, [x8, #0xd38]"
+        },
+        {
+          "address": 34948,
+          "file_offset": 34948,
+          "mnemonic": "str",
+          "op_str": "x27, [x8, #0x20]"
+        },
+        {
+          "address": 34952,
+          "file_offset": 34952,
+          "mnemonic": "b",
+          "op_str": "#0x88dc"
+        }
+      ]
+    },
+    {
+      "instruction": 34960,
+      "kind": "asmFunction_got_load",
+      "address": 1989944,
+      "context": [
+        {
+          "address": 34956,
+          "file_offset": 34956,
+          "mnemonic": "adrp",
+          "op_str": "x8, #0x1e5000"
+        },
+        {
+          "address": 34960,
+          "file_offset": 34960,
+          "mnemonic": "ldr",
+          "op_str": "x8, [x8, #0xd38]"
+        },
+        {
+          "address": 34964,
+          "file_offset": 34964,
+          "mnemonic": "str",
+          "op_str": "x27, [x8, #0x28]"
+        },
+        {
+          "address": 34968,
+          "file_offset": 34968,
+          "mnemonic": "b",
+          "op_str": "#0x88dc"
+        }
+      ]
+    },
+    {
+      "instruction": 35028,
+      "kind": "asmFunction_got_load",
+      "address": 1989944,
+      "context": [
+        {
+          "address": 35024,
+          "file_offset": 35024,
+          "mnemonic": "adrp",
+          "op_str": "x8, #0x1e5000"
+        },
+        {
+          "address": 35028,
+          "file_offset": 35028,
+          "mnemonic": "ldr",
+          "op_str": "x8, [x8, #0xd38]"
+        },
+        {
+          "address": 35032,
+          "file_offset": 35032,
+          "mnemonic": "str",
+          "op_str": "x27, [x8, #0x90]"
+        },
+        {
+          "address": 35036,
+          "file_offset": 35036,
+          "mnemonic": "mov",
+          "op_str": "w9, #0x6c3e0000"
+        },
+        {
+          "address": 35040,
+          "file_offset": 35040,
+          "mnemonic": "movk",
+          "op_str": "w9, #0xbfef"
+        },
+        {
+          "address": 35044,
+          "file_offset": 35044,
+          "mnemonic": "sub",
+          "op_str": "w8, w3, w9"
+        },
+        {
+          "address": 35048,
+          "file_offset": 35048,
+          "mnemonic": "sub",
+          "op_str": "w8, w8, #1"
+        },
+        {
+          "address": 35052,
+          "file_offset": 35052,
+          "mnemonic": "add",
+          "op_str": "w8, w8, w9"
+        },
+        {
+          "address": 35056,
+          "file_offset": 35056,
+          "mnemonic": "mul",
+          "op_str": "w8, w8, w3"
+        },
+        {
+          "address": 35060,
+          "file_offset": 35060,
+          "mnemonic": "mvn",
+          "op_str": "w8, w8"
+        },
+        {
+          "address": 35064,
+          "file_offset": 35064,
+          "mnemonic": "orr",
+          "op_str": "w8, w8, #0xfffffffe"
+        },
+        {
+          "address": 35068,
+          "file_offset": 35068,
+          "mnemonic": "cmn",
+          "op_str": "w8, #1"
+        }
+      ]
+    },
+    {
+      "instruction": 796564,
+      "kind": "asmFunction_got_load",
+      "address": 1989944,
+      "context": [
+        {
+          "address": 796524,
+          "file_offset": 796524,
+          "mnemonic": "add",
+          "op_str": "x1, x22, #0x10"
+        },
+        {
+          "address": 796528,
+          "file_offset": 796528,
+          "mnemonic": "mov",
+          "op_str": "x0, x22"
+        },
+        {
+          "address": 796532,
+          "file_offset": 796532,
+          "mnemonic": "bl",
+          "op_str": "#0xc2810"
+        },
+        {
+          "address": 796536,
+          "file_offset": 796536,
+          "mnemonic": "add",
+          "op_str": "x1, x20, #0x18"
+        },
+        {
+          "address": 796540,
+          "file_offset": 796540,
+          "mnemonic": "mov",
+          "op_str": "x0, x20"
+        },
+        {
+          "address": 796544,
+          "file_offset": 796544,
+          "mnemonic": "bl",
+          "op_str": "#0xc2810"
+        },
+        {
+          "address": 796548,
+          "file_offset": 796548,
+          "mnemonic": "add",
+          "op_str": "x1, x21, #0x40"
+        },
+        {
+          "address": 796552,
+          "file_offset": 796552,
+          "mnemonic": "mov",
+          "op_str": "x0, x21"
+        },
+        {
+          "address": 796556,
+          "file_offset": 796556,
+          "mnemonic": "bl",
+          "op_str": "#0xc2810"
+        },
+        {
+          "address": 796560,
+          "file_offset": 796560,
+          "mnemonic": "adrp",
+          "op_str": "x8, #0x1e5000"
+        },
+        {
+          "address": 796564,
+          "file_offset": 796564,
+          "mnemonic": "ldr",
+          "op_str": "x8, [x8, #0xd38]"
+        },
+        {
+          "address": 796568,
+          "file_offset": 796568,
+          "mnemonic": "stp",
+          "op_str": "x19, x19, [x8, #0x98]"
+        },
+        {
+          "address": 796572,
+          "file_offset": 796572,
+          "mnemonic": "mrs",
+          "op_str": "x8, tpidr_el0"
+        },
+        {
+          "address": 796576,
+          "file_offset": 796576,
+          "mnemonic": "ldr",
+          "op_str": "x8, [x8, #0x28]"
+        },
+        {
+          "address": 796580,
+          "file_offset": 796580,
+          "mnemonic": "ldur",
+          "op_str": "x9, [x29, #-0x28]"
+        },
+        {
+          "address": 796584,
+          "file_offset": 796584,
+          "mnemonic": "cmp",
+          "op_str": "x8, x9"
+        },
+        {
+          "address": 796588,
+          "file_offset": 796588,
+          "mnemonic": "b.ne",
+          "op_str": "#0xc280c"
+        }
+      ]
+    }
+  ],
+  "writes": [
+    {
+      "instruction": 34752,
+      "field": 0,
+      "address": 2019000,
+      "source_reg": "x27",
+      "source_value": null,
+      "source_origin": null,
+      "source_label": null,
+      "context": [
+        {
+          "address": 34744,
+          "file_offset": 34744,
+          "mnemonic": "adrp",
+          "op_str": "x8, #0x1e5000"
+        },
+        {
+          "address": 34748,
+          "file_offset": 34748,
+          "mnemonic": "ldr",
+          "op_str": "x8, [x8, #0xd38]"
+        },
+        {
+          "address": 34752,
+          "file_offset": 34752,
+          "mnemonic": "str",
+          "op_str": "x27, [x8]"
+        },
+        {
+          "address": 34756,
+          "file_offset": 34756,
+          "mnemonic": "b",
+          "op_str": "#0x88dc"
+        }
+      ]
+    },
+    {
+      "instruction": 34772,
+      "field": 8,
+      "address": 2019008,
+      "source_reg": "x27",
+      "source_value": null,
+      "source_origin": null,
+      "source_label": null,
+      "context": [
+        {
+          "address": 34764,
+          "file_offset": 34764,
+          "mnemonic": "adrp",
+          "op_str": "x8, #0x1e5000"
+        },
+        {
+          "address": 34768,
+          "file_offset": 34768,
+          "mnemonic": "ldr",
+          "op_str": "x8, [x8, #0xd38]"
+        },
+        {
+          "address": 34772,
+          "file_offset": 34772,
+          "mnemonic": "str",
+          "op_str": "x27, [x8, #8]"
+        },
+        {
+          "address": 34776,
+          "file_offset": 34776,
+          "mnemonic": "b",
+          "op_str": "#0x88dc"
+        }
+      ]
+    },
+    {
+      "instruction": 34468,
+      "field": 16,
+      "address": 2019016,
+      "source_reg": "x27",
+      "source_value": null,
+      "source_origin": null,
+      "source_label": null,
+      "context": [
+        {
+          "address": 34460,
+          "file_offset": 34460,
+          "mnemonic": "adrp",
+          "op_str": "x8, #0x1e5000"
+        },
+        {
+          "address": 34464,
+          "file_offset": 34464,
+          "mnemonic": "ldr",
+          "op_str": "x8, [x8, #0xd38]"
+        },
+        {
+          "address": 34468,
+          "file_offset": 34468,
+          "mnemonic": "str",
+          "op_str": "x27, [x8, #0x10]"
+        },
+        {
+          "address": 34472,
+          "file_offset": 34472,
+          "mnemonic": "b",
+          "op_str": "#0x88dc"
+        }
+      ]
+    },
+    {
+      "instruction": 34224,
+      "field": 24,
+      "address": 2019024,
+      "source_reg": "x27",
+      "source_value": null,
+      "source_origin": null,
+      "source_label": null,
+      "context": [
+        {
+          "address": 34216,
+          "file_offset": 34216,
+          "mnemonic": "adrp",
+          "op_str": "x8, #0x1e5000"
+        },
+        {
+          "address": 34220,
+          "file_offset": 34220,
+          "mnemonic": "ldr",
+          "op_str": "x8, [x8, #0xd38]"
+        },
+        {
+          "address": 34224,
+          "file_offset": 34224,
+          "mnemonic": "str",
+          "op_str": "x27, [x8, #0x18]"
+        },
+        {
+          "address": 34228,
+          "file_offset": 34228,
+          "mnemonic": "b",
+          "op_str": "#0x88dc"
+        }
+      ]
+    },
+    {
+      "instruction": 34948,
+      "field": 32,
+      "address": 2019032,
+      "source_reg": "x27",
+      "source_value": null,
+      "source_origin": null,
+      "source_label": null,
+      "context": [
+        {
+          "address": 34940,
+          "file_offset": 34940,
+          "mnemonic": "adrp",
+          "op_str": "x8, #0x1e5000"
+        },
+        {
+          "address": 34944,
+          "file_offset": 34944,
+          "mnemonic": "ldr",
+          "op_str": "x8, [x8, #0xd38]"
+        },
+        {
+          "address": 34948,
+          "file_offset": 34948,
+          "mnemonic": "str",
+          "op_str": "x27, [x8, #0x20]"
+        },
+        {
+          "address": 34952,
+          "file_offset": 34952,
+          "mnemonic": "b",
+          "op_str": "#0x88dc"
+        }
+      ]
+    },
+    {
+      "instruction": 34964,
+      "field": 40,
+      "address": 2019040,
+      "source_reg": "x27",
+      "source_value": null,
+      "source_origin": null,
+      "source_label": null,
+      "context": [
+        {
+          "address": 34956,
+          "file_offset": 34956,
+          "mnemonic": "adrp",
+          "op_str": "x8, #0x1e5000"
+        },
+        {
+          "address": 34960,
+          "file_offset": 34960,
+          "mnemonic": "ldr",
+          "op_str": "x8, [x8, #0xd38]"
+        },
+        {
+          "address": 34964,
+          "file_offset": 34964,
+          "mnemonic": "str",
+          "op_str": "x27, [x8, #0x28]"
+        },
+        {
+          "address": 34968,
+          "file_offset": 34968,
+          "mnemonic": "b",
+          "op_str": "#0x88dc"
+        }
+      ]
+    },
+    {
+      "instruction": 34860,
+      "field": 48,
+      "address": 2019048,
+      "source_reg": "x27",
+      "source_value": null,
+      "source_origin": null,
+      "source_label": null,
+      "context": [
+        {
+          "address": 34852,
+          "file_offset": 34852,
+          "mnemonic": "adrp",
+          "op_str": "x8, #0x1e5000"
+        },
+        {
+          "address": 34856,
+          "file_offset": 34856,
+          "mnemonic": "ldr",
+          "op_str": "x8, [x8, #0xd38]"
+        },
+        {
+          "address": 34860,
+          "file_offset": 34860,
+          "mnemonic": "str",
+          "op_str": "x27, [x8, #0x30]"
+        },
+        {
+          "address": 34864,
+          "file_offset": 34864,
+          "mnemonic": "b",
+          "op_str": "#0x88dc"
+        }
+      ]
+    },
+    {
+      "instruction": 34520,
+      "field": 56,
+      "address": 2019056,
+      "source_reg": "x27",
+      "source_value": null,
+      "source_origin": null,
+      "source_label": null,
+      "context": [
+        {
+          "address": 34512,
+          "file_offset": 34512,
+          "mnemonic": "adrp",
+          "op_str": "x8, #0x1e5000"
+        },
+        {
+          "address": 34516,
+          "file_offset": 34516,
+          "mnemonic": "ldr",
+          "op_str": "x8, [x8, #0xd38]"
+        },
+        {
+          "address": 34520,
+          "file_offset": 34520,
+          "mnemonic": "str",
+          "op_str": "x27, [x8, #0x38]"
+        },
+        {
+          "address": 34524,
+          "file_offset": 34524,
+          "mnemonic": "b",
+          "op_str": "#0x88dc"
+        }
+      ]
+    },
+    {
+      "instruction": 34164,
+      "field": 64,
+      "address": 2019064,
+      "source_reg": "x27",
+      "source_value": null,
+      "source_origin": null,
+      "source_label": null,
+      "context": [
+        {
+          "address": 34156,
+          "file_offset": 34156,
+          "mnemonic": "adrp",
+          "op_str": "x8, #0x1e5000"
+        },
+        {
+          "address": 34160,
+          "file_offset": 34160,
+          "mnemonic": "ldr",
+          "op_str": "x8, [x8, #0xd38]"
+        },
+        {
+          "address": 34164,
+          "file_offset": 34164,
+          "mnemonic": "str",
+          "op_str": "x27, [x8, #0x40]"
+        },
+        {
+          "address": 34168,
+          "file_offset": 34168,
+          "mnemonic": "b",
+          "op_str": "#0x88dc"
+        }
+      ]
+    },
+    {
+      "instruction": 34372,
+      "field": 72,
+      "address": 2019072,
+      "source_reg": "x27",
+      "source_value": null,
+      "source_origin": null,
+      "source_label": null,
+      "context": [
+        {
+          "address": 34364,
+          "file_offset": 34364,
+          "mnemonic": "adrp",
+          "op_str": "x8, #0x1e5000"
+        },
+        {
+          "address": 34368,
+          "file_offset": 34368,
+          "mnemonic": "ldr",
+          "op_str": "x8, [x8, #0xd38]"
+        },
+        {
+          "address": 34372,
+          "file_offset": 34372,
+          "mnemonic": "str",
+          "op_str": "x27, [x8, #0x48]"
+        },
+        {
+          "address": 34376,
+          "file_offset": 34376,
+          "mnemonic": "b",
+          "op_str": "#0x88dc"
+        }
+      ]
+    },
+    {
+      "instruction": 34184,
+      "field": 80,
+      "address": 2019080,
+      "source_reg": "x27",
+      "source_value": null,
+      "source_origin": null,
+      "source_label": null,
+      "context": [
+        {
+          "address": 34176,
+          "file_offset": 34176,
+          "mnemonic": "adrp",
+          "op_str": "x8, #0x1e5000"
+        },
+        {
+          "address": 34180,
+          "file_offset": 34180,
+          "mnemonic": "ldr",
+          "op_str": "x8, [x8, #0xd38]"
+        },
+        {
+          "address": 34184,
+          "file_offset": 34184,
+          "mnemonic": "str",
+          "op_str": "x27, [x8, #0x50]"
+        },
+        {
+          "address": 34188,
+          "file_offset": 34188,
+          "mnemonic": "b",
+          "op_str": "#0x88dc"
+        }
+      ]
+    },
+    {
+      "instruction": 34280,
+      "field": 88,
+      "address": 2019088,
+      "source_reg": "x27",
+      "source_value": null,
+      "source_origin": null,
+      "source_label": null,
+      "context": [
+        {
+          "address": 34272,
+          "file_offset": 34272,
+          "mnemonic": "adrp",
+          "op_str": "x8, #0x1e5000"
+        },
+        {
+          "address": 34276,
+          "file_offset": 34276,
+          "mnemonic": "ldr",
+          "op_str": "x8, [x8, #0xd38]"
+        },
+        {
+          "address": 34280,
+          "file_offset": 34280,
+          "mnemonic": "str",
+          "op_str": "x27, [x8, #0x58]"
+        },
+        {
+          "address": 34284,
+          "file_offset": 34284,
+          "mnemonic": "b",
+          "op_str": "#0x88dc"
+        }
+      ]
+    },
+    {
+      "instruction": 34024,
+      "field": 96,
+      "address": 2019096,
+      "source_reg": "x27",
+      "source_value": null,
+      "source_origin": null,
+      "source_label": null,
+      "context": [
+        {
+          "address": 34016,
+          "file_offset": 34016,
+          "mnemonic": "adrp",
+          "op_str": "x8, #0x1e5000"
+        },
+        {
+          "address": 34020,
+          "file_offset": 34020,
+          "mnemonic": "ldr",
+          "op_str": "x8, [x8, #0xd38]"
+        },
+        {
+          "address": 34024,
+          "file_offset": 34024,
+          "mnemonic": "str",
+          "op_str": "x27, [x8, #0x60]"
+        },
+        {
+          "address": 34028,
+          "file_offset": 34028,
+          "mnemonic": "b",
+          "op_str": "#0x88dc"
+        }
+      ]
+    },
+    {
+      "instruction": 34060,
+      "field": 104,
+      "address": 2019104,
+      "source_reg": "x27",
+      "source_value": null,
+      "source_origin": null,
+      "source_label": null,
+      "context": [
+        {
+          "address": 34052,
+          "file_offset": 34052,
+          "mnemonic": "adrp",
+          "op_str": "x8, #0x1e5000"
+        },
+        {
+          "address": 34056,
+          "file_offset": 34056,
+          "mnemonic": "ldr",
+          "op_str": "x8, [x8, #0xd38]"
+        },
+        {
+          "address": 34060,
+          "file_offset": 34060,
+          "mnemonic": "str",
+          "op_str": "x27, [x8, #0x68]"
+        },
+        {
+          "address": 34064,
+          "file_offset": 34064,
+          "mnemonic": "b",
+          "op_str": "#0x88dc"
+        }
+      ]
+    },
+    {
+      "instruction": 34312,
+      "field": 112,
+      "address": 2019112,
+      "source_reg": "x27",
+      "source_value": null,
+      "source_origin": null,
+      "source_label": null,
+      "context": [
+        {
+          "address": 34304,
+          "file_offset": 34304,
+          "mnemonic": "adrp",
+          "op_str": "x8, #0x1e5000"
+        },
+        {
+          "address": 34308,
+          "file_offset": 34308,
+          "mnemonic": "ldr",
+          "op_str": "x8, [x8, #0xd38]"
+        },
+        {
+          "address": 34312,
+          "file_offset": 34312,
+          "mnemonic": "str",
+          "op_str": "x27, [x8, #0x70]"
+        },
+        {
+          "address": 34316,
+          "file_offset": 34316,
+          "mnemonic": "b",
+          "op_str": "#0x88dc"
+        }
+      ]
+    },
+    {
+      "instruction": 34204,
+      "field": 120,
+      "address": 2019120,
+      "source_reg": "x27",
+      "source_value": null,
+      "source_origin": null,
+      "source_label": null,
+      "context": [
+        {
+          "address": 34196,
+          "file_offset": 34196,
+          "mnemonic": "adrp",
+          "op_str": "x8, #0x1e5000"
+        },
+        {
+          "address": 34200,
+          "file_offset": 34200,
+          "mnemonic": "ldr",
+          "op_str": "x8, [x8, #0xd38]"
+        },
+        {
+          "address": 34204,
+          "file_offset": 34204,
+          "mnemonic": "str",
+          "op_str": "x27, [x8, #0x78]"
+        },
+        {
+          "address": 34208,
+          "file_offset": 34208,
+          "mnemonic": "b",
+          "op_str": "#0x88dc"
+        }
+      ]
+    },
+    {
+      "instruction": 34932,
+      "field": 128,
+      "address": 2019128,
+      "source_reg": "x27",
+      "source_value": null,
+      "source_origin": null,
+      "source_label": null,
+      "context": [
+        {
+          "address": 34924,
+          "file_offset": 34924,
+          "mnemonic": "adrp",
+          "op_str": "x8, #0x1e5000"
+        },
+        {
+          "address": 34928,
+          "file_offset": 34928,
+          "mnemonic": "ldr",
+          "op_str": "x8, [x8, #0xd38]"
+        },
+        {
+          "address": 34932,
+          "file_offset": 34932,
+          "mnemonic": "str",
+          "op_str": "x27, [x8, #0x80]"
+        },
+        {
+          "address": 34936,
+          "file_offset": 34936,
+          "mnemonic": "b",
+          "op_str": "#0x88dc"
+        }
+      ]
+    },
+    {
+      "instruction": 33980,
+      "field": 136,
+      "address": 2019136,
+      "source_reg": "x27",
+      "source_value": null,
+      "source_origin": null,
+      "source_label": null,
+      "context": [
+        {
+          "address": 33972,
+          "file_offset": 33972,
+          "mnemonic": "adrp",
+          "op_str": "x8, #0x1e5000"
+        },
+        {
+          "address": 33976,
+          "file_offset": 33976,
+          "mnemonic": "ldr",
+          "op_str": "x8, [x8, #0xd38]"
+        },
+        {
+          "address": 33980,
+          "file_offset": 33980,
+          "mnemonic": "str",
+          "op_str": "x27, [x8, #0x88]"
+        },
+        {
+          "address": 33984,
+          "file_offset": 33984,
+          "mnemonic": "b",
+          "op_str": "#0x88dc"
+        }
+      ]
+    },
+    {
+      "instruction": 35032,
+      "field": 144,
+      "address": 2019144,
+      "source_reg": "x27",
+      "source_value": null,
+      "source_origin": null,
+      "source_label": null,
+      "context": [
+        {
+          "address": 35024,
+          "file_offset": 35024,
+          "mnemonic": "adrp",
+          "op_str": "x8, #0x1e5000"
+        },
+        {
+          "address": 35028,
+          "file_offset": 35028,
+          "mnemonic": "ldr",
+          "op_str": "x8, [x8, #0xd38]"
+        },
+        {
+          "address": 35032,
+          "file_offset": 35032,
+          "mnemonic": "str",
+          "op_str": "x27, [x8, #0x90]"
+        },
+        {
+          "address": 35036,
+          "file_offset": 35036,
+          "mnemonic": "mov",
+          "op_str": "w9, #0x6c3e0000"
+        },
+        {
+          "address": 35040,
+          "file_offset": 35040,
+          "mnemonic": "movk",
+          "op_str": "w9, #0xbfef"
+        },
+        {
+          "address": 35044,
+          "file_offset": 35044,
+          "mnemonic": "sub",
+          "op_str": "w8, w3, w9"
+        },
+        {
+          "address": 35048,
+          "file_offset": 35048,
+          "mnemonic": "sub",
+          "op_str": "w8, w8, #1"
+        },
+        {
+          "address": 35052,
+          "file_offset": 35052,
+          "mnemonic": "add",
+          "op_str": "w8, w8, w9"
+        },
+        {
+          "address": 35056,
+          "file_offset": 35056,
+          "mnemonic": "mul",
+          "op_str": "w8, w8, w3"
+        },
+        {
+          "address": 35060,
+          "file_offset": 35060,
+          "mnemonic": "mvn",
+          "op_str": "w8, w8"
+        },
+        {
+          "address": 35064,
+          "file_offset": 35064,
+          "mnemonic": "orr",
+          "op_str": "w8, w8, #0xfffffffe"
+        },
+        {
+          "address": 35068,
+          "file_offset": 35068,
+          "mnemonic": "cmn",
+          "op_str": "w8, #1"
+        },
+        {
+          "address": 35072,
+          "file_offset": 35072,
+          "mnemonic": "cset",
+          "op_str": "w8, eq"
+        },
+        {
+          "address": 35076,
+          "file_offset": 35076,
+          "mnemonic": "cmp",
+          "op_str": "w16, #0xa"
+        },
+        {
+          "address": 35080,
+          "file_offset": 35080,
+          "mnemonic": "neg",
+          "op_str": "x10, x15"
+        },
+        {
+          "address": 35084,
+          "file_offset": 35084,
+          "mnemonic": "cset",
+          "op_str": "w9, lt"
+        },
+        {
+          "address": 35088,
+          "file_offset": 35088,
+          "mnemonic": "mov",
+          "op_str": "w12, #1"
+        }
+      ]
+    },
+    {
+      "instruction": 796568,
+      "field": 152,
+      "address": 2019152,
+      "source_reg": "x19",
+      "source_value": null,
+      "source_origin": null,
+      "source_label": null,
+      "context": [
+        {
+          "address": 796512,
+          "file_offset": 796512,
+          "mnemonic": "add",
+          "op_str": "x1, x19, #0x1c"
+        },
+        {
+          "address": 796516,
+          "file_offset": 796516,
+          "mnemonic": "mov",
+          "op_str": "x0, x19"
+        },
+        {
+          "address": 796520,
+          "file_offset": 796520,
+          "mnemonic": "bl",
+          "op_str": "#0xc2810"
+        },
+        {
+          "address": 796524,
+          "file_offset": 796524,
+          "mnemonic": "add",
+          "op_str": "x1, x22, #0x10"
+        },
+        {
+          "address": 796528,
+          "file_offset": 796528,
+          "mnemonic": "mov",
+          "op_str": "x0, x22"
+        },
+        {
+          "address": 796532,
+          "file_offset": 796532,
+          "mnemonic": "bl",
+          "op_str": "#0xc2810"
+        },
+        {
+          "address": 796536,
+          "file_offset": 796536,
+          "mnemonic": "add",
+          "op_str": "x1, x20, #0x18"
+        },
+        {
+          "address": 796540,
+          "file_offset": 796540,
+          "mnemonic": "mov",
+          "op_str": "x0, x20"
+        },
+        {
+          "address": 796544,
+          "file_offset": 796544,
+          "mnemonic": "bl",
+          "op_str": "#0xc2810"
+        },
+        {
+          "address": 796548,
+          "file_offset": 796548,
+          "mnemonic": "add",
+          "op_str": "x1, x21, #0x40"
+        },
+        {
+          "address": 796552,
+          "file_offset": 796552,
+          "mnemonic": "mov",
+          "op_str": "x0, x21"
+        },
+        {
+          "address": 796556,
+          "file_offset": 796556,
+          "mnemonic": "bl",
+          "op_str": "#0xc2810"
+        },
+        {
+          "address": 796560,
+          "file_offset": 796560,
+          "mnemonic": "adrp",
+          "op_str": "x8, #0x1e5000"
+        },
+        {
+          "address": 796564,
+          "file_offset": 796564,
+          "mnemonic": "ldr",
+          "op_str": "x8, [x8, #0xd38]"
+        },
+        {
+          "address": 796568,
+          "file_offset": 796568,
+          "mnemonic": "stp",
+          "op_str": "x19, x19, [x8, #0x98]"
+        },
+        {
+          "address": 796572,
+          "file_offset": 796572,
+          "mnemonic": "mrs",
+          "op_str": "x8, tpidr_el0"
+        },
+        {
+          "address": 796576,
+          "file_offset": 796576,
+          "mnemonic": "ldr",
+          "op_str": "x8, [x8, #0x28]"
+        },
+        {
+          "address": 796580,
+          "file_offset": 796580,
+          "mnemonic": "ldur",
+          "op_str": "x9, [x29, #-0x28]"
+        },
+        {
+          "address": 796584,
+          "file_offset": 796584,
+          "mnemonic": "cmp",
+          "op_str": "x8, x9"
+        },
+        {
+          "address": 796588,
+          "file_offset": 796588,
+          "mnemonic": "b.ne",
+          "op_str": "#0xc280c"
+        }
+      ]
+    },
+    {
+      "instruction": 796568,
+      "field": 160,
+      "address": 2019160,
+      "source_reg": "x19",
+      "source_value": null,
+      "source_origin": null,
+      "source_label": null,
+      "context": [
+        {
+          "address": 796512,
+          "file_offset": 796512,
+          "mnemonic": "add",
+          "op_str": "x1, x19, #0x1c"
+        },
+        {
+          "address": 796516,
+          "file_offset": 796516,
+          "mnemonic": "mov",
+          "op_str": "x0, x19"
+        },
+        {
+          "address": 796520,
+          "file_offset": 796520,
+          "mnemonic": "bl",
+          "op_str": "#0xc2810"
+        },
+        {
+          "address": 796524,
+          "file_offset": 796524,
+          "mnemonic": "add",
+          "op_str": "x1, x22, #0x10"
+        },
+        {
+          "address": 796528,
+          "file_offset": 796528,
+          "mnemonic": "mov",
+          "op_str": "x0, x22"
+        },
+        {
+          "address": 796532,
+          "file_offset": 796532,
+          "mnemonic": "bl",
+          "op_str": "#0xc2810"
+        },
+        {
+          "address": 796536,
+          "file_offset": 796536,
+          "mnemonic": "add",
+          "op_str": "x1, x20, #0x18"
+        },
+        {
+          "address": 796540,
+          "file_offset": 796540,
+          "mnemonic": "mov",
+          "op_str": "x0, x20"
+        },
+        {
+          "address": 796544,
+          "file_offset": 796544,
+          "mnemonic": "bl",
+          "op_str": "#0xc2810"
+        },
+        {
+          "address": 796548,
+          "file_offset": 796548,
+          "mnemonic": "add",
+          "op_str": "x1, x21, #0x40"
+        },
+        {
+          "address": 796552,
+          "file_offset": 796552,
+          "mnemonic": "mov",
+          "op_str": "x0, x21"
+        },
+        {
+          "address": 796556,
+          "file_offset": 796556,
+          "mnemonic": "bl",
+          "op_str": "#0xc2810"
+        },
+        {
+          "address": 796560,
+          "file_offset": 796560,
+          "mnemonic": "adrp",
+          "op_str": "x8, #0x1e5000"
+        },
+        {
+          "address": 796564,
+          "file_offset": 796564,
+          "mnemonic": "ldr",
+          "op_str": "x8, [x8, #0xd38]"
+        },
+        {
+          "address": 796568,
+          "file_offset": 796568,
+          "mnemonic": "stp",
+          "op_str": "x19, x19, [x8, #0x98]"
+        },
+        {
+          "address": 796572,
+          "file_offset": 796572,
+          "mnemonic": "mrs",
+          "op_str": "x8, tpidr_el0"
+        },
+        {
+          "address": 796576,
+          "file_offset": 796576,
+          "mnemonic": "ldr",
+          "op_str": "x8, [x8, #0x28]"
+        },
+        {
+          "address": 796580,
+          "file_offset": 796580,
+          "mnemonic": "ldur",
+          "op_str": "x9, [x29, #-0x28]"
+        },
+        {
+          "address": 796584,
+          "file_offset": 796584,
+          "mnemonic": "cmp",
+          "op_str": "x8, x9"
+        },
+        {
+          "address": 796588,
+          "file_offset": 796588,
+          "mnemonic": "b.ne",
+          "op_str": "#0xc280c"
+        }
+      ]
+    }
+  ],
+  "helper_calls_with_table_argument": []
+}
