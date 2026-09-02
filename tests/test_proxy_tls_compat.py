@@ -40,12 +40,22 @@ class ProxyTLSCompatibilityTest(unittest.TestCase):
         post_source = inspect.getsource(proxy.ProxyHTTPRequestHandler.do_POST)
         self.assertIn('with _API_COMPAT_LOCK:', post_source)
 
-    def test_cache_modes_start_independent_http_asset_listener(self):
-        source = inspect.getsource(proxy._start_asset_http_server)
+    def test_cache_modes_start_independent_asset_listener(self):
+        source = inspect.getsource(proxy._start_asset_server)
         self.assertIn("if config.asset_mode == 'remote':", source)
         self.assertIn('create_asset_server(', source)
-        self.assertIn('fetch_on_miss = config.asset_mode == \'hybrid\'', source)
-        self.assertIn("name='mltd-asset-http'", source)
+        self.assertIn("fetch_on_miss = config.asset_mode == 'hybrid'", source)
+        self.assertIn("name='mltd-asset-https'", source)
+        self.assertIn('context.load_cert_chain(certfile, keyfile)', source)
+        self.assertIn(
+            'httpd.socket = context.wrap_socket(httpd.socket, server_side=True)',
+            source,
+        )
+
+    def test_desktop_asset_listener_rejects_api_port_reuse(self):
+        source = inspect.getsource(proxy._start_asset_server)
+        self.assertIn('if listen_port == proxy_port:', source)
+        self.assertIn('cannot share API port 443', source)
 
 
 if __name__ == '__main__':
