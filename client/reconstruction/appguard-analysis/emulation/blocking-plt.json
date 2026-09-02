@@ -1,0 +1,18 @@
+[
+  {
+    "plt": 1507312,
+    "got": 1991656,
+    "relocation": {
+      "symbol": "rand",
+      "sym_index": 157,
+      "rela_va": 568200,
+      "got": 1991656
+    },
+    "instructions": [
+      "adrp x16, #0x1e6000",
+      "ldr x17, [x16, #0x3e8]",
+      "add x16, x16, #0x3e8",
+      "br x17"
+    ]
+  }
+]
