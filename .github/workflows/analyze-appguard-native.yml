@@ -1,0 +1,94 @@
+name: Analyze AppGuard native loader
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - client-zh-fixed-reconstruction
+    paths:
+      - '.github/workflows/analyze-appguard-native.yml'
+      - 'tools/client-source/analyze-appguard-native.py'
+
+permissions:
+  contents: write
+
+jobs:
+  analyze-appguard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Install analysis tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check capstone pyelftools
+          curl -L --fail --retry 3 \
+            https://github.com/iBotPeaches/Apktool/releases/download/v2.12.1/apktool_2.12.1.jar \
+            -o "$RUNNER_TEMP/apktool.jar"
+
+      - name: Download and verify exact official 2.1.000 bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p work/xapk work/native
+          curl -L --fail --retry 3 --connect-timeout 20 --max-time 300 \
+            -A 'Mozilla/5.0' \
+            -o work/original-2.1.000.xapk \
+            'https://d.apkpure.net/b/XAPK/com.bandainamcoent.imas_millionlive_theaterdays_ch?version=latest'
+          test "$(stat -c %s work/original-2.1.000.xapk)" -eq 106437938
+          test "$(sha1sum work/original-2.1.000.xapk | awk '{print $1}')" = '1b77ddd342a4020ba032ec63ae7ef9288551b6e7'
+          unzip -q work/original-2.1.000.xapk -d work/xapk
+          test "$(sha256sum work/xapk/com.bandainamcoent.imas_millionlive_theaterdays_ch.apk | awk '{print $1}')" = '8b8a3976687f606cba2fe3a605d80ae0f7d9cbaa72e6b97ab4bed8c556ba9081'
+          test "$(sha256sum work/xapk/config.arm64_v8a.apk | awk '{print $1}')" = '9932366bd357dc33701a6e7282d26ed67630db95486f596328aade8523032e46'
+          unzip -q work/xapk/config.arm64_v8a.apk 'lib/arm64-v8a/*.so' -d work/split
+          cp work/split/lib/arm64-v8a/*.so work/native/
+
+      - name: Decode Java/AppGuard bridge
+        shell: bash
+        run: |
+          set -euo pipefail
+          java -jar "$RUNNER_TEMP/apktool.jar" d -f \
+            -o work/apktool \
+            work/xapk/com.bandainamcoent.imas_millionlive_theaterdays_ch.apk
+
+      - name: Build exact-sample native/JNI map
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf client/reconstruction/appguard-analysis
+          python tools/client-source/analyze-appguard-native.py \
+            --native-dir work/native \
+            --apktool-tree work/apktool \
+            --out client/reconstruction/appguard-analysis
+
+      - name: Add raw ELF tool summaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT=client/reconstruction/appguard-analysis/elf-tools
+          mkdir -p "$OUT"
+          for f in work/native/libcompatible.so work/native/libcompatible_x86.so \
+                   work/native/libengine-hlp.so work/native/libengine.so work/native/libstub.so; do
+            [[ -f "$f" ]] || continue
+            name=$(basename "$f")
+            readelf -h -l -S -d -Ws -r "$f" > "$OUT/${name}.readelf.txt" 2>&1 || true
+            strings -a -t x "$f" > "$OUT/${name}.strings.txt" || true
+          done
+
+      - name: Commit analysis result
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add client/reconstruction/appguard-analysis
+          if git diff --cached --quiet; then
+            echo 'No AppGuard analysis changes.'
+            exit 0
+          fi
+          git commit -m 'client: map AppGuard native loader and JNI surface'
+          git push origin HEAD:client-zh-fixed-reconstruction
