@@ -6,6 +6,7 @@ on:
       - fix/story-service-compat
     paths:
       - '.github/workflows/audit-current-rpc-coverage.yml'
+  workflow_dispatch:
 
 jobs:
   audit:
@@ -15,16 +16,27 @@ jobs:
         with:
           fetch-depth: 1
       - run: git fetch origin client-decompiled-zh-fixed-v1 --depth=1
-      - name: Inspect exact profile contracts and call construction
+      - name: Compare client RPC names with server registrations
         shell: bash
         run: |
           set -euo pipefail
           git show origin/client-decompiled-zh-fixed-v1:il2cpp-dump/dump.cs > /tmp/dump.cs
-          echo '=== EXACT GetProfileReply ==='
-          sed -n '629052,629145p' /tmp/dump.cs
-          echo '=== EXACT SetSelfProfile DTO ==='
-          sed -n '635580,635620p' /tmp/dump.cs
-          echo '=== GetProfileArgs assignments / construction ==='
-          grep -n -C 18 -E '(user_id|search_user_id|name_card_url|from_page) = .*|new GetProfileArgs|GetProfileArgs args' /tmp/dump.cs | head -n 1800 || true
-          echo '=== SetSelfProfileArgs assignments ==='
-          grep -n -C 16 -E 'SetSelfProfileArgs args|new SetSelfProfileArgs|helper_card_id_list =|mst_achievement_id_list =' /tmp/dump.cs | head -n 2200 || true
+
+          grep -oE '[A-Za-z][A-Za-z0-9]*Service\.[A-Za-z][A-Za-z0-9]*' /tmp/dump.cs \
+            | sort -u > /tmp/client-rpc.txt
+
+          grep -RhoE "name=['\"][A-Za-z][A-Za-z0-9]*Service\.[A-Za-z][A-Za-z0-9]*['\"]" \
+            standalone/mltd/services \
+            | sed -E "s/^name=['\"]//; s/['\"]$//" \
+            | sort -u > /tmp/server-rpc.txt
+
+          echo '=== COUNTS ==='
+          printf 'client=%s\n' "$(wc -l < /tmp/client-rpc.txt)"
+          printf 'server=%s\n' "$(wc -l < /tmp/server-rpc.txt)"
+          printf 'missing=%s\n' "$(comm -23 /tmp/client-rpc.txt /tmp/server-rpc.txt | wc -l)"
+
+          echo '=== CLIENT RPC MISSING ON SERVER ==='
+          comm -23 /tmp/client-rpc.txt /tmp/server-rpc.txt
+
+          echo '=== SERVER RPC NOT SEEN IN CLIENT DUMP ==='
+          comm -13 /tmp/client-rpc.txt /tmp/server-rpc.txt
