@@ -11,7 +11,7 @@ sys.path.insert(0, str(REPO_ROOT / 'standalone'))
 from mltd.servers import proxy  # noqa: E402
 
 
-class APISerialCompatibilityTest(unittest.TestCase):
+class APIConcurrencyCompatibilityTest(unittest.TestCase):
     def setUp(self):
         self.state_lock = threading.Lock()
         self.active = 0
@@ -70,7 +70,7 @@ class APISerialCompatibilityTest(unittest.TestCase):
         )
         conn.close()
 
-    def test_concurrent_api_posts_never_overlap_wsgi_dispatch(self):
+    def test_concurrent_api_posts_can_overlap_wsgi_dispatch(self):
         results = [None, None]
         workers = [
             threading.Thread(target=self._post, args=(results, i))
@@ -82,9 +82,9 @@ class APISerialCompatibilityTest(unittest.TestCase):
             worker.join(timeout=3)
             self.assertFalse(worker.is_alive())
 
-        self.assertEqual(self.max_active, 1)
+        self.assertGreaterEqual(self.max_active, 2)
         for result in results:
-            self.assertEqual(result, (200, 'close', b'ok'))
+            self.assertEqual(result, (200, None, b'ok'))
 
 
 if __name__ == '__main__':
