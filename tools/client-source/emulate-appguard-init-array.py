@@ -28,13 +28,14 @@ CTOR_LIMIT=4_000_000
 
 class InitArrayLoader(cross.CrossLoader):
     def __init__(self,compatible,out):
-        # CrossLoader requires libstub, so bypass it and use the same Bionic base.
-        pre.bionic.BionicEmulator.__init__(self,base.Image(compatible),out)
+        # CrossLoader normally also requires libstub. Initialize only its
+        # libcompatible/Bionic base because this experiment stops before libstub.
+        cross.bionic.BionicEmulator.__init__(self,base.Image(compatible),out)
         self.stage='bootstrap';self.stage2_insns=0;self.stage2_writes=0;self.stage2_write_pages={};self.stage2_write_samples=[]
         self.stub_raw=b'';self.stub_image=None;self.stub_map_size=0;self.slot_writes=[];self.ctor_history=deque(maxlen=128);self.current_ctor=None
     def code_hook(self,uc,address,size,user):
         if self.stage=='bootstrap':
-            pre.bionic.BionicEmulator.code_hook(self,uc,address,size,user)
+            cross.bionic.BionicEmulator.code_hook(self,uc,address,size,user)
             rel=address-base.BIAS
             if rel==cross.CALLBACK_DONE and self.callback_captured:
                 self.stopped_reason='libcompatible loader callback ready';uc.emu_stop()
@@ -44,7 +45,7 @@ class InitArrayLoader(cross.CrossLoader):
         try:raw=bytes(uc.mem_read(address,4))
         except Exception:pass
         self.ctor_history.append({'instruction':self.stage2_insns,'pc':address,'raw':raw.hex(),'x0':uc.reg_read(UC_ARM64_REG_X0),'lr':uc.reg_read(UC_ARM64_REG_X30)})
-        pre.bionic.BionicEmulator.code_hook(self,uc,address,size,user)
+        cross.bionic.BionicEmulator.code_hook(self,uc,address,size,user)
         if self.stage2_insns>=CTOR_LIMIT:
             self.stopped_reason=f'constructor instruction limit {CTOR_LIMIT}';uc.emu_stop()
     def slot_write_hook(self,uc,access,address,size,value,user):
@@ -80,8 +81,6 @@ def decode(rows):
 def call_ctor(e,row):
     if not row['value']:return {'entry':row,'stop':'null entry','instructions':0,'slot_before':runtime_qword(e,TARGET_SLOT),'slot_after':runtime_qword(e,TARGET_SLOT),'history':[]}
     before=runtime_qword(e,TARGET_SLOT);e.stage='ctor';e.stage2_insns=0;e.stopped_reason=None;e.current_ctor=row['index'];e.ctor_history.clear()
-    # Android constructors conventionally receive argc/argv/envp only for the executable;
-    # shared-library init_array functions are called with no defined arguments. Clear them.
     e.uc.reg_write(UC_ARM64_REG_X0,0);e.uc.reg_write(UC_ARM64_REG_X1,0);e.uc.reg_write(UC_ARM64_REG_X2,0);e.uc.reg_write(UC_ARM64_REG_X30,base.STOP_ADDR)
     try:e.uc.emu_start(row['value'],base.STOP_ADDR,count=CTOR_LIMIT+1000)
     except UcError as exc:
