@@ -12,61 +12,80 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
       - run: git fetch origin client-decompiled-zh-fixed-v1 --depth=1
-      - run: >-
-          python -m pip install
-          json-rpc==1.15.0
-          SQLAlchemy==2.0.19 SQLAlchemy-Utils==0.41.1
-          marshmallow==3.20.1 marshmallow-sqlalchemy==0.29.0
-          msgpack==1.0.5 pycryptodome==3.18.0
-      - name: Extract compact client vitality contracts
+      - name: Rank active unimplemented RPCs by DTO size
         shell: bash
         run: |
           set -euo pipefail
           git show origin/client-decompiled-zh-fixed-v1:il2cpp-dump/dump.cs > /tmp/dump.cs
-          for cls in ItemStatus RecoverVitalityByItemArgs RecoverVitalityByItemReply RecoverVitalityByItemMultiArgs RecoverVitalityByItemMultiReply RecoverVitalityByJewelReply; do
-            echo "=== ${cls} ==="
-            line=$(grep -n -m1 -E "public class ${cls}\\b" /tmp/dump.cs | cut -d: -f1 || true)
-            if [ -n "$line" ]; then
-              sed -n "${line},$((line+45))p" /tmp/dump.cs
-            fi
-          done
-      - name: Show every server vitality timeline reference
-        shell: bash
-        run: |
-          grep -RIn -C 8 -E 'full_recover_date|auto_recover_interval' standalone/mltd || true
-      - name: Initialize DB and query vitality master data
-        working-directory: standalone
-        shell: bash
-        run: |
-          set -euo pipefail
           python - <<'PY'
-          from sqlalchemy import select
-          from sqlalchemy.orm import Session
-          from mltd.models.setup import setup
-          from mltd.models.engine import engine
-          from mltd.models.models import Jewel, MstItem, MstGameSetting, User
-          setup()
-          with Session(engine) as s:
-              print('=== ITEM_TYPE_6 ===')
-              for i in s.scalars(select(MstItem).where(MstItem.item_type == 6).order_by(MstItem.mst_item_id)).all():
-                  print(i.mst_item_id, repr(i.name), 'value1=', i.value1, 'value2=', i.value2, 'max_amount=', i.max_amount)
-              print('=== GAME_SETTING ===')
-              gs = s.scalars(select(MstGameSetting)).first()
-              print('recover_jewel_amount=', gs.recover_jewel_amount)
-              print('recover_jewel_begin_date=', gs.recover_jewel_begin_date)
-              print('recover_jewel_end_date=', gs.recover_jewel_end_date)
-              print('=== USERS ===')
-              for u in s.scalars(select(User).limit(3)).all():
-                  print(str(u.user_id), 'vitality=', u.vitality, 'stored=', u._vitality, 'max=', u.max_vitality, 'full=', u.full_recover_date, 'interval=', u.auto_recover_interval, 'ticket=', u.live_ticket)
-              print('=== JEWELS ===')
-              for j in s.scalars(select(Jewel).limit(3)).all():
-                  print(str(j.user_id), 'free=', j.free_jewel_amount, 'paid=', j.paid_jewel_amount)
+          import pathlib
+          import re
+          from collections import defaultdict
+
+          root = pathlib.Path('standalone/mltd/services')
+          registered = set()
+          pattern = re.compile(r"add_method\(\s*name=['\"]([^'\"]+)['\"]")
+          for path in root.glob('*.py'):
+              text = path.read_text(encoding='utf-8')
+              registered.update(pattern.findall(text))
+
+          dump = pathlib.Path('/tmp/dump.cs').read_text(encoding='utf-8', errors='ignore')
+          constants = sorted(set(re.findall(r'"([A-Za-z0-9_]+Service\.[A-Za-z0-9_]+)"', dump)))
+          request_methods = set(re.findall(r'public HTTPRequest ([A-Za-z0-9_]+)\s*\(', dump))
+
+          def fields(class_name):
+              match = re.search(
+                  rf'public class {re.escape(class_name)}\b.*?\{{(.*?)\n\s*// Methods',
+                  dump,
+                  flags=re.S,
+              )
+              if not match:
+                  return None
+              body = match.group(1)
+              result = []
+              for typ, name in re.findall(
+                  r'^\s*public\s+([^;\n]+?)\s+([A-Za-z0-9_]+);',
+                  body,
+                  flags=re.M,
+              ):
+                  result.append((typ.strip(), name))
+              return result
+
+          missing = []
+          for rpc in constants:
+              if rpc in registered:
+                  continue
+              service, method = rpc.split('.', 1)
+              active = method in request_methods
+              reply = fields(method + 'Reply')
+              args = fields(method + 'Args')
+              missing.append((
+                  0 if active else 1,
+                  999 if reply is None else len(reply),
+                  999 if args is None else len(args),
+                  service,
+                  method,
+                  args,
+                  reply,
+              ))
+
+          print('REGISTERED', len(registered))
+          print('CLIENT_CONSTANTS', len(constants))
+          print('MISSING', len(missing))
+          print('=== ACTIVE MISSING, REPLY <= 3 FIELDS ===')
+          for _, reply_n, args_n, service, method, args, reply in sorted(missing):
+              if reply_n > 3:
+                  continue
+              print(f'{service}.{method} args={args_n} reply={reply_n}')
+              print('  ARGS ', args)
+              print('  REPLY', reply)
+
+          print('=== MISSING BY SERVICE ===')
+          by_service = defaultdict(list)
+          for active_sort, reply_n, args_n, service, method, args, reply in missing:
+              if active_sort == 0:
+                  by_service[service].append(method)
+          for service in sorted(by_service, key=lambda s: (-len(by_service[s]), s)):
+              print(f'{service}: {len(by_service[service])}: ' + ', '.join(sorted(by_service[service])))
           PY
-      - name: Print ItemSchema implementation
-        shell: bash
-        run: |
-          grep -RIn -A 55 -B 4 -E '^class ItemSchema\\b' mltd/models/schemas.py || true
