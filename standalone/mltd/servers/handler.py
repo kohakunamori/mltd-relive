@@ -14,6 +14,12 @@ from mltd.services import *
 
 _SLOW_REQUEST_MS = 25
 _BATCH_METHOD_PREVIEW = 12
+_ALLOWED_API_HOSTS = frozenset({
+    'theaterdays-zh.appspot.com',
+    'theaterdays-ko.appspot.com',
+    'theaterdays.appspot.com',
+    '127.0.0.1',
+})
 
 
 class CustomJSONEncoder(json.JSONEncoder):
@@ -48,12 +54,25 @@ def _method_name(request):
     return '?'
 
 
-def application(environ, start_response):
-    host = environ['HTTP_HOST']
+def _normalize_host(host):
+    host = (host or '').strip().lower()
+    if host.startswith('['):
+        end = host.find(']')
+        if end != -1:
+            return host[1:end]
+    if ':' in host:
+        host = host.rsplit(':', 1)[0]
+    return host
 
-    if ('theaterdays-zh.appspot.com' in host
-            or 'theaterdays-ko.appspot.com' in host
-            or '127.0.0.1' in host):
+
+def _is_allowed_api_host(host):
+    return _normalize_host(host) in _ALLOWED_API_HOSTS
+
+
+def application(environ, start_response):
+    host = environ.get('HTTP_HOST', '')
+
+    if _is_allowed_api_host(host):
         debug = logger.isEnabledFor(logging.DEBUG)
         full_start_time = time.perf_counter_ns()
 
