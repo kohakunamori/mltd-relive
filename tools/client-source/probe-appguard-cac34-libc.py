@@ -25,7 +25,7 @@ base = cond.base
 
 TRAMPOLINE = base.STUB_BASE + base.STUB_SIZE - 0x100
 WEOF = 0xffffffff
-EOF = 0xffffffffffffffff
+EOF64 = 0xffffffffffffffff
 
 
 class LibcProbe(cond.VariantProbe):
@@ -34,9 +34,6 @@ class LibcProbe(cond.VariantProbe):
         self.once_done = set()
         self.once_return_stack = []
         self.once_invocations = []
-        # Mapped already as part of STUB space; contents do not matter because
-        # code_hook intercepts before execution.
-        self.uc.mem_write(TRAMPOLINE, bytes.fromhex('c0035fd6'))
 
     @property
     def use_locale(self):
@@ -54,30 +51,30 @@ class LibcProbe(cond.VariantProbe):
             return
         super().code_hook(uc, address, size, user)
 
+    def _args(self):
+        return [self.uc.reg_read(globals()[f'UC_ARM64_REG_X{i}']) for i in range(8)]
+
     def emulate_external(self, name, address):
         n = name.split('@', 1)[0]
-        x0 = self.uc.reg_read(UC_ARM64_REG_X0)
-        x1 = self.uc.reg_read(UC_ARM64_REG_X1)
-        xs = [self.uc.reg_read(globals()[f'UC_ARM64_REG_X{i}']) for i in range(8)] if False else None
+        xs = self._args()
+        x0, x1 = xs[0], xs[1]
 
         if self.use_locale and n == 'btowc':
             c = x0 & 0xffffffff
             ret = c if c <= 0x7f else WEOF
-            self._log_override(name, address, [self.uc.reg_read(globals().get(f'UC_ARM64_REG_X{i}', UC_ARM64_REG_X0)) for i in range(8)] if False else [x0, x1, 0, 0, 0, 0, 0, 0], ret,
-                               {'model': 'C/UTF-8 single-byte ASCII'})
+            self._log_override(name, address, xs, ret, {'model': 'ASCII identity, WEOF otherwise'})
             return
         if self.use_locale and n == 'wctob':
             wc = x0 & 0xffffffff
-            ret = wc if wc <= 0x7f else EOF
-            self._log_override(name, address, [x0, x1, 0, 0, 0, 0, 0, 0], ret,
-                               {'model': 'ASCII identity, EOF otherwise'})
+            ret = wc if wc <= 0x7f else EOF64
+            self._log_override(name, address, xs, ret, {'model': 'ASCII identity, EOF otherwise'})
             return
         if self.use_locale and n == 'wctype':
             prop = self.cstring(x0).decode('ascii', errors='replace') if x0 else ''
             descs = {'alnum':1,'alpha':2,'blank':3,'cntrl':4,'digit':5,'graph':6,'lower':7,
                      'print':8,'punct':9,'space':10,'upper':11,'xdigit':12}
             ret = descs.get(prop, 0)
-            self._log_override(name, address, [x0, x1, 0, 0, 0, 0, 0, 0], ret, {'property': prop})
+            self._log_override(name, address, xs, ret, {'property': prop})
             return
         if self.use_once and n == 'pthread_once':
             control, init = x0, x1
@@ -88,6 +85,8 @@ class LibcProbe(cond.VariantProbe):
             self.once_done.add(control)
             self.once_return_stack.append(caller)
             self.once_invocations.append({'control': control, 'init': init, 'caller': caller})
+            # STUB space is mapped by run_bootstrap() before this API can be reached.
+            self.uc.mem_write(TRAMPOLINE, bytes.fromhex('c0035fd6'))
             self.uc.reg_write(UC_ARM64_REG_X30, TRAMPOLINE)
             self.uc.reg_write(UC_ARM64_REG_PC, init)
             return
