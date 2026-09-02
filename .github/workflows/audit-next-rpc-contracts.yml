@@ -13,75 +13,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: git fetch origin client-decompiled-zh-fixed-v1 --depth=1
-      - name: Rank active unimplemented RPCs by DTO size
-        shell: bash
-        run: |
-          set -euo pipefail
-          git show origin/client-decompiled-zh-fixed-v1:il2cpp-dump/dump.cs > /tmp/dump.cs
-          python - <<'PY'
-          import pathlib
-          import re
-          from collections import defaultdict
-
-          root = pathlib.Path('standalone/mltd/services')
-          registered = set()
-          pattern = re.compile(r"add_method\(\s*name=['\"]([^'\"]+)['\"]")
-          for path in root.glob('*.py'):
-              text = path.read_text(encoding='utf-8')
-              registered.update(pattern.findall(text))
-
-          dump = pathlib.Path('/tmp/dump.cs').read_text(encoding='utf-8', errors='ignore')
-          constants = sorted(set(re.findall(r'"([A-Za-z0-9_]+Service\.[A-Za-z0-9_]+)"', dump)))
-          request_methods = set(re.findall(r'public HTTPRequest ([A-Za-z0-9_]+)\s*\(', dump))
-
-          def fields(class_name):
-              match = re.search(
-                  rf'public class {re.escape(class_name)}\b.*?\{{(.*?)\n\s*// Methods',
-                  dump,
-                  flags=re.S,
-              )
-              if not match:
-                  return None
-              return [
-                  (typ.strip(), name)
-                  for typ, name in re.findall(
-                      r'^\s*public\s+([^;\n]+?)\s+([A-Za-z0-9_]+);',
-                      match.group(1), flags=re.M,
-                  )
-              ]
-
-          missing = []
-          for rpc in constants:
-              if rpc in registered:
-                  continue
-              service, method = rpc.split('.', 1)
-              active = method in request_methods
-              reply = fields(method + 'Reply')
-              args = fields(method + 'Args')
-              missing.append((0 if active else 1,
-                              999 if reply is None else len(reply),
-                              999 if args is None else len(args),
-                              service, method, args, reply))
-
-          print('REGISTERED', len(registered))
-          print('CLIENT_CONSTANTS', len(constants))
-          print('MISSING', len(missing))
-          print('=== ACTIVE MISSING, REPLY <= 3 FIELDS ===')
-          for _, reply_n, args_n, service, method, args, reply in sorted(missing):
-              if reply_n <= 3:
-                  print(f'{service}.{method} args={args_n} reply={reply_n}')
-                  print('  ARGS ', args)
-                  print('  REPLY', reply)
-
-          print('=== MISSING BY SERVICE ===')
-          by_service = defaultdict(list)
-          for active_sort, _, _, service, method, _, _ in missing:
-              if active_sort == 0:
-                  by_service[service].append(method)
-          for service in sorted(by_service, key=lambda s: (-len(by_service[s]), s)):
-              print(f'{service}: {len(by_service[service])}: ' + ', '.join(sorted(by_service[service])))
-          PY
-      - name: Dump friend recommendation contract and server schema
+      - name: Dump client mission contracts
         shell: bash
         run: |
           set -euo pipefail
@@ -89,7 +21,15 @@ jobs:
           python - <<'PY'
           import pathlib, re
           dump = pathlib.Path('/tmp/dump.cs').read_text(encoding='utf-8', errors='ignore')
-          for name in ('UserSummary', 'GetRecommendUserListArgs', 'GetRecommendUserListReply'):
+          targets = (
+              'ClientMission',
+              'DoClientMissionArgs',
+              'DoClientMissionReply',
+              'MissionProcessStatus',
+              'MissionStatus',
+              'TrainingPointDiff',
+          )
+          for name in targets:
               print(f'=== {name} ===')
               match = re.search(rf'public class {name}\b.*?\{{(.*?)\n\s*// Methods', dump, flags=re.S)
               if not match:
@@ -98,7 +38,5 @@ jobs:
               for typ, field in re.findall(r'^\s*public\s+([^;\n]+?)\s+([A-Za-z0-9_]+);', match.group(1), flags=re.M):
                   print(typ.strip(), field)
           PY
-          echo '=== GUEST SCHEMA ==='
-          grep -n -A 130 -B 5 '^class GuestSchema' standalone/mltd/models/schemas.py || true
-          echo '=== FRIEND MODEL ==='
-          grep -n -A 80 -B 5 '^class Friend' standalone/mltd/models/models.py || true
+          echo '=== CURRENT CLIENT-MISSION CLASS IDS ==='
+          grep -RIn -C 3 'mst_mission_class_id.*==' standalone/mltd/services | head -n 500 || true
