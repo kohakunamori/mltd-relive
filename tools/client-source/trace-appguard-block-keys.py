@@ -11,7 +11,7 @@ from __future__ import annotations
 import argparse,collections,hashlib,importlib.util,json,struct
 from pathlib import Path
 
-from unicorn import UC_HOOK_CODE,UC_HOOK_MEM_WRITE,UcError
+from unicorn import UC_HOOK_CODE,UC_HOOK_INTR,UC_HOOK_MEM_INVALID,UC_HOOK_MEM_WRITE,UcError
 from unicorn.arm64_const import UC_ARM64_REG_X19,UC_ARM64_REG_X23,UC_ARM64_REG_X24,UC_ARM64_REG_X28,UC_ARM64_REG_PC
 
 HERE=Path(__file__).resolve().parent
@@ -57,7 +57,7 @@ class Trace(bionic.BionicEmulator):
             self.context_writes.append({'instruction':self.insns,'pc':uc.reg_read(UC_ARM64_REG_PC)-base.BIAS,'address':address,'context_offset':address-self.ctx_ptr,'size':size,'value':value})
     def run_trace(self):
         self.map_memory();rel=self.apply_relocations();self.setup_registers()
-        self.uc.hook_add(UC_HOOK_CODE,self.code_hook);self.uc.hook_add(base.UC_HOOK_INTR,self.syscall_hook);self.uc.hook_add(base.UC_HOOK_MEM_INVALID,self.invalid_hook)
+        self.uc.hook_add(UC_HOOK_CODE,self.code_hook);self.uc.hook_add(UC_HOOK_INTR,self.syscall_hook);self.uc.hook_add(UC_HOOK_MEM_INVALID,self.invalid_hook)
         self.uc.hook_add(UC_HOOK_MEM_WRITE,self.write_hook,begin=base.STACK_BASE,end=base.STACK_BASE+base.STACK_SIZE-1)
         try:self.uc.emu_start(base.BIAS+self.image.dt_init,base.STOP_ADDR,count=RUN_LIMIT+1000)
         except UcError as exc:
