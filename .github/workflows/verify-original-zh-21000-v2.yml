@@ -48,8 +48,8 @@ jobs:
           sha1sum original/base.apk original/arm64.apk | tee report/original-apk-sha1.txt
           sha256sum original/base.apk original/arm64.apk | tee report/original-apk-sha256.txt
           grep -q "package: name='com.bandainamcoent.imas_millionlive_theaterdays_ch' versionCode='21000' versionName='2.1.000'" report/original-base-badging.txt
-          grep -qi 'Signer #1 certificate SHA-1 digest: d06df89b97286bd0c3144e7c823d5bee5496315c' report/original-base-signing.txt
-          grep -qi 'Signer #1 certificate SHA-1 digest: d06df89b97286bd0c3144e7c823d5bee5496315c' report/original-arm64-signing.txt
+          grep -qi 'certificate SHA-1 digest: d06df89b97286bd0c3144e7c823d5bee5496315c' report/original-base-signing.txt
+          grep -qi 'certificate SHA-1 digest: d06df89b97286bd0c3144e7c823d5bee5496315c' report/original-arm64-signing.txt
 
       - name: Download current zh-fixed baseline
         env:
