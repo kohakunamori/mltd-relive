@@ -91,10 +91,10 @@ def reloc_info(image):
             rows.append(r)
     return rows
 
-def scan_xrefs(emu,image):
+def scan_xrefs(uc,image):
     md=Cs(CS_ARCH_ARM64,CS_MODE_ARM);md.detail=True;rows=[]
     for start,end,keysrc in RANGES:
-        data,key=decrypt_loaded(emu,start,end,keysrc)
+        data,key=decrypt_loaded(uc,start,end,keysrc)
         pages={}
         for ins in md.disasm(data,start):
             if ins.mnemonic=='adrp' and len(ins.operands)>=2 and ins.operands[0].type==CS_OP_REG and ins.operands[1].type==CS_OP_IMM:
@@ -129,7 +129,7 @@ def render(rep):
 
 def main():
     ap=argparse.ArgumentParser();ap.add_argument('--libcompatible',type=Path,required=True);ap.add_argument('--out',type=Path,required=True);a=ap.parse_args();a.out.mkdir(parents=True,exist_ok=True)
-    image=base.Image(a.libcompatible);e=Trace(image,a.out);e.run_trace();rep={'stop':e.stopped_reason,'instructions':e.insns,'relocations':reloc_info(image),'checkpoints':e.checkpoints,'slot_writes':e.slot_writes,'ptr_writes':e.ptr_writes,'xrefs':scan_xrefs(e,image),'ptr_symbol':nearest_symbol(image,PTR_CELL),'slot_symbol':nearest_symbol(image,TARGET_SLOT)}
+    image=base.Image(a.libcompatible);e=Trace(image,a.out);e.run_trace();rep={'stop':e.stopped_reason,'instructions':e.insns,'relocations':reloc_info(image),'checkpoints':e.checkpoints,'slot_writes':e.slot_writes,'ptr_writes':e.ptr_writes,'xrefs':scan_xrefs(e.uc,image),'ptr_symbol':nearest_symbol(image,PTR_CELL),'slot_symbol':nearest_symbol(image,TARGET_SLOT)}
     (a.out/'sostart-slot-provenance.json').write_text(json.dumps(rep,indent=2)+'\n');(a.out/'sostart-slot-provenance.md').write_text(render(rep)+'\n')
     print(json.dumps({'stop':rep['stop'],'insns':rep['instructions'],'checkpoints':[(x['label'],hex(x['ptr_cell'] or 0),hex(x['target_slot'] or 0)) for x in rep['checkpoints']],'slot_writes':rep['slot_writes'],'ptr_writes':rep['ptr_writes'],'xrefs':rep['xrefs'][:20]},indent=2))
 if __name__=='__main__':main()
