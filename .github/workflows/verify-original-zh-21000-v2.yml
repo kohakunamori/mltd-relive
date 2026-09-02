@@ -1,0 +1,144 @@
+name: Verify original zh-TW 2.1.000 split bundle
+
+on:
+  push:
+    branches:
+      - client-original-apk-recovery
+    paths:
+      - '.github/workflows/verify-original-zh-21000-v2.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download exact original XAPK
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p original fixed report/xapk report/extracted
+          URL='https://d.apkpure.net/b/XAPK/com.bandainamcoent.imas_millionlive_theaterdays_ch?version=latest'
+          curl -L --fail --retry 3 --connect-timeout 20 --max-time 300 \
+            -A 'Mozilla/5.0' -o original/original-2.1.000.xapk "$URL"
+          test "$(stat -c %s original/original-2.1.000.xapk)" -eq 106437938
+          test "$(sha1sum original/original-2.1.000.xapk | cut -d' ' -f1)" = '1b77ddd342a4020ba032ec63ae7ef9288551b6e7'
+          sha1sum original/original-2.1.000.xapk | tee report/xapk-sha1.txt
+          sha256sum original/original-2.1.000.xapk | tee report/xapk-sha256.txt
+          unzip -q original/original-2.1.000.xapk -d report/xapk
+          cp report/xapk/com.bandainamcoent.imas_millionlive_theaterdays_ch.apk original/base.apk
+          cp report/xapk/config.arm64_v8a.apk original/arm64.apk
+          cat report/xapk/manifest.json | tee report/xapk-manifest.json
+
+      - name: Verify package version and publisher signature
+        shell: bash
+        run: |
+          set -euo pipefail
+          AAPT=$(find "$ANDROID_HOME/build-tools" -type f -name aapt -print | sort -V | tail -1)
+          APKSIGNER=$(find "$ANDROID_HOME/build-tools" -type f -name apksigner -print | sort -V | tail -1)
+          "$AAPT" dump badging original/base.apk | tee report/original-base-badging.txt
+          "$AAPT" dump badging original/arm64.apk | tee report/original-arm64-badging.txt
+          "$APKSIGNER" verify --print-certs original/base.apk | tee report/original-base-signing.txt
+          "$APKSIGNER" verify --print-certs original/arm64.apk | tee report/original-arm64-signing.txt
+          sha1sum original/base.apk original/arm64.apk | tee report/original-apk-sha1.txt
+          sha256sum original/base.apk original/arm64.apk | tee report/original-apk-sha256.txt
+          grep -q "package: name='com.bandainamcoent.imas_millionlive_theaterdays_ch' versionCode='21000' versionName='2.1.000'" report/original-base-badging.txt
+          grep -qi 'Signer #1 certificate SHA-1 digest: d06df89b97286bd0c3144e7c823d5bee5496315c' report/original-base-signing.txt
+          grep -qi 'Signer #1 certificate SHA-1 digest: d06df89b97286bd0c3144e7c823d5bee5496315c' report/original-arm64-signing.txt
+
+      - name: Download current zh-fixed baseline
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          source release/game-client.env
+          TAG=$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName --jq .tagName)
+          gh release download "$TAG" --repo "$GITHUB_REPOSITORY" \
+            --pattern 'mltd-relive-game-client-zh-fixed.apk' --dir fixed
+          mv fixed/mltd-relive-game-client-zh-fixed.apk fixed/fixed.apk
+          echo "${ZH_SHA256}  fixed/fixed.apk" | sha256sum -c -
+          sha256sum fixed/fixed.apk | tee report/fixed-apk-sha256.txt
+
+      - name: Generate structural and critical binary diff
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib, json, zipfile
+          from pathlib import Path
+
+          base=zipfile.ZipFile('original/base.apk')
+          arm=zipfile.ZipFile('original/arm64.apk')
+          fixed=zipfile.ZipFile('fixed/fixed.apk')
+          bn=set(base.namelist()); an=set(arm.namelist()); fn=set(fixed.namelist())
+          original_union=bn|an
+          Path('report/original-union-only.txt').write_text('\n'.join(sorted(original_union-fn))+'\n',encoding='utf-8')
+          Path('report/fixed-only.txt').write_text('\n'.join(sorted(fn-original_union))+'\n',encoding='utf-8')
+
+          mapping=[
+            ('AndroidManifest.xml','base','AndroidManifest.xml'),
+            ('resources.arsc','base','resources.arsc'),
+            ('classes.dex','base','classes.dex'),
+            ('lib/arm64-v8a/libil2cpp.so','arm','lib/arm64-v8a/libil2cpp.so'),
+            ('lib/arm64-v8a/libunity.so','arm','lib/arm64-v8a/libunity.so'),
+            ('assets/bin/Data/Managed/Metadata/global-metadata.dat','base','assets/bin/Data/Managed/Metadata/global-metadata.dat'),
+            ('assets/bin/Data/globalgamemanagers','base','assets/bin/Data/globalgamemanagers'),
+            ('assets/bin/Data/data.unity3d','base','assets/bin/Data/data.unity3d'),
+          ]
+          src={'base':base,'arm':arm}
+          rows=[]
+          ex=Path('report/extracted')
+          def h(b): return hashlib.sha256(b).hexdigest()
+          for logical,which,path in mapping:
+            oz=src[which]
+            ob=oz.read(path) if path in set(oz.namelist()) else None
+            fb=fixed.read(logical) if logical in fn else None
+            row={'path':logical,'original_source':which,'original_size':None if ob is None else len(ob),'fixed_size':None if fb is None else len(fb),'original_sha256':None if ob is None else h(ob),'fixed_sha256':None if fb is None else h(fb),'identical': ob==fb if ob is not None and fb is not None else False}
+            rows.append(row)
+            safe=logical.replace('/','__')
+            if ob is not None: (ex/f'original-{safe}').write_bytes(ob)
+            if fb is not None: (ex/f'fixed-{safe}').write_bytes(fb)
+          Path('report/critical-diff.json').write_text(json.dumps(rows,indent=2),encoding='utf-8')
+          md=['# Original 2.1.000 vs zh-fixed','','| Path | Source split | Original size | Fixed size | Identical |','|---|---|---:|---:|:---:|']
+          for r in rows: md.append(f"| `{r['path']}` | {r['original_source']} | {r['original_size']} | {r['fixed_size']} | {'yes' if r['identical'] else 'NO'} |")
+          Path('report/critical-diff.md').write_text('\n'.join(md)+'\n',encoding='utf-8')
+          print('\n'.join(md))
+          PY
+
+          python - <<'PY'
+          from pathlib import Path
+          pairs=[
+            ('classes.dex','classes.dex'),
+            ('libil2cpp.so','lib__arm64-v8a__libil2cpp.so'),
+            ('global-metadata.dat','assets__bin__Data__Managed__Metadata__global-metadata.dat'),
+          ]
+          lines=[]
+          for name,safe in pairs:
+            a=Path('report/extracted/original-'+safe).read_bytes()
+            b=Path('report/extracted/fixed-'+safe).read_bytes()
+            n=min(len(a),len(b))
+            offs=[i for i in range(n) if a[i]!=b[i]]
+            lines.append(f'{name}: original={len(a)} fixed={len(b)} common={n} differing_bytes={len(offs)} first_offsets=' + ','.join(hex(x) for x in offs[:200]))
+          Path('report/byte-diff-summary.txt').write_text('\n'.join(lines)+'\n',encoding='utf-8')
+          print('\n'.join(lines))
+          PY
+
+      - name: Upload verified original and reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: verified-original-zh-2.1.000-and-diff-v2
+          path: |
+            original/original-2.1.000.xapk
+            original/base.apk
+            original/arm64.apk
+            report/*.txt
+            report/*.json
+            report/*.md
+          retention-days: 7
+          compression-level: 0
