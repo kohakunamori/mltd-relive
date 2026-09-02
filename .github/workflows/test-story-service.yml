@@ -53,4 +53,4 @@ jobs:
         run: python -c "from mltd.models.setup import setup; setup()"
       - name: Exercise StoryService state transitions
         working-directory: standalone
-        run: PYTHONPATH=.. python ../tests/test_story_service_runtime.py
+        run: PYTHONPATH=. python ../tests/test_story_service_runtime.py
