@@ -1,0 +1,107 @@
+name: Extract zh-fixed client source
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Release tag containing mltd-relive-game-client-zh-fixed.apk (blank = latest)'
+        required: false
+        default: ''
+        type: string
+  push:
+    branches:
+      - client-source-extraction
+    paths:
+      - '.github/workflows/extract-zh-fixed-client.yml'
+      - 'tools/client-source/**'
+      - 'release/game-client.env'
+
+permissions:
+  contents: read
+
+jobs:
+  extract:
+    name: Decompile Traditional Chinese fixed client
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install analysis dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y binutils curl file unzip zip zstd
+
+      - name: Download zh-fixed APK from Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REQUESTED_TAG: ${{ inputs.release_tag }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -n "${REQUESTED_TAG:-}" ]]; then
+            tag="$REQUESTED_TAG"
+          else
+            tag="$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName --jq .tagName)"
+          fi
+          echo "Using release: $tag"
+          echo "release_tag=$tag" >> "$GITHUB_ENV"
+          mkdir -p input
+          gh release download "$tag" \
+            --repo "$GITHUB_REPOSITORY" \
+            --pattern 'mltd-relive-game-client-zh-fixed.apk' \
+            --dir input
+          test -s input/mltd-relive-game-client-zh-fixed.apk
+
+      - name: Verify fixed-client baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          source release/game-client.env
+          echo "${ZH_SHA256}  input/mltd-relive-game-client-zh-fixed.apk" | sha256sum -c -
+
+      - name: Extract source views
+        shell: bash
+        run: |
+          chmod +x tools/client-source/extract-zh-fixed.sh
+          tools/client-source/extract-zh-fixed.sh \
+            input/mltd-relive-game-client-zh-fixed.apk \
+            client-source-output
+
+      - name: Package full source bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          tar --zstd -cf "mltd-zh-fixed-source-${release_tag}.tar.zst" client-source-output
+          sha256sum "mltd-zh-fixed-source-${release_tag}.tar.zst" \
+            > "mltd-zh-fixed-source-${release_tag}.tar.zst.sha256"
+          du -h "mltd-zh-fixed-source-${release_tag}.tar.zst"
+
+      - name: Upload compact report
+        uses: actions/upload-artifact@v4
+        with:
+          name: mltd-zh-fixed-source-report-${{ env.release_tag }}
+          path: |
+            client-source-output/README.txt
+            client-source-output/report/
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload full decompilation bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: mltd-zh-fixed-source-${{ env.release_tag }}
+          path: |
+            mltd-zh-fixed-source-${{ env.release_tag }}.tar.zst
+            mltd-zh-fixed-source-${{ env.release_tag }}.tar.zst.sha256
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 14
