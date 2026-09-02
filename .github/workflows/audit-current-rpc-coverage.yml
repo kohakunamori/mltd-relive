@@ -48,7 +48,6 @@ jobs:
                               locations.setdefault(rpc, []).append(f'{path}:{node.lineno}')
           implemented = sorted(client & server)
           missing = sorted(client - server)
-          server_only = sorted(server - client)
           print(f'CLIENT_RPC_COUNT={len(client)}')
           print(f'SERVER_REGISTERED_COUNT={len(server)}')
           print(f'IMPLEMENTED_CLIENT_RPC_COUNT={len(implemented)}')
@@ -57,10 +56,14 @@ jobs:
           print('=== MISSING RPCS ===')
           for rpc in missing:
               print(rpc)
-          print('=== SERVER ONLY ===')
-          for rpc in server_only:
-              print(rpc)
           print('=== STORY REGISTERED ===')
           for rpc in sorted(x for x in server if x.startswith('StoryService.')):
               print(rpc, ','.join(locations[rpc]))
           PY
+      - name: Inspect corrected-client CostumeService contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          git show origin/client-decompiled-zh-fixed-v1:il2cpp-dump/dump.cs > /tmp/dump.cs
+          echo '=== COSTUME DTO / API CONTEXT ==='
+          grep -n -C 12 -E 'GetCostumeList(Args|Reply)|SetCostume(Args|Reply)|CostumeService\.GetCostumeList|CostumeService\.SetCostume|HTTPRequest (GetCostumeList|SetCostume)\(' /tmp/dump.cs || true
