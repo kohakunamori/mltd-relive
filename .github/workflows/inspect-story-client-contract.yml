@@ -1,0 +1,27 @@
+name: Inspect Story client contract
+
+on:
+  push:
+    branches:
+      - fix/story-service-compat
+    paths:
+      - '.github/workflows/inspect-story-client-contract.yml'
+
+jobs:
+  inspect:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Fetch reverse-engineered client branch
+        run: git fetch origin client-decompiled-zh-fixed-v1 --depth=1
+      - name: Extract GetSpecialList contract context
+        shell: bash
+        run: |
+          set -euo pipefail
+          git show origin/client-decompiled-zh-fixed-v1:il2cpp-dump/dump.cs > /tmp/dump.cs
+          echo '=== GetSpecialList matches ==='
+          grep -n -C 12 -E 'GetSpecialList|GetSpecial.*(Args|Reply)|SpecialList.*(Args|Reply)' /tmp/dump.cs || true
+          echo '=== StoryService declaration context ==='
+          grep -n -C 8 -E 'class StoryService|GetSpecialList\(' /tmp/dump.cs || true
