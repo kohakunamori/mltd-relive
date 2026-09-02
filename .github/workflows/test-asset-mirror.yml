@@ -6,6 +6,7 @@ on:
       - main
       - perf/asset-mirror
       - perf/local-assets-and-server
+      - fix/live-asset-compat
     paths:
       - 'standalone/console.py'
       - 'standalone/gui.pyw'
@@ -18,6 +19,7 @@ on:
       - 'standalone/mltd/servers/asset_prepare.py'
       - 'standalone/mltd/servers/asset_server.py'
       - 'standalone/mltd/servers/config.py'
+      - 'standalone/mltd/servers/dns.py'
       - 'standalone/mltd/servers/handler.py'
       - 'standalone/mltd/servers/proxy.py'
       - 'requirements.txt'
@@ -26,7 +28,9 @@ on:
       - 'tests/test_asset_mirror.py'
       - 'tests/test_asset_prefetch_fastpath.py'
       - 'tests/test_asset_server_hotpath.py'
+      - 'tests/test_asset_host_routing.py'
       - 'tests/test_local_asset_runtime.py'
+      - 'tests/test_proxy_tls_compat.py'
       - 'tests/test_strict_local_and_api.py'
       - 'tests/api_transport_benchmark.py'
       - 'tests/asset_server_benchmark.py'
@@ -45,6 +49,7 @@ on:
       - 'standalone/mltd/servers/asset_prepare.py'
       - 'standalone/mltd/servers/asset_server.py'
       - 'standalone/mltd/servers/config.py'
+      - 'standalone/mltd/servers/dns.py'
       - 'standalone/mltd/servers/handler.py'
       - 'standalone/mltd/servers/proxy.py'
       - 'requirements.txt'
@@ -53,7 +58,9 @@ on:
       - 'tests/test_asset_mirror.py'
       - 'tests/test_asset_prefetch_fastpath.py'
       - 'tests/test_asset_server_hotpath.py'
+      - 'tests/test_asset_host_routing.py'
       - 'tests/test_local_asset_runtime.py'
+      - 'tests/test_proxy_tls_compat.py'
       - 'tests/test_strict_local_and_api.py'
       - 'tests/api_transport_benchmark.py'
       - 'tests/asset_server_benchmark.py'
@@ -82,7 +89,9 @@ jobs:
             tests/test_asset_mirror.py \
             tests/test_asset_prefetch_fastpath.py \
             tests/test_asset_server_hotpath.py \
+            tests/test_asset_host_routing.py \
             tests/test_local_asset_runtime.py \
+            tests/test_proxy_tls_compat.py \
             tests/test_strict_local_and_api.py \
             tests/api_transport_benchmark.py \
             tests/asset_server_benchmark.py \
