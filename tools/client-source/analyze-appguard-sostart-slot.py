@@ -18,7 +18,7 @@ from pathlib import Path
 from collections import deque
 
 from capstone import Cs,CS_ARCH_ARM64,CS_MODE_ARM,CS_OP_IMM,CS_OP_MEM,CS_OP_REG
-from unicorn import UC_HOOK_CODE,UC_HOOK_MEM_WRITE,UcError
+from unicorn import UC_HOOK_CODE,UC_HOOK_MEM_WRITE,UC_HOOK_INTR,UC_HOOK_MEM_INVALID,UcError
 from unicorn.arm64_const import *
 
 HERE=Path(__file__).resolve().parent
@@ -41,7 +41,6 @@ def decrypt_loaded(uc,start,end,keysrc):
 
 def nearest_symbol(image,addr):
     best=None
-    # Dynamic symbol count is not explicit; walk conservatively until long empty tail.
     empty=0
     for i in range(0,4096):
         s=image.dynsym(i)
@@ -77,7 +76,7 @@ class Trace(bionic.BionicEmulator):
         self.checkpoints.append({'label':label,'instruction':self.insns,'pc':self.uc.reg_read(UC_ARM64_REG_PC)-base.BIAS,'ptr_cell':ptr,'target_slot':slot,'near_qwords':[struct.unpack_from('<Q',near,i)[0] for i in range(0,len(near)-7,8)]})
     def run_trace(self):
         self.map_memory();relocs=self.apply_relocations();self.setup_registers();self.snap_slot('after-relocations')
-        self.uc.hook_add(UC_HOOK_CODE,self.code_hook);self.uc.hook_add(base.UC_HOOK_INTR,self.syscall_hook);self.uc.hook_add(base.UC_HOOK_MEM_INVALID,self.invalid_hook)
+        self.uc.hook_add(UC_HOOK_CODE,self.code_hook);self.uc.hook_add(UC_HOOK_INTR,self.syscall_hook);self.uc.hook_add(UC_HOOK_MEM_INVALID,self.invalid_hook)
         self.uc.hook_add(UC_HOOK_MEM_WRITE,self.write_hook,begin=base.BIAS+PTR_CELL,end=base.BIAS+TARGET_SLOT+7)
         try:self.uc.emu_start(base.BIAS+self.image.dt_init,base.STOP_ADDR,count=RUN_LIMIT+1000)
         except UcError as exc:
@@ -96,7 +95,6 @@ def scan_xrefs(emu,image):
     md=Cs(CS_ARCH_ARM64,CS_MODE_ARM);md.detail=True;rows=[]
     for start,end,keysrc in RANGES:
         data,key=decrypt_loaded(emu,start,end,keysrc)
-        # Track simple ADRP destination registers to resolve nearby LDR/STR globals.
         pages={}
         for ins in md.disasm(data,start):
             if ins.mnemonic=='adrp' and len(ins.operands)>=2 and ins.operands[0].type==CS_OP_REG and ins.operands[1].type==CS_OP_IMM:
@@ -131,7 +129,7 @@ def render(rep):
 
 def main():
     ap=argparse.ArgumentParser();ap.add_argument('--libcompatible',type=Path,required=True);ap.add_argument('--out',type=Path,required=True);a=ap.parse_args();a.out.mkdir(parents=True,exist_ok=True)
-    image=base.Image(a.libcompatible);e=Trace(image,a.out);rels=e.run_trace();rep={'stop':e.stopped_reason,'instructions':e.insns,'relocations':reloc_info(image),'checkpoints':e.checkpoints,'slot_writes':e.slot_writes,'ptr_writes':e.ptr_writes,'xrefs':scan_xrefs(e,image),'ptr_symbol':nearest_symbol(image,PTR_CELL),'slot_symbol':nearest_symbol(image,TARGET_SLOT)}
+    image=base.Image(a.libcompatible);e=Trace(image,a.out);e.run_trace();rep={'stop':e.stopped_reason,'instructions':e.insns,'relocations':reloc_info(image),'checkpoints':e.checkpoints,'slot_writes':e.slot_writes,'ptr_writes':e.ptr_writes,'xrefs':scan_xrefs(e,image),'ptr_symbol':nearest_symbol(image,PTR_CELL),'slot_symbol':nearest_symbol(image,TARGET_SLOT)}
     (a.out/'sostart-slot-provenance.json').write_text(json.dumps(rep,indent=2)+'\n');(a.out/'sostart-slot-provenance.md').write_text(render(rep)+'\n')
     print(json.dumps({'stop':rep['stop'],'insns':rep['instructions'],'checkpoints':[(x['label'],hex(x['ptr_cell'] or 0),hex(x['target_slot'] or 0)) for x in rep['checkpoints']],'slot_writes':rep['slot_writes'],'ptr_writes':rep['ptr_writes'],'xrefs':rep['xrefs'][:20]},indent=2))
 if __name__=='__main__':main()
