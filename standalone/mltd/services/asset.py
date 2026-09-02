@@ -35,16 +35,15 @@ def get_asset_version(params):
         asset_url = f'{REMOTE_ASSET_ROOT}/{scope}/'
     elif config.is_local:
         # Termux / same-device mode talks directly to the local HTTP asset
-        # server and therefore needs no extra certificate or DNS handling.
+        # server and therefore needs no TLS interception or DNS handling.
         asset_url = f'http://127.0.0.1:{asset_port}/{scope}/'
     else:
-        # Desktop clients already trust and resolve the existing API hostname
-        # to the standalone TLS proxy. Reuse that trust path instead of
-        # introducing a second local certificate for the public asset domain.
-        asset_url = (
-            f'https://theaterdays-{config.language}.appspot.com/'
-            f'__mltd_assets/{scope}/'
-        )
+        # Keep the exact public asset URL shape used by the original server.
+        # In hybrid/local desktop mode DNS redirects only the public asset
+        # hostname to the standalone TLS listener, where SNI/Host routing
+        # serves the local mirror.  This avoids changing paths visible to the
+        # game client (for example by inserting /__mltd_assets/).
+        asset_url = f'{REMOTE_ASSET_ROOT}/{scope}/'
 
     return {
         'asset_url': asset_url,
