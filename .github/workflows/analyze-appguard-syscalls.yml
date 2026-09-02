@@ -15,6 +15,7 @@ on:
       - 'tools/client-source/summarize-appguard-init.py'
       - 'tools/client-source/analyze-appguard-solibrary.py'
       - 'tools/client-source/analyze-appguard-dispatch.py'
+      - 'tools/client-source/analyze-appguard-asmfunction.py'
 
 permissions:
   contents: write
@@ -83,6 +84,12 @@ jobs:
             --libcompatible work/native/libcompatible.so \
             --solibrary-cfg client/reconstruction/appguard-analysis/solibrary-cfg.json \
             --out client/reconstruction/appguard-analysis
+          python tools/client-source/analyze-appguard-asmfunction.py \
+            --libcompatible work/native/libcompatible.so \
+            --bootstrap client/reconstruction/appguard-analysis/bootstrap-cfg.json \
+            --dispatch client/reconstruction/appguard-analysis/dispatch-table.json \
+            --loader-slice client/reconstruction/appguard-analysis/loader-slice.json \
+            --out client/reconstruction/appguard-analysis
 
       - name: Commit maps
         shell: bash
@@ -104,7 +111,9 @@ jobs:
                   client/reconstruction/appguard-analysis/solibrary-cfg.json \
                   client/reconstruction/appguard-analysis/solibrary-cfg.md \
                   client/reconstruction/appguard-analysis/dispatch-table.json \
-                  client/reconstruction/appguard-analysis/dispatch-table.md
+                  client/reconstruction/appguard-analysis/dispatch-table.md \
+                  client/reconstruction/appguard-analysis/asmfunction-init.json \
+                  client/reconstruction/appguard-analysis/asmfunction-init.md
           if git diff --cached --quiet; then exit 0; fi
-          git commit -m 'client: resolve AppGuard runtime dispatch table'
+          git commit -m 'client: trace asmFunction runtime table initialization'
           git push origin HEAD:client-zh-fixed-reconstruction
