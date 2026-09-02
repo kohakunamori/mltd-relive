@@ -13,52 +13,38 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: git fetch origin client-decompiled-zh-fixed-v1 --depth=1
-      - name: Analyze mission option mapping
-        shell: bash
-        run: |
-          set -euo pipefail
-          python - <<'PY'
-          import csv
-          from collections import defaultdict
-
-          path = 'standalone/mltd/models/mst_data/mst_mission.csv'
-          with open(path, newline='', encoding='utf-8-sig') as f:
-              rows = list(csv.DictReader(f))
-
-          groups = defaultdict(list)
-          for r in rows:
-              pair = (r['option'], r['option2'])
-              groups[pair].append(r)
-
-          print('TOTAL_MISSIONS', len(rows))
-          print('UNIQUE_OPTION_PAIRS', len(groups))
-          print('=== NON-GENERIC OPTION PAIRS ===')
-          for pair, rs in sorted(groups.items(), key=lambda kv: (kv[0][0], kv[0][1])):
-              if pair == ('-', '-'):
-                  continue
-              classes = sorted({int(r['mst_mission_class_id']) for r in rs})
-              ids = [int(r['mst_mission_id']) for r in rs]
-              states = [(r['mission_type'], r['goal'], r['jump_type']) for r in rs]
-              print('PAIR', repr(pair), 'count=', len(rs), 'classes=', classes, 'ids=', ids[:30], 'rows=', states[:12])
-
-          print('=== UNIQUE NON-GENERIC PAIRS ===')
-          for pair, rs in sorted(groups.items(), key=lambda kv: (kv[0][0], kv[0][1])):
-              if pair != ('-', '-') and len(rs) == 1:
-                  r = rs[0]
-                  print(pair, 'mission=', r['mst_mission_id'], 'class=', r['mst_mission_class_id'], 'goal=', r['goal'])
-
-          print('=== DUPLICATE NON-GENERIC PAIRS ===')
-          for pair, rs in sorted(groups.items(), key=lambda kv: (kv[0][0], kv[0][1])):
-              if pair != ('-', '-') and len(rs) > 1:
-                  print(pair, [(r['mst_mission_id'], r['mst_mission_class_id'], r['goal']) for r in rs])
-          PY
-      - name: Inspect ClientMission and DoClientMission references
+      - name: Inspect client mission call sites
         shell: bash
         run: |
           set -euo pipefail
           git show origin/client-decompiled-zh-fixed-v1:il2cpp-dump/dump.cs > /tmp/dump.cs
-          echo '=== REFERENCES ==='
-          grep -n -E 'ClientMission|DoClientMission' /tmp/dump.cs | head -n 300 || true
-          echo '=== STRING LITERALS AROUND MISSION NAMES ==='
-          git show origin/client-decompiled-zh-fixed-v1:il2cpp-dump/stringliteral.json > /tmp/strings.json
-          grep -n -E 'DoClientMission|client_mission|MissionService' /tmp/strings.json | head -n 300 || true
+          for range in \
+            525650,526020 \
+            612930,613150 \
+            705780,706030 \
+            814760,814930 \
+            828430,828550; do
+            start=${range%,*}; end=${range#*,}
+            echo "=== dump.cs ${start}-${end} ==="
+            sed -n "${start},${end}p" /tmp/dump.cs
+          done
+          echo '=== NAMED UPDATE METHODS ==='
+          grep -n -B 20 -A 40 -E '_UpdateMobileReadMission|_UpdateMVPlayMission|_UpdateCostumeChangeMission|ShowOpenURLPopup|CheckClientMission' /tmp/dump.cs | head -n 1200 || true
+      - name: Summarize likely client-managed master missions
+        shell: bash
+        run: |
+          python - <<'PY'
+          import csv
+          from collections import defaultdict
+          with open('standalone/mltd/models/mst_data/mst_mission.csv', newline='', encoding='utf-8-sig') as f:
+              rows = list(csv.DictReader(f))
+          for r in rows:
+              if r['option'] in {'dress', 'mobile', 'thirteen'} or r['mst_mission_class_id'] in {'74', '75'}:
+                  print(r['mst_mission_id'], r['mission_type'], r['mst_mission_class_id'], r['goal'], repr(r['option']), repr(r['option2']), r['jump_type'])
+          print('=== CLASSES BY JUMP TYPE OF CLIENT CALLERS ===')
+          by_jump = defaultdict(set)
+          for r in rows:
+              by_jump[r['jump_type']].add(int(r['mst_mission_class_id']))
+          for jump in ('CostumeCheck', 'Home', 'SongSelect', 'IdolGift'):
+              print(jump, sorted(by_jump[jump]))
+          PY
