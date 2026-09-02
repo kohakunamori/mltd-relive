@@ -5,7 +5,7 @@
 
 ## Confirmed v0.1.9 Asset regression
 
-The following A/B test uses the same v0.1.9 server build, corrected Traditional Chinese APK, database and TheaterService implementation. The only changed setting is `asset_mode`:
+The same v0.1.9 server build, corrected Traditional Chinese APK, database and TheaterService behaves differently only when `asset_mode` changes:
 
 ```ini
 asset_mode = hybrid
@@ -24,12 +24,12 @@ This isolates the login regression to the Asset download path.
 ### Directions ruled out as the primary cause
 
 - `AuthService.Login` is not the root cause.
-- The Theater API imported from `yuyueryuyu/mltd-relive` is not the root cause under a healthy database. Repeated Theater calls have passed 250 consecutive iterations.
+- The Theater API imported from `yuyueryuyu/mltd-relive` is not the root cause under a healthy database. Repeated Theater calls passed 250 consecutive iterations.
 - v0.1.6 -> v0.1.8 database migration is not the root cause. The migrated database also passed 250 consecutive Theater calls.
 - Listener-vs-worker TLS handshake timing is not the primary cause of this hybrid-only failure because both remote and hybrid use the same API TLS listener.
-- The current 60-second accepted-socket timeout remains a separate compatibility issue to revisit, but cannot explain `remote OK / hybrid FAIL` because both modes traverse it for API traffic.
+- The current 60-second accepted-socket timeout remains a separate compatibility issue, but cannot explain `remote OK / hybrid FAIL` because both modes traverse it for API traffic.
 
-## Root-cause model
+## v0.1.9 self-signed Asset TLS failure
 
 v0.1.9 desktop hybrid returned:
 
@@ -37,15 +37,15 @@ v0.1.9 desktop hybrid returned:
 https://theaterdays-zh.appspot.com/__mltd_assets/zh-android/
 ```
 
-That path shares the local API TLS endpoint and its self-signed `api.crt`.
+That route shares the local API TLS endpoint and its self-signed `api.crt`.
 
-The corrected client is known to accept the local self-signed certificate for API RPC traffic, while web/Asset traffic uses stricter certificate validation. The actual APK also contains the client-side error string:
+The corrected client accepts the self-signed certificate for API RPC traffic, while its Asset/Web downloader uses stricter TLS validation. The APK contains:
 
 ```text
 [AssetBundle] NotFoundError(-404)
 ```
 
-The most consistent failure chain is therefore:
+The most consistent failure chain is:
 
 ```text
 AssetBundle downloader
@@ -59,46 +59,15 @@ AssetBundle downloader
 
 The Rainbow CDN itself is not missing the Theater resources. The Traditional Chinese Android manifest is about 4.27 MB with 33,676 records. Of 53 Theater resource IDs returned by the yuyu implementation, 52 map directly to the manifest, and 104 identified Theater Asset objects returned HTTP 200 to upstream HEAD checks.
 
-## v0.1.10 Asset transport design
+## Desktop cleartext HTTP experiment — rejected by device test
 
-### Safe default
-
-`remote` is restored as the default mode.
-
-New and migrated v0.1.9 default-like configs should not silently remain on the known-broken self-signed desktop hybrid topology.
-
-### Remote
-
-Unchanged:
-
-```text
-https://assets.rainbowunicorn7297.com/zh-android/
-```
-
-The client talks directly to the public CDN.
-
-### Desktop hybrid/local experiment
-
-Do not route Asset traffic through local HTTPS 443.
-
-Return:
+The first v0.1.10 experiment moved Desktop Asset traffic to an independent cleartext listener:
 
 ```text
 http://theaterdays-zh.appspot.com:7651/zh-android/
 ```
 
-The existing local DNS already resolves `theaterdays-zh.appspot.com` to the standalone server LAN address. The dedicated Asset server listens on cleartext HTTP port 7651.
-
-This avoids:
-
-- self-signed Asset TLS;
-- `/__mltd_assets/` path rewriting;
-- sharing API and Asset connection semantics;
-- introducing a literal LAN IP into `asset_url`.
-
-The 443 listener is API-only. Asset GET/HEAD remains a separate high-concurrency `ThreadingHTTPServer` on 7651.
-
-### Corrected APK cleartext caveat
+This removed self-signed Asset TLS and kept API/Asset transports separate.
 
 A direct parse of `mltd-relive-game-client-zh-fixed.apk` shows:
 
@@ -106,15 +75,71 @@ A direct parse of `mltd-relive-game-client-zh-fixed.apk` shows:
 targetSdkVersion = 29
 ```
 
-The `<application>` element does not explicitly set `android:usesCleartextTraffic="true"` and does not reference an Android `networkSecurityConfig`.
+The `<application>` element does not explicitly set `android:usesCleartextTraffic="true"` and does not reference a `networkSecurityConfig`.
 
-Therefore the desktop HTTP `:7651` transport must be treated as an empirical compatibility experiment rather than assumed to work. Android's framework cleartext policy for a target-SDK-29 application may reject HTTP if the Asset download stack consults `NetworkSecurityPolicy`. Unity/native AssetBundle networking may use a path that does not enforce the same framework policy, so the corrected game client must be tested directly.
+Device test result on 2026-09-02:
 
-If the corrected client rejects desktop cleartext Asset HTTP, the next preferred design is a separately controlled public hostname with a valid public-CA certificate and DNS pointing to the LAN server. That preserves local caching while satisfying the stricter Asset TLS stack. APK cleartext/TLS patching remains a fallback, not the first choice.
+```text
+資料下載失敗
+ErrorCode -21990
+```
+
+Therefore the Desktop cleartext Asset transport is no longer considered a viable default or release path. The exact internal meaning of `-21990` is not publicly documented, but the failure is reproducible only after switching the Asset URL to cleartext and is consistent with the corrected client's Android/Unity download stack rejecting that topology.
+
+## Current v0.1.10 Asset transport design: trusted HTTPS hostname
+
+`remote` remains the safe default:
+
+```text
+https://assets.rainbowunicorn7297.com/zh-android/
+```
+
+Desktop `hybrid/local` now requires a separately controlled hostname with a publicly trusted TLS certificate. Example:
+
+```ini
+asset_mode = hybrid
+asset_public_url = https://mltd-assets.example.com:7651
+asset_tls_cert = /path/to/fullchain.pem
+asset_tls_key = /path/to/privkey.pem
+```
+
+The client receives:
+
+```text
+https://mltd-assets.example.com:7651/zh-android/
+```
+
+The standalone DNS server redirects `mltd-assets.example.com` to the LAN server. TLS still validates normally because the certificate is issued by a public CA for that hostname.
+
+Architecture:
+
+```text
+API
+https://theaterdays-zh.appspot.com:443
+  -> existing API certificate / compatibility transport
+
+Asset
+https://<controlled-asset-host>:7651/<scope>/<object>
+  -> public-CA certificate
+  -> independent ThreadingHTTPServer
+  -> Range / cache / hybrid fetch-on-miss
+  -> Rainbow CDN only on cache miss
+```
+
+Port 7651 is intentionally retained so the Asset listener does not share API port 443. HTTPS certificate validation is hostname-based and remains valid on a non-default port.
+
+Desktop cache mode now fails fast if:
+
+- `asset_public_url` is missing;
+- the URL is not HTTPS;
+- the configured certificate or key does not exist;
+- the Asset URL tries to reuse API port 443.
+
+The old repository certificate `key/assets.rainbowunicorn7297.com.crt` is **self-signed**, despite having a valid date range and matching private key. It cannot provide public trust for the Asset downloader and is not used by the new Desktop Asset topology.
 
 ## Live performance issue — resolved
 
-The observed remote-mode Live failure is now device-confirmed fixed.
+The observed remote-mode Live failure is device-confirmed fixed.
 
 The failing request was:
 
@@ -123,7 +148,7 @@ UnitService.SetUnit
 TypeError: 'ChunkedIteratorResult' object is not subscriptable
 ```
 
-The optimized `SetUnit` implementation passed the SQLAlchemy 2.x Result object directly to `dict()`. The fix materializes the two-column rows first:
+The optimized `SetUnit` implementation passed the SQLAlchemy 2.x Result object directly to `dict()`. The fix materializes the rows first:
 
 ```python
 card_rows = session.execute(...).all()
@@ -136,28 +161,28 @@ Fix commit:
 351161e8df288fce8ab478953c34701010106ca0
 ```
 
-After rebuilding with this fix, the corrected Traditional Chinese client was tested again with `asset_mode = remote` and Live now operates normally. Therefore this observed Live failure was a service-layer SQLAlchemy compatibility bug, not an Asset/TLS failure and not evidence that `LiveService` itself is incompatible.
+After rebuilding with this fix, the corrected Traditional Chinese client was tested again with `asset_mode = remote` and Live operates normally.
 
 The branch still contains `Connection: close` and serialized API dispatch compatibility changes. They are no longer considered necessary to explain the observed Live failure and should be A/B-tested independently before final release.
 
 ## Remaining device tests before merge
 
 1. `asset_mode = remote`
-   - login succeeds: **confirmed**;
-   - Theater loads: **confirmed for the current tested flow**;
-   - Live operates normally after the SetUnit fix: **confirmed**.
+   - login: **confirmed**;
+   - Theater: **confirmed for the current tested flow**;
+   - Live after SetUnit fix: **confirmed**.
 
-2. `asset_mode = hybrid`
-   - `AssetService.GetAssetVersion.asset_url` is `http://theaterdays-zh.appspot.com:7651/...`;
-   - login succeeds without `-404/0`;
-   - first cache miss reaches local port 7651 and then the Rainbow CDN;
+2. Trusted-HTTPS `asset_mode = hybrid`
+   - configure a controlled public hostname and valid public-CA certificate;
+   - DNS override points that hostname to LAN;
+   - login succeeds without `-404/0` or `-21990`;
+   - first cache miss reaches local Asset HTTPS listener and then Rainbow CDN;
    - second request is served from local cache;
    - Range requests work;
-   - Theater contact assets load;
-   - if the client fails before any request reaches port 7651, treat Android cleartext policy as the primary next suspect.
+   - Theater contact assets load.
 
 3. API transport cleanup
-   - once Asset transport is stable, A/B remove the global API serialization lock and/or `Connection: close`;
+   - after Asset transport is stable, A/B remove the global API serialization lock and/or `Connection: close`;
    - retain only transport compatibility changes proven necessary by device testing.
 
-The active blocker for v0.1.10 is now the Desktop `hybrid/local` Asset path, not Live.
+The active blocker for v0.1.10 is now provisioning and device-testing the trusted HTTPS Desktop `hybrid/local` Asset endpoint.
