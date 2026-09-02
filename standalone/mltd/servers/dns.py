@@ -1,4 +1,3 @@
-from inspect import cleandoc
 from time import sleep
 
 import netifaces
@@ -8,6 +7,11 @@ from dnslib.server import DNSLogger, DNSServer
 from mltd.servers.logging import logger
 
 dns_port = 53
+_API_HOSTS = (
+    'theaterdays-zh.appspot.com',
+    'theaterdays-ko.appspot.com',
+    'theaterdays.appspot.com',
+)
 
 
 def get_lan_ips():
@@ -24,23 +28,24 @@ def get_lan_ips():
     return ipv4, ipv6
 
 
+def build_zone_record(lan_ipv4, lan_ipv6):
+    """Build DNS overrides used by corrected clients.
+
+    Only API hostnames are intercepted. Asset URLs are ordinary remote HTTPS
+    endpoints and resolve normally, whether they point at Rainbow's CDN or at
+    a user-configured trusted relay.
+    """
+    records = []
+    if lan_ipv4:
+        records.extend(f'{host}. 60 IN A {lan_ipv4}' for host in _API_HOSTS)
+    if lan_ipv6:
+        records.extend(f'{host}. 60 IN AAAA {lan_ipv6}' for host in _API_HOSTS)
+    return '\n'.join(records) + ('\n' if records else '')
+
+
 def start(port=dns_port, conn=None):
     lan_ipv4, lan_ipv6 = get_lan_ips()
-    zone_record = ''
-    if lan_ipv4:
-        zone_record = cleandoc(f"""
-            theaterdays-zh.appspot.com. 60 IN A {lan_ipv4}
-            theaterdays-ko.appspot.com. 60 IN A {lan_ipv4}
-            theaterdays.appspot.com. 60 IN A {lan_ipv4}
-        """)
-        zone_record += '\n'
-    if lan_ipv6:
-        zone_record = cleandoc(f"""
-            theaterdays-zh.appspot.com. 60 IN A {lan_ipv6}
-            theaterdays-ko.appspot.com. 60 IN A {lan_ipv6}
-            theaterdays.appspot.com. 60 IN A {lan_ipv6}
-        """)
-        zone_record += '\n'
+    zone_record = build_zone_record(lan_ipv4, lan_ipv6)
 
     resolver = InterceptResolver(address='8.8.8.8',
                                  port=53,
