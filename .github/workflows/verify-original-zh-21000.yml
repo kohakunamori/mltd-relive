@@ -1,0 +1,165 @@
+name: Verify original zh-TW 2.1.000 client
+
+on:
+  push:
+    branches:
+      - client-original-apk-recovery
+    paths:
+      - '.github/workflows/verify-original-zh-21000.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch exact APKPure 2.1.000 XAPK
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p original fixed report xapk
+          URL='https://d.apkpure.net/b/XAPK/com.bandainamcoent.imas_millionlive_theaterdays_ch?version=latest'
+          echo "$URL" > report/source-url.txt
+          curl -L --fail --retry 3 --connect-timeout 20 --max-time 300 \
+            -A 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/147.0 Safari/537.36' \
+            -o original/mltd-zh-2.1.000.xapk "$URL"
+          test "$(stat -c %s original/mltd-zh-2.1.000.xapk)" -eq 106437938
+          sha1sum original/mltd-zh-2.1.000.xapk | tee report/xapk-sha1.txt
+          sha256sum original/mltd-zh-2.1.000.xapk | tee report/xapk-sha256.txt
+          unzip -q original/mltd-zh-2.1.000.xapk -d xapk
+          find xapk -maxdepth 2 -type f -printf '%s\t%p\n' | sort -nr | tee report/xapk-files.tsv
+
+      - name: Locate base APK and inspect Android identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import zipfile, shutil
+          candidates=[]
+          for p in Path('xapk').rglob('*.apk'):
+              try:
+                  with zipfile.ZipFile(p) as z:
+                      names=set(z.namelist())
+                      score=0
+                      if 'AndroidManifest.xml' in names: score += 1
+                      if 'classes.dex' in names: score += 2
+                      if 'lib/arm64-v8a/libil2cpp.so' in names: score += 10
+                      if 'assets/bin/Data/Managed/Metadata/global-metadata.dat' in names: score += 10
+                      candidates.append((score,p.stat().st_size,p))
+              except Exception:
+                  pass
+          print('APK candidates:')
+          for x in sorted(candidates, reverse=True): print(x)
+          if not candidates: raise SystemExit('No APK in XAPK')
+          score,size,p=max(candidates)
+          if score < 20: raise SystemExit(f'No MLTD base APK candidate, best={score} {p}')
+          shutil.copy2(p,'original/base.apk')
+          Path('report/base-apk-source.txt').write_text(str(p)+'\n',encoding='utf-8')
+          PY
+
+          AAPT=$(find "$ANDROID_HOME/build-tools" -type f -name aapt -print | sort -V | tail -1)
+          APKSIGNER=$(find "$ANDROID_HOME/build-tools" -type f -name apksigner -print | sort -V | tail -1)
+          echo "aapt=$AAPT" | tee report/android-tools.txt
+          echo "apksigner=$APKSIGNER" | tee -a report/android-tools.txt
+          "$AAPT" dump badging original/base.apk | tee report/original-badging.txt
+          "$APKSIGNER" verify --print-certs original/base.apk | tee report/original-signing.txt
+          sha1sum original/base.apk | tee report/original-base-sha1.txt
+          sha256sum original/base.apk | tee report/original-base-sha256.txt
+
+          grep -q "package: name='com.bandainamcoent.imas_millionlive_theaterdays_ch' versionCode='21000' versionName='2.1.000'" report/original-badging.txt
+          grep -qi 'Signer #1 certificate SHA-1 digest: d06df89b97286bd0c3144e7c823d5bee5496315c' report/original-signing.txt
+
+      - name: Fetch zh-fixed baseline
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          source release/game-client.env
+          TAG=$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName --jq .tagName)
+          gh release download "$TAG" --repo "$GITHUB_REPOSITORY" \
+            --pattern 'mltd-relive-game-client-zh-fixed.apk' --dir fixed
+          mv fixed/mltd-relive-game-client-zh-fixed.apk fixed/fixed.apk
+          echo "${ZH_SHA256}  fixed/fixed.apk" | sha256sum -c -
+
+      - name: Compare original and fixed critical payloads
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib, json, zipfile
+          from pathlib import Path
+
+          orig=Path('original/base.apk')
+          fixed=Path('fixed/fixed.apk')
+          keys=[
+            'AndroidManifest.xml',
+            'resources.arsc',
+            'classes.dex',
+            'lib/arm64-v8a/libil2cpp.so',
+            'lib/arm64-v8a/libunity.so',
+            'assets/bin/Data/Managed/Metadata/global-metadata.dat',
+            'assets/bin/Data/globalgamemanagers',
+            'assets/bin/Data/data.unity3d',
+          ]
+          def sha(b): return hashlib.sha256(b).hexdigest()
+          rows=[]
+          extracted=Path('report/extracted'); extracted.mkdir(parents=True,exist_ok=True)
+          with zipfile.ZipFile(orig) as zo, zipfile.ZipFile(fixed) as zf:
+            no=set(zo.namelist()); nf=set(zf.namelist())
+            Path('report/original-only-files.txt').write_text('\n'.join(sorted(no-nf))+'\n',encoding='utf-8')
+            Path('report/fixed-only-files.txt').write_text('\n'.join(sorted(nf-no))+'\n',encoding='utf-8')
+            for k in keys:
+              ob=zo.read(k) if k in no else None
+              fb=zf.read(k) if k in nf else None
+              row={
+                'path':k,
+                'original_size':None if ob is None else len(ob),
+                'fixed_size':None if fb is None else len(fb),
+                'original_sha256':None if ob is None else sha(ob),
+                'fixed_sha256':None if fb is None else sha(fb),
+                'identical': ob == fb if ob is not None and fb is not None else False,
+              }
+              rows.append(row)
+              if ob is not None: (extracted/('original-'+k.replace('/','__'))).write_bytes(ob)
+              if fb is not None: (extracted/('fixed-'+k.replace('/','__'))).write_bytes(fb)
+          Path('report/critical-diff.json').write_text(json.dumps(rows,indent=2),encoding='utf-8')
+          md=['# Original 2.1.000 vs zh-fixed critical diff','','| Path | Original size | Fixed size | Identical |','|---|---:|---:|:---:|']
+          for r in rows: md.append(f"| `{r['path']}` | {r['original_size']} | {r['fixed_size']} | {'yes' if r['identical'] else 'NO'} |")
+          Path('report/critical-diff.md').write_text('\n'.join(md)+'\n',encoding='utf-8')
+          print('\n'.join(md))
+          PY
+
+          # Byte-difference counts for the two files known to be patched by the project.
+          python - <<'PY'
+          from pathlib import Path
+          pairs=[
+            ('classes.dex','report/extracted/original-classes.dex','report/extracted/fixed-classes.dex'),
+            ('libil2cpp.so','report/extracted/original-lib__arm64-v8a__libil2cpp.so','report/extracted/fixed-lib__arm64-v8a__libil2cpp.so'),
+          ]
+          out=[]
+          for name,a,b in pairs:
+            x=Path(a).read_bytes(); y=Path(b).read_bytes()
+            common=min(len(x),len(y))
+            idx=[i for i in range(common) if x[i]!=y[i]]
+            out.append(f'{name}: original={len(x)} fixed={len(y)} differing_bytes_in_common={len(idx)} first_offsets={[hex(i) for i in idx[:100]]}')
+          Path('report/byte-diff-summary.txt').write_text('\n'.join(out)+'\n',encoding='utf-8')
+          print('\n'.join(out))
+          PY
+
+      - name: Upload verified original and diff report
+        uses: actions/upload-artifact@v4
+        with:
+          name: verified-original-zh-2.1.000-and-diff
+          path: |
+            original/mltd-zh-2.1.000.xapk
+            original/base.apk
+            report/
+          retention-days: 7
+          compression-level: 0
