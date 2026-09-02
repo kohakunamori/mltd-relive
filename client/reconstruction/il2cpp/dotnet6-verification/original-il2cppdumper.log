@@ -1,0 +1,15 @@
+You must install or update .NET to run this application.
+
+App: /home/runner/work/_temp/mltd-client-source-tools/Il2CppDumper-net6-v6.7.46/Il2CppDumper.dll
+Architecture: x64
+Framework: 'Microsoft.NETCore.App', version '6.0.0' (x64)
+.NET location: /home/runner/work/_temp/dotnet6/
+
+The following frameworks were found:
+  6.0.36 at [/home/runner/work/_temp/dotnet6/shared/Microsoft.NETCore.App]
+
+Learn about framework resolution:
+https://aka.ms/dotnet/app-launch-failed
+
+To install missing framework, download:
+https://aka.ms/dotnet-core-applaunch?framework=Microsoft.NETCore.App&framework_version=6.0.0&arch=x64&rid=ubuntu.24.04-x64
