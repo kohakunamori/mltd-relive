@@ -11,7 +11,11 @@ from sqlalchemy.orm import Session
 
 from mltd.models.engine import engine
 from mltd.models.models import Card, HelperCard, Mission, MstMission, Profile, User
-from mltd.services.user_profile import get_profile, set_self_profile
+from mltd.services.user_profile import (
+    get_profile,
+    set_achievement_list,
+    set_self_profile,
+)
 
 
 ADMIN_USER_ID = UUID('ffffffff-ffff-ffff-ffff-ffffffffffff')
@@ -159,6 +163,34 @@ class UserProfileRuntimeTest(unittest.TestCase):
             {'search_user_id': self.search_id}, CONTEXT
         )
         self.assertEqual(by_search_id['user_id'], str(ADMIN_USER_ID))
+
+    def test_set_achievement_list_has_empty_wire_reply_and_persists(self):
+        values = [3, 2, 1]
+        reply = set_achievement_list(
+            {'mst_achievement_id_list': values},
+            CONTEXT,
+        )
+        self.assertEqual(reply, {})
+
+        with Session(engine) as session:
+            stored = session.scalar(
+                select(Profile.mst_achievement_id_list)
+                .where(Profile.id_ == ADMIN_USER_ID)
+            )
+            self.assertEqual(stored, '3,2,1')
+
+        profile_reply = get_profile(
+            {'user_id': str(ADMIN_USER_ID)}, CONTEXT
+        )
+        self.assertEqual(profile_reply['mst_achievement_id_list'], values)
+
+        set_achievement_list({'mst_achievement_id_list': []}, CONTEXT)
+        with Session(engine) as session:
+            stored = session.scalar(
+                select(Profile.mst_achievement_id_list)
+                .where(Profile.id_ == ADMIN_USER_ID)
+            )
+            self.assertIsNone(stored)
 
     def test_invalid_card_references_do_not_corrupt_profile(self):
         set_self_profile(self._params(), CONTEXT)
