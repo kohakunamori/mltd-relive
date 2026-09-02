@@ -1,0 +1,105 @@
+name: Runtime unpacking toolchain
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - client-runtime-unpacking-experiment
+    paths:
+      - '.github/workflows/runtime-unpacking-toolchain.yml'
+      - 'client/runtime-unpacking/**'
+      - 'tools/client-runtime/**'
+
+permissions:
+  contents: read
+
+jobs:
+  zygisk-il2cppdumper:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout upstream
+        run: |
+          git clone https://github.com/Perfare/Zygisk-Il2CppDumper.git zygisk
+          cd zygisk
+          git checkout ede65d18a795882e37a2d988943d77a72d132c5d
+          git rev-parse HEAD | tee ../zygisk-upstream-sha.txt
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '11'
+      - name: Patch MLTD package and build
+        run: |
+          cd zygisk
+          sed -i 's/com.game.packagename/com.bandainamcoent.imas_millionlive_theaterdays_ch/g' module/src/main/cpp/game.h
+          sed -i 's/moduleDescription = "/moduleDescription = "(MLTD zh 2.1.000) /g' module.gradle
+          chmod +x gradlew
+          ./gradlew :module:assembleRelease --stacktrace
+      - name: Inspect outputs
+        run: |
+          find zygisk/out -maxdepth 4 -type f -printf '%s %p\n' | sort -n || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mltd-zygisk-il2cppdumper
+          path: |
+            zygisk/out/magisk_module_release/**
+            zygisk-upstream-sha.txt
+          if-no-files-found: error
+
+  frida-il2cppdumper:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout and patch upstream agent
+        run: |
+          git clone https://github.com/IIIImmmyyy/frida-il2cppDumper.git frida-dumper
+          cd frida-dumper
+          git rev-parse HEAD | tee ../frida-upstream-sha.txt
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          p = Path('_agent.js')
+          s = p.read_text(errors='replace')
+          target = 'com.bandainamcoent.imas_millionlive_theaterdays_ch'
+          s2, n = re.subn(r'exports\.pkg_name\s*=\s*["\'][^"\']+["\']', f'exports.pkg_name="{target}"', s, count=1)
+          if n != 1:
+              raise SystemExit('could not locate exports.pkg_name in _agent.js')
+          p.write_text(s2)
+          print('patched exports.pkg_name ->', target)
+          PY
+      - name: Package agent
+        run: |
+          mkdir -p frida-out
+          cp frida-dumper/_agent.js frida-out/mltd-agent.js
+          cp frida-dumper/README.md frida-out/UPSTREAM-README.md
+          cp frida-upstream-sha.txt frida-out/
+          sha256sum frida-out/* > frida-out/SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mltd-frida-il2cppdumper-agent
+          path: frida-out/
+
+  native-memory-dumper:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: android-actions/setup-android@v3
+      - name: Install NDK
+        run: |
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager 'ndk;25.2.9519653'
+      - name: Checkout and build IL2CPPDumper
+        run: |
+          git clone https://github.com/kp7742/IL2CPPDumper.git native-dumper
+          cd native-dumper
+          git rev-parse HEAD | tee ../native-dumper-upstream-sha.txt
+          "$ANDROID_SDK_ROOT/ndk/25.2.9519653/ndk-build" -C .
+      - name: Collect ARM64 binaries
+        run: |
+          mkdir -p native-out
+          find native-dumper/libs -type f -maxdepth 3 -print -exec cp {} native-out/ \;
+          cp native-dumper-upstream-sha.txt native-out/
+          sha256sum native-out/* > native-out/SHA256SUMS
+          file native-out/*
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mltd-native-il2cpp-memory-dumper
+          path: native-out/
+          if-no-files-found: error
