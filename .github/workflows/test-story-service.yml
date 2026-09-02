@@ -5,7 +5,9 @@ on:
     branches:
       - fix/story-service-compat
     paths:
+      - 'standalone/mltd/services/__init__.py'
       - 'standalone/mltd/services/story.py'
+      - 'standalone/mltd/services/story_legacy.py'
       - 'standalone/mltd/services/mission.py'
       - 'standalone/mltd/models/models.py'
       - 'standalone/mltd/models/schemas.py'
@@ -14,7 +16,9 @@ on:
       - '.github/workflows/test-story-service.yml'
   pull_request:
     paths:
+      - 'standalone/mltd/services/__init__.py'
       - 'standalone/mltd/services/story.py'
+      - 'standalone/mltd/services/story_legacy.py'
       - 'standalone/mltd/services/mission.py'
       - 'standalone/mltd/models/models.py'
       - 'standalone/mltd/models/schemas.py'
@@ -47,7 +51,8 @@ jobs:
           msgpack==1.0.5 pycryptodome==3.18.0
       - name: Import StoryService from standalone runtime directory
         working-directory: standalone
-        run: python -c "import mltd.services.story; print('StoryService import OK')"
+        run: >-
+          python -c "import mltd.services.story; import mltd.services.story_legacy; print('StoryService import OK')"
       - name: Initialize standalone database
         working-directory: standalone
         run: python -c "from mltd.models.setup import setup; setup()"
