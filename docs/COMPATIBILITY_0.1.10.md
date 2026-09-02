@@ -148,7 +148,37 @@ smoke-test flow.
 This confirms the release Asset/UI design itself. No hybrid/local runtime path
 is required.
 
-## Current compatibility status
+## Final API transport — device-confirmed
+
+The temporary global API serialization lock and forced `Connection: close` were
+introduced while the Live failure was still under investigation. The observed
+root cause was instead the SQLAlchemy `SetUnit` bug.
+
+The final implementation restores:
+
+- concurrent direct WSGI dispatch;
+- HTTP/1.1 keep-alive;
+- `wsgi.multithread = True`.
+
+The listener-wrapped TLS behavior remains unchanged from the corrected-client
+compatible path.
+
+The A/B binary built from commit:
+
+```text
+bf604f62ab217ad5d5f462fb3e49faef77869636
+```
+
+passed the corrected Traditional Chinese client smoke test:
+
+```text
+login -> Live -> SetUnit -> StartSong -> FinishSong -> return to song selection
+```
+
+Therefore the serialization lock and forced connection close are not required
+for compatibility and are intentionally not part of the final release design.
+
+## Final compatibility status
 
 Device-confirmed:
 
@@ -157,31 +187,20 @@ Device-confirmed:
 - Theater flow used during testing: working;
 - Live after the SetUnit fix: working;
 - final remote-only GUI build: working;
+- concurrent API dispatch: working;
+- HTTP/1.1 keep-alive: working;
 - v0.1.9 local self-signed Asset HTTPS: rejected (`-404 / 0`);
 - v0.1.10 Desktop cleartext Asset HTTP: rejected (`-21990`).
 
-Current release architecture:
+Final release architecture:
 
-- API HTTPS listener remains local and keeps the listener-wrapped TLS accept
-  path that is already confirmed compatible;
+- API HTTPS listener keeps listener-wrapped TLS;
+- API dispatch is threaded/concurrent and keeps HTTP/1.1 connections alive;
 - Asset traffic is remote HTTPS only;
 - `asset_remote_url` can redirect the client to another trusted HTTPS object
   storage endpoint;
 - Asset preservation is handled only by `tools/cache_assets.py`.
 
-## Final API transport A/B
-
-The temporary global API serialization lock and forced `Connection: close` were
-introduced while the Live failure was still under investigation. The observed
-root cause was instead the SQLAlchemy `SetUnit` bug.
-
-The branch now contains an A/B candidate which restores:
-
-- concurrent direct WSGI dispatch;
-- HTTP/1.1 keep-alive;
-- `wsgi.multithread = True`.
-
-The listener-wrapped TLS behavior is intentionally unchanged. Automated tests
-must pass first, followed by one corrected-client login + Live smoke test on the
-A/B build. Only after that confirmation should the branch be merged and v0.1.10
-published.
+All targeted compatibility and cache/transport CI suites passed after the final
+transport cleanup. The branch is ready to merge into `main` and publish as
+v0.1.10.
