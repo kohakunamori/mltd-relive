@@ -17,6 +17,7 @@ on:
       - 'tools/client-source/analyze-appguard-dispatch.py'
       - 'tools/client-source/analyze-appguard-asmfunction.py'
       - 'tools/client-source/analyze-appguard-asmfunction-flow.py'
+      - 'tools/client-source/extract-appguard-static-config.py'
 
 permissions:
   contents: write
@@ -51,7 +52,7 @@ jobs:
           unzip -q work/xapk/config.arm64_v8a.apk 'lib/arm64-v8a/*.so' -d work/split
           cp work/split/lib/arm64-v8a/*.so work/native/
 
-      - name: Recover direct syscall, loader and bootstrap maps
+      - name: Recover AppGuard bootstrap, dispatch and static config
         shell: bash
         run: |
           set -euo pipefail
@@ -97,6 +98,9 @@ jobs:
             --asm-init client/reconstruction/appguard-analysis/asmfunction-init.json \
             --loader-slice client/reconstruction/appguard-analysis/loader-slice.json \
             --out client/reconstruction/appguard-analysis
+          python tools/client-source/extract-appguard-static-config.py \
+            --libcompatible work/native/libcompatible.so \
+            --out client/reconstruction/appguard-analysis
 
       - name: Commit maps
         shell: bash
@@ -122,7 +126,12 @@ jobs:
                   client/reconstruction/appguard-analysis/asmfunction-init.json \
                   client/reconstruction/appguard-analysis/asmfunction-init.md \
                   client/reconstruction/appguard-analysis/asmfunction-flow.json \
-                  client/reconstruction/appguard-analysis/asmfunction-flow.md
+                  client/reconstruction/appguard-analysis/asmfunction-flow.md \
+                  client/reconstruction/appguard-analysis/static-config.json \
+                  client/reconstruction/appguard-analysis/static-config.md
+          if test -f client/reconstruction/appguard-analysis/static-config-0x1070.bin; then
+            git add client/reconstruction/appguard-analysis/static-config-0x1070.bin
+          fi
           if git diff --cached --quiet; then exit 0; fi
-          git commit -m 'client: resolve asmFunction source flow'
+          git commit -m 'client: extract static AppGuard trampoline config'
           git push origin HEAD:client-zh-fixed-reconstruction
