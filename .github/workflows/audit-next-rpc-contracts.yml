@@ -13,25 +13,29 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: git fetch origin client-decompiled-zh-fixed-v1 --depth=1
-      - name: Extract producer rank and vitality contracts
+      - name: Extract exact vitality semantics
         shell: bash
         run: |
           set -euo pipefail
           git show origin/client-decompiled-zh-fixed-v1:il2cpp-dump/dump.cs > /tmp/dump.cs
 
-          echo '=== PRODUCER RANK STATUS ==='
-          grep -n -A 110 -B 8 -E 'public class ProducerRankStatus\\b' /tmp/dump.cs || true
-          echo '=== PRODUCER RANK CLIENT ==='
-          grep -n -C 30 -E 'ProducerRankStatus|GetProducerRankList' /tmp/dump.cs | head -n 2200 || true
+          echo '=== EXACT ITEM STATUS ==='
+          grep -n -A 90 -B 5 -E 'public class ItemStatus\\b' /tmp/dump.cs || true
 
-          echo '=== VITALITY SUPPORT DTOS ==='
-          grep -n -A 110 -B 8 -E 'public class (ItemAmount|ItemStatus|RecoverVitalityByItemArgs|RecoverVitalityByItemReply|RecoverVitalityByItemMultiArgs|RecoverVitalityByItemMultiReply|RecoverVitalityByJewelReply)\\b' /tmp/dump.cs | head -n 2200 || true
-          echo '=== VITALITY CLIENT CONSTANTS / FORMULAS ==='
-          grep -n -C 35 -E 'RecoverVitalityBy(Item|ItemMulti|Jewel)|full_recover_date|stamina|vitality' /tmp/dump.cs | head -n 3200 || true
+          echo '=== EXACT RECOVER REPLIES ==='
+          grep -n -A 90 -B 5 -E 'public class (RecoverVitalityByItemArgs|RecoverVitalityByItemReply|RecoverVitalityByItemMultiArgs|RecoverVitalityByItemMultiReply|RecoverVitalityByJewelReply)\\b' /tmp/dump.cs || true
 
-          echo '=== SERVER ITEM / JEWEL / SETTINGS MODELS ==='
-          grep -RIn -C 18 -E 'class (Item|MstItem|Jewel|MstGameSetting)\\b|vitality|max_vitality|recover|recovery|item_type|item_value' standalone/mltd | head -n 3200 || true
+          echo '=== CLIENT JEWEL / VITALITY CONSTANTS ==='
+          grep -n -C 45 -E 'RecoverVitalityByJewel|before_jewel|after_jewel|after_free_jewel|after_paid_jewel|full_recover_date|need_jewel|jewel.*recover|recover.*jewel' /tmp/dump.cs | head -n 3600 || true
 
-          echo '=== REPOSITORY MASTER-DATA RANK / RECOVERY REFERENCES ==='
-          grep -RIn -E 'producer.?rank|vitality|stamina|recover' . \
-            --exclude='*.pyc' --exclude-dir='.git' | head -n 3200 || true
+          echo '=== SERVER JEWEL MODEL ==='
+          grep -RIn -A 90 -B 8 -E '^class Jewel\\b|^class JewelSchema\\b' standalone/mltd | head -n 1200 || true
+
+          echo '=== SERVER GAME SETTINGS ==='
+          grep -RIn -A 120 -B 8 -E '^class MstGameSetting\\b|vitality|recover|jewel' standalone/mltd/models standalone/mltd/services | head -n 2400 || true
+
+          echo '=== MASTER DATA VITALITY ITEMS ==='
+          if [ -f standalone/master.db ]; then
+            sqlite3 standalone/master.db '.tables' | tr ' ' '\n' | grep -Ei 'item|setting|rank' || true
+          fi
+          find . -maxdepth 4 -type f \( -name '*.json' -o -name '*.csv' -o -name '*.db' \) -print | head -n 500
