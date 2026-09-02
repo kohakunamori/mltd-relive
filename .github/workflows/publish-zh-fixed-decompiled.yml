@@ -60,8 +60,8 @@ jobs:
       - name: Resolve release and destination branch
         env:
           GH_TOKEN: ${{ github.token }}
-          REQUESTED_TAG: ${{ inputs.release_tag }}
-          REQUESTED_BRANCH: ${{ inputs.publish_branch }}
+          REQUESTED_TAG: ${{ github.event.inputs.release_tag }}
+          REQUESTED_BRANCH: ${{ github.event.inputs.publish_branch }}
         shell: bash
         run: |
           set -euo pipefail
@@ -125,105 +125,17 @@ jobs:
             standalone/mltd/services \
             "$RUNNER_TEMP/client-source-output/report"
 
-      - name: Prepare complete publish tree
+      - name: Prepare complete publish tree and enforce GitHub file limits
         shell: bash
         run: |
           set -euo pipefail
-          src="$RUNNER_TEMP/client-source-output"
-          dst="$RUNNER_TEMP/publish-tree"
-          rm -rf "$dst"
-          mkdir -p "$dst"
-          rsync -a "$src/" "$dst/"
-
-          # This APK is an output of the rebuild validation, not decompiler
-          # source. Keeping it would add ~92 MiB without adding information.
-          rm -rf "$dst/rebuild-check"
-
-          python - "$dst" "$release_tag" "$GITHUB_SHA" <<'PY'
-          import hashlib
-          import json
-          import os
-          import sys
-          from pathlib import Path
-
-          root = Path(sys.argv[1])
-          release_tag = sys.argv[2]
-          source_commit = sys.argv[3]
-          limit = 100 * 1024 * 1024
-          files = []
-          total = 0
-          too_large = []
-          for p in sorted(root.rglob('*')):
-              if not p.is_file():
-                  continue
-              size = p.stat().st_size
-              total += size
-              rel = p.relative_to(root).as_posix()
-              files.append((size, rel))
-              if size >= limit:
-                  too_large.append((size, rel))
-          if too_large:
-              for size, rel in too_large:
-                  print(f'File exceeds GitHub regular Git limit: {size} {rel}', file=sys.stderr)
-              raise SystemExit(1)
-
-          apk_hash = (root / 'report' / 'APK_SHA256.txt').read_text(encoding='utf-8').split()[0]
-          largest = sorted(files, reverse=True)[:20]
-          provenance = {
-              'baseline': 'zh-fixed-v1',
-              'release_tag': release_tag,
-              'source_maintenance_commit': source_commit,
-              'apk_sha256': apk_hash,
-              'file_count': len(files),
-              'total_bytes': total,
-              'largest_files': [{'path': rel, 'bytes': size} for size, rel in largest],
-              'generated_by': '.github/workflows/publish-zh-fixed-decompiled.yml',
-              'excluded_generated_output': ['rebuild-check/unsigned-rebuilt.apk'],
-          }
-          (root / 'PROVENANCE.json').write_text(
-              json.dumps(provenance, indent=2, ensure_ascii=False) + '\n', encoding='utf-8'
-          )
-
-          readme = f'''# MLTD zh-fixed v1 — complete decompiled client tree
-
-This branch is generated from the Traditional Chinese corrected client shipped in `{release_tag}`.
-It is an **orphan generated branch**: it intentionally does not share history with `main` and is force-updated by CI so repeated regeneration does not accumulate hundreds of MiB of binary history.
-
-## Baseline
-
-- APK: `mltd-relive-game-client-zh-fixed.apk`
-- SHA-256: `{apk_hash}`
-- Maintenance source commit: `{source_commit}`
-- Files in this generated tree: `{len(files)}`
-- Total generated tree size: `{total / 1024 / 1024:.1f} MiB`
-
-## Directory map
-
-- `apktool/` — authoritative Android/Dalvik maintenance view: decoded manifest/resources + smali + exact native/assets payloads.
-- `jadx/` — Java-like readability view. Useful for Android shell analysis; not a guaranteed recompilable Gradle project.
-- `il2cpp-dump/` — Il2CppDumper output: `dump.cs`, `script.json`, `il2cpp.h`, `DummyDll/`, string literals and metadata-derived symbol maps.
-- `raw-critical/` — exact binary AndroidManifest/resources copied from the APK for round-trip comparison.
-- `report/` — tool versions, hashes, ELF/APK structure, network hits, RPC contract, server coverage and extraction logs.
-- `PROVENANCE.json` — machine-readable origin, size and largest-file inventory.
-
-The rebuild-check APK is deliberately omitted because it is a derived build product, not decompiled source. The maintenance workflow still verifies that Apktool can rebuild the decoded baseline.
-
-## Source-of-truth hierarchy
-
-1. For Android/Dalvik byte-level edits, prefer `apktool/` / smali.
-2. For readability of Java Android shell logic, use `jadx/`.
-3. For MLTD gameplay/network logic, use `il2cpp-dump/dump.cs` + RVA/offset data and the original `apktool/lib/arm64-v8a/libil2cpp.so`.
-4. `dump.cs` contains recovered declarations/signatures and RVA/VA/offset annotations; it does **not** recreate original C# method bodies.
-
-Full maintenance documentation lives on the `client-source-extraction` branch at `docs/CLIENT_DECOMPILATION_COMPLETE.md`.
-'''
-          (root / 'README.md').write_text(readme, encoding='utf-8')
-          PY
-
-          echo "Publish tree size:"
-          du -sh "$dst"
-          echo "Largest files:"
-          find "$dst" -type f -printf '%s %p\n' | sort -nr | head -20
+          python tools/client-source/prepare-publish-tree.py \
+            "$RUNNER_TEMP/client-source-output" \
+            "$RUNNER_TEMP/publish-tree" \
+            --release-tag "$release_tag" \
+            --source-commit "$GITHUB_SHA"
+          du -sh "$RUNNER_TEMP/publish-tree"
+          find "$RUNNER_TEMP/publish-tree" -type f -printf '%s %p\n' | sort -nr | head -20
 
       - name: Publish orphan decompiled branch
         shell: bash
@@ -247,4 +159,5 @@ Full maintenance documentation lives on the `client-source-extraction` branch at
         shell: bash
         run: |
           set -euo pipefail
-          gh api "repos/${GITHUB_REPOSITORY}/branches/${publish_branch}" --jq '.name + " @ " + .commit.sha'
+          gh api "repos/${GITHUB_REPOSITORY}/branches/${publish_branch}" \
+            --jq '.name + " @ " + .commit.sha'
