@@ -1,0 +1,52 @@
+name: Build live asset compatibility test
+
+on:
+  push:
+    branches:
+      - fix/live-asset-compat
+    paths:
+      - 'standalone/**'
+      - 'requirements.txt'
+      - '.github/workflows/build-live-asset-test.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-ubuntu:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: requirements.txt
+      - name: Install dependencies
+        run: |
+          python -m venv env
+          source env/bin/activate
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+      - name: Build Ubuntu standalone
+        run: |
+          source env/bin/activate
+          cd standalone
+          ../env/bin/pyinstaller gui_ubuntu.spec
+      - name: Package test build
+        run: |
+          mkdir -p test-output
+          cp standalone/dist/mltd-relive-standalone test-output/mltd-relive-v0.1.10-live-asset-test-ubuntu
+          chmod +x test-output/mltd-relive-v0.1.10-live-asset-test-ubuntu
+          printf '%s\n' \
+            'Branch: fix/live-asset-compat' \
+            "Commit: ${GITHUB_SHA}" \
+            'Purpose: corrected-client test for HTTP :7651 hybrid assets and serialized Connection: close API transport.' \
+            > test-output/TEST_BUILD_INFO.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mltd-relive-v0.1.10-live-asset-test-ubuntu
+          path: test-output/*
+          if-no-files-found: error
+          retention-days: 7
