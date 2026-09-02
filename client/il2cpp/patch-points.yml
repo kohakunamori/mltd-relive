@@ -1,0 +1,45 @@
+baseline:
+  id: zh-fixed-v1
+  libil2cpp_sha256: 52d0cdac0179ae4a5d61a00b9bfd500969730d1a3f157cf667d82c525836936b
+  architecture: arm64-v8a
+  file: lib/arm64-v8a/libil2cpp.so
+
+# These patch points are extracted from the current tools/apk-patcher logic and
+# tied to the exact zh-fixed-v1 libil2cpp hash above. A patcher should verify
+# both the file hash and expected_original_bytes before writing.
+patch_points:
+  - id: rendering.resolution
+    file_offset: 0x01950494
+    expected_original_bytes_le: "095a8052"
+    baseline_semantics: "MOVZ W9, #720"
+    replacement: "MOVZ W9, #<resolution>"
+
+  - id: framerate.on_begin_scene
+    file_offset: 0x01e35c94
+    expected_original_bytes_le: "e00f1e32"
+    replacement: "MOVZ W0, #<frame_rate>"
+
+  - id: framerate.setup_live_mv_special_level
+    file_offset: 0x01e3676c
+    expected_original_bytes_le: "e00f1e32"
+    replacement: "MOVZ W0, #<frame_rate>"
+
+  - id: framerate.setup_live_special_level
+    file_offset: 0x01e3617c
+    expected_original_bytes_le: "e00f1e32"
+    replacement: "MOVZ W0, #<frame_rate>"
+
+  - id: framerate.setup_theater_special_level
+    file_offset: 0x01e359ac
+    expected_original_bytes_le: "e00f1e32"
+    replacement: "MOVZ W0, #<frame_rate>"
+
+  - id: framerate.setup_commu_special_plus_level
+    file_offset: 0x01e35de4
+    expected_original_bytes_le: "e00f1e32"
+    replacement: "MOVZ W0, #<frame_rate>"
+
+  - id: framerate.setup_gasha_special_plus_level
+    file_offset: 0x01e35f8c
+    expected_original_bytes_le: "e00f1e32"
+    replacement: "MOVZ W0, #<frame_rate>"
