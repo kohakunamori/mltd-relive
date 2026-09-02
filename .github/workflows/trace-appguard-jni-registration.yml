@@ -21,6 +21,12 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: Install parser dependency
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check capstone
+
       - name: Download exact official ARM64 split
         shell: bash
         run: |
@@ -37,7 +43,7 @@ jobs:
           cp work/split/lib/arm64-v8a/libcompatible.so work/native/libcompatible.so
           test "$(sha256sum work/native/libcompatible.so | awk '{print $1}')" = '8880c415e1ab82c31858be68ce12b76b95dc8ff8875b76c1246a8bc0679647bc'
 
-      - name: Recover JNINativeMethod table
+      - name: Recover and disassemble JNINativeMethod entry
         shell: bash
         run: |
           set -euo pipefail
@@ -46,26 +52,6 @@ jobs:
           python tools/client-source/trace-appguard-jni-registration.py \
             --lib work/native/libcompatible.so \
             --out "$OUT"
-
-      - name: Disassemble recovered native candidates
-        shell: bash
-        run: |
-          set -euo pipefail
-          OUT=client/reconstruction/appguard-analysis/jni-registration
-          python - <<'PY'
-          import json, subprocess
-          from pathlib import Path
-          p=Path('client/reconstruction/appguard-analysis/jni-registration/jni-registration.json')
-          r=json.loads(p.read_text())
-          blocks=[]
-          for i,c in enumerate(r.get('jni_native_method_candidates',[]),1):
-              va=c.get('function_va')
-              if not isinstance(va,int): continue
-              cmd=['llvm-objdump','-d','--no-show-raw-insn',f'--start-address={va}',f'--stop-address={va+0x300}','work/native/libcompatible.so']
-              cp=subprocess.run(cmd,text=True,capture_output=True)
-              blocks.append(f'## Candidate {i} disassembly from 0x{va:x}\n\n```asm\n{cp.stdout or cp.stderr}\n```\n')
-          (Path('client/reconstruction/appguard-analysis/jni-registration')/'candidate-disassembly.md').write_text('\n'.join(blocks) if blocks else '# No recovered candidates\n')
-          PY
 
       - name: Commit evidence safely
         shell: bash
