@@ -85,7 +85,7 @@ class DirectWSGIDispatchTest(unittest.TestCase):
         proxy.ProxyHTTPRequestHandler.api_application = None
         proxy.api_port = self.old_api_port
 
-    def test_direct_wsgi_bypasses_local_http_api_and_closes_api_connection(self):
+    def test_direct_wsgi_bypasses_local_http_api_and_reuses_connection(self):
         conn = http.client.HTTPConnection('127.0.0.1', self.port, timeout=3)
         headers = {
             'Content-Length': '1',
@@ -94,13 +94,16 @@ class DirectWSGIDispatchTest(unittest.TestCase):
 
         conn.request('POST', '/api', body=b'a', headers=headers)
         first = conn.getresponse()
-        self.assertEqual(first.getheader('Connection'), 'close')
+        self.assertIsNone(first.getheader('Connection'))
         self.assertEqual(first.read(), b'direct-wsgi')
+        first_socket = conn.sock
+        self.assertIsNotNone(first_socket)
 
         conn.request('POST', '/api', body=b'b', headers=headers)
         second = conn.getresponse()
-        self.assertEqual(second.getheader('Connection'), 'close')
+        self.assertIsNone(second.getheader('Connection'))
         self.assertEqual(second.read(), b'direct-wsgi')
+        self.assertIs(conn.sock, first_socket)
         self.assertEqual(FakeAPIHandler.calls, 0)
         conn.close()
 
