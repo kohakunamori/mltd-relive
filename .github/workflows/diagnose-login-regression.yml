@@ -25,11 +25,20 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
 
-      - name: Preserve diagnostic runner outside worktree
-        run: cp tools/diagnose_login_regression.py /tmp/diagnose_login_regression.py
+      - name: Preserve diagnostic runners outside worktree
+        run: |
+          cp tools/diagnose_login_regression.py /tmp/diagnose_login_regression.py
+          cp tools/diagnose_theater_runtime.py /tmp/diagnose_theater_runtime.py
 
       - name: Build source-level commit matrix
         run: python /tmp/diagnose_login_regression.py source-matrix
+
+      - name: Sample v0.1.9 Theater resource selection
+        run: |
+          git checkout --detach b4b6cf02f30373e4975a341317b57afe3e1b5e2e
+          rm -f standalone/mltd-relive.db standalone/config.ini
+          cd standalone
+          PYTHONPATH=. python /tmp/diagnose_theater_runtime.py
 
       - name: Verify v0.1.6 has no accepted-socket timeout
         run: |
