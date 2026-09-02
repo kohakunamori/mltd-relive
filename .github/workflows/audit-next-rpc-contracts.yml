@@ -14,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: git fetch origin client-decompiled-zh-fixed-v1 --depth=1
-      - name: Dump exact costume RPC contract
+      - name: Resolve costume RPC DTO bindings
         shell: bash
         run: |
           set -euo pipefail
@@ -23,30 +23,53 @@ jobs:
           import pathlib, re
           dump = pathlib.Path('/tmp/dump.cs').read_text(encoding='utf-8', errors='ignore')
 
-          for needle in ('CostumeService.GetCostumeList', 'CostumeService.SetCostume'):
-              print(f'=== OCCURRENCES {needle} ===')
-              for m in re.finditer(re.escape(needle), dump):
-                  lo=max(0,m.start()-2600); hi=min(len(dump),m.end()+3600)
-                  print(dump[lo:hi])
-                  print('\n---\n')
+          print('=== ALL CLASS NAMES CONTAINING COSTUME ===')
+          for name in sorted(set(re.findall(r'public class ([A-Za-z0-9_.+`]*Costume[A-Za-z0-9_.+`]*)', dump))):
+              print(name)
 
-          print('=== CLASSES WITH COSTUME FIELDS ===')
+          print('=== DTOs CONTAINING CostumeStatus FIELDS ===')
+          for m in re.finditer(r'public class ([A-Za-z0-9_.+`]+)\b[^\n]*\n\{', dump):
+              start=m.start(); end=dump.find('\n// Namespace:', start+1)
+              if end < 0: end=min(len(dump), start+16000)
+              block=dump[start:end]
+              if 'CostumeStatus' not in block:
+                  continue
+              fields=re.findall(r'^\s*public\s+([^;\n]+?)\s+([A-Za-z0-9_]+);', block, flags=re.M)
+              costume_fields=[f for f in fields if 'CostumeStatus' in f[0]]
+              if costume_fields:
+                  print(f'=== CLASS {m.group(1)} ===')
+                  for typ,field in fields:
+                      print(typ.strip(), field)
+
+          print('=== CostumeStatus FULL ===')
+          m=re.search(r'public class CostumeStatus\b.*?\{(.*?)\n\s*// Methods', dump, flags=re.S)
+          if m:
+              for typ,field in re.findall(r'^\s*public\s+([^;\n]+?)\s+([A-Za-z0-9_]+);', m.group(1), flags=re.M):
+                  print(typ.strip(), field)
+
+          print('=== METHOD CALL SITES WITH GetCostumeList/SetCostume IDENTIFIERS ===')
+          for needle in ('GetCostumeList', 'SetCostume'):
+              for m in re.finditer(rf'\b{needle}\b', dump):
+                  lo=max(0,m.start()-1400); hi=min(len(dump),m.end()+1800)
+                  snippet=dump[lo:hi]
+                  if 'public const string' in snippet and snippet.count(needle) == 1:
+                      continue
+                  print(f'--- {needle} @{m.start()} ---')
+                  print(snippet)
+
+          print('=== TYPES WITH likely Get/Set costume request fields ===')
           for m in re.finditer(r'public class ([A-Za-z0-9_.+`]+)\b[^\n]*\n\{', dump):
               start=m.start(); end=dump.find('\n// Namespace:', start+1)
               if end < 0: end=min(len(dump), start+12000)
               block=dump[start:end]
               fields=re.findall(r'^\s*public\s+([^;\n]+?)\s+([A-Za-z0-9_]+);', block, flags=re.M)
-              if not fields:
-                  continue
-              if any('costume' in field.lower() for _,field in fields):
+              names={field for _,field in fields}
+              if {'mst_costume_id','mst_idol_id'} <= names or {'costume_id','mst_idol_id'} <= names:
                   print(f'=== CLASS {m.group(1)} ===')
                   for typ,field in fields:
-                      if ('costume' in field.lower() or field in {
-                          'mission_process','mission_list','idol_list','user_id'
-                      }):
-                          print(typ.strip(), field)
+                      print(typ.strip(), field)
           PY
-          echo '=== SERVER COSTUME MODELS ==='
-          grep -n -A100 -B5 -E '^class (Costume|MstCostume|Idol|UnitIdol|SongUnitIdol)\b' standalone/mltd/models/models.py | head -n 1200 || true
-          echo '=== COSTUME USAGE ==='
-          grep -RIn -C 5 -E 'mst_costume_id|costume_id|Costume\(' standalone/mltd/services | head -n 1600 || true
+          echo '=== GREP API MODEL COSTUME TERMS ==='
+          grep -n -C 8 -E 'class .*Costume.*(Args|Reply)|CostumeStatus\[\] costume_list|mst_costume_id;' /tmp/dump.cs | head -n 1800 || true
+          echo '=== SERVER IDOL/COSTUME SCHEMA ==='
+          grep -n -A120 -B10 -E '^class (MstCostumeSchema|IdolSchema)\b' standalone/mltd/models/schemas.py | head -n 700 || true
