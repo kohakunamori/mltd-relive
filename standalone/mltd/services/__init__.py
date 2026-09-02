@@ -9,6 +9,7 @@ __all__ = [
     'client_compat',
     'event',
     'friend',
+    'friend_core',
     'friend_recommend',
     'game',
     'game_corner',
