@@ -14,6 +14,7 @@ on:
       - 'tools/client-source/analyze-appguard-mprotect.py'
       - 'tools/client-source/summarize-appguard-init.py'
       - 'tools/client-source/analyze-appguard-solibrary.py'
+      - 'tools/client-source/analyze-appguard-dispatch.py'
 
 permissions:
   contents: write
@@ -78,6 +79,10 @@ jobs:
             --libcompatible work/native/libcompatible.so \
             --loader-slice client/reconstruction/appguard-analysis/loader-slice.json \
             --out client/reconstruction/appguard-analysis
+          python tools/client-source/analyze-appguard-dispatch.py \
+            --libcompatible work/native/libcompatible.so \
+            --solibrary-cfg client/reconstruction/appguard-analysis/solibrary-cfg.json \
+            --out client/reconstruction/appguard-analysis
 
       - name: Commit maps
         shell: bash
@@ -97,7 +102,9 @@ jobs:
                   client/reconstruction/appguard-analysis/mprotect-slice.md \
                   client/reconstruction/appguard-analysis/dt-init-region.md \
                   client/reconstruction/appguard-analysis/solibrary-cfg.json \
-                  client/reconstruction/appguard-analysis/solibrary-cfg.md
+                  client/reconstruction/appguard-analysis/solibrary-cfg.md \
+                  client/reconstruction/appguard-analysis/dispatch-table.json \
+                  client/reconstruction/appguard-analysis/dispatch-table.md
           if git diff --cached --quiet; then exit 0; fi
-          git commit -m 'client: trace SoLibraryStart decryption API'
+          git commit -m 'client: resolve AppGuard runtime dispatch table'
           git push origin HEAD:client-zh-fixed-reconstruction
