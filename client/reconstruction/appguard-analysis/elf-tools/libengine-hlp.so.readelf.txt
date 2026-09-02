@@ -1,0 +1,301 @@
+ELF Header:
+  Magic:   7f 45 4c 46 02 01 01 00 00 00 00 00 00 00 00 00 
+  Class:                             ELF64
+  Data:                              2's complement, little endian
+  Version:                           1 (current)
+  OS/ABI:                            UNIX - System V
+  ABI Version:                       0
+  Type:                              DYN (Shared object file)
+  Machine:                           Advanced Micro Devices X86-64
+  Version:                           0x1
+  Entry point address:               0x0
+  Start of program headers:          64 (bytes into file)
+  Start of section headers:          236144 (bytes into file)
+  Flags:                             0x0
+  Size of this header:               64 (bytes)
+  Size of program headers:           56 (bytes)
+  Number of program headers:         7
+  Size of section headers:           64 (bytes)
+  Number of section headers:         4
+  Section header string table index: 3
+
+Section Headers:
+  [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+  [ 0]                   DYNSYM          0000000000007e00 007e00 001320 18   A  1   1  8
+  [ 1]                   STRTAB          0000000000009431 009431 0011f6 00   A  0   0  1
+  [ 2]                   DYNAMIC         0000000000039098 039098 000290 10  WA  1   0  8
+  [ 3]                   STRTAB          0000000000000000 0398ac 0001bd 00      0   0  1
+Key to Flags:
+  W (write), A (alloc), X (execute), M (merge), S (strings), I (info),
+  L (link order), O (extra OS processing required), G (group), T (TLS),
+  C (compressed), x (unknown), o (OS specific), E (exclude),
+  D (mbind), l (large), p (processor specific)
+
+Program Headers:
+  Type           Offset   VirtAddr           PhysAddr           FileSiz  MemSiz   Flg Align
+  PHDR           0x000040 0x0000000000000040 0x0000000000000040 0x000188 0x000188 R   0x8
+  LOAD           0x000000 0x0000000000000000 0x0000000000000000 0x037bd8 0x037bd8 R E 0x1000
+  LOAD           0x038000 0x0000000000038000 0x0000000000038000 0x001868 0x013d6c RW  0x1000
+  DYNAMIC        0x039098 0x0000000000039098 0x0000000000039098 0x000290 0x000290 RW  0x8
+readelf: Error: no .dynamic section in the dynamic segment
+  NOTE           0x005304 0x0000000000005304 0x0000000000005304 0x000024 0x000024 R   0x4
+  GNU_EH_FRAME   0x0330a0 0x00000000000330a0 0x00000000000330a0 0x000afc 0x000afc R   0x4
+  GNU_STACK      0x000000 0x0000000000000000 0x0000000000000000 0x000000 0x000000 RW  0
+
+ Section to Segment mapping:
+  Segment Sections...
+   00     
+   01      
+   02      
+   03      
+   04     
+   05     
+   06     
+
+Dynamic section at offset 0x39098 contains 35 entries:
+  Tag        Type                         Name/Value
+ 0x000000000000000c (INIT)               0x1d60
+ 0x0000000000000003 (PLTGOT)             0x39440
+ 0x0000000000000002 (PLTRELSZ)           960 (bytes)
+ 0x0000000000000017 (JMPREL)             0x5b68
+ 0x0000000000000014 (PLTREL)             RELA
+ 0x0000000000000007 (RELA)               0x5f28
+ 0x0000000000000008 (RELASZ)             7896 (bytes)
+ 0x0000000000000009 (RELAENT)            24 (bytes)
+ 0x000000006ffffff9 (RELACOUNT)          325
+ 0x0000000000000006 (SYMTAB)             0x7e00
+ 0x000000000000000b (SYMENT)             24 (bytes)
+ 0x0000000000000005 (STRTAB)             0x9431
+ 0x000000000000000a (STRSZ)              4598 (bytes)
+ 0x0000000000000004 (HASH)               0x5328
+ 0x0000000000000001 (NEEDED)             Shared library: [liblog.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libz.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libandroid.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libstdc++.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libm.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libc.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libdl.so]
+ 0x000000000000000e (SONAME)             Library soname: [libengine-hlp.so]
+ 0x000000000000001a (FINI_ARRAY)         0x38020
+ 0x000000000000001c (FINI_ARRAYSZ)       8 (bytes)
+ 0x000000000000001a (FINI_ARRAY)         0x39860
+ 0x000000000000001c (FINI_ARRAYSZ)       8 (bytes)
+ 0x0000000000000010 (SYMBOLIC)           0x0
+ 0x000000000000001e (FLAGS)              SYMBOLIC BIND_NOW
+ 0x000000006ffffffb (FLAGS_1)            Flags: NOW
+ 0x000000006ffffff0 (VERSYM)             0x5974
+ 0x000000006ffffffc (VERDEF)             0x5b0c
+ 0x000000006ffffffd (VERDEFNUM)          1
+ 0x000000006ffffffe (VERNEED)            0x5b28
+ 0x000000006fffffff (VERNEEDNUM)         2
+ 0x0000000000000000 (NULL)               0x0
+
+There are no static relocations in this file.
+To see the dynamic relocations add --use-dynamic to the command line.
+
+Symbol table '' contains 204 entries:
+   Num:    Value          Size Type    Bind   Vis      Ndx Name
+     0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+     1: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND __cxa_finalize@LIBC (2)
+     2: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND __cxa_atexit@LIBC (2)
+     3: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND stat@LIBC (2)
+     4: 000000000000f6c0    25 FUNC    GLOBAL DEFAULT BAD[0x1b] asm_read
+     5: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND __errno@LIBC (2)
+     6: 000000000000f6e0    25 FUNC    GLOBAL DEFAULT BAD[0x1b] asm_write
+     7: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND gettid@LIBC (2)
+     8: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND __stack_chk_fail@LIBC (2)
+     9: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND strlen@LIBC (2)
+    10: 000000000000f860    25 FUNC    GLOBAL DEFAULT BAD[0x1b] asm_socket
+    11: 000000000000f800    25 FUNC    GLOBAL DEFAULT BAD[0x1b] asm_bind
+    12: 000000000000f840    25 FUNC    GLOBAL DEFAULT BAD[0x1b] asm_listen
+    13: 000000000000f7e0    28 FUNC    GLOBAL DEFAULT BAD[0x1b] asm_accept4
+    14: 000000000000f820    28 FUNC    GLOBAL DEFAULT BAD[0x1b] asm_getsockopt
+    15: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND pipe@LIBC (2)
+    16: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND pthread_create@LIBC (2)
+    17: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND open@LIBC (2)
+    18: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND fopen@LIBC (2)
+    19: 00000000000001e0   766 FUNC    GLOBAL DEFAULT    1 iiIiiIiiII2
+    20: 00000000000004e0   766 FUNC    GLOBAL DEFAULT    1 iiIiiIiiII3
+    21: 00000000000007e0   766 FUNC    GLOBAL DEFAULT    1 iiIiiIiiII4
+    22: 0000000000000ae0  1150 FUNC    GLOBAL DEFAULT    2 iiIiiIIiII1
+    23: 0000000000000f60  1150 FUNC    GLOBAL DEFAULT    2 iiIiiIIiII2
+    24: 00000000000013e0  1150 FUNC    GLOBAL DEFAULT    2 iiIiiIIiII3
+    25: 0000000000001860  1150 FUNC    GLOBAL DEFAULT    2 iiIiiIIiII4
+    26: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND qsort@LIBC (2)
+    27: 0000000000001d60  2795 FUNC    GLOBAL DEFAULT BAD[0x4] iiIiiIiiIi
+    28: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND calloc@LIBC (2)
+    29: 000000000000f680    25 FUNC    GLOBAL DEFAULT BAD[0x1b] asm_mprotect
+    30: 00000000000111fc   193 FUNC    GLOBAL DEFAULT BAD[0x1b] _Unwind_Resume
+    31: 000000000001db40  1582 FUNC    GLOBAL DEFAULT BAD[0x1c] __gxx_personality_v0
+    32: 0000000000002860  1212 FUNC    GLOBAL DEFAULT BAD[0x5] IIIiiIIIIi
+    33: 000000000000f1a0  1001 FUNC    GLOBAL DEFAULT BAD[0x1a] iIIIiIiiiI
+    34: 0000000000002d20  1389 FUNC    GLOBAL DEFAULT BAD[0x6] IiiiiiiiII
+    35: 0000000000004240   705 FUNC    GLOBAL DEFAULT BAD[0xa] 
+    36: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND rand@LIBC (2)
+    37: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND malloc@LIBC (2)
+    38: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND free@LIBC (2)
+    39: 000000000000f5e0    28 FUNC    GLOBAL DEFAULT BAD[0x1b] asm_mmap
+    40: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND madvise@LIBC (2)
+    41: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND openat@LIBC (2)
+    42: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND pthread_mutex_init@LIBC (2)
+    43: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND pthread_mutex_lock@LIBC (2)
+    44: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND pthread_mutex_unlock@LIBC (2)
+    45: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND pthread_mutex_destroy@LIBC (2)
+    46: 000000000000f660    25 FUNC    GLOBAL DEFAULT BAD[0x1b] asm_lseek
+    47: 000000000000f740    25 FUNC    GLOBAL DEFAULT BAD[0x1b] asm_inotify_init
+    48: 000000000000f760    25 FUNC    GLOBAL DEFAULT BAD[0x1b] asm_inotify_add_watch
+    49: 000000000000f780    25 FUNC    GLOBAL DEFAULT BAD[0x1b] asm_getpid
+    50: 000000000000f7a0    28 FUNC    GLOBAL DEFAULT BAD[0x1b] asm_ptrace
+    51: 000000000000f7c0    28 FUNC    GLOBAL DEFAULT BAD[0x1b] asm_watipid
+    52: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND __android_log_vprint
+    53: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND snprintf@LIBC (2)
+    54: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND isgraph@LIBC (2)
+    55: 000000000001e4d0    35 FUNC    GLOBAL DEFAULT BAD[0x1c] _Znam
+    56: 000000000001e460   106 FUNC    GLOBAL DEFAULT BAD[0x1c] _Znwm
+    57: 000000000001d690     5 FUNC    GLOBAL DEFAULT BAD[0x1c] _ZdaPv
+    58: 000000000001d680     5 FUNC    GLOBAL DEFAULT BAD[0x1c] _ZdlPv
+    59: 000000000000f6a0    25 FUNC    GLOBAL DEFAULT BAD[0x1b] asm_munmap
+    60: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND strtoul@LIBC (2)
+    61: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND memmove@LIBC (2)
+    62: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND getpagesize@LIBC (2)
+    63: 000000000000f640    25 FUNC    GLOBAL DEFAULT BAD[0x1b] asm_kill
+    64: 000000000000f700    28 FUNC    GLOBAL DEFAULT BAD[0x1b] asm_prctl
+    65: 000000000000f720    28 FUNC    GLOBAL DEFAULT BAD[0x1b] asm_readlinkat
+    66: 000000000000f880    28 FUNC    GLOBAL DEFAULT BAD[0x1b] asm_fstatat64
+    67: 000000000000f8a0    25 FUNC    GLOBAL DEFAULT BAD[0x1b] asm_connect
+    68: 000000000001e500    32 FUNC    GLOBAL DEFAULT BAD[0x1c] __cxa_pure_virtual
+    69: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND abort@LIBC (2)
+    70: 000000000000fc46     8 FUNC    GLOBAL DEFAULT BAD[0x1b] _Unwind_GetDataRelBase
+    71: 000000000000fc17     8 FUNC    GLOBAL DEFAULT BAD[0x1b] _Unwind_GetRegionStart
+    72: 000000000000fc4e     8 FUNC    GLOBAL DEFAULT BAD[0x1b] _Unwind_GetTextRelBase
+    73: 000000000000fbab    63 FUNC    GLOBAL DEFAULT BAD[0x1b] _Unwind_SetGR
+    74: 000000000000fc07     8 FUNC    GLOBAL DEFAULT BAD[0x1b] _Unwind_SetIP
+    75: 000000000001e300    17 FUNC    GLOBAL DEFAULT BAD[0x1c] _ZSt10unexpectedv
+    76: 000000000000fc0f     8 FUNC    GLOBAL DEFAULT BAD[0x1b] _Unwind_GetLanguageSpecificData
+    77: 000000000000fbf2    21 FUNC    GLOBAL DEFAULT BAD[0x1b] _Unwind_GetIPInfo
+    78: 000000000001f2a0   102 FUNC    GLOBAL DEFAULT BAD[0x1c] __cxa_begin_catch
+    79: 000000000001e2b0    17 FUNC    GLOBAL DEFAULT BAD[0x1c] _ZSt9terminatev
+    80: 0000000000038e20    16 OBJECT  WEAK   DEFAULT BAD[0x24] _ZTIN10__cxxabiv115__forced_unwindE
+    81: 0000000000038e30    16 OBJECT  WEAK   DEFAULT BAD[0x24] _ZTIN10__cxxabiv119__foreign_exceptionE
+    82: 000000000001e170   218 FUNC    GLOBAL DEFAULT BAD[0x1c] __cxa_call_unexpected
+    83: 000000000001e2d0    11 FUNC    GLOBAL DEFAULT BAD[0x1c] _ZN10__cxxabiv112__unexpectedEPFvvE
+    84: 000000000001f530    65 FUNC    GLOBAL DEFAULT BAD[0x1c] __cxa_get_globals_fast
+    85: 000000000001e400    84 FUNC    GLOBAL DEFAULT BAD[0x1c] __cxa_rethrow
+    86: 000000000001f310   130 FUNC    GLOBAL DEFAULT BAD[0x1c] __cxa_end_catch
+    87: 0000000000038e00    24 OBJECT  WEAK   DEFAULT BAD[0x24] _ZTISt13bad_exception
+    88: 000000000001eef0   231 FUNC    GLOBAL DEFAULT BAD[0x1c] __cxa_allocate_exception
+    89: 0000000000038e80    40 OBJECT  WEAK   DEFAULT BAD[0x24] _ZTVSt13bad_exception
+    90: 000000000001f3d0    19 FUNC    GLOBAL DEFAULT BAD[0x1c] _ZNSt13bad_exceptionD1Ev
+    91: 000000000001e380   114 FUNC    GLOBAL DEFAULT BAD[0x1c] __cxa_throw
+    92: 000000000001e250    60 FUNC    GLOBAL DEFAULT BAD[0x1c] _ZN10__cxxabiv111__terminateEPFvvE
+    93: 000000000001e290    14 FUNC    GLOBAL DEFAULT BAD[0x1c] _ZSt13set_terminatePFvvE
+    94: 0000000000039850     8 OBJECT  GLOBAL DEFAULT BAD[0x27] _ZN10__cxxabiv119__terminate_handlerE
+    95: 000000000001e2a0    11 FUNC    GLOBAL DEFAULT BAD[0x1c] _ZSt13get_terminatev
+    96: 000000000001e2e0    14 FUNC    GLOBAL DEFAULT BAD[0x1c] _ZSt14set_unexpectedPFvvE
+    97: 0000000000039840     8 OBJECT  GLOBAL DEFAULT BAD[0x27] _ZN10__cxxabiv120__unexpected_handlerE
+    98: 000000000001e2f0    11 FUNC    GLOBAL DEFAULT BAD[0x1c] _ZSt14get_unexpectedv
+    99: 000000000001efe0   181 FUNC    GLOBAL DEFAULT BAD[0x1c] __cxa_free_exception
+   100: 000000000001f580   123 FUNC    GLOBAL DEFAULT BAD[0x1c] __cxa_get_globals
+   101: 0000000000010fce   346 FUNC    GLOBAL DEFAULT BAD[0x1b] _Unwind_RaiseException
+   102: 00000000000112bd   217 FUNC    GLOBAL DEFAULT BAD[0x1b] _Unwind_Resume_or_Rethrow
+   103: 000000000001f610     8 FUNC    GLOBAL DEFAULT BAD[0x1c] _ZSt15get_new_handlerv
+   104: 0000000000038d80    40 OBJECT  WEAK   DEFAULT BAD[0x24] _ZTVSt9bad_alloc
+   105: 0000000000038d50    24 OBJECT  WEAK   DEFAULT BAD[0x24] _ZTISt9bad_alloc
+   106: 000000000001edd0    19 FUNC    GLOBAL DEFAULT BAD[0x1c] _ZNSt9bad_allocD1Ev
+   107: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND write@LIBC (2)
+   108: 000000000001e520    32 FUNC    GLOBAL DEFAULT BAD[0x1c] __cxa_deleted_virtual
+   109: 000000000001edc0     8 FUNC    GLOBAL DEFAULT BAD[0x1c] _ZNKSt9bad_alloc4whatEv
+   110: 000000000001edd0    19 FUNC    GLOBAL DEFAULT BAD[0x1c] _ZNSt9bad_allocD2Ev
+   111: 000000000001f3c0     1 FUNC    GLOBAL DEFAULT BAD[0x1c] _ZNSt9exceptionD2Ev
+   112: 000000000001edf0    18 FUNC    GLOBAL DEFAULT BAD[0x1c] _ZNSt9bad_allocD0Ev
+   113: 0000000000032350    13 OBJECT  WEAK   DEFAULT BAD[0x1d] _ZTSSt9bad_alloc
+   114: 0000000000038f80    88 OBJECT  WEAK   DEFAULT BAD[0x24] _ZTVN10__cxxabiv120__si_class_type_infoE
+   115: 0000000000038df0    16 OBJECT  WEAK   DEFAULT BAD[0x24] _ZTISt9exception
+   116: 000000000001f0a0   234 FUNC    GLOBAL DEFAULT BAD[0x1c] __cxa_allocate_dependent_exception
+   117: 000000000001f190   205 FUNC    GLOBAL DEFAULT BAD[0x1c] __cxa_free_dependent_exception
+   118: 000000000001f290     5 FUNC    GLOBAL DEFAULT BAD[0x1c] __cxa_get_exception_ptr
+   119: 0000000000011396    20 FUNC    GLOBAL DEFAULT BAD[0x1b] _Unwind_DeleteException
+   120: 000000000001f3a0    24 FUNC    GLOBAL DEFAULT BAD[0x1c] _ZSt18uncaught_exceptionv
+   121: 000000000001f3c0     1 FUNC    GLOBAL DEFAULT BAD[0x1c] _ZNSt9exceptionD1Ev
+   122: 000000000001f3d0    19 FUNC    GLOBAL DEFAULT BAD[0x1c] _ZNSt13bad_exceptionD2Ev
+   123: 000000000001f3f0     8 FUNC    GLOBAL DEFAULT BAD[0x1c] _ZNKSt9exception4whatEv
+   124: 000000000001f400     8 FUNC    GLOBAL DEFAULT BAD[0x1c] _ZNKSt13bad_exception4whatEv
+   125: 000000000001f410    18 FUNC    GLOBAL DEFAULT BAD[0x1c] _ZNSt9exceptionD0Ev
+   126: 000000000001f430    18 FUNC    GLOBAL DEFAULT BAD[0x1c] _ZNSt13bad_exceptionD0Ev
+   127: 000000000001f450     1 FUNC    GLOBAL DEFAULT BAD[0x1c] _ZN10__cxxabiv115__forced_unwindD2Ev
+   128: 000000000001f450     1 FUNC    GLOBAL DEFAULT BAD[0x1c] _ZN10__cxxabiv115__forced_unwindD1Ev
+   129: 000000000001f460    18 FUNC    GLOBAL DEFAULT BAD[0x1c] _ZN10__cxxabiv115__forced_unwindD0Ev
+   130: 000000000001f480     1 FUNC    GLOBAL DEFAULT BAD[0x1c] _ZN10__cxxabiv119__foreign_exceptionD2Ev
+   131: 000000000001f480     1 FUNC    GLOBAL DEFAULT BAD[0x1c] _ZN10__cxxabiv119__foreign_exceptionD1Ev
+   132: 000000000001f490    18 FUNC    GLOBAL DEFAULT BAD[0x1c] _ZN10__cxxabiv119__foreign_exceptionD0Ev
+   133: 00000000000323c9    13 OBJECT  WEAK   DEFAULT BAD[0x1d] _ZTSSt9exception
+   134: 0000000000039040    88 OBJECT  WEAK   DEFAULT BAD[0x24] _ZTVN10__cxxabiv117__class_type_infoE
+   135: 00000000000323e0    18 OBJECT  WEAK   DEFAULT BAD[0x1d] _ZTSSt13bad_exception
+   136: 0000000000032400    32 OBJECT  WEAK   DEFAULT BAD[0x1d] _ZTSN10__cxxabiv115__forced_unwindE
+   137: 0000000000032420    36 OBJECT  WEAK   DEFAULT BAD[0x1d] _ZTSN10__cxxabiv119__foreign_exceptionE
+   138: 0000000000038e40    40 OBJECT  WEAK   DEFAULT BAD[0x24] _ZTVSt9exception
+   139: 0000000000038ec0    40 OBJECT  WEAK   DEFAULT BAD[0x24] _ZTVN10__cxxabiv115__forced_unwindE
+   140: 0000000000038f00    40 OBJECT  WEAK   DEFAULT BAD[0x24] _ZTVN10__cxxabiv119__foreign_exceptionE
+   141: 0000000000000000     0 FUNC    WEAK   DEFAULT  UND pthread_key_delete@LIBC (2)
+   142: 0000000000000000     0 FUNC    WEAK   DEFAULT  UND pthread_key_create@LIBC (2)
+   143: 0000000000000000     0 FUNC    WEAK   DEFAULT  UND pthread_setspecific@LIBC (2)
+   144: 0000000000000000     0 FUNC    WEAK   DEFAULT  UND pthread_getspecific@LIBC (2)
+   145: 000000000001f910   458 FUNC    GLOBAL DEFAULT BAD[0x1c] _ZN9__gnu_cxx27__verbose_terminate_handlerEv
+   146: 000000000001f600    11 FUNC    GLOBAL DEFAULT BAD[0x1c] _ZSt15set_new_handlerPFvvE
+   147: 0000000000032444     1 OBJECT  GLOBAL DEFAULT BAD[0x1d] _ZSt7nothrow
+   148: 000000000001f620    19 FUNC    GLOBAL DEFAULT BAD[0x1c] _ZN10__cxxabiv120__si_class_type_infoD2Ev
+   149: 000000000001fb50    19 FUNC    GLOBAL DEFAULT BAD[0x1c] _ZN10__cxxabiv117__class_type_infoD2Ev
+   150: 000000000001f620    19 FUNC    GLOBAL DEFAULT BAD[0x1c] _ZN10__cxxabiv120__si_class_type_infoD1Ev
+   151: 000000000001f640    18 FUNC    GLOBAL DEFAULT BAD[0x1c] _ZN10__cxxabiv120__si_class_type_infoD0Ev
+   152: 000000000001f660   318 FUNC    GLOBAL DEFAULT BAD[0x1c] _ZNK10__cxxabiv120__si_class_type_info12__do_dyncastElNS_17__class_type_info10__sub_kindEPKS1_PKvS4_S6_RNS1_16__dyncast_resultE
+   153: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND strcmp@LIBC (2)
+   154: 000000000001f7a0   118 FUNC    GLOBAL DEFAULT BAD[0x1c] _ZNK10__cxxabiv120__si_class_type_info20__do_find_public_srcElPKvPKNS_17__class_type_infoES2_
+   155: 000000000001f820    81 FUNC    GLOBAL DEFAULT BAD[0x1c] _ZNK10__cxxabiv120__si_class_type_info11__do_upcastEPKNS_17__class_type_infoEPKvRNS1_15__upcast_resultE
+   156: 000000000001fb90    78 FUNC    GLOBAL DEFAULT BAD[0x1c] _ZNK10__cxxabiv117__class_type_info11__do_upcastEPKS0_PKvRNS0_15__upcast_resultE
+   157: 0000000000032460    37 OBJECT  WEAK   DEFAULT BAD[0x1d] _ZTSN10__cxxabiv120__si_class_type_infoE
+   158: 0000000000038f30    24 OBJECT  WEAK   DEFAULT BAD[0x24] _ZTIN10__cxxabiv120__si_class_type_infoE
+   159: 0000000000038ff0    24 OBJECT  WEAK   DEFAULT BAD[0x24] _ZTIN10__cxxabiv117__class_type_infoE
+   160: 000000000001fbe0   142 FUNC    GLOBAL DEFAULT BAD[0x1c] _ZNK10__cxxabiv117__class_type_info10__do_catchEPKSt9type_infoPPvj
+   161: 000000000001fae0    87 FUNC    GLOBAL DEFAULT BAD[0x1c] _ZNK10__cxxabiv117__class_type_info11__do_upcastEPKS0_PPv
+   162: 000000000002ca70    60 FUNC    GLOBAL DEFAULT BAD[0x1c] __cxa_current_exception_type
+   163: 000000000002c8d0   366 FUNC    GLOBAL DEFAULT BAD[0x1c] __cxa_demangle
+   164: 0000000000000000     0 OBJECT  GLOBAL DEFAULT  UND __sF@LIBC (2)
+   165: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND fwrite@LIBC (2)
+   166: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND fputs@LIBC (2)
+   167: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND fputc@LIBC (2)
+   168: 000000000001fb40    13 FUNC    GLOBAL DEFAULT BAD[0x1c] _ZNK10__cxxabiv117__class_type_info20__do_find_public_srcElPKvPKS0_S2_
+   169: 000000000001fb50    19 FUNC    GLOBAL DEFAULT BAD[0x1c] _ZN10__cxxabiv117__class_type_infoD1Ev
+   170: 000000000001fb70    18 FUNC    GLOBAL DEFAULT BAD[0x1c] _ZN10__cxxabiv117__class_type_infoD0Ev
+   171: 000000000001fc70   204 FUNC    GLOBAL DEFAULT BAD[0x1c] _ZNK10__cxxabiv117__class_type_info12__do_dyncastElNS0_10__sub_kindEPKS0_PKvS3_S5_RNS0_16__dyncast_resultE
+   172: 00000000000324a0    34 OBJECT  WEAK   DEFAULT BAD[0x1d] _ZTSN10__cxxabiv117__class_type_infoE
+   173: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND memcpy@LIBC (2)
+   174: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND realloc@LIBC (2)
+   175: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND memcmp@LIBC (2)
+   176: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND sprintf@LIBC (2)
+   177: 000000000002ca40    46 FUNC    GLOBAL DEFAULT BAD[0x1c] __gcclibcxx_demangle_callback
+   178: 000000000000fa85    58 FUNC    GLOBAL DEFAULT BAD[0x1b] _Unwind_GetGR
+   179: 000000000000fba3     8 FUNC    GLOBAL DEFAULT BAD[0x1b] _Unwind_GetCFA
+   180: 000000000000fbea     8 FUNC    GLOBAL DEFAULT BAD[0x1b] _Unwind_GetIP
+   181: 000000000000fc1f    39 FUNC    GLOBAL DEFAULT BAD[0x1b] _Unwind_FindEnclosingFunction
+   182: 0000000000012827   424 FUNC    GLOBAL DEFAULT BAD[0x1b] _Unwind_Find_FDE
+   183: 0000000000010ee3   234 FUNC    GLOBAL DEFAULT BAD[0x1b] __frame_state_for
+   184: 0000000000011128   212 FUNC    GLOBAL DEFAULT BAD[0x1b] _Unwind_ForcedUnwind
+   185: 00000000000113aa   143 FUNC    GLOBAL DEFAULT BAD[0x1b] _Unwind_Backtrace
+   186: 0000000000000000     0 FUNC    WEAK   DEFAULT  UND pthread_once@LIBC (2)
+   187: 000000000001261a   116 FUNC    GLOBAL DEFAULT BAD[0x1b] __register_frame_info_bases
+   188: 000000000001268e     9 FUNC    GLOBAL DEFAULT BAD[0x1b] __register_frame_info
+   189: 0000000000012697    32 FUNC    GLOBAL DEFAULT BAD[0x1b] __register_frame
+   190: 00000000000126b7   110 FUNC    GLOBAL DEFAULT BAD[0x1b] __register_frame_info_table_bases
+   191: 0000000000012725     9 FUNC    GLOBAL DEFAULT BAD[0x1b] __register_frame_info_table
+   192: 000000000001272e    26 FUNC    GLOBAL DEFAULT BAD[0x1b] __register_frame_table
+   193: 0000000000012748   197 FUNC    GLOBAL DEFAULT BAD[0x1b] __deregister_frame_info_bases
+   194: 000000000001280d     5 FUNC    GLOBAL DEFAULT BAD[0x1b] __deregister_frame_info
+   195: 0000000000012812    21 FUNC    GLOBAL DEFAULT BAD[0x1b] __deregister_frame
+   196: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND dl_iterate_phdr@LIBC (3)
+   197: 0000000000039868     0 NOTYPE  GLOBAL DEFAULT  ABS _edata
+   198: 0000000000039868     0 NOTYPE  GLOBAL DEFAULT  ABS __bss_start
+   199: 000000000004bd6c     0 NOTYPE  GLOBAL DEFAULT  ABS _end
+   200: 0000000000039868     0 NOTYPE  GLOBAL DEFAULT  ABS __bss_start__
+   201: 000000000004bd6c     0 NOTYPE  GLOBAL DEFAULT  ABS _bss_end__
+   202: 000000000004bd6c     0 NOTYPE  GLOBAL DEFAULT  ABS __bss_end__
+   203: 000000000004bd6c     0 NOTYPE  GLOBAL DEFAULT  ABS __end__

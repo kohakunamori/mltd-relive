@@ -1,0 +1,65 @@
+    489 __cxa_finalize
+    498 JNI_OnLoad
+    4a3 __stack_chk_fail
+    4b4 dlclose
+    4bc dlerror
+    4c4 dlopen
+    4cb dlsym
+    4d1 free
+    4d6 malloc
+    4dd memcpy
+    4e4 snprintf
+    4ed liblog.so
+    4f7 libstdc++.so
+    504 libm.so
+    50c libdl.so
+    515 libc.so
+    51d _edata
+    524 __bss_start
+    530 __bss_start__
+    53e __bss_end__
+    54a __end__
+    552 _end
+    557 libmain.so
+    562 LIBC
+    b28 com/unity3d/player/NativeLoader
+    b48 (Ljava/lang/String;)Z
+    b5e unload
+    b69 libunity.so
+    b75 Unable to retrieve Java VM
+    b90 %s/%s
+    b96 Unable to load library: %s [%s]
+    bb6 JNI_OnLoad
+    bc1 Unsupported VM version
+    bd8 JNI_OnUnload
+    c94 Android
+    ca0 r16b
+    ce0 4479499
+    fd0 GCC: (GNU) 4.9.x 20150123 (prerelease)
+    ff7 Android clang version 5.0.300080  (based on LLVM 5.0.300080)
+   1040 Unity Technologies
+   1054 2018.4.30f1_c698a062d8e6libmain.dbg.so
+   1081 .shstrtab
+   108b .note.gnu.build-id
+   109e .hash
+   10a4 .dynsym
+   10ac .dynstr
+   10b4 .gnu.version
+   10c1 .gnu.version_r
+   10d0 .rela.dyn
+   10da .rela.plt
+   10e4 .text
+   10ea .rodata
+   10f2 .eh_frame_hdr
+   1100 .eh_frame
+   110a .note.android.ident
+   111e .init_array
+   112a .fini_array
+   1136 .dynamic
+   113f .got
+   1144 .got.plt
+   114d .data
+   1153 .bss
+   1158 .comment
+   1161 .note.unity
+   116d .gnu_debuglink

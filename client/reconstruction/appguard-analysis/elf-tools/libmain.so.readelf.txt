@@ -1,0 +1,154 @@
+ELF Header:
+  Magic:   7f 45 4c 46 02 01 01 00 00 00 00 00 00 00 00 00 
+  Class:                             ELF64
+  Data:                              2's complement, little endian
+  Version:                           1 (current)
+  OS/ABI:                            UNIX - System V
+  ABI Version:                       0
+  Type:                              DYN (Shared object file)
+  Machine:                           AArch64
+  Version:                           0x1
+  Entry point address:               0x830
+  Start of program headers:          64 (bytes into file)
+  Start of section headers:          4480 (bytes into file)
+  Flags:                             0x0
+  Size of this header:               64 (bytes)
+  Size of program headers:           56 (bytes)
+  Number of program headers:         7
+  Size of section headers:           64 (bytes)
+  Number of section headers:         26
+  Section header string table index: 25
+
+Section Headers:
+  [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+  [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+  [ 1] .note.gnu.build-id NOTE            00000000000001c8 0001c8 000024 00   A  0   0  4
+  [ 2] .hash             HASH            00000000000001f0 0001f0 0000a0 04   A  3   0  8
+  [ 3] .dynsym           DYNSYM          0000000000000290 000290 0001f8 18   A  4   3  8
+  [ 4] .dynstr           STRTAB          0000000000000488 000488 0000df 00   A  0   0  1
+  [ 5] .gnu.version      VERSYM          0000000000000568 000568 00002a 02   A  3   0  2
+  [ 6] .gnu.version_r    VERNEED         0000000000000598 000598 000040 00   A  4   2  8
+  [ 7] .rela.dyn         RELA            00000000000005d8 0005d8 0000a8 18   A  3   0  8
+  [ 8] .rela.plt         RELA            0000000000000680 000680 0000f0 18  AI  3  19  8
+  [ 9] .plt              PROGBITS        0000000000000770 000770 0000c0 10  AX  0   0 16
+  [10] .text             PROGBITS        0000000000000830 000830 0002f8 00  AX  0   0  4
+  [11] .rodata           PROGBITS        0000000000000b28 000b28 0000bd 01 AMS  0   0  1
+  [12] .eh_frame_hdr     PROGBITS        0000000000000be8 000be8 000024 00   A  0   0  4
+  [13] .eh_frame         PROGBITS        0000000000000c10 000c10 000078 00   A  0   0  8
+  [14] .note.android.ident NOTE            0000000000000c88 000c88 000098 00   A  0   0  4
+  [15] .init_array       INIT_ARRAY      0000000000010d20 000d20 000008 08  WA  0   0  1
+  [16] .fini_array       FINI_ARRAY      0000000000010d28 000d28 000010 08  WA  0   0  8
+  [17] .dynamic          DYNAMIC         0000000000010d38 000d38 0001f0 10  WA  4   0  8
+  [18] .got              PROGBITS        0000000000010f28 000f28 000008 08  WA  0   0  8
+  [19] .got.plt          PROGBITS        0000000000010f30 000f30 000068 08  WA  0   0  8
+  [20] .data             PROGBITS        0000000000010f98 000f98 000038 00  WA  0   0  8
+  [21] .bss              NOBITS          0000000000010fd0 000fd0 000008 00  WA  0   0  8
+  [22] .comment          PROGBITS        0000000000000000 000fd0 000064 01  MS  0   0  1
+  [23] .note.unity       NOTE            0000000000000000 001034 000038 00      0   0  1
+  [24] .gnu_debuglink    PROGBITS        0000000000000000 00106c 000014 00      0   0  1
+  [25] .shstrtab         STRTAB          0000000000000000 001080 0000fc 00      0   0  1
+Key to Flags:
+  W (write), A (alloc), X (execute), M (merge), S (strings), I (info),
+  L (link order), O (extra OS processing required), G (group), T (TLS),
+  C (compressed), x (unknown), o (OS specific), E (exclude),
+  D (mbind), p (processor specific)
+
+Program Headers:
+  Type           Offset   VirtAddr           PhysAddr           FileSiz  MemSiz   Flg Align
+  LOAD           0x000000 0x0000000000000000 0x0000000000000000 0x000d20 0x000d20 R E 0x10000
+  LOAD           0x000d20 0x0000000000010d20 0x0000000000010d20 0x0002b0 0x0002b8 RW  0x10000
+  DYNAMIC        0x000d38 0x0000000000010d38 0x0000000000010d38 0x0001f0 0x0001f0 RW  0x8
+  NOTE           0x0001c8 0x00000000000001c8 0x00000000000001c8 0x000024 0x000024 R   0x4
+  NOTE           0x000c88 0x0000000000000c88 0x0000000000000c88 0x000098 0x000098 R   0x4
+  GNU_EH_FRAME   0x000be8 0x0000000000000be8 0x0000000000000be8 0x000024 0x000024 R   0x4
+  GNU_STACK      0x000000 0x0000000000000000 0x0000000000000000 0x000000 0x000000 RW  0x10
+
+ Section to Segment mapping:
+  Segment Sections...
+   00     .note.gnu.build-id .hash .dynsym .dynstr .gnu.version .gnu.version_r .rela.dyn .rela.plt .plt .text .rodata .eh_frame_hdr .eh_frame .note.android.ident 
+   01     .init_array .fini_array .dynamic .got .got.plt .data .bss 
+   02     .dynamic 
+   03     .note.gnu.build-id 
+   04     .note.android.ident 
+   05     .eh_frame_hdr 
+   06     
+
+Dynamic section at offset 0xd38 contains 27 entries:
+  Tag        Type                         Name/Value
+ 0x0000000000000001 (NEEDED)             Shared library: [liblog.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libstdc++.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libm.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libdl.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libc.so]
+ 0x000000000000000e (SONAME)             Library soname: [libmain.so]
+ 0x0000000000000019 (INIT_ARRAY)         0x10d20
+ 0x000000000000001b (INIT_ARRAYSZ)       8 (bytes)
+ 0x000000000000001a (FINI_ARRAY)         0x10d28
+ 0x000000000000001c (FINI_ARRAYSZ)       16 (bytes)
+ 0x0000000000000004 (HASH)               0x1f0
+ 0x0000000000000005 (STRTAB)             0x488
+ 0x0000000000000006 (SYMTAB)             0x290
+ 0x000000000000000a (STRSZ)              223 (bytes)
+ 0x000000000000000b (SYMENT)             24 (bytes)
+ 0x0000000000000003 (PLTGOT)             0x10f30
+ 0x0000000000000002 (PLTRELSZ)           240 (bytes)
+ 0x0000000000000014 (PLTREL)             RELA
+ 0x0000000000000017 (JMPREL)             0x680
+ 0x0000000000000007 (RELA)               0x5d8
+ 0x0000000000000008 (RELASZ)             168 (bytes)
+ 0x0000000000000009 (RELAENT)            24 (bytes)
+ 0x000000006ffffffe (VERNEED)            0x598
+ 0x000000006fffffff (VERNEEDNUM)         2
+ 0x000000006ffffff0 (VERSYM)             0x568
+ 0x000000006ffffff9 (RELACOUNT)          7
+ 0x0000000000000000 (NULL)               0x0
+
+Relocation section '.rela.dyn' at offset 0x5d8 contains 7 entries:
+    Offset             Info             Type               Symbol's Value  Symbol's Name + Addend
+0000000000010d28  0000000000000403 R_AARCH64_RELATIVE                        830
+0000000000010fa0  0000000000000403 R_AARCH64_RELATIVE                        be0
+0000000000010fa8  0000000000000403 R_AARCH64_RELATIVE                        b48
+0000000000010fb0  0000000000000403 R_AARCH64_RELATIVE                        8cc
+0000000000010fb8  0000000000000403 R_AARCH64_RELATIVE                        b5e
+0000000000010fc0  0000000000000403 R_AARCH64_RELATIVE                        b65
+0000000000010fc8  0000000000000403 R_AARCH64_RELATIVE                        a9c
+
+Relocation section '.rela.plt' at offset 0x680 contains 10 entries:
+    Offset             Info             Type               Symbol's Value  Symbol's Name + Addend
+0000000000010f48  0000000700000402 R_AARCH64_JUMP_SLOT    0000000000000000 __cxa_finalize@LIBC + 0
+0000000000010f50  0000000800000402 R_AARCH64_JUMP_SLOT    0000000000000000 snprintf@LIBC + 0
+0000000000010f58  0000000a00000402 R_AARCH64_JUMP_SLOT    0000000000000000 __stack_chk_fail@LIBC + 0
+0000000000010f60  0000000b00000402 R_AARCH64_JUMP_SLOT    0000000000000000 dlclose@LIBC + 0
+0000000000010f68  0000000c00000402 R_AARCH64_JUMP_SLOT    0000000000000000 dlsym@LIBC + 0
+0000000000010f70  0000000e00000402 R_AARCH64_JUMP_SLOT    0000000000000000 dlerror@LIBC + 0
+0000000000010f78  0000001000000402 R_AARCH64_JUMP_SLOT    0000000000000000 dlopen@LIBC + 0
+0000000000010f80  0000001100000402 R_AARCH64_JUMP_SLOT    0000000000000000 malloc@LIBC + 0
+0000000000010f88  0000001200000402 R_AARCH64_JUMP_SLOT    0000000000000000 memcpy@LIBC + 0
+0000000000010f90  0000001400000402 R_AARCH64_JUMP_SLOT    0000000000000000 free@LIBC + 0
+
+Symbol table '.dynsym' contains 21 entries:
+   Num:    Value          Size Type    Bind   Vis      Ndx Name
+     0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+     1: 0000000000000830     0 SECTION LOCAL  DEFAULT   10 .text
+     2: 0000000000010f98     0 SECTION LOCAL  DEFAULT   20 .data
+     3: 0000000000010fd0     0 NOTYPE  LOCAL  DEFAULT  ABS __bss_start
+readelf: Warning: local symbol 3 found at index >= .dynsym's sh_info value of 3
+     4: 0000000000010fd0     0 NOTYPE  LOCAL  DEFAULT  ABS _edata
+readelf: Warning: local symbol 4 found at index >= .dynsym's sh_info value of 3
+     5: 0000000000010fd8     0 NOTYPE  LOCAL  DEFAULT  ABS _end
+readelf: Warning: local symbol 5 found at index >= .dynsym's sh_info value of 3
+     6: 0000000000010fd8     0 NOTYPE  GLOBAL DEFAULT  ABS _bss_end__
+     7: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND __cxa_finalize@LIBC (2)
+     8: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND snprintf@LIBC (2)
+     9: 000000000000083c   144 FUNC    GLOBAL DEFAULT   10 JNI_OnLoad
+    10: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND __stack_chk_fail@LIBC (2)
+    11: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND dlclose@LIBC (3)
+    12: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND dlsym@LIBC (3)
+    13: 0000000000010fd8     0 NOTYPE  GLOBAL DEFAULT  ABS __end__
+    14: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND dlerror@LIBC (3)
+    15: 0000000000010fd0     0 NOTYPE  GLOBAL DEFAULT  ABS __bss_start__
+    16: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND dlopen@LIBC (3)
+    17: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND malloc@LIBC (2)
+    18: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND memcpy@LIBC (2)
+    19: 0000000000010fd8     0 NOTYPE  GLOBAL DEFAULT  ABS __bss_end__
+    20: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND free@LIBC (2)

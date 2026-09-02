@@ -1,0 +1,138 @@
+[
+  {
+    "name": "libAudioPlayer.so",
+    "size": 26376,
+    "sha256": "b9f3357a830b67dd817efc2de2e78dd8cec5d98eeecf63a0346e27bc37a601d0",
+    "is_elf": true,
+    "first_32_bytes_hex": "7f454c460201010000000000000000000300b700010000006022000000000000",
+    "entropy_bits_per_byte": 5.045619
+  },
+  {
+    "name": "libBlueDoveMediaRender.so",
+    "size": 132792,
+    "sha256": "f0781a3f5e8002a8e2a25baf7f030262735f5dfefb6960aea7187b4985345d6c",
+    "is_elf": true,
+    "first_32_bytes_hex": "7f454c460201010000000000000000000300b7000100000060ae000000000000",
+    "entropy_bits_per_byte": 5.576888
+  },
+  {
+    "name": "libFirebaseCppApp-6.2.0.so",
+    "size": 3974032,
+    "sha256": "e2b71ede73746c3e70f43daeace13519bfe4a2dea88ce4d9df2c0c81a037c731",
+    "is_elf": true,
+    "first_32_bytes_hex": "7f454c460201010000000000000000000300b700010000000030170000000000",
+    "entropy_bits_per_byte": 5.91761
+  },
+  {
+    "name": "libFirebaseCppMessaging.so",
+    "size": 108744,
+    "sha256": "880c4f88aec36c6e7ecc6f0a9dcd0b2978925fa373e71c06bd6a24f24c40f36b",
+    "is_elf": true,
+    "first_32_bytes_hex": "7f454c460201010000000000000000000300b700010000000090000000000000",
+    "entropy_bits_per_byte": 5.4469
+  },
+  {
+    "name": "libSmartBeatNdk.so",
+    "size": 272384,
+    "sha256": "c14f9a52a76198a1f38058061a0f3705458802f0cae8db7c0d3318cd22c60279",
+    "is_elf": true,
+    "first_32_bytes_hex": "7f454c460201010000000000000000000300b7000100000010ac000000000000",
+    "entropy_bits_per_byte": 6.050487
+  },
+  {
+    "name": "lib_burst_generated.so",
+    "size": 26688,
+    "sha256": "109a4e954db8ecee20254d264747fe40d885191f57811cef4a455fbdf246e361",
+    "is_elf": true,
+    "first_32_bytes_hex": "7f454c460201010000000000000000000300b70001000000a007000000000000",
+    "entropy_bits_per_byte": 6.46336
+  },
+  {
+    "name": "libcompatible.so",
+    "size": 1935632,
+    "sha256": "8880c415e1ab82c31858be68ce12b76b95dc8ff8875b76c1246a8bc0679647bc",
+    "is_elf": true,
+    "first_32_bytes_hex": "7f454c460201010000000000000000000300b7000100000000bb080000000000",
+    "entropy_bits_per_byte": 6.858902
+  },
+  {
+    "name": "libcompatible_x86.so",
+    "size": 2026048,
+    "sha256": "6cca8c7be501e0fe8560cc229dec1b986f389832fdf83f11d068793a386f7e02",
+    "is_elf": true,
+    "first_32_bytes_hex": "7f454c4602010100000000000000000003003e00010000000000000000000000",
+    "entropy_bits_per_byte": 6.756626
+  },
+  {
+    "name": "libcri_ware_unity.so",
+    "size": 1749416,
+    "sha256": "7177b20a9a6d743fdc216120b1948e46db7722ca3adcaaeb37a90d895ee5024c",
+    "is_elf": true,
+    "first_32_bytes_hex": "7f454c460201010000000000000000000300b7000100000000ae010000000000",
+    "entropy_bits_per_byte": 6.582009
+  },
+  {
+    "name": "libengine-hlp.so",
+    "size": 236400,
+    "sha256": "ceb581eda775b8a2dfa53483e7a994d4bda25e99c3565ad95cad5c2bd16b1b2e",
+    "is_elf": true,
+    "first_32_bytes_hex": "7f454c4602010100000000000000000003003e00010000000000000000000000",
+    "entropy_bits_per_byte": 6.33633
+  },
+  {
+    "name": "libengine.so",
+    "size": 2047352,
+    "sha256": "e90d5ebea78bcc0dcf18c64b354782d567eb9da271a445e24212220a4eae27b7",
+    "is_elf": false,
+    "first_32_bytes_hex": "01eeec000000000000000000f8211e00b10cf30058825f08024e6921ee958924",
+    "entropy_bits_per_byte": 6.624598
+  },
+  {
+    "name": "libgpg.so",
+    "size": 3718560,
+    "sha256": "209f0f0681ac695bf301f9548893a773a0921260244701b7c91ee70755f3385b",
+    "is_elf": true,
+    "first_32_bytes_hex": "7f454c460201010000000000000000000300b70001000000b0d1180000000000",
+    "entropy_bits_per_byte": 6.0125
+  },
+  {
+    "name": "libil2cpp.so",
+    "size": 105866464,
+    "sha256": "1a774f6ddf828179b94d40294a01b5ea6b9c8bc89769d36719bec7d56c167acf",
+    "is_elf": true,
+    "first_32_bytes_hex": "7f454c460201010000000000000000000300b7000100000040b3490100000000",
+    "entropy_bits_per_byte": 5.48064
+  },
+  {
+    "name": "libmain.so",
+    "size": 6144,
+    "sha256": "cd8d5e25bcfb7714b19557af90b2512c6dd4d88860978d0d514abd3e5b55b5f9",
+    "is_elf": true,
+    "first_32_bytes_hex": "7f454c460201010000000000000000000300b700010000003008000000000000",
+    "entropy_bits_per_byte": 3.639925
+  },
+  {
+    "name": "libstub.so",
+    "size": 813143,
+    "sha256": "041c81c97b77bc182c08207a6ac174e422795c9857c5d71076b16ec48dde201b",
+    "is_elf": true,
+    "first_32_bytes_hex": "7f454c460201010000000000000000000300b70001000000d0b9020000000000",
+    "entropy_bits_per_byte": 7.001904
+  },
+  {
+    "name": "libunity.so",
+    "size": 15971328,
+    "sha256": "af8b49e0ed592fcec99e0f6ebc33e86dfa7647abe9d476c70a199fd53ea03051",
+    "is_elf": true,
+    "first_32_bytes_hex": "7f454c460201010000000000000000000300b70001000000d0240a0000000000",
+    "entropy_bits_per_byte": 6.806003
+  },
+  {
+    "name": "libzipw.so",
+    "size": 357064,
+    "sha256": "e3b17ccc6f8ffa40d6cd588ecd9d4846271ad1337c9af4f853a06f54b814288f",
+    "is_elf": true,
+    "first_32_bytes_hex": "7f454c460201010000000000000000000300b70001000000f066000000000000",
+    "entropy_bits_per_byte": 6.583522
+  }
+]

@@ -1,0 +1,1380 @@
+{
+  "libraries": [
+    {
+      "path": "libcompatible.so",
+      "sha256": "8880c415e1ab82c31858be68ce12b76b95dc8ff8875b76c1246a8bc0679647bc",
+      "size": 1935632,
+      "elf_class": 64,
+      "machine": "EM_AARCH64",
+      "entry": 572160,
+      "needed": [],
+      "imports": [],
+      "exports": [],
+      "interesting_imports": [],
+      "sections": [
+        {
+          "name": "",
+          "type": "SHT_DYNSYM",
+          "offset": 466648,
+          "address": 466648,
+          "size": 14328,
+          "flags": 2
+        },
+        {
+          "name": "",
+          "type": "SHT_STRTAB",
+          "offset": 480976,
+          "address": 480976,
+          "size": 15400,
+          "flags": 2
+        },
+        {
+          "name": "",
+          "type": "SHT_DYNAMIC",
+          "offset": 1922000,
+          "address": 1987536,
+          "size": 560,
+          "flags": 3
+        },
+        {
+          "name": "",
+          "type": "SHT_STRTAB",
+          "offset": 1934661,
+          "address": 0,
+          "size": 714,
+          "flags": 0
+        }
+      ],
+      "segments": [
+        {
+          "type": "PT_LOAD",
+          "offset": 0,
+          "vaddr": 0,
+          "filesz": 1900748,
+          "memsz": 1900748,
+          "flags": 5
+        },
+        {
+          "type": "PT_LOAD",
+          "offset": 1900752,
+          "vaddr": 1966288,
+          "filesz": 33800,
+          "memsz": 191768,
+          "flags": 6
+        },
+        {
+          "type": "PT_DYNAMIC",
+          "offset": 1922000,
+          "vaddr": 1987536,
+          "filesz": 560,
+          "memsz": 560,
+          "flags": 6
+        },
+        {
+          "type": "PT_NOTE",
+          "offset": 462128,
+          "vaddr": 462128,
+          "filesz": 36,
+          "memsz": 36,
+          "flags": 4
+        },
+        {
+          "type": "PT_GNU_EH_FRAME",
+          "offset": 1664840,
+          "vaddr": 1664840,
+          "filesz": 28276,
+          "memsz": 28276,
+          "flags": 4
+        },
+        {
+          "type": "PT_GNU_STACK",
+          "offset": 0,
+          "vaddr": 0,
+          "filesz": 0,
+          "memsz": 0,
+          "flags": 6
+        }
+      ],
+      "relocations": [],
+      "plt_call_map_assumption": "AArch64 .plt: 32-byte PLT0 + 16-byte entries in .rela.plt order",
+      "interesting_plt_calls": [],
+      "interesting_plt_calls_by_symbol": {},
+      "interesting_strings": {
+        "procfs": [
+          {
+            "file_offset": 1528401,
+            "text": "/proc/self/maps"
+          },
+          {
+            "file_offset": 1634668,
+            "text": "/proc/%d/fd/%d"
+          }
+        ],
+        "appguard": [
+          {
+            "file_offset": 1933548,
+            "text": "#Lcom/inca/security/AppGuard/xClass;"
+          }
+        ],
+        "loader": [
+          {
+            "file_offset": 482447,
+            "text": "dlopen"
+          },
+          {
+            "file_offset": 482454,
+            "text": "dlsym"
+          },
+          {
+            "file_offset": 489223,
+            "text": "asm_mmap2"
+          },
+          {
+            "file_offset": 489278,
+            "text": "asm_mprotect"
+          },
+          {
+            "file_offset": 496354,
+            "text": "libcompatible.so"
+          }
+        ],
+        "anti_debug": [
+          {
+            "file_offset": 489397,
+            "text": "asm_ptrace"
+          },
+          {
+            "file_offset": 1656976,
+            "text": "Friday"
+          }
+        ],
+        "crypto": [
+          {
+            "file_offset": 483200,
+            "text": "crc32"
+          },
+          {
+            "file_offset": 487421,
+            "text": "_ZSt32__enable_shared_from_this_helperILN9__gnu_cxx12_Lock_policyE2EEvRKSt14__shared_countIXT_EEz"
+          },
+          {
+            "file_offset": 1532158,
+            "text": "md5WithRSAEncryption"
+          },
+          {
+            "file_offset": 1532179,
+            "text": "RSA with MD5"
+          },
+          {
+            "file_offset": 1532202,
+            "text": "sha-1WithRSAEncryption"
+          },
+          {
+            "file_offset": 1532225,
+            "text": "RSA with SHA1"
+          },
+          {
+            "file_offset": 1532249,
+            "text": "sha224WithRSAEncryption"
+          },
+          {
+            "file_offset": 1532273,
+            "text": "RSA with SHA-224"
+          },
+          {
+            "file_offset": 1532300,
+            "text": "sha256WithRSAEncryption"
+          },
+          {
+            "file_offset": 1532324,
+            "text": "RSA with SHA-256"
+          },
+          {
+            "file_offset": 1532351,
+            "text": "sha384WithRSAEncryption"
+          },
+          {
+            "file_offset": 1532375,
+            "text": "RSA with SHA-384"
+          },
+          {
+            "file_offset": 1532402,
+            "text": "sha512WithRSAEncryption"
+          },
+          {
+            "file_offset": 1532426,
+            "text": "RSA with SHA-512"
+          },
+          {
+            "file_offset": 1532480,
+            "text": "rsaEncryption"
+          },
+          {
+            "file_offset": 1532623,
+            "text": "id-md5"
+          },
+          {
+            "file_offset": 1532636,
+            "text": "id-sha1"
+          },
+          {
+            "file_offset": 1532644,
+            "text": "SHA-1"
+          },
+          {
+            "file_offset": 1532660,
+            "text": "id-sha224"
+          },
+          {
+            "file_offset": 1532680,
+            "text": "id-sha256"
+          },
+          {
+            "file_offset": 1532700,
+            "text": "id-sha384"
+          },
+          {
+            "file_offset": 1532720,
+            "text": "id-sha512"
+          },
+          {
+            "file_offset": 1532741,
+            "text": "pbeWithSHAAnd3-KeyTripleDES-CBC"
+          },
+          {
+            "file_offset": 1532773,
+            "text": "PBE with SHA1 and 3-Key 3DES"
+          },
+          {
+            "file_offset": 1532813,
+            "text": "pbeWithSHAAnd2-KeyTripleDES-CBC"
+          },
+          {
+            "file_offset": 1532845,
+            "text": "PBE with SHA1 and 2-Key 3DES"
+          },
+          {
+            "file_offset": 1537192,
+            "text": "CIPHER - The selected feature is not available"
+          },
+          {
+            "file_offset": 1537239,
+            "text": "CIPHER - Bad input parameters to function"
+          },
+          {
+            "file_offset": 1537281,
+            "text": "CIPHER - Failed to allocate memory"
+          },
+          {
+            "file_offset": 1537316,
+            "text": "CIPHER - Input data contains invalid padding and is rejected"
+          },
+          {
+            "file_offset": 1537377,
+            "text": "CIPHER - Decryption of block requires a full block"
+          },
+          {
+            "file_offset": 1537428,
+            "text": "CIPHER - Authentication failed (for AEAD modes)"
+          },
+          {
+            "file_offset": 1537476,
+            "text": "CIPHER - The context is invalid, eg because it was free()ed"
+          },
+          {
+            "file_offset": 1538188,
+            "text": "PEM - Unsupported key encryption algorithm"
+          },
+          {
+            "file_offset": 1538273,
+            "text": "PEM - Given private key password does not allow for correct decryption"
+          },
+          {
+            "file_offset": 1538344,
+            "text": "PEM - Unavailable feature, e.g. hashing/encryption combination"
+          },
+          {
+            "file_offset": 1538476,
+            "text": "PK - Type mismatch, eg attempt to encrypt with an ECDSA key"
+          },
+          {
+            "file_offset": 1538771,
+            "text": "PK - Given private key password does not allow for correct decryption"
+          },
+          {
+            "file_offset": 1539187,
+            "text": "PKCS12 - Feature not available, e.g. unsupported encryption scheme"
+          },
+          {
+            "file_offset": 1539294,
+            "text": "PKCS12 - Given private key password does not allow for correct decryption"
+          },
+          {
+            "file_offset": 1539439,
+            "text": "PKCS5 - Requested encryption or digest alg not available"
+          },
+          {
+            "file_offset": 1539496,
+            "text": "PKCS5 - Given private key password does not allow for correct decryption"
+          },
+          {
+            "file_offset": 1539884,
+            "text": "RSA - The output buffer for decryption is not large enough"
+          },
+          {
+            "file_offset": 1540207,
+            "text": "SSL - An unknown cipher was received"
+          },
+          {
+            "file_offset": 1540244,
+            "text": "SSL - The server has no ciphersuites in common with the client"
+          },
+          {
+            "file_offset": 1540582,
+            "text": "SSL - The own private key or pre-shared key is not set, but needed"
+          },
+          {
+            "file_offset": 1540916,
+            "text": "SSL - Processing of the ClientHello handshake message failed"
+          },
+          {
+            "file_offset": 1540977,
+            "text": "SSL - Processing of the ServerHello handshake message failed"
+          },
+          {
+            "file_offset": 1541038,
+            "text": "SSL - Processing of the Certificate handshake message failed"
+          },
+          {
+            "file_offset": 1541099,
+            "text": "SSL - Processing of the CertificateRequest handshake message failed"
+          },
+          {
+            "file_offset": 1541167,
+            "text": "SSL - Processing of the ServerKeyExchange handshake message failed"
+          },
+          {
+            "file_offset": 1541234,
+            "text": "SSL - Processing of the ServerHelloDone handshake message failed"
+          },
+          {
+            "file_offset": 1541299,
+            "text": "SSL - Processing of the ClientKeyExchange handshake message failed"
+          },
+          {
+            "file_offset": 1541366,
+            "text": "SSL - Processing of the ClientKeyExchange handshake message failed in DHM / ECDH Read Public"
+          },
+          {
+            "file_offset": 1541459,
+            "text": "SSL - Processing of the ClientKeyExchange handshake message failed in DHM / ECDH Calculate Secret"
+          },
+          {
+            "file_offset": 1541557,
+            "text": "SSL - Processing of the CertificateVerify handshake message failed"
+          },
+          {
+            "file_offset": 1541624,
+            "text": "SSL - Processing of the ChangeCipherSpec handshake message failed"
+          },
+          {
+            "file_offset": 1541690,
+            "text": "SSL - Processing of the Finished handshake message failed"
+          },
+          {
+            "file_offset": 1541958,
+            "text": "SSL - Handshake protocol not within min/max boundaries"
+          },
+          {
+            "file_offset": 1542013,
+            "text": "SSL - Processing of the NewSessionTicket handshake message failed"
+          },
+          {
+            "file_offset": 1542544,
+            "text": "SSL - None of the common ciphersuites is usable (eg, no suitable certificate, see debug messages)"
+          },
+          {
+            "file_offset": 1542980,
+            "text": "X509 - Unavailable feature, e.g. RSA hashing/encryption combination"
+          },
+          {
+            "file_offset": 1543997,
+            "text": "AES - Invalid key length"
+          },
+          {
+            "file_offset": 1544022,
+            "text": "AES - Invalid data input length"
+          }
+        ],
+        "metadata": []
+      }
+    },
+    {
+      "path": "libcompatible_x86.so",
+      "sha256": "6cca8c7be501e0fe8560cc229dec1b986f389832fdf83f11d068793a386f7e02",
+      "size": 2026048,
+      "elf_class": 64,
+      "machine": "EM_X86_64",
+      "entry": 0,
+      "needed": [],
+      "imports": [],
+      "exports": [],
+      "interesting_imports": [],
+      "sections": [
+        {
+          "name": "",
+          "type": "SHT_DYNSYM",
+          "offset": 570800,
+          "address": 570800,
+          "size": 14064,
+          "flags": 2
+        },
+        {
+          "name": "",
+          "type": "SHT_STRTAB",
+          "offset": 586197,
+          "address": 586197,
+          "size": 15445,
+          "flags": 2
+        },
+        {
+          "name": "",
+          "type": "SHT_DYNAMIC",
+          "offset": 2011464,
+          "address": 2011464,
+          "size": 640,
+          "flags": 3
+        },
+        {
+          "name": "",
+          "type": "SHT_STRTAB",
+          "offset": 2025060,
+          "address": 0,
+          "size": 728,
+          "flags": 0
+        }
+      ],
+      "segments": [
+        {
+          "type": "PT_PHDR",
+          "offset": 64,
+          "vaddr": 64,
+          "filesz": 392,
+          "memsz": 392,
+          "flags": 4
+        },
+        {
+          "type": "PT_LOAD",
+          "offset": 0,
+          "vaddr": 0,
+          "filesz": 1985720,
+          "memsz": 1985720,
+          "flags": 5
+        },
+        {
+          "type": "PT_LOAD",
+          "offset": 1986560,
+          "vaddr": 1986560,
+          "filesz": 38360,
+          "memsz": 138864,
+          "flags": 6
+        },
+        {
+          "type": "PT_DYNAMIC",
+          "offset": 2011464,
+          "vaddr": 2011464,
+          "filesz": 640,
+          "memsz": 640,
+          "flags": 6
+        },
+        {
+          "type": "PT_NOTE",
+          "offset": 489672,
+          "vaddr": 489672,
+          "filesz": 36,
+          "memsz": 36,
+          "flags": 4
+        },
+        {
+          "type": "PT_GNU_EH_FRAME",
+          "offset": 1755660,
+          "vaddr": 1755660,
+          "filesz": 28188,
+          "memsz": 28188,
+          "flags": 4
+        },
+        {
+          "type": "PT_GNU_STACK",
+          "offset": 0,
+          "vaddr": 0,
+          "filesz": 0,
+          "memsz": 0,
+          "flags": 6
+        }
+      ],
+      "relocations": [],
+      "plt_call_map_assumption": "AArch64 .plt: 32-byte PLT0 + 16-byte entries in .rela.plt order",
+      "interesting_plt_calls": [],
+      "interesting_plt_calls_by_symbol": {},
+      "interesting_strings": {
+        "procfs": [
+          {
+            "file_offset": 1712784,
+            "text": "/proc/self/maps"
+          },
+          {
+            "file_offset": 1732129,
+            "text": "/proc/%d/fd/%d"
+          }
+        ],
+        "appguard": [
+          {
+            "file_offset": 2023380,
+            "text": "#Lcom/inca/security/AppGuard/xClass;"
+          }
+        ],
+        "loader": [
+          {
+            "file_offset": 586226,
+            "text": "libcompatible.so"
+          },
+          {
+            "file_offset": 587766,
+            "text": "dlopen"
+          },
+          {
+            "file_offset": 587773,
+            "text": "dlsym"
+          },
+          {
+            "file_offset": 592613,
+            "text": "mprotect"
+          },
+          {
+            "file_offset": 594719,
+            "text": "asm_mmap2"
+          },
+          {
+            "file_offset": 594774,
+            "text": "asm_mprotect"
+          }
+        ],
+        "anti_debug": [
+          {
+            "file_offset": 594893,
+            "text": "asm_ptrace"
+          },
+          {
+            "file_offset": 1732864,
+            "text": "Friday"
+          }
+        ],
+        "crypto": [
+          {
+            "file_offset": 588695,
+            "text": "crc32"
+          },
+          {
+            "file_offset": 592894,
+            "text": "_ZSt32__enable_shared_from_this_helperILN9__gnu_cxx12_Lock_policyE2EEvRKSt14__shared_countIXT_EEz"
+          },
+          {
+            "file_offset": 1714252,
+            "text": "md5WithRSAEncryption"
+          },
+          {
+            "file_offset": 1714273,
+            "text": "RSA with MD5"
+          },
+          {
+            "file_offset": 1714296,
+            "text": "sha-1WithRSAEncryption"
+          },
+          {
+            "file_offset": 1714319,
+            "text": "RSA with SHA1"
+          },
+          {
+            "file_offset": 1714343,
+            "text": "sha224WithRSAEncryption"
+          },
+          {
+            "file_offset": 1714367,
+            "text": "RSA with SHA-224"
+          },
+          {
+            "file_offset": 1714394,
+            "text": "sha256WithRSAEncryption"
+          },
+          {
+            "file_offset": 1714418,
+            "text": "RSA with SHA-256"
+          },
+          {
+            "file_offset": 1714445,
+            "text": "sha384WithRSAEncryption"
+          },
+          {
+            "file_offset": 1714469,
+            "text": "RSA with SHA-384"
+          },
+          {
+            "file_offset": 1714496,
+            "text": "sha512WithRSAEncryption"
+          },
+          {
+            "file_offset": 1714520,
+            "text": "RSA with SHA-512"
+          },
+          {
+            "file_offset": 1714574,
+            "text": "rsaEncryption"
+          },
+          {
+            "file_offset": 1714725,
+            "text": "id-md5"
+          },
+          {
+            "file_offset": 1714742,
+            "text": "id-sha1"
+          },
+          {
+            "file_offset": 1714750,
+            "text": "SHA-1"
+          },
+          {
+            "file_offset": 1714766,
+            "text": "id-sha224"
+          },
+          {
+            "file_offset": 1714776,
+            "text": "SHA-224"
+          },
+          {
+            "file_offset": 1714794,
+            "text": "id-sha256"
+          },
+          {
+            "file_offset": 1714804,
+            "text": "SHA-256"
+          },
+          {
+            "file_offset": 1714822,
+            "text": "id-sha384"
+          },
+          {
+            "file_offset": 1714832,
+            "text": "SHA-384"
+          },
+          {
+            "file_offset": 1714850,
+            "text": "id-sha512"
+          },
+          {
+            "file_offset": 1714860,
+            "text": "SHA-512"
+          },
+          {
+            "file_offset": 1714879,
+            "text": "pbeWithSHAAnd3-KeyTripleDES-CBC"
+          },
+          {
+            "file_offset": 1714911,
+            "text": "PBE with SHA1 and 3-Key 3DES"
+          },
+          {
+            "file_offset": 1714951,
+            "text": "pbeWithSHAAnd2-KeyTripleDES-CBC"
+          },
+          {
+            "file_offset": 1714983,
+            "text": "PBE with SHA1 and 2-Key 3DES"
+          },
+          {
+            "file_offset": 1715012,
+            "text": "CIPHER - The selected feature is not available"
+          },
+          {
+            "file_offset": 1715059,
+            "text": "CIPHER - Bad input parameters to function"
+          },
+          {
+            "file_offset": 1715101,
+            "text": "CIPHER - Failed to allocate memory"
+          },
+          {
+            "file_offset": 1715136,
+            "text": "CIPHER - Input data contains invalid padding and is rejected"
+          },
+          {
+            "file_offset": 1715197,
+            "text": "CIPHER - Decryption of block requires a full block"
+          },
+          {
+            "file_offset": 1715248,
+            "text": "CIPHER - Authentication failed (for AEAD modes)"
+          },
+          {
+            "file_offset": 1715296,
+            "text": "CIPHER - The context is invalid, eg because it was free()ed"
+          },
+          {
+            "file_offset": 1716008,
+            "text": "PEM - Unsupported key encryption algorithm"
+          },
+          {
+            "file_offset": 1716093,
+            "text": "PEM - Given private key password does not allow for correct decryption"
+          },
+          {
+            "file_offset": 1716164,
+            "text": "PEM - Unavailable feature, e.g. hashing/encryption combination"
+          },
+          {
+            "file_offset": 1716296,
+            "text": "PK - Type mismatch, eg attempt to encrypt with an ECDSA key"
+          },
+          {
+            "file_offset": 1716591,
+            "text": "PK - Given private key password does not allow for correct decryption"
+          },
+          {
+            "file_offset": 1717007,
+            "text": "PKCS12 - Feature not available, e.g. unsupported encryption scheme"
+          },
+          {
+            "file_offset": 1717114,
+            "text": "PKCS12 - Given private key password does not allow for correct decryption"
+          },
+          {
+            "file_offset": 1717259,
+            "text": "PKCS5 - Requested encryption or digest alg not available"
+          },
+          {
+            "file_offset": 1717316,
+            "text": "PKCS5 - Given private key password does not allow for correct decryption"
+          },
+          {
+            "file_offset": 1717704,
+            "text": "RSA - The output buffer for decryption is not large enough"
+          },
+          {
+            "file_offset": 1718027,
+            "text": "SSL - An unknown cipher was received"
+          },
+          {
+            "file_offset": 1718064,
+            "text": "SSL - The server has no ciphersuites in common with the client"
+          },
+          {
+            "file_offset": 1718402,
+            "text": "SSL - The own private key or pre-shared key is not set, but needed"
+          },
+          {
+            "file_offset": 1718736,
+            "text": "SSL - Processing of the ClientHello handshake message failed"
+          },
+          {
+            "file_offset": 1718797,
+            "text": "SSL - Processing of the ServerHello handshake message failed"
+          },
+          {
+            "file_offset": 1718858,
+            "text": "SSL - Processing of the Certificate handshake message failed"
+          },
+          {
+            "file_offset": 1718919,
+            "text": "SSL - Processing of the CertificateRequest handshake message failed"
+          },
+          {
+            "file_offset": 1718987,
+            "text": "SSL - Processing of the ServerKeyExchange handshake message failed"
+          },
+          {
+            "file_offset": 1719054,
+            "text": "SSL - Processing of the ServerHelloDone handshake message failed"
+          },
+          {
+            "file_offset": 1719119,
+            "text": "SSL - Processing of the ClientKeyExchange handshake message failed"
+          },
+          {
+            "file_offset": 1719186,
+            "text": "SSL - Processing of the ClientKeyExchange handshake message failed in DHM / ECDH Read Public"
+          },
+          {
+            "file_offset": 1719279,
+            "text": "SSL - Processing of the ClientKeyExchange handshake message failed in DHM / ECDH Calculate Secret"
+          },
+          {
+            "file_offset": 1719377,
+            "text": "SSL - Processing of the CertificateVerify handshake message failed"
+          },
+          {
+            "file_offset": 1719444,
+            "text": "SSL - Processing of the ChangeCipherSpec handshake message failed"
+          },
+          {
+            "file_offset": 1719510,
+            "text": "SSL - Processing of the Finished handshake message failed"
+          },
+          {
+            "file_offset": 1719778,
+            "text": "SSL - Handshake protocol not within min/max boundaries"
+          },
+          {
+            "file_offset": 1719833,
+            "text": "SSL - Processing of the NewSessionTicket handshake message failed"
+          },
+          {
+            "file_offset": 1720364,
+            "text": "SSL - None of the common ciphersuites is usable (eg, no suitable certificate, see debug messages)"
+          },
+          {
+            "file_offset": 1720800,
+            "text": "X509 - Unavailable feature, e.g. RSA hashing/encryption combination"
+          },
+          {
+            "file_offset": 1721817,
+            "text": "AES - Invalid key length"
+          },
+          {
+            "file_offset": 1721842,
+            "text": "AES - Invalid data input length"
+          }
+        ],
+        "metadata": []
+      }
+    },
+    {
+      "path": "libengine-hlp.so",
+      "sha256": "ceb581eda775b8a2dfa53483e7a994d4bda25e99c3565ad95cad5c2bd16b1b2e",
+      "size": 236400,
+      "elf_class": 64,
+      "machine": "EM_X86_64",
+      "entry": 0,
+      "needed": [],
+      "imports": [],
+      "exports": [],
+      "interesting_imports": [],
+      "sections": [
+        {
+          "name": "",
+          "type": "SHT_DYNSYM",
+          "offset": 32256,
+          "address": 32256,
+          "size": 4896,
+          "flags": 2
+        },
+        {
+          "name": "",
+          "type": "SHT_STRTAB",
+          "offset": 37937,
+          "address": 37937,
+          "size": 4598,
+          "flags": 2
+        },
+        {
+          "name": "",
+          "type": "SHT_DYNAMIC",
+          "offset": 233624,
+          "address": 233624,
+          "size": 656,
+          "flags": 3
+        },
+        {
+          "name": "",
+          "type": "SHT_STRTAB",
+          "offset": 235692,
+          "address": 0,
+          "size": 445,
+          "flags": 0
+        }
+      ],
+      "segments": [
+        {
+          "type": "PT_PHDR",
+          "offset": 64,
+          "vaddr": 64,
+          "filesz": 392,
+          "memsz": 392,
+          "flags": 4
+        },
+        {
+          "type": "PT_LOAD",
+          "offset": 0,
+          "vaddr": 0,
+          "filesz": 228312,
+          "memsz": 228312,
+          "flags": 5
+        },
+        {
+          "type": "PT_LOAD",
+          "offset": 229376,
+          "vaddr": 229376,
+          "filesz": 6248,
+          "memsz": 81260,
+          "flags": 6
+        },
+        {
+          "type": "PT_DYNAMIC",
+          "offset": 233624,
+          "vaddr": 233624,
+          "filesz": 656,
+          "memsz": 656,
+          "flags": 6
+        },
+        {
+          "type": "PT_NOTE",
+          "offset": 21252,
+          "vaddr": 21252,
+          "filesz": 36,
+          "memsz": 36,
+          "flags": 4
+        },
+        {
+          "type": "PT_GNU_EH_FRAME",
+          "offset": 209056,
+          "vaddr": 209056,
+          "filesz": 2812,
+          "memsz": 2812,
+          "flags": 4
+        },
+        {
+          "type": "PT_GNU_STACK",
+          "offset": 0,
+          "vaddr": 0,
+          "filesz": 0,
+          "memsz": 0,
+          "flags": 6
+        }
+      ],
+      "relocations": [],
+      "plt_call_map_assumption": "AArch64 .plt: 32-byte PLT0 + 16-byte entries in .rela.plt order",
+      "interesting_plt_calls": [],
+      "interesting_plt_calls_by_symbol": {},
+      "interesting_strings": {
+        "procfs": [
+          {
+            "file_offset": 200039,
+            "text": "/proc/self/maps"
+          }
+        ],
+        "appguard": [],
+        "loader": [
+          {
+            "file_offset": 37966,
+            "text": "libengine-hlp.so"
+          },
+          {
+            "file_offset": 38256,
+            "text": "asm_mprotect"
+          },
+          {
+            "file_offset": 38405,
+            "text": "asm_mmap"
+          }
+        ],
+        "anti_debug": [
+          {
+            "file_offset": 38570,
+            "text": "asm_ptrace"
+          }
+        ],
+        "crypto": [],
+        "metadata": []
+      }
+    },
+    {
+      "path": "libstub.so",
+      "sha256": "041c81c97b77bc182c08207a6ac174e422795c9857c5d71076b16ec48dde201b",
+      "size": 813143,
+      "elf_class": 64,
+      "machine": "EM_AARCH64",
+      "entry": 178640,
+      "needed": [
+        "liblog.so",
+        "libz.so",
+        "libdl.so",
+        "libc.so",
+        "libm.so",
+        "libstdc++.so",
+        "libcompatible.so"
+      ],
+      "imports": [],
+      "exports": [
+        "SoLibraryStart"
+      ],
+      "interesting_imports": [],
+      "sections": [
+        {
+          "name": ".dynsym",
+          "type": "SHT_DYNSYM",
+          "offset": 9928,
+          "address": 9928,
+          "size": 31776,
+          "flags": 2
+        },
+        {
+          "name": ".dynstr",
+          "type": "SHT_STRTAB",
+          "offset": 41704,
+          "address": 41704,
+          "size": 48204,
+          "flags": 2
+        },
+        {
+          "name": ".dynamic",
+          "type": "SHT_DYNAMIC",
+          "offset": 265296,
+          "address": 269392,
+          "size": 544,
+          "flags": 3
+        },
+        {
+          "name": ".shstrtab",
+          "type": "SHT_STRTAB",
+          "offset": 273469,
+          "address": 0,
+          "size": 227,
+          "flags": 0
+        }
+      ],
+      "segments": [
+        {
+          "type": "PT_LOAD",
+          "offset": 0,
+          "vaddr": 0,
+          "filesz": 264960,
+          "memsz": 264960,
+          "flags": 5
+        },
+        {
+          "type": "PT_LOAD",
+          "offset": 264960,
+          "vaddr": 269056,
+          "filesz": 8400,
+          "memsz": 8400,
+          "flags": 6
+        },
+        {
+          "type": "PT_DYNAMIC",
+          "offset": 265296,
+          "vaddr": 269392,
+          "filesz": 544,
+          "memsz": 544,
+          "flags": 6
+        },
+        {
+          "type": "PT_NOTE",
+          "offset": 456,
+          "vaddr": 456,
+          "filesz": 36,
+          "memsz": 36,
+          "flags": 4
+        },
+        {
+          "type": "PT_GNU_EH_FRAME",
+          "offset": 1026776,
+          "vaddr": 1026776,
+          "filesz": 21796,
+          "memsz": 21796,
+          "flags": 4
+        },
+        {
+          "type": "PT_GNU_STACK",
+          "offset": 0,
+          "vaddr": 0,
+          "filesz": 0,
+          "memsz": 0,
+          "flags": 6
+        },
+        {
+          "type": "PT_GNU_RELRO",
+          "offset": 264960,
+          "vaddr": 269056,
+          "filesz": 8144,
+          "memsz": 8144,
+          "flags": 4
+        }
+      ],
+      "relocations": [],
+      "plt_call_map_assumption": "AArch64 .plt: 32-byte PLT0 + 16-byte entries in .rela.plt order",
+      "interesting_plt_calls": [],
+      "interesting_plt_calls_by_symbol": {},
+      "interesting_strings": {
+        "procfs": [],
+        "appguard": [],
+        "loader": [
+          {
+            "file_offset": 41706,
+            "text": "libcompatible.so"
+          },
+          {
+            "file_offset": 89892,
+            "text": "libstub.so"
+          }
+        ],
+        "anti_debug": [],
+        "crypto": [],
+        "metadata": []
+      }
+    }
+  ],
+  "smali": {
+    "appguard_class_count": 13,
+    "classes": [
+      "Lcom/inca/security/Core/ObjectReflector;",
+      "Lcom/inca/security/DexProtect/Binder;",
+      "Lcom/inca/security/DexProtect/SupportActivity$1;",
+      "Lcom/inca/security/DexProtect/SupportActivity;",
+      "Lcom/inca/security/IiiIiiiiiI;",
+      "Lcom/inca/security/Proxy/AppGuardFrontApplication;",
+      "Lcom/inca/security/Proxy/AppGuardProxyApplication;",
+      "Lcom/inca/security/Proxy/AppGuardProxyHandler;",
+      "Lcom/inca/security/Proxy/JNISoxProxy;",
+      "Lcom/inca/security/Proxy/iIiIiIiIii;",
+      "Lcom/inca/security/Service/AppGuardService;",
+      "Lcom/inca/security/Service/AppGuardServiceCaller;",
+      "Lcom/inca/security/iiIiiiiIIi;"
+    ],
+    "native_methods": [
+      {
+        "class": "Lcom/inca/security/Proxy/AppGuardFrontApplication;",
+        "method": "IiIiIiiIII(I)Ljava/lang/String;",
+        "flags": "private static native synthetic",
+        "file": "smali/com/inca/security/Proxy/AppGuardFrontApplication.smali",
+        "line": 912
+      },
+      {
+        "class": "Lcom/inca/security/Proxy/AppGuardProxyApplication;",
+        "method": "IiIiiIiIiI(Landroid/content/Context;)V",
+        "flags": "private native",
+        "file": "smali/com/inca/security/Proxy/AppGuardProxyApplication.smali",
+        "line": 16
+      },
+      {
+        "class": "Lcom/inca/security/Proxy/AppGuardProxyHandler;",
+        "method": "iiIiIIiIIi(Landroid/os/Message;)Z",
+        "flags": "private native",
+        "file": "smali/com/inca/security/Proxy/AppGuardProxyHandler.smali",
+        "line": 61
+      },
+      {
+        "class": "Lcom/inca/security/Proxy/iIiIiIiIii;",
+        "method": "IIiIiIiIiI(Ljava/lang/Object;I[Ljava/lang/Object;)J",
+        "flags": "public static varargs native",
+        "file": "smali/com/inca/security/Proxy/iIiIiIiIii.smali",
+        "line": 16
+      },
+      {
+        "class": "Lcom/inca/security/Proxy/iIiIiIiIii;",
+        "method": "IIiIiIiiII(Ljava/lang/Object;I[Ljava/lang/Object;)D",
+        "flags": "public static varargs native",
+        "file": "smali/com/inca/security/Proxy/iIiIiIiIii.smali",
+        "line": 19
+      },
+      {
+        "class": "Lcom/inca/security/Proxy/iIiIiIiIii;",
+        "method": "IIiIiIiiii(Ljava/lang/Object;I[Ljava/lang/Object;)[D",
+        "flags": "public static varargs native",
+        "file": "smali/com/inca/security/Proxy/iIiIiIiIii.smali",
+        "line": 22
+      },
+      {
+        "class": "Lcom/inca/security/Proxy/iIiIiIiIii;",
+        "method": "IiIIIiIIiI(Ljava/lang/Object;I[Ljava/lang/Object;)B",
+        "flags": "public static varargs native",
+        "file": "smali/com/inca/security/Proxy/iIiIiIiIii.smali",
+        "line": 33
+      },
+      {
+        "class": "Lcom/inca/security/Proxy/iIiIiIiIii;",
+        "method": "IiIiIiIIii(Ljava/lang/Object;I[Ljava/lang/Object;)[B",
+        "flags": "public static varargs native",
+        "file": "smali/com/inca/security/Proxy/iIiIiIiIii.smali",
+        "line": 36
+      },
+      {
+        "class": "Lcom/inca/security/Proxy/iIiIiIiIii;",
+        "method": "IiIiIiiIii(Ljava/lang/Object;I[Ljava/lang/Object;)C",
+        "flags": "public static varargs native",
+        "file": "smali/com/inca/security/Proxy/iIiIiIiIii.smali",
+        "line": 39
+      },
+      {
+        "class": "Lcom/inca/security/Proxy/iIiIiIiIii;",
+        "method": "IiiIiIiIiI(Ljava/lang/Object;I[Ljava/lang/Object;)[J",
+        "flags": "public static varargs native",
+        "file": "smali/com/inca/security/Proxy/iIiIiIiIii.smali",
+        "line": 42
+      },
+      {
+        "class": "Lcom/inca/security/Proxy/iIiIiIiIii;",
+        "method": "IiiiIiIIiI(Ljava/lang/Object;I[Ljava/lang/Object;)[Z",
+        "flags": "public static varargs native",
+        "file": "smali/com/inca/security/Proxy/iIiIiIiIii.smali",
+        "line": 45
+      },
+      {
+        "class": "Lcom/inca/security/Proxy/iIiIiIiIii;",
+        "method": "IiiiIiiiII(Ljava/lang/Object;I[Ljava/lang/Object;)V",
+        "flags": "public static varargs native",
+        "file": "smali/com/inca/security/Proxy/iIiIiIiIii.smali",
+        "line": 48
+      },
+      {
+        "class": "Lcom/inca/security/Proxy/iIiIiIiIii;",
+        "method": "IiiiIiiiii(Ljava/lang/Object;I[Ljava/lang/Object;)Z",
+        "flags": "public static varargs native",
+        "file": "smali/com/inca/security/Proxy/iIiIiIiIii.smali",
+        "line": 51
+      },
+      {
+        "class": "Lcom/inca/security/Proxy/iIiIiIiIii;",
+        "method": "iIIiIIiIiI(Ljava/lang/Object;I[Ljava/lang/Object;)[Ljava/lang/Object;",
+        "flags": "public static varargs native",
+        "file": "smali/com/inca/security/Proxy/iIiIiIiIii.smali",
+        "line": 63
+      },
+      {
+        "class": "Lcom/inca/security/Proxy/iIiIiIiIii;",
+        "method": "iIIiiIiIii(Ljava/lang/Object;I[Ljava/lang/Object;)Ljava/lang/Object;",
+        "flags": "public static varargs native",
+        "file": "smali/com/inca/security/Proxy/iIiIiIiIii.smali",
+        "line": 66
+      },
+      {
+        "class": "Lcom/inca/security/Proxy/iIiIiIiIii;",
+        "method": "iIiIIIiIII(Ljava/lang/Object;I[Ljava/lang/Object;)[S",
+        "flags": "public static varargs native",
+        "file": "smali/com/inca/security/Proxy/iIiIiIiIii.smali",
+        "line": 69
+      },
+      {
+        "class": "Lcom/inca/security/Proxy/iIiIiIiIii;",
+        "method": "iIiIIIiIii(Ljava/lang/Object;I[Ljava/lang/Object;)I",
+        "flags": "public static varargs native",
+        "file": "smali/com/inca/security/Proxy/iIiIiIiIii.smali",
+        "line": 72
+      },
+      {
+        "class": "Lcom/inca/security/Proxy/iIiIiIiIii;",
+        "method": "iIiIIIiiIi(Ljava/lang/Object;I[Ljava/lang/Object;)[I",
+        "flags": "public static varargs native",
+        "file": "smali/com/inca/security/Proxy/iIiIiIiIii.smali",
+        "line": 75
+      },
+      {
+        "class": "Lcom/inca/security/Proxy/iIiIiIiIii;",
+        "method": "iIiIIiIiiI(Landroid/content/Context;Ljava/lang/Object;)V",
+        "flags": "public static native",
+        "file": "smali/com/inca/security/Proxy/iIiIiIiIii.smali",
+        "line": 78
+      },
+      {
+        "class": "Lcom/inca/security/Proxy/iIiIiIiIii;",
+        "method": "iIiIiIiiII(Ljava/lang/Object;I[Ljava/lang/Object;)[F",
+        "flags": "public static varargs native",
+        "file": "smali/com/inca/security/Proxy/iIiIiIiIii.smali",
+        "line": 81
+      },
+      {
+        "class": "Lcom/inca/security/Proxy/iIiIiIiIii;",
+        "method": "iIiIiIiiIi(Ljava/lang/Object;I[Ljava/lang/Object;)F",
+        "flags": "public static varargs native",
+        "file": "smali/com/inca/security/Proxy/iIiIiIiIii.smali",
+        "line": 84
+      },
+      {
+        "class": "Lcom/inca/security/Proxy/iIiIiIiIii;",
+        "method": "iIiiIIiIiI(Ljava/lang/Object;I[Ljava/lang/Object;)S",
+        "flags": "public static varargs native",
+        "file": "smali/com/inca/security/Proxy/iIiIiIiIii.smali",
+        "line": 87
+      },
+      {
+        "class": "Lcom/inca/security/Proxy/iIiIiIiIii;",
+        "method": "iIiiIIiIii(Ljava/lang/Object;I[Ljava/lang/Object;)[C",
+        "flags": "public static varargs native",
+        "file": "smali/com/inca/security/Proxy/iIiIiIiIii.smali",
+        "line": 90
+      },
+      {
+        "class": "Lcom/inca/security/Proxy/iIiIiIiIii;",
+        "method": "iiIiIIIiII(J)Ljava/lang/Object;",
+        "flags": "public static native",
+        "file": "smali/com/inca/security/Proxy/iIiIiIiIii.smali",
+        "line": 93
+      },
+      {
+        "class": "Lcom/inca/security/Service/AppGuardService;",
+        "method": "IiiiIIiIIi(I)I",
+        "flags": "private native synthetic",
+        "file": "smali/com/inca/security/Service/AppGuardService.smali",
+        "line": 42
+      },
+      {
+        "class": "Lcom/inca/security/Service/AppGuardServiceCaller;",
+        "method": "IiiIiIiiIi(III)V",
+        "flags": "private static native synthetic",
+        "file": "smali/com/inca/security/Service/AppGuardServiceCaller.smali",
+        "line": 104
+      }
+    ],
+    "load_library_sites": [
+      {
+        "class": "Lcom/inca/security/Proxy/AppGuardFrontApplication;",
+        "method": "<clinit>()V",
+        "file": "smali/com/inca/security/Proxy/AppGuardFrontApplication.smali",
+        "line": 65
+      },
+      {
+        "class": "Lcom/inca/security/Proxy/AppGuardFrontApplication;",
+        "method": "IIiiIiIiIi()V",
+        "file": "smali/com/inca/security/Proxy/AppGuardFrontApplication.smali",
+        "line": 852
+      },
+      {
+        "class": "Lcom/inca/security/Proxy/JNISoxProxy;",
+        "method": "loadSecureLibrary(Ljava/lang/String;)V",
+        "file": "smali/com/inca/security/Proxy/JNISoxProxy.smali",
+        "line": 227
+      },
+      {
+        "class": "Lcom/inca/security/Proxy/JNISoxProxy;",
+        "method": "loadSecureLibrary(Ljava/lang/String;)V",
+        "file": "smali/com/inca/security/Proxy/JNISoxProxy.smali",
+        "line": 2179
+      },
+      {
+        "class": "Lcom/inca/security/Proxy/JNISoxProxy;",
+        "method": "loadSecureLibrary(Ljava/lang/String;)V",
+        "file": "smali/com/inca/security/Proxy/JNISoxProxy.smali",
+        "line": 2197
+      },
+      {
+        "class": "Lcom/inca/security/Proxy/iIiIiIiIii;",
+        "method": "Load(Ljava/lang/String;)V",
+        "file": "smali/com/inca/security/Proxy/iIiIiIiIii.smali",
+        "line": 58
+      }
+    ],
+    "interesting_literals": [
+      {
+        "class": "Lcom/inca/security/DexProtect/SupportActivity;",
+        "method": "onCreate(Landroid/os/Bundle;)V",
+        "file": "smali/com/inca/security/DexProtect/SupportActivity.smali",
+        "line": 105,
+        "literal": "AppGuard RunTime \\u517c\\u5bb9\\u6027"
+      },
+      {
+        "class": "Lcom/inca/security/DexProtect/SupportActivity;",
+        "method": "onCreate(Landroid/os/Bundle;)V",
+        "file": "smali/com/inca/security/DexProtect/SupportActivity.smali",
+        "line": 160,
+        "literal": "AppGuard Runtime Compatibility"
+      }
+    ]
+  }
+}
