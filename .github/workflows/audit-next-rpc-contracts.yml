@@ -16,75 +16,75 @@ jobs:
         with:
           fetch-depth: 1
       - run: git fetch origin client-decompiled-zh-fixed-v1 --depth=1
-      - name: Build compact client/server contract report
+      - name: Build focused remaining-RPC report
         shell: bash
         run: |
           set -euo pipefail
           git show origin/client-decompiled-zh-fixed-v1:il2cpp-dump/dump.cs > /tmp/dump.cs
+          git show origin/client-decompiled-zh-fixed-v1:il2cpp-dump/script.json > /tmp/script.json
           python - <<'PY' > /tmp/rpc-contract-audit.txt
           from pathlib import Path
-          import re
+          import re, json
 
-          dump = Path('/tmp/dump.cs').read_text(encoding='utf-8', errors='ignore')
-          lines = dump.splitlines()
+          lines = Path('/tmp/dump.cs').read_text(encoding='utf-8', errors='ignore').splitlines()
+          script = Path('/tmp/script.json').read_text(encoding='utf-8', errors='ignore')
 
-          needles = [
-              'ItemService.UseItem', 'UseItemArgs', 'UseItemReply',
-              'UseGiftForCard', 'UseGiftForIdolGift',
-              'BirthdayService.ExecuteBirthdayPresent', 'ExecuteBirthdayPresentArgs', 'ExecuteBirthdayPresentReply',
-              'IdolService.SetFavoriteCostume', 'SetFavoriteCostumeArgs', 'SetFavoriteCostumeReply',
-              'IdolService.GetSalesCostumeList', 'GetSalesCostumeListArgs', 'GetSalesCostumeListReply',
-              'PresentService.GetPresentHistory', 'GetPresentHistoryArgs', 'GetPresentHistoryReply',
-          ]
+          def emit_context(needle, before=45, after=90, cap=30):
+              hits=[i for i,l in enumerate(lines) if needle in l]
+              print(f'\n===== CONTEXT {needle} count={len(hits)} =====')
+              for n,i in enumerate(hits[:cap],1):
+                  lo=max(0,i-before); hi=min(len(lines),i+after+1)
+                  print(f'--- hit {n}: dump lines {lo+1}-{hi} ---')
+                  for j in range(lo,hi): print(f'{j+1}: {lines[j]}')
 
-          def contexts(needle, before=18, after=38, cap=20):
-              hits = [i for i, line in enumerate(lines) if needle in line]
-              print(f'\n===== {needle} (count={len(hits)}) =====')
-              for n, i in enumerate(hits[:cap], 1):
-                  lo=max(0, i-before); hi=min(len(lines), i+after+1)
-                  print(f'--- hit {n} lines {lo+1}-{hi} ---')
-                  for j in range(lo, hi):
-                      print(f'{j+1}: {lines[j]}')
+          def emit_class(name):
+              pat=re.compile(r'^public (?:sealed )?class '+re.escape(name)+r'\b')
+              hits=[i for i,l in enumerate(lines) if pat.match(l.strip())]
+              print(f'\n===== CLASS {name} count={len(hits)} =====')
+              for i in hits:
+                  depth=0; started=False
+                  for j in range(i,min(len(lines),i+240)):
+                      line=lines[j]
+                      print(f'{j+1}: {line}')
+                      depth += line.count('{')-line.count('}')
+                      if '{' in line: started=True
+                      if started and depth<=0: break
 
-          for needle in needles:
-              contexts(needle)
+          for name in [
+              'BirthdayStatus','PresentStatus','ResultIdol','IdolStatus',
+              'SalesCostumeStatus','CostumeStatus',
+              'SetFavoriteCostumeArgs','SetFavoriteCostumeReply',
+              'GetSalesCostumeListReply','ExecuteBirthdayPresentReply'
+          ]:
+              emit_class(name)
 
-          # Find the surrounding class for each DTO/method occurrence, with a bounded block.
-          for needle in needles:
-              hit = next((i for i,l in enumerate(lines) if needle in l), None)
-              if hit is None:
-                  continue
-              cls = None
-              for i in range(hit, max(-1, hit-500), -1):
-                  if re.match(r'^public (?:sealed )?class\s+\w+', lines[i].strip()):
-                      cls=i; break
-              if cls is not None:
-                  print(f'\n===== SURROUNDING CLASS FOR {needle}: line {cls+1} =====')
-                  for j in range(cls, min(len(lines), cls+180)):
-                      print(f'{j+1}: {lines[j]}')
-                      if j > cls and lines[j].strip() == '}' and j-cls > 8:
-                          break
+          for needle in [
+              'ExecuteBirthdayPresent', 'ProcessReward(ExecuteBirthdayPresentReply',
+              'OnClickPresentButton', 'BdlCommuView',
+              'RegistFavoriteCostumeContent', '_RegistFavoriteCostume',
+              'CostumeFavariteData', 'CommGetCostumeList', 'CostumeBuyContent',
+              'SalesCostumeStatus'
+          ]:
+              emit_context(needle)
+
+          print('\n===== SCRIPT.JSON TARGETS =====')
+          for needle in [
+              'ExecuteBirthdayPresent','ProcessReward','OnClickPresentButton',
+              'SetFavoriteCostume','RegistFavoriteCostume','GetSalesCostumeList',
+              'CommGetCostumeList'
+          ]:
+              print(f'-- {needle} --')
+              for m in re.finditer(re.escape(needle), script):
+                  lo=max(0,m.start()-350); hi=min(len(script),m.end()+550)
+                  print(script[lo:hi])
+                  print()
           PY
-
-          {
-            echo
-            echo '===== SERVER MODEL SYMBOLS ====='
-            grep -n -E '^class (MstItem|Item|MstCard|Card|MstIdol|Idol|Birthday|Costume|Present|MstCostume|MstSalesCostume)\b|favorite_costume|awakening|affection|birthday|present' standalone/mltd/models/models.py || true
-            echo
-            echo '===== SERVER SERVICE SYMBOLS ====='
-            grep -R -n -E 'UseItem|UseGift|FavoriteCostume|SalesCostume|BirthdayPresent|PresentHistory|awakening_gauge|affection' standalone/mltd/services || true
-            echo
-            echo '===== ITEM MASTER HEADER + LIKELY GIFT ROWS ====='
-            head -n 1 standalone/mltd/models/mst_data/mst_item.csv || true
-            grep -E '^(70|71|72|73|80|81|82|83|84),' standalone/mltd/models/mst_data/mst_item.csv || true
-          } >> /tmp/rpc-contract-audit.txt
-
           wc -l /tmp/rpc-contract-audit.txt
-          tail -n 60 /tmp/rpc-contract-audit.txt
-      - name: Upload compact audit report
+          tail -n 80 /tmp/rpc-contract-audit.txt
+      - name: Upload focused audit report
         uses: actions/upload-artifact@v4
         with:
-          name: next-rpc-contract-audit
+          name: remaining-rpc-contract-audit
           path: /tmp/rpc-contract-audit.txt
           if-no-files-found: error
           retention-days: 7
