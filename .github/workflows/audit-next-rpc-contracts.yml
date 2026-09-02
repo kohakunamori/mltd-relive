@@ -14,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: git fetch origin client-decompiled-zh-fixed-v1 --depth=1
-      - name: Trace ItemService consumer semantics
+      - name: Resolve gift item mechanics
         shell: bash
         run: |
           set -euo pipefail
@@ -23,31 +23,45 @@ jobs:
           import pathlib, re
           dump = pathlib.Path('/tmp/dump.cs').read_text(encoding='utf-8', errors='ignore')
 
-          def class_fields(name):
-              m = re.search(rf'public class {re.escape(name)}\b.*?\{{(.*?)\n\s*// Methods', dump, flags=re.S)
-              print(f'=== {name} ===')
-              if not m:
-                  print('NOT FOUND'); return
-              for typ, field in re.findall(r'^\s*public\s+([^;\n]+?)\s+([A-Za-z0-9_]+);', m.group(1), flags=re.M):
-                  print(typ.strip(), field)
-
-          for name in (
-              'UseGiftForCardArgs','UseGiftForCardReply',
-              'UseGiftForIdolGiftArgs','UseGiftForIdolGiftReply',
-              'UseItemArgs','UseItemReply','ResultIdol','CardStatus','IdolStatus'
+          print('=== GIFT-RELATED CLIENT ENUMS / CONSTANTS ===')
+          for pat in (
+              r'gift_result', r'isDouble', r'IdolGiftAffection',
+              r'IdolGiftAwakeningPt', r'GiftResult', r'GiftItem'
           ):
-              class_fields(name)
+              print(f'--- {pat} ---')
+              hits=list(re.finditer(pat, dump, flags=re.I))
+              print('COUNT', len(hits))
+              for m in hits[:20]:
+                  print(dump[max(0,m.start()-900):min(len(dump),m.end()+1500)])
 
-          patterns = (
-              r'\.UseItem\(', r'new UseItemArgs', r'UseItemReply',
-              r'\.UseGiftForCard\(', r'new UseGiftForCardArgs', r'UseGiftForCardReply',
-              r'\.UseGiftForIdolGift\(', r'new UseGiftForIdolGiftArgs', r'UseGiftForIdolGiftReply',
-          )
-          for pat in patterns:
-              print(f'=== CONTEXT {pat} ===')
-              matches=list(re.finditer(pat, dump))
-              print('COUNT', len(matches))
-              for i,m in enumerate(matches[:30]):
-                  print(f'--- {i+1} @{m.start()} ---')
-                  print(dump[max(0,m.start()-2200):min(len(dump),m.end()+3000)])
+          print('=== CONNECTION ITEM GIFT METHODS ===')
+          for needle in ('UseGiftForCard', 'UseGiftForIdolGift'):
+              for m in re.finditer(rf'public HTTPRequest {needle}\b', dump):
+                  print(dump[max(0,m.start()-800):min(len(dump),m.end()+1800)])
           PY
+
+          echo '=== SERVER CARD / ITEM / MEMORIAL MODEL BLOCKS ==='
+          grep -n -A180 -B15 -E '^class (MstCard|Card|MstItem|Item|MstMemorial|Memorial)\(Base\)' standalone/mltd/models/models.py | head -n 1800 || true
+
+          echo '=== GIFT MASTER ITEM ROWS ==='
+          { head -n 1 standalone/mltd/models/mst_data/mst_item.csv; grep -E '^(70|71|72|73|80|81|82|83|84),' standalone/mltd/models/mst_data/mst_item.csv; } || true
+
+          echo '=== GIFT-RELATED MISSION ROWS ==='
+          python - <<'PY'
+          import csv
+          from pathlib import Path
+          p=Path('standalone/mltd/models/mst_data/mst_mission.csv')
+          if p.exists():
+              with p.open(encoding='utf-8-sig') as f:
+                  rows=list(csv.DictReader(f))
+              print('FIELDS', rows[0].keys() if rows else [])
+              for r in rows:
+                  hay=' '.join(str(v) for v in r.values()).lower()
+                  if any(k in hay for k in ('gift','present','affection','awak','親愛','覚醒','プレゼント')):
+                      print(r)
+          else:
+              print('NO mst_mission.csv')
+          PY
+
+          echo '=== EXISTING AWAKEN/AFFECTION MUTATION SITES ==='
+          grep -R -n -A20 -B10 -E 'awakening_gauge|affection[[:space:]]*=|release_affection|gift_result' standalone/mltd/services | head -n 2200 || true
