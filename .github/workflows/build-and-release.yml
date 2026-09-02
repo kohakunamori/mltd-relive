@@ -7,6 +7,17 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      rebuild_patcher:
+        description: 'Force rebuilding APK Patcher packages'
+        required: false
+        default: false
+        type: boolean
+      refresh_game_clients:
+        description: 'Force downloading and validating corrected game clients'
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: write
@@ -20,15 +31,21 @@ jobs:
       standalone_version: ${{ steps.meta.outputs.standalone_version }}
       release_tag: ${{ steps.meta.outputs.release_tag }}
       patcher_version: ${{ steps.meta.outputs.patcher_version }}
+      previous_release_tag: ${{ steps.meta.outputs.previous_release_tag }}
+      patcher_changed: ${{ steps.meta.outputs.patcher_changed }}
+      gameclient_changed: ${{ steps.meta.outputs.gameclient_changed }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Resolve versions from source
+      - name: Resolve versions and changed components
         id: meta
         shell: bash
         run: |
           set -euo pipefail
+
           standalone_version="$(python - <<'PY'
           import pathlib
           import re
@@ -41,13 +58,67 @@ jobs:
           )"
           patcher_version="v$(tr -d '\r\n ' < tools/apk-patcher/VERSION)"
           release_tag="standalone-v${standalone_version}"
+
           if [[ "${GITHUB_REF_TYPE}" == "tag" && "${GITHUB_REF_NAME}" != "${release_tag}" ]]; then
             echo "Tag ${GITHUB_REF_NAME} does not match source version ${release_tag}." >&2
             exit 1
           fi
-          echo "standalone_version=${standalone_version}" >> "$GITHUB_OUTPUT"
-          echo "release_tag=${release_tag}" >> "$GITHUB_OUTPUT"
-          echo "patcher_version=${patcher_version}" >> "$GITHUB_OUTPUT"
+
+          git fetch --force --tags
+          previous_release_tag="$(
+            git tag --list 'standalone-v*' --sort=-v:refname |
+              grep -Fvx "${release_tag}" |
+              head -n 1 || true
+          )"
+
+          patcher_changed=true
+          gameclient_changed=true
+
+          if [[ -n "${previous_release_tag}" ]]; then
+            if git diff --quiet "${previous_release_tag}" "${GITHUB_SHA}" -- \
+              tools/apk-patcher requirements.txt; then
+              patcher_changed=false
+            fi
+
+            # v0.1.9 and older predate the tracked client manifest but already
+            # contain the fixed-clients-v1 APKs. Treat that baseline as reusable.
+            if git cat-file -e "${previous_release_tag}:release/game-client.env" 2>/dev/null; then
+              if git diff --quiet "${previous_release_tag}" "${GITHUB_SHA}" -- \
+                release/game-client.env; then
+                gameclient_changed=false
+              fi
+            else
+              # The first manifest records the exact APK hashes already shipped
+              # by standalone-v0.1.8/v0.1.9, so no redownload is necessary.
+              source release/game-client.env
+              if [[ "${GAME_CLIENT_REVISION}" == "fixed-clients-v1" \
+                    && "${ZH_SHA256}" == "a423f1b09b6d9022cf255aff9a43716d6beadf32d42641da3c7b92d2e663e918" \
+                    && "${KO_SHA256}" == "a0dbd66681f59d4ac5ca9d4bd1cf7aea24e7cd728356342158ded6b871f47e93" ]]; then
+                gameclient_changed=false
+              fi
+            fi
+          fi
+
+          if [[ "${{ inputs.rebuild_patcher }}" == "true" ]]; then
+            patcher_changed=true
+          fi
+          if [[ "${{ inputs.refresh_game_clients }}" == "true" ]]; then
+            gameclient_changed=true
+          fi
+
+          {
+            echo "standalone_version=${standalone_version}"
+            echo "release_tag=${release_tag}"
+            echo "patcher_version=${patcher_version}"
+            echo "previous_release_tag=${previous_release_tag}"
+            echo "patcher_changed=${patcher_changed}"
+            echo "gameclient_changed=${gameclient_changed}"
+          } >> "$GITHUB_OUTPUT"
+
+          echo "Release tag: ${release_tag}"
+          echo "Previous release: ${previous_release_tag:-<none>}"
+          echo "APK Patcher changed: ${patcher_changed}"
+          echo "Game clients changed: ${gameclient_changed}"
 
   build:
     name: Build standalone packages
@@ -103,6 +174,8 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+          cache: pip
+          cache-dependency-path: requirements.txt
       - name: Install dependencies for ${{ matrix.target }}
         run: ${{ matrix.cmd-install }}
       - name: Build with PyInstaller for ${{ matrix.target }}
@@ -134,7 +207,7 @@ jobs:
   patcher:
     name: Build APK Patcher packages
     needs: metadata
-    if: needs.metadata.result == 'success'
+    if: needs.metadata.result == 'success' && needs.metadata.outputs.patcher_changed == 'true'
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -185,6 +258,8 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+          cache: pip
+          cache-dependency-path: requirements.txt
       - name: Install dependencies for ${{ matrix.target }}
         run: ${{ matrix.cmd-install }}
       - name: Build APK Patcher for ${{ matrix.target }}
@@ -213,6 +288,33 @@ jobs:
           path: tools/apk-patcher/dist/release-output/*
           if-no-files-found: error
 
+  reuse-patcher:
+    name: Reuse unchanged APK Patcher packages
+    needs: metadata
+    if: needs.metadata.result == 'success' && needs.metadata.outputs.patcher_changed == 'false'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download APK Patcher assets from previous Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PREVIOUS_RELEASE_TAG: ${{ needs.metadata.outputs.previous_release_tag }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${PREVIOUS_RELEASE_TAG}"
+          mkdir -p reused-patcher
+          gh release download "${PREVIOUS_RELEASE_TAG}" \
+            --repo "${GITHUB_REPOSITORY}" \
+            --pattern 'mltd-relive-apk-patcher-*' \
+            --dir reused-patcher
+          test "$(find reused-patcher -maxdepth 1 -type f | wc -l)" -ge 3
+      - name: Upload reused APK Patcher artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: patcher-reused
+          path: reused-patcher/*
+          if-no-files-found: error
+
   gameclient:
     name: Prepare corrected game clients
     needs: metadata
@@ -221,50 +323,83 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Reuse unchanged game clients from previous Release
+        if: needs.metadata.outputs.gameclient_changed == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PREVIOUS_RELEASE_TAG: ${{ needs.metadata.outputs.previous_release_tag }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${PREVIOUS_RELEASE_TAG}"
+          mkdir -p game-client
+          gh release download "${PREVIOUS_RELEASE_TAG}" \
+            --repo "${GITHUB_REPOSITORY}" \
+            --pattern 'mltd-relive-game-client-*-fixed.apk' \
+            --dir game-client
+
       - name: Install MEGA download tools
+        if: needs.metadata.outputs.gameclient_changed == 'true'
         run: |
           sudo apt-get update
-          sudo apt-get install -y megatools unzip
+          sudo apt-get install -y megatools
+
       - name: Download corrected Traditional Chinese client
+        if: needs.metadata.outputs.gameclient_changed == 'true'
         shell: bash
         run: |
           set -euo pipefail
+          source release/game-client.env
           mkdir -p game-client
           output='game-client/mltd-relive-game-client-zh-fixed.apk'
-          modern='https://mega.nz/file/HMgiTSbI#cy7z52H6zBOSdSX5Xok1GKQ4yT7k6K1ctjV6Heceu3I'
-          legacy='https://mega.nz/#!HMgiTSbI!cy7z52H6zBOSdSX5Xok1GKQ4yT7k6K1ctjV6Heceu3I'
-          if ! megatools dl --no-progress --path - "$modern" > "${output}.part"; then
+          if ! megatools dl --no-progress --path - "$ZH_MODERN_URL" > "${output}.part"; then
             rm -f "${output}.part"
-            megatools dl --no-progress --path - "$legacy" > "${output}.part"
+            megatools dl --no-progress --path - "$ZH_LEGACY_URL" > "${output}.part"
           fi
           mv "${output}.part" "$output"
+
       - name: Download corrected Korean client
+        if: needs.metadata.outputs.gameclient_changed == 'true'
         shell: bash
         run: |
           set -euo pipefail
+          source release/game-client.env
           mkdir -p game-client
           output='game-client/mltd-relive-game-client-ko-fixed.apk'
-          modern='https://mega.nz/file/2dBgiBQY#NBgo-1rTW7g1Jtm9FLYZ61KoOP4HFoElxO75dzMyXew'
-          legacy='https://mega.nz/#!2dBgiBQY!NBgo-1rTW7g1Jtm9FLYZ61KoOP4HFoElxO75dzMyXew'
-          if ! megatools dl --no-progress --path - "$modern" > "${output}.part"; then
+          if ! megatools dl --no-progress --path - "$KO_MODERN_URL" > "${output}.part"; then
             rm -f "${output}.part"
-            megatools dl --no-progress --path - "$legacy" > "${output}.part"
+            megatools dl --no-progress --path - "$KO_LEGACY_URL" > "${output}.part"
           fi
           mv "${output}.part" "$output"
+
       - name: Validate game client packages
         shell: bash
         run: |
           set -euo pipefail
-          for apk in game-client/*.apk; do
-            test "$(stat -c%s "$apk")" -gt 10000000
-            unzip -tq "$apk"
-            unzip -p "$apk" AndroidManifest.xml > /dev/null
-          done
+          source release/game-client.env
+          echo "${ZH_SHA256}  game-client/mltd-relive-game-client-zh-fixed.apk" | sha256sum -c -
+          echo "${KO_SHA256}  game-client/mltd-relive-game-client-ko-fixed.apk" | sha256sum -c -
+          python - <<'PY'
+          from pathlib import Path
+          from zipfile import ZipFile
+
+          for apk in Path('game-client').glob('*.apk'):
+              if apk.stat().st_size <= 10_000_000:
+                  raise SystemExit(f'{apk} is unexpectedly small')
+              with ZipFile(apk) as archive:
+                  if 'AndroidManifest.xml' not in archive.namelist():
+                      raise SystemExit(f'{apk} has no AndroidManifest.xml')
+                  bad = archive.testzip()
+                  if bad is not None:
+                      raise SystemExit(f'{apk} contains a corrupt entry: {bad}')
+          PY
           cp RELEASE_NOTES.md game-client/RELEASE_NOTES.md
           (
             cd game-client
             sha256sum *.apk > SHA256SUMS.txt
           )
+
       - name: Upload game client artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -278,8 +413,14 @@ jobs:
       - metadata
       - build
       - patcher
+      - reuse-patcher
       - gameclient
-    if: needs.metadata.result == 'success' && needs.build.result == 'success' && needs.patcher.result == 'success' && needs.gameclient.result == 'success'
+    if: >-
+      always() &&
+      needs.metadata.result == 'success' &&
+      needs.build.result == 'success' &&
+      needs.gameclient.result == 'success' &&
+      (needs.patcher.result == 'success' || needs.reuse-patcher.result == 'success')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -306,7 +447,7 @@ jobs:
           commit: ${{ github.sha }}
           name: mltd-relive-${{ needs.metadata.outputs.release_tag }}
           bodyFile: RELEASE_NOTES.md
-          artifacts: 'LICENSE,release-artifacts/windows/*,release-artifacts/ubuntu/*,release-artifacts/macos/*,release-artifacts/patcher-windows/*,release-artifacts/patcher-ubuntu/*,release-artifacts/patcher-macos/*,release-artifacts/game-client/*'
+          artifacts: 'LICENSE,release-artifacts/windows/*,release-artifacts/ubuntu/*,release-artifacts/macos/*,release-artifacts/patcher-*/*,release-artifacts/game-client/*'
           artifactErrorsFailBuild: true
           allowUpdates: true
           replacesArtifacts: true
