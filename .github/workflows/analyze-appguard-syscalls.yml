@@ -1,0 +1,64 @@
+name: Analyze AppGuard direct syscalls
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - client-zh-fixed-reconstruction
+    paths:
+      - '.github/workflows/analyze-appguard-syscalls.yml'
+      - 'tools/client-source/analyze-appguard-syscalls.py'
+
+permissions:
+  contents: write
+
+jobs:
+  syscall-map:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Install analysis libraries
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check capstone pyelftools
+
+      - name: Download exact official arm64 split
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p work/xapk work/native
+          curl -L --fail --retry 3 --connect-timeout 20 --max-time 300 \
+            -A 'Mozilla/5.0' \
+            -o work/original.xapk \
+            'https://d.apkpure.net/b/XAPK/com.bandainamcoent.imas_millionlive_theaterdays_ch?version=latest'
+          test "$(sha1sum work/original.xapk | awk '{print $1}')" = '1b77ddd342a4020ba032ec63ae7ef9288551b6e7'
+          unzip -q work/original.xapk -d work/xapk
+          test "$(sha256sum work/xapk/config.arm64_v8a.apk | awk '{print $1}')" = '9932366bd357dc33701a6e7282d26ed67630db95486f596328aade8523032e46'
+          unzip -q work/xapk/config.arm64_v8a.apk 'lib/arm64-v8a/*.so' -d work/split
+          cp work/split/lib/arm64-v8a/*.so work/native/
+
+      - name: Recover direct syscall and loader map
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p client/reconstruction/appguard-analysis
+          python tools/client-source/analyze-appguard-syscalls.py \
+            --native-dir work/native \
+            --out client/reconstruction/appguard-analysis
+
+      - name: Commit map
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add client/reconstruction/appguard-analysis/syscall-map.json \
+                  client/reconstruction/appguard-analysis/syscall-map.md
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'client: recover AppGuard direct syscalls and loader candidates'
+          git push origin HEAD:client-zh-fixed-reconstruction
