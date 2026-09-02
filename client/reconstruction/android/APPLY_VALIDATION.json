@@ -1,0 +1,19 @@
+{
+  "checks": {
+    "smali_same_file_set": true,
+    "smali_all_normalized_identical": true,
+    "package_local": true,
+    "appguard_application_removed": true,
+    "appguard_components_absent": true,
+    "firebase_provider_local": true,
+    "file_provider_local": true,
+    "app_name_local": true,
+    "fused_modules_base": true,
+    "standalone_stamp": true
+  },
+  "reconstructed_smali_files": 5428,
+  "fixed_smali_files": 5428,
+  "reconstructed_only_smali": [],
+  "fixed_only_smali": [],
+  "changed_normalized_smali": []
+}
