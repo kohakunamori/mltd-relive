@@ -42,7 +42,7 @@ jobs:
           python tools/client-source/analyze-appguard-sostart-slot.py \
             --libcompatible work/native/libcompatible.so \
             --out client/reconstruction/appguard-analysis/emulation
-      - name: Commit result
+      - name: Commit result safely
         shell: bash
         run: |
           set -euo pipefail
@@ -52,4 +52,6 @@ jobs:
                   client/reconstruction/appguard-analysis/emulation/sostart-slot-provenance.md
           if git diff --cached --quiet; then exit 0; fi
           git commit -m 'client: map AppGuard SoLibraryStart slot provenance'
+          git fetch origin client-zh-fixed-reconstruction
+          git rebase origin/client-zh-fixed-reconstruction
           git push origin HEAD:client-zh-fixed-reconstruction
