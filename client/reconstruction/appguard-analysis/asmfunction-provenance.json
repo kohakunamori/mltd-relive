@@ -9,6 +9,20 @@
       ]
     },
     {
+      "name": "trampoline config / descriptor base",
+      "use_pc": 32208,
+      "registers": [
+        "x28"
+      ]
+    },
+    {
+      "name": "trampoline template-code base",
+      "use_pc": 32504,
+      "registers": [
+        "x22"
+      ]
+    },
+    {
       "name": "asmFunction slots 0x98/0xa0",
       "use_pc": 795200,
       "registers": [
@@ -393,6 +407,156 @@
       ]
     },
     {
+      "root": "trampoline config / descriptor base",
+      "use_pc": 32208,
+      "reg": "x28",
+      "depth": 0,
+      "definitions": [
+        {
+          "pc": 31488,
+          "block": 31488,
+          "distance": 3,
+          "path": [
+            {
+              "from": 32096,
+              "to": 32208,
+              "block": 32096,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 32016,
+              "to": 32096,
+              "block": 32016,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 31488,
+              "to": 32016,
+              "block": 31488,
+              "kind": "cfg",
+              "callsite": null
+            }
+          ],
+          "instruction": {
+            "address": 31488,
+            "file_offset": 31488,
+            "mnemonic": "ldr",
+            "op_str": "x28, [x2, #0xea0]"
+          },
+          "context": [
+            {
+              "address": 31488,
+              "file_offset": 31488,
+              "mnemonic": "ldr",
+              "op_str": "x28, [x2, #0xea0]"
+            },
+            {
+              "address": 31492,
+              "file_offset": 31492,
+              "mnemonic": "add",
+              "op_str": "x22, x28, #0x70"
+            },
+            {
+              "address": 31496,
+              "file_offset": 31496,
+              "mnemonic": "cmp",
+              "op_str": "x22, x8"
+            },
+            {
+              "address": 31500,
+              "file_offset": 31500,
+              "mnemonic": "b.eq",
+              "op_str": "#0x7d10"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "root": "trampoline template-code base",
+      "use_pc": 32504,
+      "reg": "x22",
+      "depth": 0,
+      "definitions": [
+        {
+          "pc": 31492,
+          "block": 31488,
+          "distance": 5,
+          "path": [
+            {
+              "from": 32296,
+              "to": 32464,
+              "block": 32296,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 32208,
+              "to": 32296,
+              "block": 32208,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 32096,
+              "to": 32208,
+              "block": 32096,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 32016,
+              "to": 32096,
+              "block": 32016,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 31488,
+              "to": 32016,
+              "block": 31488,
+              "kind": "cfg",
+              "callsite": null
+            }
+          ],
+          "instruction": {
+            "address": 31492,
+            "file_offset": 31492,
+            "mnemonic": "add",
+            "op_str": "x22, x28, #0x70"
+          },
+          "context": [
+            {
+              "address": 31488,
+              "file_offset": 31488,
+              "mnemonic": "ldr",
+              "op_str": "x28, [x2, #0xea0]"
+            },
+            {
+              "address": 31492,
+              "file_offset": 31492,
+              "mnemonic": "add",
+              "op_str": "x22, x28, #0x70"
+            },
+            {
+              "address": 31496,
+              "file_offset": 31496,
+              "mnemonic": "cmp",
+              "op_str": "x22, x8"
+            },
+            {
+              "address": 31500,
+              "file_offset": 31500,
+              "mnemonic": "b.eq",
+              "op_str": "#0x7d10"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "root": "asmFunction slots 0x98/0xa0",
       "use_pc": 795200,
       "reg": "x14",
@@ -693,6 +857,304 @@
       ]
     },
     {
+      "root": "trampoline config / descriptor base",
+      "use_pc": 31488,
+      "reg": "x2",
+      "depth": 1,
+      "definitions": [
+        {
+          "pc": 30444,
+          "block": 30408,
+          "distance": 2,
+          "path": [
+            {
+              "from": 30524,
+              "to": 31488,
+              "block": 30524,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 30408,
+              "to": 30524,
+              "block": 30408,
+              "kind": "cfg",
+              "callsite": null
+            }
+          ],
+          "instruction": {
+            "address": 30444,
+            "file_offset": 30444,
+            "mnemonic": "adrp",
+            "op_str": "x2, #0x1ec000"
+          },
+          "context": [
+            {
+              "address": 30420,
+              "file_offset": 30420,
+              "mnemonic": "mov",
+              "op_str": "x0, x27"
+            },
+            {
+              "address": 30424,
+              "file_offset": 30424,
+              "mnemonic": "mov",
+              "op_str": "x2, x1"
+            },
+            {
+              "address": 30428,
+              "file_offset": 30428,
+              "mnemonic": "bl",
+              "op_str": "#0x171c28"
+            },
+            {
+              "address": 30432,
+              "file_offset": 30432,
+              "mnemonic": "adrp",
+              "op_str": "x8, #0x1e5000"
+            },
+            {
+              "address": 30436,
+              "file_offset": 30436,
+              "mnemonic": "ldr",
+              "op_str": "x8, [x8, #0x838]"
+            },
+            {
+              "address": 30440,
+              "file_offset": 30440,
+              "mnemonic": "adrp",
+              "op_str": "x9, #0x1e5000"
+            },
+            {
+              "address": 30444,
+              "file_offset": 30444,
+              "mnemonic": "adrp",
+              "op_str": "x2, #0x1ec000"
+            },
+            {
+              "address": 30448,
+              "file_offset": 30448,
+              "mnemonic": "ldr",
+              "op_str": "w8, [x8]"
+            },
+            {
+              "address": 30452,
+              "file_offset": 30452,
+              "mnemonic": "ldr",
+              "op_str": "x9, [x9, #0xe28]"
+            },
+            {
+              "address": 30456,
+              "file_offset": 30456,
+              "mnemonic": "sub",
+              "op_str": "w10, w8, #1"
+            },
+            {
+              "address": 30460,
+              "file_offset": 30460,
+              "mnemonic": "ldr",
+              "op_str": "w9, [x9]"
+            },
+            {
+              "address": 30464,
+              "file_offset": 30464,
+              "mnemonic": "mul",
+              "op_str": "w10, w10, w8"
+            },
+            {
+              "address": 30468,
+              "file_offset": 30468,
+              "mnemonic": "cmp",
+              "op_str": "w9, #0xa"
+            }
+          ]
+        },
+        {
+          "pc": 31004,
+          "block": 31000,
+          "distance": 5,
+          "path": [
+            {
+              "from": 31232,
+              "to": 31488,
+              "block": 31232,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 31072,
+              "to": 31232,
+              "block": 31072,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 31044,
+              "to": 31072,
+              "block": 31044,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 31028,
+              "to": 31044,
+              "block": 31028,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 31000,
+              "to": 31028,
+              "block": 31000,
+              "kind": "cfg",
+              "callsite": null
+            }
+          ],
+          "instruction": {
+            "address": 31004,
+            "file_offset": 31004,
+            "mnemonic": "adrp",
+            "op_str": "x2, #0x1ec000"
+          },
+          "context": [
+            {
+              "address": 31000,
+              "file_offset": 31000,
+              "mnemonic": "cmp",
+              "op_str": "x16, x1"
+            },
+            {
+              "address": 31004,
+              "file_offset": 31004,
+              "mnemonic": "adrp",
+              "op_str": "x2, #0x1ec000"
+            },
+            {
+              "address": 31008,
+              "file_offset": 31008,
+              "mnemonic": "b.ne",
+              "op_str": "#0x7934"
+            }
+          ]
+        },
+        {
+          "pc": 31384,
+          "block": 31384,
+          "distance": 6,
+          "path": [
+            {
+              "from": 30772,
+              "to": 31488,
+              "block": 30772,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 30760,
+              "to": 30772,
+              "block": 30760,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 32016,
+              "to": 30760,
+              "block": 32016,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 31976,
+              "to": 32016,
+              "block": 31976,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 31952,
+              "to": 31976,
+              "block": 31952,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 31384,
+              "to": 31952,
+              "block": 31384,
+              "kind": "cfg",
+              "callsite": null
+            }
+          ],
+          "instruction": {
+            "address": 31384,
+            "file_offset": 31384,
+            "mnemonic": "adrp",
+            "op_str": "x2, #0x1ec000"
+          },
+          "context": [
+            {
+              "address": 31384,
+              "file_offset": 31384,
+              "mnemonic": "adrp",
+              "op_str": "x2, #0x1ec000"
+            },
+            {
+              "address": 31388,
+              "file_offset": 31388,
+              "mnemonic": "cbnz",
+              "op_str": "x3, #0x7cd0"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "root": "trampoline template-code base",
+      "use_pc": 31492,
+      "reg": "x28",
+      "depth": 1,
+      "definitions": [
+        {
+          "pc": 31488,
+          "block": 31488,
+          "distance": 0,
+          "path": [],
+          "instruction": {
+            "address": 31488,
+            "file_offset": 31488,
+            "mnemonic": "ldr",
+            "op_str": "x28, [x2, #0xea0]"
+          },
+          "context": [
+            {
+              "address": 31488,
+              "file_offset": 31488,
+              "mnemonic": "ldr",
+              "op_str": "x28, [x2, #0xea0]"
+            },
+            {
+              "address": 31492,
+              "file_offset": 31492,
+              "mnemonic": "add",
+              "op_str": "x22, x28, #0x70"
+            },
+            {
+              "address": 31496,
+              "file_offset": 31496,
+              "mnemonic": "cmp",
+              "op_str": "x22, x8"
+            },
+            {
+              "address": 31500,
+              "file_offset": 31500,
+              "mnemonic": "b.eq",
+              "op_str": "#0x7d10"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "root": "asmFunction slots 0x98/0xa0",
       "use_pc": 795088,
       "reg": "x8",
@@ -887,6 +1349,258 @@
               "file_offset": 795076,
               "mnemonic": "mov",
               "op_str": "w12, #0x4b"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "root": "trampoline template-code base",
+      "use_pc": 31488,
+      "reg": "x2",
+      "depth": 2,
+      "definitions": [
+        {
+          "pc": 30444,
+          "block": 30408,
+          "distance": 2,
+          "path": [
+            {
+              "from": 30524,
+              "to": 31488,
+              "block": 30524,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 30408,
+              "to": 30524,
+              "block": 30408,
+              "kind": "cfg",
+              "callsite": null
+            }
+          ],
+          "instruction": {
+            "address": 30444,
+            "file_offset": 30444,
+            "mnemonic": "adrp",
+            "op_str": "x2, #0x1ec000"
+          },
+          "context": [
+            {
+              "address": 30420,
+              "file_offset": 30420,
+              "mnemonic": "mov",
+              "op_str": "x0, x27"
+            },
+            {
+              "address": 30424,
+              "file_offset": 30424,
+              "mnemonic": "mov",
+              "op_str": "x2, x1"
+            },
+            {
+              "address": 30428,
+              "file_offset": 30428,
+              "mnemonic": "bl",
+              "op_str": "#0x171c28"
+            },
+            {
+              "address": 30432,
+              "file_offset": 30432,
+              "mnemonic": "adrp",
+              "op_str": "x8, #0x1e5000"
+            },
+            {
+              "address": 30436,
+              "file_offset": 30436,
+              "mnemonic": "ldr",
+              "op_str": "x8, [x8, #0x838]"
+            },
+            {
+              "address": 30440,
+              "file_offset": 30440,
+              "mnemonic": "adrp",
+              "op_str": "x9, #0x1e5000"
+            },
+            {
+              "address": 30444,
+              "file_offset": 30444,
+              "mnemonic": "adrp",
+              "op_str": "x2, #0x1ec000"
+            },
+            {
+              "address": 30448,
+              "file_offset": 30448,
+              "mnemonic": "ldr",
+              "op_str": "w8, [x8]"
+            },
+            {
+              "address": 30452,
+              "file_offset": 30452,
+              "mnemonic": "ldr",
+              "op_str": "x9, [x9, #0xe28]"
+            },
+            {
+              "address": 30456,
+              "file_offset": 30456,
+              "mnemonic": "sub",
+              "op_str": "w10, w8, #1"
+            },
+            {
+              "address": 30460,
+              "file_offset": 30460,
+              "mnemonic": "ldr",
+              "op_str": "w9, [x9]"
+            },
+            {
+              "address": 30464,
+              "file_offset": 30464,
+              "mnemonic": "mul",
+              "op_str": "w10, w10, w8"
+            },
+            {
+              "address": 30468,
+              "file_offset": 30468,
+              "mnemonic": "cmp",
+              "op_str": "w9, #0xa"
+            }
+          ]
+        },
+        {
+          "pc": 31004,
+          "block": 31000,
+          "distance": 5,
+          "path": [
+            {
+              "from": 31232,
+              "to": 31488,
+              "block": 31232,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 31072,
+              "to": 31232,
+              "block": 31072,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 31044,
+              "to": 31072,
+              "block": 31044,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 31028,
+              "to": 31044,
+              "block": 31028,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 31000,
+              "to": 31028,
+              "block": 31000,
+              "kind": "cfg",
+              "callsite": null
+            }
+          ],
+          "instruction": {
+            "address": 31004,
+            "file_offset": 31004,
+            "mnemonic": "adrp",
+            "op_str": "x2, #0x1ec000"
+          },
+          "context": [
+            {
+              "address": 31000,
+              "file_offset": 31000,
+              "mnemonic": "cmp",
+              "op_str": "x16, x1"
+            },
+            {
+              "address": 31004,
+              "file_offset": 31004,
+              "mnemonic": "adrp",
+              "op_str": "x2, #0x1ec000"
+            },
+            {
+              "address": 31008,
+              "file_offset": 31008,
+              "mnemonic": "b.ne",
+              "op_str": "#0x7934"
+            }
+          ]
+        },
+        {
+          "pc": 31384,
+          "block": 31384,
+          "distance": 6,
+          "path": [
+            {
+              "from": 30772,
+              "to": 31488,
+              "block": 30772,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 30760,
+              "to": 30772,
+              "block": 30760,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 32016,
+              "to": 30760,
+              "block": 32016,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 31976,
+              "to": 32016,
+              "block": 31976,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 31952,
+              "to": 31976,
+              "block": 31952,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 31384,
+              "to": 31952,
+              "block": 31384,
+              "kind": "cfg",
+              "callsite": null
+            }
+          ],
+          "instruction": {
+            "address": 31384,
+            "file_offset": 31384,
+            "mnemonic": "adrp",
+            "op_str": "x2, #0x1ec000"
+          },
+          "context": [
+            {
+              "address": 31384,
+              "file_offset": 31384,
+              "mnemonic": "adrp",
+              "op_str": "x2, #0x1ec000"
+            },
+            {
+              "address": 31388,
+              "file_offset": 31388,
+              "mnemonic": "cbnz",
+              "op_str": "x3, #0x7cd0"
             }
           ]
         }
@@ -1317,6 +2031,414 @@
               "op_str": "x17, #0xc2600"
             }
           ]
+        },
+        {
+          "pc": 46704,
+          "block": 46704,
+          "distance": 13,
+          "path": [
+            {
+              "from": 797096,
+              "to": 794960,
+              "block": 797096,
+              "kind": "call",
+              "callsite": 797096
+            },
+            {
+              "from": 797084,
+              "to": 797096,
+              "block": 797084,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 797044,
+              "to": 797084,
+              "block": 797044,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 796968,
+              "to": 797044,
+              "block": 796968,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 796876,
+              "to": 796968,
+              "block": 796876,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 796816,
+              "to": 796876,
+              "block": 796816,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 796688,
+              "to": 796816,
+              "block": 796688,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 47196,
+              "to": 796688,
+              "block": 47196,
+              "kind": "call",
+              "callsite": 47204
+            },
+            {
+              "from": 47016,
+              "to": 47196,
+              "block": 47016,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 46884,
+              "to": 47016,
+              "block": 46884,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 46844,
+              "to": 46884,
+              "block": 46844,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 46828,
+              "to": 46844,
+              "block": 46828,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 46704,
+              "to": 46828,
+              "block": 46704,
+              "kind": "cfg",
+              "callsite": null
+            }
+          ],
+          "instruction": {
+            "address": 46704,
+            "file_offset": 46704,
+            "mnemonic": "mov",
+            "op_str": "w18, #1"
+          },
+          "context": [
+            {
+              "address": 46704,
+              "file_offset": 46704,
+              "mnemonic": "mov",
+              "op_str": "w18, #1"
+            },
+            {
+              "address": 46708,
+              "file_offset": 46708,
+              "mnemonic": "mov",
+              "op_str": "x14, x8"
+            },
+            {
+              "address": 46712,
+              "file_offset": 46712,
+              "mnemonic": "mov",
+              "op_str": "x15, x9"
+            },
+            {
+              "address": 46716,
+              "file_offset": 46716,
+              "mnemonic": "tbnz",
+              "op_str": "w18, #0, #0xb6ec"
+            }
+          ]
+        },
+        {
+          "pc": 795856,
+          "block": 795856,
+          "distance": 13,
+          "path": [
+            {
+              "from": 797096,
+              "to": 794960,
+              "block": 797096,
+              "kind": "call",
+              "callsite": 797096
+            },
+            {
+              "from": 797084,
+              "to": 797096,
+              "block": 797084,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 797044,
+              "to": 797084,
+              "block": 797044,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 796968,
+              "to": 797044,
+              "block": 796968,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 796876,
+              "to": 796968,
+              "block": 796876,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 796816,
+              "to": 796876,
+              "block": 796816,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 796688,
+              "to": 796816,
+              "block": 796688,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 796512,
+              "to": 796688,
+              "block": 796512,
+              "kind": "call",
+              "callsite": 796520
+            },
+            {
+              "from": 796240,
+              "to": 796512,
+              "block": 796240,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 795980,
+              "to": 796240,
+              "block": 795980,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 795944,
+              "to": 795980,
+              "block": 795944,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 795928,
+              "to": 795944,
+              "block": 795928,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 795856,
+              "to": 795928,
+              "block": 795856,
+              "kind": "cfg",
+              "callsite": null
+            }
+          ],
+          "instruction": {
+            "address": 795856,
+            "file_offset": 795856,
+            "mnemonic": "and",
+            "op_str": "x18, x13, #3"
+          },
+          "context": [
+            {
+              "address": 795856,
+              "file_offset": 795856,
+              "mnemonic": "and",
+              "op_str": "x18, x13, #3"
+            },
+            {
+              "address": 795860,
+              "file_offset": 795860,
+              "mnemonic": "sub",
+              "op_str": "x17, x13, x18"
+            },
+            {
+              "address": 795864,
+              "file_offset": 795864,
+              "mnemonic": "mov",
+              "op_str": "x15, x11"
+            },
+            {
+              "address": 795868,
+              "file_offset": 795868,
+              "mnemonic": "mov",
+              "op_str": "x16, x10"
+            },
+            {
+              "address": 795872,
+              "file_offset": 795872,
+              "mnemonic": "cbz",
+              "op_str": "x17, #0xc2518"
+            }
+          ]
+        },
+        {
+          "pc": 795904,
+          "block": 795900,
+          "distance": 13,
+          "path": [
+            {
+              "from": 797096,
+              "to": 794960,
+              "block": 797096,
+              "kind": "call",
+              "callsite": 797096
+            },
+            {
+              "from": 797084,
+              "to": 797096,
+              "block": 797084,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 797044,
+              "to": 797084,
+              "block": 797044,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 796968,
+              "to": 797044,
+              "block": 796968,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 796876,
+              "to": 796968,
+              "block": 796876,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 796816,
+              "to": 796876,
+              "block": 796816,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 796688,
+              "to": 796816,
+              "block": 796688,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 796512,
+              "to": 796688,
+              "block": 796512,
+              "kind": "call",
+              "callsite": 796520
+            },
+            {
+              "from": 796240,
+              "to": 796512,
+              "block": 796240,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 795980,
+              "to": 796240,
+              "block": 795980,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 795944,
+              "to": 795980,
+              "block": 795944,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 795924,
+              "to": 795944,
+              "block": 795924,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 795900,
+              "to": 795924,
+              "block": 795900,
+              "kind": "cfg",
+              "callsite": null
+            }
+          ],
+          "instruction": {
+            "address": 795904,
+            "file_offset": 795904,
+            "mnemonic": "add",
+            "op_str": "x18, x18, #0x20"
+          },
+          "context": [
+            {
+              "address": 795900,
+              "file_offset": 795900,
+              "mnemonic": "ldp",
+              "op_str": "q0, q1, [x18, #-0x10]"
+            },
+            {
+              "address": 795904,
+              "file_offset": 795904,
+              "mnemonic": "add",
+              "op_str": "x18, x18, #0x20"
+            },
+            {
+              "address": 795908,
+              "file_offset": 795908,
+              "mnemonic": "sub",
+              "op_str": "x17, x17, #4"
+            },
+            {
+              "address": 795912,
+              "file_offset": 795912,
+              "mnemonic": "stp",
+              "op_str": "q0, q1, [x0, #-0x10]"
+            },
+            {
+              "address": 795916,
+              "file_offset": 795916,
+              "mnemonic": "add",
+              "op_str": "x0, x0, #0x20"
+            },
+            {
+              "address": 795920,
+              "file_offset": 795920,
+              "mnemonic": "cbnz",
+              "op_str": "x17, #0xc24fc"
+            }
+          ]
         }
       ]
     },
@@ -1565,6 +2687,149 @@
     },
     {
       "root": "asmFunction slots 0x98/0xa0",
+      "use_pc": 795856,
+      "reg": "x13",
+      "depth": 3,
+      "definitions": [
+        {
+          "pc": 795824,
+          "block": 795816,
+          "distance": 1,
+          "path": [
+            {
+              "from": 795816,
+              "to": 795856,
+              "block": 795816,
+              "kind": "cfg",
+              "callsite": null
+            }
+          ],
+          "instruction": {
+            "address": 795824,
+            "file_offset": 795824,
+            "mnemonic": "mov",
+            "op_str": "w13, #2"
+          },
+          "context": [
+            {
+              "address": 795816,
+              "file_offset": 795816,
+              "mnemonic": "add",
+              "op_str": "x10, sp, #0x60"
+            },
+            {
+              "address": 795820,
+              "file_offset": 795820,
+              "mnemonic": "mov",
+              "op_str": "w12, #0x10"
+            },
+            {
+              "address": 795824,
+              "file_offset": 795824,
+              "mnemonic": "mov",
+              "op_str": "w13, #2"
+            },
+            {
+              "address": 795828,
+              "file_offset": 795828,
+              "mnemonic": "mov",
+              "op_str": "x11, x22"
+            },
+            {
+              "address": 795832,
+              "file_offset": 795832,
+              "mnemonic": "cmp",
+              "op_str": "x13, #4"
+            },
+            {
+              "address": 795836,
+              "file_offset": 795836,
+              "mnemonic": "lsl",
+              "op_str": "x14, x13, #3"
+            },
+            {
+              "address": 795840,
+              "file_offset": 795840,
+              "mnemonic": "b.hs",
+              "op_str": "#0xc24d0"
+            }
+          ]
+        },
+        {
+          "pc": 795800,
+          "block": 795784,
+          "distance": 2,
+          "path": [
+            {
+              "from": 795832,
+              "to": 795856,
+              "block": 795832,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 795784,
+              "to": 795832,
+              "block": 795784,
+              "kind": "cfg",
+              "callsite": null
+            }
+          ],
+          "instruction": {
+            "address": 795800,
+            "file_offset": 795800,
+            "mnemonic": "lsr",
+            "op_str": "x13, x12, #3"
+          },
+          "context": [
+            {
+              "address": 795784,
+              "file_offset": 795784,
+              "mnemonic": "mov",
+              "op_str": "w12, #0x10"
+            },
+            {
+              "address": 795788,
+              "file_offset": 795788,
+              "mnemonic": "add",
+              "op_str": "x10, sp, #0x60"
+            },
+            {
+              "address": 795792,
+              "file_offset": 795792,
+              "mnemonic": "sub",
+              "op_str": "x12, x12, x11"
+            },
+            {
+              "address": 795796,
+              "file_offset": 795796,
+              "mnemonic": "add",
+              "op_str": "x10, x10, x11"
+            },
+            {
+              "address": 795800,
+              "file_offset": 795800,
+              "mnemonic": "lsr",
+              "op_str": "x13, x12, #3"
+            },
+            {
+              "address": 795804,
+              "file_offset": 795804,
+              "mnemonic": "add",
+              "op_str": "x11, x22, x11"
+            },
+            {
+              "address": 795808,
+              "file_offset": 795808,
+              "mnemonic": "cbnz",
+              "op_str": "x13, #0xc24b8"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "root": "asmFunction slots 0x98/0xa0",
       "use_pc": 796060,
       "reg": "x12",
       "depth": 4,
@@ -1622,6 +2887,70 @@
               "file_offset": 796068,
               "mnemonic": "cbnz",
               "op_str": "x13, #0xc25bc"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "root": "asmFunction slots 0x98/0xa0",
+      "use_pc": 795800,
+      "reg": "x12",
+      "depth": 4,
+      "definitions": [
+        {
+          "pc": 795792,
+          "block": 795784,
+          "distance": 0,
+          "path": [],
+          "instruction": {
+            "address": 795792,
+            "file_offset": 795792,
+            "mnemonic": "sub",
+            "op_str": "x12, x12, x11"
+          },
+          "context": [
+            {
+              "address": 795784,
+              "file_offset": 795784,
+              "mnemonic": "mov",
+              "op_str": "w12, #0x10"
+            },
+            {
+              "address": 795788,
+              "file_offset": 795788,
+              "mnemonic": "add",
+              "op_str": "x10, sp, #0x60"
+            },
+            {
+              "address": 795792,
+              "file_offset": 795792,
+              "mnemonic": "sub",
+              "op_str": "x12, x12, x11"
+            },
+            {
+              "address": 795796,
+              "file_offset": 795796,
+              "mnemonic": "add",
+              "op_str": "x10, x10, x11"
+            },
+            {
+              "address": 795800,
+              "file_offset": 795800,
+              "mnemonic": "lsr",
+              "op_str": "x13, x12, #3"
+            },
+            {
+              "address": 795804,
+              "file_offset": 795804,
+              "mnemonic": "add",
+              "op_str": "x11, x22, x11"
+            },
+            {
+              "address": 795808,
+              "file_offset": 795808,
+              "mnemonic": "cbnz",
+              "op_str": "x13, #0xc24b8"
             }
           ]
         }
@@ -1719,6 +3048,96 @@
     },
     {
       "root": "asmFunction slots 0x98/0xa0",
+      "use_pc": 795792,
+      "reg": "x11",
+      "depth": 5,
+      "definitions": [
+        {
+          "pc": 795752,
+          "block": 795740,
+          "distance": 1,
+          "path": [
+            {
+              "from": 795740,
+              "to": 795784,
+              "block": 795740,
+              "kind": "cfg",
+              "callsite": null
+            }
+          ],
+          "instruction": {
+            "address": 795752,
+            "file_offset": 795752,
+            "mnemonic": "csel",
+            "op_str": "x11, x11, x10, ne"
+          },
+          "context": [
+            {
+              "address": 795740,
+              "file_offset": 795740,
+              "mnemonic": "tst",
+              "op_str": "x22, #7"
+            },
+            {
+              "address": 795744,
+              "file_offset": 795744,
+              "mnemonic": "mov",
+              "op_str": "w10, #8"
+            },
+            {
+              "address": 795748,
+              "file_offset": 795748,
+              "mnemonic": "mov",
+              "op_str": "w11, #0x10"
+            },
+            {
+              "address": 795752,
+              "file_offset": 795752,
+              "mnemonic": "csel",
+              "op_str": "x11, x11, x10, ne"
+            },
+            {
+              "address": 795756,
+              "file_offset": 795756,
+              "mnemonic": "add",
+              "op_str": "x10, sp, #0x60"
+            },
+            {
+              "address": 795760,
+              "file_offset": 795760,
+              "mnemonic": "mov",
+              "op_str": "x12, x22"
+            },
+            {
+              "address": 795764,
+              "file_offset": 795764,
+              "mnemonic": "mov",
+              "op_str": "x13, x11"
+            },
+            {
+              "address": 795768,
+              "file_offset": 795768,
+              "mnemonic": "ldrb",
+              "op_str": "w14, [x10], #1"
+            },
+            {
+              "address": 795772,
+              "file_offset": 795772,
+              "mnemonic": "sub",
+              "op_str": "x13, x13, #1"
+            },
+            {
+              "address": 795776,
+              "file_offset": 795776,
+              "mnemonic": "strb",
+              "op_str": "w14, [x12], #1"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "root": "asmFunction slots 0x98/0xa0",
       "use_pc": 796012,
       "reg": "x10",
       "depth": 6,
@@ -1786,6 +3205,76 @@
           ]
         }
       ]
+    },
+    {
+      "root": "asmFunction slots 0x98/0xa0",
+      "use_pc": 795752,
+      "reg": "x10",
+      "depth": 6,
+      "definitions": [
+        {
+          "pc": 795744,
+          "block": 795740,
+          "distance": 0,
+          "path": [],
+          "instruction": {
+            "address": 795744,
+            "file_offset": 795744,
+            "mnemonic": "mov",
+            "op_str": "w10, #8"
+          },
+          "context": [
+            {
+              "address": 795740,
+              "file_offset": 795740,
+              "mnemonic": "tst",
+              "op_str": "x22, #7"
+            },
+            {
+              "address": 795744,
+              "file_offset": 795744,
+              "mnemonic": "mov",
+              "op_str": "w10, #8"
+            },
+            {
+              "address": 795748,
+              "file_offset": 795748,
+              "mnemonic": "mov",
+              "op_str": "w11, #0x10"
+            },
+            {
+              "address": 795752,
+              "file_offset": 795752,
+              "mnemonic": "csel",
+              "op_str": "x11, x11, x10, ne"
+            },
+            {
+              "address": 795756,
+              "file_offset": 795756,
+              "mnemonic": "add",
+              "op_str": "x10, sp, #0x60"
+            },
+            {
+              "address": 795760,
+              "file_offset": 795760,
+              "mnemonic": "mov",
+              "op_str": "x12, x22"
+            },
+            {
+              "address": 795764,
+              "file_offset": 795764,
+              "mnemonic": "mov",
+              "op_str": "x13, x11"
+            },
+            {
+              "address": 795768,
+              "file_offset": 795768,
+              "mnemonic": "ldrb",
+              "op_str": "w14, [x10], #1"
+            }
+          ]
+        }
+      ]
     }
   ],
   "edges": [
@@ -1813,6 +3302,24 @@
       "sources": []
     },
     {
+      "root": "trampoline config / descriptor base",
+      "use_pc": 32208,
+      "reg": "x28",
+      "def_pc": 31488,
+      "sources": [
+        "x2"
+      ]
+    },
+    {
+      "root": "trampoline template-code base",
+      "use_pc": 32504,
+      "reg": "x22",
+      "def_pc": 31492,
+      "sources": [
+        "x28"
+      ]
+    },
+    {
       "root": "asmFunction slots 0x98/0xa0",
       "use_pc": 795200,
       "reg": "x14",
@@ -1837,6 +3344,36 @@
       "sources": []
     },
     {
+      "root": "trampoline config / descriptor base",
+      "use_pc": 31488,
+      "reg": "x2",
+      "def_pc": 30444,
+      "sources": []
+    },
+    {
+      "root": "trampoline config / descriptor base",
+      "use_pc": 31488,
+      "reg": "x2",
+      "def_pc": 31004,
+      "sources": []
+    },
+    {
+      "root": "trampoline config / descriptor base",
+      "use_pc": 31488,
+      "reg": "x2",
+      "def_pc": 31384,
+      "sources": []
+    },
+    {
+      "root": "trampoline template-code base",
+      "use_pc": 31492,
+      "reg": "x28",
+      "def_pc": 31488,
+      "sources": [
+        "x2"
+      ]
+    },
+    {
       "root": "asmFunction slots 0x98/0xa0",
       "use_pc": 795088,
       "reg": "x8",
@@ -1852,6 +3389,27 @@
         "x18",
         "x11"
       ]
+    },
+    {
+      "root": "trampoline template-code base",
+      "use_pc": 31488,
+      "reg": "x2",
+      "def_pc": 30444,
+      "sources": []
+    },
+    {
+      "root": "trampoline template-code base",
+      "use_pc": 31488,
+      "reg": "x2",
+      "def_pc": 31004,
+      "sources": []
+    },
+    {
+      "root": "trampoline template-code base",
+      "use_pc": 31488,
+      "reg": "x2",
+      "def_pc": 31384,
+      "sources": []
     },
     {
       "root": "asmFunction slots 0x98/0xa0",
@@ -1879,6 +3437,22 @@
     {
       "root": "asmFunction slots 0x98/0xa0",
       "use_pc": 795052,
+      "reg": "x18",
+      "def_pc": 46704,
+      "sources": []
+    },
+    {
+      "root": "asmFunction slots 0x98/0xa0",
+      "use_pc": 795052,
+      "reg": "x18",
+      "def_pc": 795856,
+      "sources": [
+        "x13"
+      ]
+    },
+    {
+      "root": "asmFunction slots 0x98/0xa0",
+      "use_pc": 795052,
       "reg": "x11",
       "def_pc": 795048,
       "sources": []
@@ -1901,9 +3475,34 @@
     },
     {
       "root": "asmFunction slots 0x98/0xa0",
+      "use_pc": 795856,
+      "reg": "x13",
+      "def_pc": 795824,
+      "sources": []
+    },
+    {
+      "root": "asmFunction slots 0x98/0xa0",
+      "use_pc": 795856,
+      "reg": "x13",
+      "def_pc": 795800,
+      "sources": [
+        "x12"
+      ]
+    },
+    {
+      "root": "asmFunction slots 0x98/0xa0",
       "use_pc": 796060,
       "reg": "x12",
       "def_pc": 796052,
+      "sources": [
+        "x11"
+      ]
+    },
+    {
+      "root": "asmFunction slots 0x98/0xa0",
+      "use_pc": 795800,
+      "reg": "x12",
+      "def_pc": 795792,
       "sources": [
         "x11"
       ]
@@ -1919,9 +3518,25 @@
     },
     {
       "root": "asmFunction slots 0x98/0xa0",
+      "use_pc": 795792,
+      "reg": "x11",
+      "def_pc": 795752,
+      "sources": [
+        "x10"
+      ]
+    },
+    {
+      "root": "asmFunction slots 0x98/0xa0",
       "use_pc": 796012,
       "reg": "x10",
       "def_pc": 796004,
+      "sources": []
+    },
+    {
+      "root": "asmFunction slots 0x98/0xa0",
+      "use_pc": 795752,
+      "reg": "x10",
+      "def_pc": 795744,
       "sources": []
     }
   ]

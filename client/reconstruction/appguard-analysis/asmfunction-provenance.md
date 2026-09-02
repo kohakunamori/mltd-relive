@@ -1,4 +1,4 @@
-# AppGuard `asmFunction` address provenance
+# AppGuard `asmFunction` / trampoline provenance
 
 ## asmFunction slots 0x00..0x90
 
@@ -7,6 +7,21 @@ Seed instruction: `0x7eec`
 - depth 0 use `0x7eec` `x14` <- 0x7e98: mov w14, wzr (edges=1)
 - depth 0 use `0x7eec` `x20` <- 0x72cc: mov x20, #-1 (edges=9); 0x7650: mov x20, x0 (edges=9)
 - depth 1 use `0x7650` `x0` <- 0x7640: mov x0, xzr (edges=0)
+
+## trampoline config / descriptor base
+
+Seed instruction: `0x7dd0`
+
+- depth 0 use `0x7dd0` `x28` <- 0x7b00: ldr x28, [x2, #0xea0] (edges=3)
+- depth 1 use `0x7b00` `x2` <- 0x76ec: adrp x2, #0x1ec000 (edges=2); 0x791c: adrp x2, #0x1ec000 (edges=5); 0x7a98: adrp x2, #0x1ec000 (edges=6)
+
+## trampoline template-code base
+
+Seed instruction: `0x7ef8`
+
+- depth 0 use `0x7ef8` `x22` <- 0x7b04: add x22, x28, #0x70 (edges=5)
+- depth 1 use `0x7b04` `x28` <- 0x7b00: ldr x28, [x2, #0xea0] (edges=0)
+- depth 2 use `0x7b00` `x2` <- 0x76ec: adrp x2, #0x1ec000 (edges=2); 0x791c: adrp x2, #0x1ec000 (edges=5); 0x7a98: adrp x2, #0x1ec000 (edges=6)
 
 ## asmFunction slots 0x98/0xa0
 
@@ -17,10 +32,14 @@ Seed instruction: `0xc2240`
 - depth 1 use `0xc21d0` `x15` <- 0xc21ac: ldp w15, w18, [x11] (edges=0)
 - depth 1 use `0xc21d0` `x8` <- 0xc21cc: lsr x8, x8, #0x23 (edges=0)
 - depth 2 use `0xc21ac` `x11` <- 0xc21a8: add x11, x11, #0xf60 (edges=0)
-- depth 2 use `0xc21ac` `x18` <- 0x7eb4: movk x18, #0xac75 (edges=9); 0xc25d4: and x18, x13, #3 (edges=12); 0xc2604: add x18, x18, #0x20 (edges=12)
+- depth 2 use `0xc21ac` `x18` <- 0x7eb4: movk x18, #0xac75 (edges=9); 0xc25d4: and x18, x13, #3 (edges=12); 0xc2604: add x18, x18, #0x20 (edges=12); 0xb670: mov w18, #1 (edges=13); 0xc24d0: and x18, x13, #3 (edges=13); 0xc2500: add x18, x18, #0x20 (edges=13)
+- depth 3 use `0xc24d0` `x13` <- 0xc24b0: mov w13, #2 (edges=1); 0xc2498: lsr x13, x12, #3 (edges=2)
 - depth 3 use `0xc25d4` `x13` <- 0xc25b4: mov w13, #3 (edges=1); 0xc259c: lsr x13, x12, #3 (edges=2)
+- depth 4 use `0xc2498` `x12` <- 0xc2490: sub x12, x12, x11 (edges=0)
 - depth 4 use `0xc259c` `x12` <- 0xc2594: sub x12, x12, x11 (edges=0)
+- depth 5 use `0xc2490` `x11` <- 0xc2468: csel x11, x11, x10, ne (edges=1)
 - depth 5 use `0xc2594` `x11` <- 0xc256c: csel x11, x11, x10, ne (edges=1)
+- depth 6 use `0xc2468` `x10` <- 0xc2460: mov w10, #8 (edges=0)
 - depth 6 use `0xc256c` `x10` <- 0xc2564: mov w10, #8 (edges=0)
 
 ### asmFunction slots 0x00..0x90: `x14` used at `0x7eec`
@@ -221,6 +240,38 @@ Definition `0xc2604`:
 0xc2614: cbnz x17, #0xc2600
 ```
 
+Definition `0xb670`:
+```asm
+0xb670: mov w18, #1  ; <-- definition
+0xb674: mov x14, x8
+0xb678: mov x15, x9
+0xb67c: tbnz w18, #0, #0xb6ec
+```
+
+### asmFunction slots 0x98/0xa0: `x13` used at `0xc24d0`
+
+Definition `0xc24b0`:
+```asm
+0xc24a8: add x10, sp, #0x60
+0xc24ac: mov w12, #0x10
+0xc24b0: mov w13, #2  ; <-- definition
+0xc24b4: mov x11, x22
+0xc24b8: cmp x13, #4
+0xc24bc: lsl x14, x13, #3
+0xc24c0: b.hs #0xc24d0
+```
+
+Definition `0xc2498`:
+```asm
+0xc2488: mov w12, #0x10
+0xc248c: add x10, sp, #0x60
+0xc2490: sub x12, x12, x11
+0xc2494: add x10, x10, x11
+0xc2498: lsr x13, x12, #3  ; <-- definition
+0xc249c: add x11, x22, x11
+0xc24a0: cbnz x13, #0xc24b8
+```
+
 ### asmFunction slots 0x98/0xa0: `x13` used at `0xc25d4`
 
 Definition `0xc25b4`:
@@ -243,5 +294,125 @@ Definition `0xc259c`:
 0xc259c: lsr x13, x12, #3  ; <-- definition
 0xc25a0: add x11, x20, x11
 0xc25a4: cbnz x13, #0xc25bc
+```
+
+### asmFunction slots 0x98/0xa0: `x12` used at `0xc2498`
+
+Definition `0xc2490`:
+```asm
+0xc2488: mov w12, #0x10
+0xc248c: add x10, sp, #0x60
+0xc2490: sub x12, x12, x11  ; <-- definition
+0xc2494: add x10, x10, x11
+0xc2498: lsr x13, x12, #3
+0xc249c: add x11, x22, x11
+0xc24a0: cbnz x13, #0xc24b8
+```
+
+### asmFunction slots 0x98/0xa0: `x12` used at `0xc259c`
+
+Definition `0xc2594`:
+```asm
+0xc258c: mov w12, #0x18
+0xc2590: add x10, sp, #0x40
+0xc2594: sub x12, x12, x11  ; <-- definition
+0xc2598: add x10, x10, x11
+0xc259c: lsr x13, x12, #3
+0xc25a0: add x11, x20, x11
+0xc25a4: cbnz x13, #0xc25bc
+```
+
+### trampoline config / descriptor base: `x28` used at `0x7dd0`
+
+Definition `0x7b00`:
+```asm
+0x7b00: ldr x28, [x2, #0xea0]  ; <-- definition
+0x7b04: add x22, x28, #0x70
+0x7b08: cmp x22, x8
+0x7b0c: b.eq #0x7d10
+```
+
+### trampoline config / descriptor base: `x2` used at `0x7b00`
+
+Definition `0x76ec`:
+```asm
+0x76d4: mov x0, x27
+0x76d8: mov x2, x1
+0x76dc: bl #0x171c28
+0x76e0: adrp x8, #0x1e5000
+0x76e4: ldr x8, [x8, #0x838]
+0x76e8: adrp x9, #0x1e5000
+0x76ec: adrp x2, #0x1ec000  ; <-- definition
+0x76f0: ldr w8, [x8]
+0x76f4: ldr x9, [x9, #0xe28]
+0x76f8: sub w10, w8, #1
+0x76fc: ldr w9, [x9]
+0x7700: mul w10, w10, w8
+0x7704: cmp w9, #0xa
+```
+
+Definition `0x791c`:
+```asm
+0x7918: cmp x16, x1
+0x791c: adrp x2, #0x1ec000  ; <-- definition
+0x7920: b.ne #0x7934
+```
+
+Definition `0x7a98`:
+```asm
+0x7a98: adrp x2, #0x1ec000  ; <-- definition
+0x7a9c: cbnz x3, #0x7cd0
+```
+
+### trampoline template-code base: `x22` used at `0x7ef8`
+
+Definition `0x7b04`:
+```asm
+0x7b00: ldr x28, [x2, #0xea0]
+0x7b04: add x22, x28, #0x70  ; <-- definition
+0x7b08: cmp x22, x8
+0x7b0c: b.eq #0x7d10
+```
+
+### trampoline template-code base: `x28` used at `0x7b04`
+
+Definition `0x7b00`:
+```asm
+0x7b00: ldr x28, [x2, #0xea0]  ; <-- definition
+0x7b04: add x22, x28, #0x70
+0x7b08: cmp x22, x8
+0x7b0c: b.eq #0x7d10
+```
+
+### trampoline template-code base: `x2` used at `0x7b00`
+
+Definition `0x76ec`:
+```asm
+0x76d4: mov x0, x27
+0x76d8: mov x2, x1
+0x76dc: bl #0x171c28
+0x76e0: adrp x8, #0x1e5000
+0x76e4: ldr x8, [x8, #0x838]
+0x76e8: adrp x9, #0x1e5000
+0x76ec: adrp x2, #0x1ec000  ; <-- definition
+0x76f0: ldr w8, [x8]
+0x76f4: ldr x9, [x9, #0xe28]
+0x76f8: sub w10, w8, #1
+0x76fc: ldr w9, [x9]
+0x7700: mul w10, w10, w8
+0x7704: cmp w9, #0xa
+```
+
+Definition `0x791c`:
+```asm
+0x7918: cmp x16, x1
+0x791c: adrp x2, #0x1ec000  ; <-- definition
+0x7920: b.ne #0x7934
+```
+
+Definition `0x7a98`:
+```asm
+0x7a98: adrp x2, #0x1ec000  ; <-- definition
+0x7a9c: cbnz x3, #0x7cd0
 ```
 
