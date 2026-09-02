@@ -12,6 +12,7 @@ on:
       - 'tools/client-source/analyze-appguard-bootstrap.py'
       - 'tools/client-source/analyze-appguard-loader-slice.py'
       - 'tools/client-source/analyze-appguard-mprotect.py'
+      - 'tools/client-source/summarize-appguard-init.py'
 
 permissions:
   contents: write
@@ -68,6 +69,10 @@ jobs:
             --bootstrap client/reconstruction/appguard-analysis/bootstrap-cfg.json \
             --loader-slice client/reconstruction/appguard-analysis/loader-slice.json \
             --out client/reconstruction/appguard-analysis
+          python tools/client-source/summarize-appguard-init.py \
+            --bootstrap client/reconstruction/appguard-analysis/bootstrap-cfg.json \
+            --loader-slice client/reconstruction/appguard-analysis/loader-slice.json \
+            --out client/reconstruction/appguard-analysis
 
       - name: Commit maps
         shell: bash
@@ -84,7 +89,8 @@ jobs:
                   client/reconstruction/appguard-analysis/loader-slice.json \
                   client/reconstruction/appguard-analysis/loader-slice.md \
                   client/reconstruction/appguard-analysis/mprotect-slice.json \
-                  client/reconstruction/appguard-analysis/mprotect-slice.md
+                  client/reconstruction/appguard-analysis/mprotect-slice.md \
+                  client/reconstruction/appguard-analysis/dt-init-region.md
           if git diff --cached --quiet; then exit 0; fi
-          git commit -m 'client: slice AppGuard bootstrap mprotect arguments'
+          git commit -m 'client: emit annotated AppGuard DT_INIT region'
           git push origin HEAD:client-zh-fixed-reconstruction
