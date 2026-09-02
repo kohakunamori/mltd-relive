@@ -8,7 +8,7 @@ api_port = 7650
 _language = 'zh'
 _log_level = logging.INFO
 _is_local = False
-_asset_mode = 'remote'
+_asset_mode = 'hybrid'
 _asset_cache_root = 'asset-cache'
 _asset_prefetch_workers = 48
 _asset_upstream_proxy = ''
@@ -65,14 +65,6 @@ class CustomConfigParser(ConfigParser):
             self['default']['asset_local_scopes'] = self['default'].get(
                 'asset_local_scopes', _asset_local_scopes
             )
-            if (version_tuple(stored_version) < (0, 1, 10)
-                    and self['default'].get('asset_mode', '').lower() == 'hybrid'):
-                # v0.1.9 made desktop hybrid the default, but its self-signed
-                # HTTPS AssetBundle path is incompatible with the corrected
-                # client. Move existing v0.1.9 default-like configs back to
-                # the known-good remote mode. Users can explicitly re-enable
-                # hybrid to test the v0.1.10 cleartext-LAN transport.
-                self['default']['asset_mode'] = 'remote'
             self['default']['version'] = version
             self.write_config()
 
