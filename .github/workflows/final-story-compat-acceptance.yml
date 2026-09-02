@@ -1,5 +1,6 @@
 name: Final story compatibility acceptance
 
+# One-shot pre-device acceptance gate for the story compatibility branch.
 on:
   push:
     branches: [fix/story-service-compat]
