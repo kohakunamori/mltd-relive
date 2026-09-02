@@ -10,6 +10,7 @@ on:
       - 'standalone/mltd/models/models.py'
       - 'standalone/mltd/models/schemas.py'
       - 'tests/test_story_service_compat.py'
+      - 'tests/test_story_service_runtime.py'
       - '.github/workflows/test-story-service.yml'
   pull_request:
     paths:
@@ -18,6 +19,7 @@ on:
       - 'standalone/mltd/models/models.py'
       - 'standalone/mltd/models/schemas.py'
       - 'tests/test_story_service_compat.py'
+      - 'tests/test_story_service_runtime.py'
       - '.github/workflows/test-story-service.yml'
 
 jobs:
@@ -30,7 +32,7 @@ jobs:
           python-version: '3.11'
       - run: python -m unittest tests.test_story_service_compat -v
 
-  import-smoke:
+  runtime-smoke:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
@@ -43,4 +45,12 @@ jobs:
           SQLAlchemy==2.0.19 SQLAlchemy-Utils==0.41.1
           marshmallow==3.20.1 marshmallow-sqlalchemy==0.29.0
           msgpack==1.0.5 pycryptodome==3.18.0
-      - run: PYTHONPATH=standalone python -c "import mltd.services.story; print('StoryService import OK')"
+      - name: Import StoryService from standalone runtime directory
+        working-directory: standalone
+        run: python -c "import mltd.services.story; print('StoryService import OK')"
+      - name: Initialize standalone database
+        working-directory: standalone
+        run: python -c "from mltd.models.setup import setup; setup()"
+      - name: Exercise StoryService state transitions
+        working-directory: standalone
+        run: PYTHONPATH=.. python ../tests/test_story_service_runtime.py
