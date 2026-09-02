@@ -1,0 +1,42 @@
+name: Recover original zh client from QooApp
+
+on:
+  push:
+    branches:
+      - client-original-apk-recovery
+    paths:
+      - '.github/workflows/recover-qoo-original.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  recover-qoo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Download from legacy QooApp API
+        shell: bash
+        run: |
+          set -x
+          mkdir -p recovery
+          url='https://api.qoo-app.com/v1/apps/download?id=com.bandainamcoent.imas_millionlive_theaterdays_ch'
+          curl -L --retry 2 --connect-timeout 20 --max-time 180 \
+            -A 'QooApp/80305 Android' \
+            -D recovery/headers.txt \
+            -o recovery/download.bin \
+            "$url" || true
+          ls -lh recovery
+          file recovery/download.bin || true
+          wc -c recovery/download.bin || true
+          sha1sum recovery/download.bin || true
+          sha256sum recovery/download.bin || true
+          head -c 200 recovery/download.bin | xxd || true
+
+      - name: Upload probe
+        uses: actions/upload-artifact@v4
+        with:
+          name: qoo-original-probe
+          path: recovery/
+          retention-days: 3
