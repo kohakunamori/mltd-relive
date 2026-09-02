@@ -11,7 +11,9 @@ from urllib.parse import unquote, urlsplit
 import requests
 import urllib3
 
-from mltd.servers.config import api_port
+from mltd.servers.asset_cache import AssetMirror, AssetStore
+from mltd.servers.asset_server import asset_port, create_server as create_asset_server
+from mltd.servers.config import api_port, config
 from mltd.servers.logging import logger
 
 proxy_port = 443
@@ -52,6 +54,51 @@ def _tune_client_socket(request):
     request.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
     request.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
     request.settimeout(_SOCKET_TIMEOUT)
+
+
+def _start_asset_http_server():
+    """Start the independent cleartext Asset server for cache modes.
+
+    Remote mode intentionally opens no local Asset port. Hybrid/local use a
+    separate HTTP listener on 7651 so AssetBundle traffic never traverses the
+    self-signed API TLS endpoint on 443.
+    """
+    if config.asset_mode == 'remote':
+        return None
+
+    if config.asset_mode == 'local':
+        from mltd.servers.asset_prepare import prepare_local_assets
+        prepare_local_assets(
+            config.language,
+            config.asset_cache_root,
+            workers=config.asset_prefetch_workers,
+            upstream_proxy=config.asset_upstream_proxy,
+        )
+
+    store = AssetStore(config.asset_cache_root)
+    fetch_on_miss = config.asset_mode == 'hybrid'
+    mirror = AssetMirror(
+        store,
+        upstream_proxy=config.asset_upstream_proxy,
+    ) if fetch_on_miss else None
+    httpd = create_asset_server(
+        port=asset_port,
+        store=store,
+        mirror=mirror,
+        fetch_on_miss=fetch_on_miss,
+    )
+    thread = threading.Thread(
+        target=httpd.serve_forever,
+        name='mltd-asset-http',
+        daemon=True,
+    )
+    thread.start()
+    logger.info(
+        f'Asset HTTP server is running on port {asset_port} '
+        f'(mode={config.asset_mode}, '
+        f'fetch_on_miss={"yes" if fetch_on_miss else "no"})...'
+    )
+    return httpd, thread
 
 
 class ThreadedProxyServer(ThreadingHTTPServer):
@@ -231,6 +278,11 @@ def start(port=proxy_port, conn=None):
 
     ProxyHTTPRequestHandler.api_application = application
 
+    # Bind/start the cleartext Asset listener before exposing the API. If the
+    # asset port is unavailable, startup fails early instead of handing the
+    # client an unusable hybrid/local asset_url.
+    _start_asset_http_server()
+
     httpd = ThreadedProxyServer(('', port), ProxyHTTPRequestHandler)
     certfile = path.join(key_path(), 'api.crt')
     keyfile = path.join(key_path(), 'api.key')
@@ -246,7 +298,10 @@ def start(port=proxy_port, conn=None):
     logger.info(
         'API dispatch: direct WSGI, serialized Connection: close compatibility'
     )
-    logger.info('Asset transport: separate HTTP server on port 7651')
+    logger.info(
+        'Asset transport: remote CDN' if config.asset_mode == 'remote'
+        else f'Asset transport: cleartext HTTP on port {asset_port}'
+    )
     if conn:
         conn.send(True)
         conn.close()
