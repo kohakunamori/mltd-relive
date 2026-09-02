@@ -1,6 +1,5 @@
 import io
 import socket
-import ssl
 import sys
 import threading
 import traceback
@@ -62,29 +61,11 @@ class ThreadedProxyServer(ThreadingHTTPServer):
     block_on_close = False
     allow_reuse_address = True
     request_queue_size = _REQUEST_QUEUE_SIZE
-    ssl_context: SSLContext | None = None
 
     def get_request(self):
-        # Accept stays plaintext so ThreadingMixIn can dispatch immediately;
-        # TLS handshakes are performed inside each worker below.  Wrapping the
-        # listening socket serializes handshakes in the accept path under a
-        # burst of new game/asset connections.
         request, client_address = super().get_request()
         _tune_client_socket(request)
         return request, client_address
-
-    def process_request_thread(self, request, client_address):
-        context = self.ssl_context
-        if context is not None:
-            try:
-                request = context.wrap_socket(request, server_side=True)
-            except (ssl.SSLError, OSError):
-                try:
-                    request.close()
-                except OSError:
-                    pass
-                return
-        super().process_request_thread(request, client_address)
 
 
 class ProxyHTTPRequestHandler(AssetHTTPRequestHandler):
@@ -276,12 +257,13 @@ def start(port=proxy_port, conn=None):
     keyfile = path.join(key_path(), 'api.key')
     context = SSLContext(PROTOCOL_TLS_SERVER)
     context.load_cert_chain(certfile, keyfile)
-    # Keep the listening socket plaintext.  Each ThreadingMixIn worker wraps
-    # its accepted socket, so TLS handshakes can proceed in parallel.
-    httpd.ssl_context = context
+    # Preserve the v0.1.6 TLS accept path for corrected game-client compatibility.
+    # The listening socket is TLS-wrapped, so the handshake completes before
+    # ThreadingHTTPServer dispatches the accepted connection to a worker.
+    httpd.socket = context.wrap_socket(httpd.socket, server_side=True)
 
     logger.info(f'TLS API server is running on port {port}...')
-    logger.info('TLS handshakes: parallel worker mode')
+    logger.info('TLS handshakes: listener-wrapped compatibility mode')
     logger.info('API dispatch: direct WSGI (no localhost HTTP hop)')
     logger.info(f'Asset mode: {config.asset_mode}')
     if config.asset_upstream_proxy:
