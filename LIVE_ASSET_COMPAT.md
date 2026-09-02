@@ -1,6 +1,6 @@
 # Live / Asset compatibility fix candidate
 
-> Branch: `fix/live-asset-compat`
+> Branch: `fix/live-asset-sni-compat`
 >
 > Status: code + CI validated; corrected Android client validation pending.
 
