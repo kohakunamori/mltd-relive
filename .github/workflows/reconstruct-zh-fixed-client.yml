@@ -8,6 +8,7 @@ on:
     paths:
       - '.github/workflows/reconstruct-zh-fixed-client.yml'
       - 'tools/client-source/reconstruct-zh-fixed.py'
+      - 'tools/client-source/refine-reconstruction.py'
 
 permissions:
   contents: write
@@ -25,7 +26,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python -m pip install --disable-pip-version-check pyelftools pyyaml
+          python -m pip install --disable-pip-version-check pyelftools pyyaml pillow
           mkdir -p "$RUNNER_TEMP/mltd-reconstruct-tools"
           APKTOOL_VERSION=2.12.1
           curl -L --fail --retry 3 \
@@ -69,9 +70,6 @@ jobs:
           JAR="$RUNNER_TEMP/mltd-reconstruct-tools/apktool.jar"
           java -jar "$JAR" d -f -o work/original-apktool work/original/base.apk
           java -jar "$JAR" d -f -o work/fixed-apktool work/fixed/fixed.apk
-          # The official Play-distributed app keeps arm64 native libraries in a split APK.
-          # Inject that split payload into the decoded original tree so Il2CppDumper sees
-          # the same logical application contents as the merged zh-fixed APK.
           mkdir -p work/original-apktool/lib/arm64-v8a
           unzip -p work/original/arm64.apk lib/arm64-v8a/libil2cpp.so > work/original-apktool/lib/arm64-v8a/libil2cpp.so
           unzip -p work/original/arm64.apk lib/arm64-v8a/libunity.so > work/original-apktool/lib/arm64-v8a/libunity.so
@@ -88,14 +86,21 @@ jobs:
             --fixed-apktool work/fixed-apktool \
             --patch-points client/il2cpp/patch-points.yml \
             --out client/reconstruction
+          python tools/client-source/refine-reconstruction.py \
+            --original-apktool work/original-apktool \
+            --fixed-apktool work/fixed-apktool \
+            --original-arm64 work/original/arm64.apk \
+            --fixed work/fixed/fixed.apk \
+            --reconstruction client/reconstruction
 
       - name: Attempt IL2CPP symbol recovery on both sides
         shell: bash
         run: |
           set -euo pipefail
+          rm -rf work/original-src work/fixed-src
           mkdir -p work/original-src work/fixed-src client/reconstruction/il2cpp/dumper
-          ln -s ../original-apktool work/original-src/apktool
-          ln -s ../fixed-apktool work/fixed-src/apktool
+          cp -a work/original-apktool work/original-src/apktool
+          cp -a work/fixed-apktool work/fixed-src/apktool
           set +e
           bash tools/client-source/extract-il2cpp.sh work/original-src
           ORIG_RC=$?
@@ -170,5 +175,5 @@ jobs:
             echo 'No reconstruction changes to commit.'
             exit 0
           fi
-          git commit -m 'client: record reconstructed zh-fixed semantic delta'
+          git commit -m 'client: refine reconstructed zh-fixed semantic delta'
           git push origin HEAD:client-zh-fixed-reconstruction
