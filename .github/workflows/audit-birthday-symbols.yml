@@ -1,0 +1,71 @@
+name: Audit birthday native symbols
+
+on:
+  push:
+    branches: [fix/story-service-compat]
+    paths: ['.github/workflows/audit-birthday-symbols.yml']
+
+jobs:
+  audit:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: git fetch origin client-decompiled-zh-fixed-v1 --depth=1
+      - name: Map birthday DTO fields and native call targets
+        shell: bash
+        run: |
+          set -euo pipefail
+          git show origin/client-decompiled-zh-fixed-v1:il2cpp-dump/dump.cs > /tmp/dump.cs
+          python - <<'PY' > /tmp/birthday-symbols.txt
+          from pathlib import Path
+          import re
+          lines = Path('/tmp/dump.cs').read_text(errors='ignore').splitlines()
+
+          def class_block(name):
+              hits=[i for i,l in enumerate(lines) if re.search(r'\bclass\s+'+re.escape(name)+r'\b', l)]
+              print(f'===== CLASS {name} hits={len(hits)} =====')
+              for i in hits[:6]:
+                  lo=max(0,i-12); hi=min(len(lines),i+180)
+                  depth=0; started=False
+                  for j in range(lo,hi):
+                      l=lines[j]
+                      print(f'{j+1}: {l}')
+                      if j>=i:
+                          depth += l.count('{')-l.count('}')
+                          if '{' in l: started=True
+                          if started and depth<=0: break
+
+          for name in [
+              'ExecuteBirthdayPresentArgs','ExecuteBirthdayPresentReply',
+              'BirthdayStatus','ResultIdol','IdolStatus','RewardItemStatus',
+              'PresentStatus','ItemStatus'
+          ]:
+              class_block(name)
+
+          targets = [
+              '0x240d61c','0x3785b94','0x3782ce4','0x31079fc','0x1d2749c',
+              '0x18d3aa4','0x30f6dd8','0x1f43700','0x1b068dc','0x3ff1074',
+              '0x448a1a4','0x2854708','0x2856500','0x2409d18','0x3791e44',
+              '0x1a7fa50','0x448a01c','0x1a7d808'
+          ]
+          print('\n===== RVA TARGET DECLARATIONS =====')
+          for target in targets:
+              needle='RVA: '+target
+              hits=[i for i,l in enumerate(lines) if needle.lower() in l.lower()]
+              print(f'\n--- {target} hits={len(hits)} ---')
+              for i in hits[:12]:
+                  for j in range(max(0,i-18), min(len(lines),i+8)):
+                      print(f'{j+1}: {lines[j]}')
+
+          print('\n===== PROCESS REWARD MOVENEXT DECLARATION =====')
+          hits=[i for i,l in enumerate(lines) if 'RVA: 0x189970c' in l.lower()]
+          for i in hits:
+              for j in range(max(0,i-140), min(len(lines),i+20)):
+                  print(f'{j+1}: {lines[j]}')
+          PY
+          wc -l /tmp/birthday-symbols.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: birthday-symbol-map
+          path: /tmp/birthday-symbols.txt
+          retention-days: 7
