@@ -15,12 +15,58 @@ jobs:
         with:
           fetch-depth: 1
       - run: git fetch origin client-decompiled-zh-fixed-v1 --depth=1
-      - name: Inspect corrected-client CostumeService contract
+      - name: Classify active corrected-client RPCs
         shell: bash
         run: |
           set -euo pipefail
           git show origin/client-decompiled-zh-fixed-v1:il2cpp-dump/dump.cs > /tmp/dump.cs
-          echo '=== COSTUME CLIENT REFERENCES ==='
-          grep -n -C 10 -E 'GetCostumeList|SetCostume|CreateRequestAndSend<[^>]*Costume|GetReply<[^>]*Costume|HTTPRequest [A-Za-z0-9_]*Costume|CostumeStatus\[\]' /tmp/dump.cs | head -n 1800 || true
-          echo '=== COSTUME SERVER MODELS ==='
-          grep -n -C 22 -E '^class (Costume|MstCostume)\b|^class .*Costume.*Schema\b' standalone/mltd/models/models.py standalone/mltd/models/schemas.py || true
+          git show origin/client-decompiled-zh-fixed-v1:report/client-rpc-methods.txt > /tmp/client-rpcs.txt
+          python - <<'PY'
+          import ast, re
+          from pathlib import Path
+          client = {x.strip() for x in Path('/tmp/client-rpcs.txt').read_text().splitlines() if x.strip()}
+          dump = Path('/tmp/dump.cs').read_text(errors='replace')
+          connection_methods = set(re.findall(r'public HTTPRequest ([A-Za-z0-9_]+)\s*\(', dump))
+          server = set()
+          for path in Path('standalone/mltd/services').glob('*.py'):
+              try:
+                  tree = ast.parse(path.read_text(encoding='utf-8'))
+              except SyntaxError:
+                  continue
+              for node in ast.walk(tree):
+                  if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                      continue
+                  for dec in node.decorator_list:
+                      if not isinstance(dec, ast.Call):
+                          continue
+                      if not (isinstance(dec.func, ast.Attribute) and dec.func.attr == 'add_method'):
+                          continue
+                      for kw in dec.keywords:
+                          if kw.arg == 'name' and isinstance(kw.value, ast.Constant) and isinstance(kw.value.value, str):
+                              server.add(kw.value.value)
+          active = {rpc for rpc in client if rpc.rsplit('.', 1)[-1] in connection_methods}
+          missing_active = sorted(active - server)
+          dormant = sorted(client - active)
+          print(f'CLIENT_TOTAL={len(client)}')
+          print(f'CONNECTION_METHOD_NAMES={len(connection_methods)}')
+          print(f'ACTIVE_RPC_ESTIMATE={len(active)}')
+          print(f'ACTIVE_IMPLEMENTED={len(active & server)}')
+          print(f'ACTIVE_MISSING={len(missing_active)}')
+          print('=== ACTIVE MISSING ===')
+          for rpc in missing_active:
+              print(rpc)
+          print('=== DORMANT CONSTANTS OF INTEREST ===')
+          for rpc in dormant:
+              if rpc.startswith(('CostumeService.', 'StoryService.')):
+                  print(rpc)
+          PY
+      - name: Inspect high-value missing contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo '=== DTOs ==='
+          grep -n -C 14 -E 'class (FinishTheaterOpening|FinishGuestCharacterMainStory|DoClientMission|ExecuteBirthdayPresent)(Args|Reply)' /tmp/dump.cs || true
+          echo '=== CONNECTION METHODS ==='
+          grep -n -C 5 -E 'HTTPRequest (FinishTheaterOpening|FinishGuestCharacterMainStory|DoClientMission|ExecuteBirthdayPresent)\(' /tmp/dump.cs || true
+          echo '=== RELEVANT SERVER MODELS/SCHEMAS ==='
+          grep -n -C 18 -E '^class (GuestCharacter|GuestCharacterMainStory|MstGuest|MstGuestCharacter|Birthday|Mission|MstMission).*\b|^class .*Guest.*Schema\b|^class .*Birthday.*Schema\b' standalone/mltd/models/models.py standalone/mltd/models/schemas.py || true
