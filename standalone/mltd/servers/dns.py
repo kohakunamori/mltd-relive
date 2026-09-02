@@ -1,17 +1,12 @@
-from inspect import cleandoc
 from time import sleep
-from urllib.parse import urlsplit
 
 import netifaces
 from dnslib.intercept import InterceptResolver
 from dnslib.server import DNSLogger, DNSServer
 
-from mltd.servers.asset_cache import REMOTE_ASSET_ROOT
-from mltd.servers.config import config
 from mltd.servers.logging import logger
 
 dns_port = 53
-_ASSET_HOST = urlsplit(REMOTE_ASSET_ROOT).hostname
 _API_HOSTS = (
     'theaterdays-zh.appspot.com',
     'theaterdays-ko.appspot.com',
@@ -33,30 +28,23 @@ def get_lan_ips():
     return ipv4, ipv6
 
 
-def _intercept_asset_host():
-    return (
-        not config.is_local
-        and config.asset_mode in {'hybrid', 'local'}
-        and _ASSET_HOST is not None
-    )
-
-
 def build_zone_record(lan_ipv4, lan_ipv6):
     """Build DNS overrides used by corrected clients.
 
-    API hostnames always resolve to the standalone server.  The public asset
-    hostname is intercepted only for desktop hybrid/local modes; remote mode
-    intentionally resolves it normally so clients talk to the public CDN.
+    Only API hostnames are intercepted. Desktop hybrid/local asset traffic
+    reuses the already-intercepted theaterdays-{language}.appspot.com host on
+    the dedicated cleartext HTTP asset port (7651), so the public Rainbow CDN
+    hostname must keep resolving normally.
     """
-    hosts = list(_API_HOSTS)
-    if _intercept_asset_host():
-        hosts.append(_ASSET_HOST)
-
     records = []
     if lan_ipv4:
-        records.extend(f'{host}. 60 IN A {lan_ipv4}' for host in hosts)
+        records.extend(
+            f'{host}. 60 IN A {lan_ipv4}' for host in _API_HOSTS
+        )
     if lan_ipv6:
-        records.extend(f'{host}. 60 IN AAAA {lan_ipv6}' for host in hosts)
+        records.extend(
+            f'{host}. 60 IN AAAA {lan_ipv6}' for host in _API_HOSTS
+        )
     return '\n'.join(records) + ('\n' if records else '')
 
 
@@ -78,10 +66,6 @@ def start(port=dns_port, conn=None):
     logger.info(f'DNS is running on port {port}...')
     logger.info(f'IPv4: {lan_ipv4}')
     logger.info(f'IPv6: {lan_ipv6}')
-    logger.info(
-        'Asset DNS interception: '
-        + ('enabled' if _intercept_asset_host() else 'disabled')
-    )
     if conn:
         conn.send(True)
         conn.close()
