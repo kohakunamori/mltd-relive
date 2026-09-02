@@ -1,75 +1,73 @@
-# mltd-relive Standalone v0.1.8
+# mltd-relive Standalone v0.1.9
 
-本 Release 同时包含 **Standalone v0.1.8 服务器、修正版游戏客户端和 APK Patcher**。
+本 Release 是 **Standalone v0.1.9 登录兼容性 Hotfix**，同时重新构建 Windows / Ubuntu / macOS Standalone、APK Patcher，并继续附带既有修正版繁中/韩文游戏客户端。
 
-## v0.1.8 重点更新
+## v0.1.9 Hotfix
 
-### Asset Server 高性能传输
+### 恢复 v0.1.6 TLS 客户端兼容路径
 
-- 为已缓存 Asset 建立内存 serving index；正常 `GET` / `HEAD` 热路径不再逐请求查询 SQLite，也不再重复执行文件 `stat`。
-- hybrid 或外部 prefetch 在运行时新增的 Asset 会自动自愈进入 serving index；之后的请求继续走零 SQLite 热路径。
-- HTTP/1.1 keep-alive 保持开启，连接 backlog 提升到 512，并启用 `TCP_NODELAY`、TCP keepalive 和连接超时控制。
-- 桌面 443 TLS listener 改为 **accept 后在线程内执行 TLS handshake**，避免新连接突发时在 accept 路径串行握手，提高并发连接建立能力。
-- 明文 Asset listener 可使用内核 `sendfile()` 零拷贝传输；TLS 路径使用 1 MiB `readinto(memoryview)` 缓冲，减少 Python 临时对象和复制开销。
-- Range、HEAD、ETag / If-None-Match、Last-Modified / If-Modified-Since 等行为继续保留。
-- 新增 Asset 热路径并发回归测试：重复命中明确要求不得再次调用 SQLite metadata 查询，并覆盖 96 个并发 GET / Range 请求。
+- 回退 v0.1.8 新引入的“accept 明文 socket 后在线程内执行 TLS handshake”实现。
+- 恢复已经由 v0.1.6 修正版客户端验证过的 listener-wrapped TLS accept 路径：443 监听 socket 在进入 `serve_forever()` 前直接由 `SSLContext.wrap_socket(..., server_side=True)` 包装。
+- 此修复只调整 TLS 接入方式，不修改客户端请求、JSON-RPC 请求体、加密协议或 API 路径。
+- 保留 v0.1.8 的连接 backlog 512、`TCP_NODELAY`、TCP keepalive、连接超时、direct WSGI API dispatch 等其余性能优化。
 
-GitHub Actions 合成基准（Ubuntu runner，64 KiB Asset，32 个 HTTP/1.1 持久客户端）：
+### 修复 DNS / API Host 不一致
 
-- **1600 requests / 100 MiB / 1.074 s**
-- **1489.4 req/s**
-- **93.1 MiB/s**
+- v0.1.8 已将 `theaterdays.appspot.com` 加入本地 DNS 映射，但 API handler 此前仍只接受：
+  - `theaterdays-zh.appspot.com`
+  - `theaterdays-ko.appspot.com`
+  - `127.0.0.1`
+- 这会导致被本地 DNS 接管的 `theaterdays.appspot.com` 请求进入本地 443 后收到 `503 Service Unavailable`。
+- v0.1.9 将 `theaterdays.appspot.com` 纳入允许列表，使 DNS interception 与 API handler 保持一致。
+- Host 校验同时由 substring matching 改为标准化后的严格 hostname matching，并兼容 `:443` 端口与大小写差异。
 
-该数字用于比较服务器实现的相对吞吐；实际游戏速度仍取决于客户端、TLS、磁盘和本机网络环境。
+### 回归验证
 
-### API Server 性能与诊断
+新增自动化覆盖：
 
-- 保留 direct WSGI API dispatch，不再经过 localhost HTTP hop。
-- 合成 API transport benchmark：direct WSGI 约 **4557 req/s，median 0.217 ms，p95 0.244 ms**。
-- 优化 `UnitService.SetUnit` ORM 读取，显式 eager-load 目标 Unit / UnitIdol，减少 relationship lazy-load。
-- Slow API 日志现在可以识别 JSON-RPC batch，并显示 batch 内的方法预览，不再只显示 `?`。
+- TLS server 必须保持 v0.1.6 listener-wrapped compatibility model。
+- 三个 Theater Days Appspot hostname 均必须被 API handler 接受。
+- 伪造的后缀/前缀 hostname 不得因 substring matching 被误接受。
 
-### 合并 yuyueryuyu Standalone 新功能
+修复分支在合并前已通过：
 
-已合并 `yuyueryuyu/mltd-relive` 的新 Standalone 功能（PR #4），同时保留本 fork 的 Asset/API/GUI/配置性能改造，包括：
+- local asset / transport tests
+- API runtime import 与 SQLite runtime 检查
+- remote asset compatibility
+- API transport benchmark
+- Asset serving benchmark
 
-- 偶像详情相关功能。
-- 工作（Job）相关补全。
-- 礼物领取相关功能。
-- 剧场中与偶像互动相关功能。
-- 对应 model、schema、master data、繁中 locale 及相关 service 更新。
-- DNS 补充 `theaterdays.appspot.com` 本地解析支持。
+## 保留的 v0.1.8 功能
 
-上游调试残留及会破坏本 fork 配置语义的 server 改动没有机械覆盖；`config.py`、高性能 `handler.py`、logging、encryption 和 Asset/TLS server 保留本 fork 实现。
+v0.1.9 除上述兼容性修复外继续包含 v0.1.8 的功能和性能改造，包括：
 
-### Local Asset 延续优化
+- Asset serving index 与缓存热路径零 SQLite 查询。
+- hybrid/local Asset mirror、prefetch 与 self-heal serving index。
+- HTTP/1.1 keep-alive、backlog 512、TCP keepalive / `TCP_NODELAY`。
+- 明文 Asset `sendfile()` 与 TLS 大缓冲传输路径。
+- direct WSGI API dispatch。
+- `UnitService.SetUnit` eager-load 优化与 JSON-RPC batch slow-log 诊断。
+- yuyueryuyu Standalone 的偶像详情、Job、Present、Theater interaction、model/schema/master data/locale/service 更新。
+- local Asset fast-start、48 workers 与 configurable scopes。
 
-继续包含 v0.1.7 / v0.1.6 的 local 优化：
+## 客户端兼容性
 
-- 默认只准备 `zh-android`，额外 scope 可通过 `asset_local_scopes` 单独配置。
-- 默认 48 workers，`asset_prefetch_workers` 可在 `config.ini` 修改。
-- bulk metadata transaction、批量 cache snapshot、减少重复 manifest 解析。
-- Preparing Local Assets 阶段支持 Stop Server 中断。
-- strict-local 完成后使用可自动失效的 ready stamp；未改变 cache 时后续启动直接走常数级 fast-start。
+本次 Hotfix **不修改游戏客户端请求行为**。Release 中继续提供既有修正版客户端：
 
-## local 配置示例
+- `mltd-relive-game-client-zh-fixed.apk`
+- `mltd-relive-game-client-ko-fixed.apk`
 
-```ini
-[default]
-asset_mode = local
-asset_local_scopes = zh-android
-asset_prefetch_workers = 48
-```
+服务器侧恢复与修正版客户端兼容的 TLS 行为，并修复 Host routing。
 
 ## 下载哪个文件
 
 | 文件 | 用途 |
 |---|---|
-| `mltd-relive-standalone-v0.1.8-windows.exe` | Windows GUI/服务器 |
-| `mltd-relive-standalone-v0.1.8-ubuntu` | Ubuntu/Linux 服务器 |
-| `mltd-relive-standalone-v0.1.8-macos.zip` | macOS 服务器 |
+| `mltd-relive-standalone-v0.1.9-windows.exe` | Windows GUI/服务器 |
+| `mltd-relive-standalone-v0.1.9-ubuntu` | Ubuntu/Linux 服务器 |
+| `mltd-relive-standalone-v0.1.9-macos.zip` | macOS 服务器 |
 | `mltd-relive-game-client-zh-fixed.apk` | 繁中修正版客户端 |
 | `mltd-relive-game-client-ko-fixed.apk` | 韩文修正版客户端 |
 | `mltd-relive-apk-patcher-*-windows.exe` | Windows APK Patcher |
 
-Windows + 繁中客户端通常使用 `mltd-relive-standalone-v0.1.8-windows.exe` 和 `mltd-relive-game-client-zh-fixed.apk`。
+Windows + 繁中客户端通常使用 `mltd-relive-standalone-v0.1.9-windows.exe` 和 `mltd-relive-game-client-zh-fixed.apk`。
