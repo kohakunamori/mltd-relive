@@ -30,6 +30,7 @@ __all__ = [
     'song',
     'song_ranking',
     'story',
+    'story_legacy',
     'theater',
     'unit',
     'user',
