@@ -1,0 +1,89 @@
+schema_version: 1
+baseline:
+  official:
+    package: com.bandainamcoent.imas_millionlive_theaterdays_ch
+    version_code: 21000
+    version_name: 2.1.000
+    xapk_sha1: 1b77ddd342a4020ba032ec63ae7ef9288551b6e7
+    base_apk_sha256: 8b8a3976687f606cba2fe3a605d80ae0f7d9cbaa72e6b97ab4bed8c556ba9081
+    arm64_split_sha256: 9932366bd357dc33701a6e7282d26ed67630db95486f596328aade8523032e46
+    libil2cpp_sha256: 1a774f6ddf828179b94d40294a01b5ea6b9c8bc89769d36719bec7d56c167acf
+    global_metadata_sha256: aaf8b0d5a559d49aa5cca5937fc87beed7217c497d96cfc470d5d58abe987d69
+  zh_fixed:
+    package: com.bandainamcoent.imas_millionlive_theaterdays_ch.local
+    apk_sha256: a423f1b09b6d9022cf255aff9a43716d6beadf32d42641da3c7b92d2e663e918
+    libil2cpp_sha256: 52d0cdac0179ae4a5d61a00b9bfd500969730d1a3f157cf667d82c525836936b
+    global_metadata_sha256: 0b0913387be65fb046a7536e016cd9f8514b0ac23bd79b8b20540c73cb1d8cf0
+
+android:
+  status: reconstructed
+  package_rename:
+    from: com.bandainamcoent.imas_millionlive_theaterdays_ch
+    to: com.bandainamcoent.imas_millionlive_theaterdays_ch.local
+  app_name:
+    from: 劇場時光
+    to: 劇場時光L
+  remove_application_name: com.inca.security.Proxy.AppGuardFrontApplication
+  remove_permissions:
+    - com.bandainamcoent.imas_millionlive_theaterdays_ch.permission.C2D_MESSAGE
+  provider_authority_renames:
+    - from: com.bandainamcoent.imas_millionlive_theaterdays_ch.firebaseinitprovider
+      to: com.bandainamcoent.imas_millionlive_theaterdays_ch.local.firebaseinitprovider
+    - from: com.bandainamcoent.imas_millionlive_theaterdays_ch.fileprovider
+      to: com.bandainamcoent.imas_millionlive_theaterdays_ch.local.fileprovider
+  remove_components:
+    activities:
+      - com.inca.security.DexProtect.SupportActivity
+    services:
+      - com.inca.security.Service.AppGuardService
+  remove_metadata:
+    - AppGuardLicense
+    - AppGuardRptType
+    - AppGuardMsgShow
+    - AppGuardHashKey
+    - AppGuardAppType
+    - AppGuardConnect
+    - AppGuardDexOptz
+  standalone_metadata:
+    com.android.dynamic.apk.fused.modules: base
+    com.android.stamp.type: STAMP_TYPE_STANDALONE_APK
+    com.android.vending.derived.apk.id: "2"
+  remove_smali:
+    - smali/com/bandainamcoent/imas_millionlive_theaterdays/player/OverrideEventListener$1.smali
+    - smali/com/bandainamcoent/imas_millionlive_theaterdays/player/OverrideEventListener$2.smali
+    - smali/com/bandainamcoent/imas_millionlive_theaterdays/player/OverrideEventListener$3.smali
+    - smali/com/bandainamcoent/imas_millionlive_theaterdays/player/OverrideEventListener.smali
+    - smali/com/inca/security/Core/ObjectReflector.smali
+    - smali/com/inca/security/DexProtect/Binder.smali
+    - smali/com/inca/security/DexProtect/SupportActivity$1.smali
+    - smali/com/inca/security/DexProtect/SupportActivity.smali
+    - smali/com/inca/security/IiiIiiiiiI.smali
+    - smali/com/inca/security/Proxy/AppGuardFrontApplication.smali
+    - smali/com/inca/security/Proxy/AppGuardProxyApplication.smali
+    - smali/com/inca/security/Proxy/AppGuardProxyHandler.smali
+    - smali/com/inca/security/Proxy/JNISoxProxy.smali
+    - smali/com/inca/security/Proxy/iIiIiIiIii.smali
+    - smali/com/inca/security/Service/AppGuardService.smali
+    - smali/com/inca/security/Service/AppGuardServiceCaller.smali
+    - smali/com/inca/security/iiIiiiiIIi.smali
+  replace_smali:
+    smali/com/bandainamcoent/imas_millionlive_theaterdays/player/OverrideActivity.smali: android/fixed-smali/smali/com/bandainamcoent/imas_millionlive_theaterdays/player/OverrideActivity.smali
+
+native:
+  status: deprotection_not_yet_rederived
+  observations:
+    - official global-metadata.dat does not start with the standard IL2CPP AF1BB1FA magic
+    - zh-fixed global-metadata.dat does start with standard IL2CPP AF1BB1FA magic
+    - metadata size is unchanged at 21159696 bytes
+    - no exact repeating XOR key of period <= 512 explains the metadata transform
+    - official libil2cpp.so is 6715576 bytes larger than the zh-fixed library
+    - official libil2cpp.so is AppGuard-protected/obfuscated; fixed library is a deprotected ELF baseline
+  target_payloads:
+    libil2cpp_sha256: 52d0cdac0179ae4a5d61a00b9bfd500969730d1a3f157cf667d82c525836936b
+    global_metadata_sha256: 0b0913387be65fb046a7536e016cd9f8514b0ac23bd79b8b20540c73cb1d8cf0
+
+separation_of_concerns:
+  note: >-
+    The resolution/framerate patches currently implemented by tools/apk-patcher are downstream
+    user-configurable patches against the already deprotected zh-fixed baseline. They are not
+    part of the historical AppGuard-removal reconstruction described by this specification.
