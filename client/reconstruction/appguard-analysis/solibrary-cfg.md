@@ -1,0 +1,351 @@
+# `SoLibraryStart` recursive CFG
+
+- entry: `0xc0d64`
+- blocks: **22**
+- instructions: **204**
+- direct calls: **13**
+- UDF boundaries: **0**
+- invalid boundaries: **3**
+
+## Imported functions reached
+
+| Import | Calls |
+|---|---:|
+| `__stack_chk_fail` | 2 |
+| `_Unwind_Resume` | 2 |
+| `free` | 1 |
+
+## Direct calls
+
+| Callsite | Depth | Owner | Target | Target label | Import |
+|---:|---:|---|---:|---|---|
+| `0xc0d74` | 0 | `SoLibraryStart` | `0xc0d98` | `SoLibraryStart+0x34` | `-` |
+| `0xc0dcc` | 1 | `SoLibraryStart` | `0x1cd84` | `IIiIIiIiiI+0xe808` | `-` |
+| `0xc1644` | 1 | `SoLibraryStart` | `0x1cd4c` | `IIiIIiIiiI+0xe7d0` | `-` |
+| `0xc1620` | 1 | `SoLibraryStart` | `0x29414` | `IIiIIiIiiI+0x1ae98` | `-` |
+| `0xc168c` | 1 | `SoLibraryStart` | `0x1708c0` | `iIIIIIIiIi+0x23334` | `__stack_chk_fail` |
+| `0xc1644` | 1 | `SoLibraryStart` | `0x1cd4c` | `IIiIIiIiiI+0xe7d0` | `-` |
+| `0xc16ac` | 1 | `SoLibraryStart` | `0x170680` | `iIIIIIIiIi+0x230f4` | `_Unwind_Resume` |
+| `0xc16e4` | 1 | `SoLibraryStart` | `0x1cd84` | `IIiIIiIiiI+0xe808` | `-` |
+| `0xc16a0` | 1 | `SoLibraryStart` | `0x16fec0` | `iIIIIIIiIi+0x22934` | `free` |
+| `0xc16ac` | 1 | `SoLibraryStart` | `0x170680` | `iIIIIIIiIi+0x230f4` | `_Unwind_Resume` |
+| `0xc16e4` | 1 | `SoLibraryStart` | `0x1cd84` | `IIiIIiIiiI+0xe808` | `-` |
+| `0xc1d58` | 1 | `SoLibraryStart` | `0x1cd4c` | `IIiIIiIiiI+0xe7d0` | `-` |
+| `0xc1da0` | 1 | `SoLibraryStart` | `0x1708c0` | `iIIIIIIiIi+0x23334` | `__stack_chk_fail` |
+
+## First code blocks
+
+### block `0xc0d64` depth 0 (blr)
+
+```asm
+0xc0d64: str x19, [sp, #-0x20]!
+0xc0d68: stp x29, x30, [sp, #0x10]
+0xc0d6c: add x29, sp, #0x10
+0xc0d70: mov x19, x0
+0xc0d74: bl #0xc0d98
+0xc0d78: adrp x8, #0x1e5000
+0xc0d7c: ldr x8, [x8, #0xcf0]
+0xc0d80: mov x0, x19
+0xc0d84: ldr x8, [x8]
+0xc0d88: blr x8
+```
+
+### block `0xc0d98` depth 1 (cbnz)
+
+```asm
+0xc0d98: stp x28, x27, [sp, #-0x60]!
+0xc0d9c: stp x26, x25, [sp, #0x10]
+0xc0da0: stp x24, x23, [sp, #0x20]
+0xc0da4: stp x22, x21, [sp, #0x30]
+0xc0da8: stp x20, x19, [sp, #0x40]
+0xc0dac: stp x29, x30, [sp, #0x50]
+0xc0db0: add x29, sp, #0x50
+0xc0db4: sub sp, sp, #0x80
+0xc0db8: mrs x8, tpidr_el0
+0xc0dbc: ldr x8, [x8, #0x28]
+0xc0dc0: adrp x0, #0x1e5000
+0xc0dc4: stur x8, [x29, #-0x58]
+0xc0dc8: ldr x0, [x0, #0xb28]
+0xc0dcc: bl #0x1cd84
+0xc0dd0: adrp x10, #0x1e6000
+0xc0dd4: ldr x10, [x10, #0xc0]
+0xc0dd8: ldr w9, [x10]
+0xc0ddc: cbnz w9, #0xc15e8
+```
+
+### block `0xc0de0` depth 1 (blr)
+
+```asm
+0xc0de0: adrp x19, #0x1e5000
+0xc0de4: ldr x19, [x19, #0xc68]
+0xc0de8: adrp x11, #0x1e5000
+0xc0dec: mov w7, #-0x1cb00000
+0xc0df0: mov w9, #7
+0xc0df4: ldr x8, [x19]
+0xc0df8: mov w2, #7
+0xc0dfc: sub x3, x29, #0x90
+0xc0e00: sub x4, x29, #0x94
+0xc0e04: ldp x10, x8, [x8, #0xe0]
+0xc0e08: ldr x11, [x11, #0xd38]
+0xc0e0c: mov w5, #0xe2
+0xc0e10: mov w6, #0xd9
+0xc0e14: add x8, x8, #0xfff
+0xc0e18: ldr x11, [x11, #0xa0]
+0xc0e1c: and x0, x10, #0xfffffffffffff000
+0xc0e20: and x8, x8, #0xfffffffffffff000
+0xc0e24: sub x1, x8, x0
+0xc0e28: movk w7, #0xf787
+0xc0e2c: stur x1, [x29, #-0x90]
+0xc0e30: stur w9, [x29, #-0x94]
+0xc0e34: blr x11
+```
+
+### block `0xc15e8` depth 1 (cbnz)
+
+```asm
+0xc15e8: add w9, w9, #1
+0xc15ec: str w9, [x10]
+0xc15f0: adrp x9, #0x1e5000
+0xc15f4: ldr x9, [x9, #0x6f8]
+0xc15f8: mov x8, xzr
+0xc15fc: ldrb w10, [x9, x8]
+0xc1600: add x8, x8, #1
+0xc1604: cbnz w10, #0xc15fc
+```
+
+### block `0xc15fc` depth 1 (cbnz)
+
+```asm
+0xc15fc: ldrb w10, [x9, x8]
+0xc1600: add x8, x8, #1
+0xc1604: cbnz w10, #0xc15fc
+```
+
+### block `0xc1608` depth 1 (b.eq)
+
+```asm
+0xc1608: cmp x8, #1
+0xc160c: b.eq #0xc163c
+```
+
+### block `0xc1610` depth 1 (tbnz)
+
+```asm
+0xc1610: adrp x0, #0x1e5000
+0xc1614: adrp x1, #0x1e5000
+0xc1618: ldr x0, [x0, #0x658]
+0xc161c: ldr x1, [x1, #0x6f8]
+0xc1620: bl #0x29414
+0xc1624: tbnz w0, #0, #0xc163c
+```
+
+### block `0xc1628` depth 1 (b.ne)
+
+```asm
+0xc1628: adrp x8, #0x1e5000
+0xc162c: ldr x8, [x8, #0x6b0]
+0xc1630: ldr w9, [x8]
+0xc1634: orr w9, w9, #8
+0xc1638: str w9, [x8]
+0xc163c: adrp x0, #0x1e5000
+0xc1640: ldr x0, [x0, #0xb28]
+0xc1644: bl #0x1cd4c
+0xc1648: mrs x8, tpidr_el0
+0xc164c: ldr x8, [x8, #0x28]
+0xc1650: ldur x9, [x29, #-0x58]
+0xc1654: cmp x8, x9
+0xc1658: b.ne #0xc168c
+```
+
+### block `0xc163c` depth 1 (b.ne)
+
+```asm
+0xc163c: adrp x0, #0x1e5000
+0xc1640: ldr x0, [x0, #0xb28]
+0xc1644: bl #0x1cd4c
+0xc1648: mrs x8, tpidr_el0
+0xc164c: ldr x8, [x8, #0x28]
+0xc1650: ldur x9, [x29, #-0x58]
+0xc1654: cmp x8, x9
+0xc1658: b.ne #0xc168c
+```
+
+### block `0xc165c` depth 1 (ret)
+
+```asm
+0xc165c: sub sp, x29, #0x50
+0xc1660: ldp x29, x30, [sp, #0x50]
+0xc1664: ldp x20, x19, [sp, #0x40]
+0xc1668: ldp x22, x21, [sp, #0x30]
+0xc166c: ldp x24, x23, [sp, #0x20]
+0xc1670: ldp x26, x25, [sp, #0x10]
+0xc1674: ldp x28, x27, [sp], #0x60
+0xc1678: ret 
+```
+
+### block `0xc168c` depth 1 (cbz)
+
+```asm
+0xc168c: bl #0x1708c0
+0xc1690: ldur x8, [x29, #-0x68]
+0xc1694: mov x19, x0
+0xc1698: cbz x8, #0xc16a8
+```
+
+### block `0xc169c` depth 1 (cbnz)
+
+```asm
+0xc169c: mov x0, x8
+0xc16a0: bl #0x16fec0
+0xc16a4: stur xzr, [x29, #-0x68]
+0xc16a8: mov x0, x19
+0xc16ac: bl #0x170680
+0xc16b0: stp x28, x27, [sp, #-0x60]!
+0xc16b4: stp x26, x25, [sp, #0x10]
+0xc16b8: stp x24, x23, [sp, #0x20]
+0xc16bc: stp x22, x21, [sp, #0x30]
+0xc16c0: stp x20, x19, [sp, #0x40]
+0xc16c4: stp x29, x30, [sp, #0x50]
+0xc16c8: add x29, sp, #0x50
+0xc16cc: sub sp, sp, #0x90
+0xc16d0: mrs x8, tpidr_el0
+0xc16d4: ldr x8, [x8, #0x28]
+0xc16d8: adrp x0, #0x1e5000
+0xc16dc: stur x8, [x29, #-0x58]
+0xc16e0: ldr x0, [x0, #0xb28]
+0xc16e4: bl #0x1cd84
+0xc16e8: adrp x8, #0x1e6000
+0xc16ec: ldr x8, [x8, #0xc0]
+0xc16f0: ldr w9, [x8]
+0xc16f4: sub w9, w9, #1
+0xc16f8: str w9, [x8]
+0xc16fc: cbnz w9, #0xc1d50
+```
+
+### block `0xc16a8` depth 1 (cbnz)
+
+```asm
+0xc16a8: mov x0, x19
+0xc16ac: bl #0x170680
+0xc16b0: stp x28, x27, [sp, #-0x60]!
+0xc16b4: stp x26, x25, [sp, #0x10]
+0xc16b8: stp x24, x23, [sp, #0x20]
+0xc16bc: stp x22, x21, [sp, #0x30]
+0xc16c0: stp x20, x19, [sp, #0x40]
+0xc16c4: stp x29, x30, [sp, #0x50]
+0xc16c8: add x29, sp, #0x50
+0xc16cc: sub sp, sp, #0x90
+0xc16d0: mrs x8, tpidr_el0
+0xc16d4: ldr x8, [x8, #0x28]
+0xc16d8: adrp x0, #0x1e5000
+0xc16dc: stur x8, [x29, #-0x58]
+0xc16e0: ldr x0, [x0, #0xb28]
+0xc16e4: bl #0x1cd84
+0xc16e8: adrp x8, #0x1e6000
+0xc16ec: ldr x8, [x8, #0xc0]
+0xc16f0: ldr w9, [x8]
+0xc16f4: sub w9, w9, #1
+0xc16f8: str w9, [x8]
+0xc16fc: cbnz w9, #0xc1d50
+```
+
+### block `0xc1700` depth 1 (blr)
+
+```asm
+0xc1700: adrp x19, #0x1e5000
+0xc1704: ldr x19, [x19, #0xc68]
+0xc1708: adrp x11, #0x1e5000
+0xc170c: mov w7, #-0x1cb00000
+0xc1710: mov w9, #7
+0xc1714: ldr x8, [x19]
+0xc1718: mov w2, #7
+0xc171c: sub x3, x29, #0x90
+0xc1720: sub x4, x29, #0x94
+0xc1724: ldp x10, x8, [x8, #0xe0]
+0xc1728: ldr x11, [x11, #0xd38]
+0xc172c: mov w5, #0xe2
+0xc1730: mov w6, #0xd9
+0xc1734: add x8, x8, #0xfff
+0xc1738: ldr x11, [x11, #0xa0]
+0xc173c: and x0, x10, #0xfffffffffffff000
+0xc1740: and x8, x8, #0xfffffffffffff000
+0xc1744: sub x1, x8, x0
+0xc1748: movk w7, #0xf787
+0xc174c: stur x1, [x29, #-0x90]
+0xc1750: stur w9, [x29, #-0x94]
+0xc1754: blr x11
+```
+
+### block `0xc1d50` depth 1 (b.ne)
+
+```asm
+0xc1d50: adrp x0, #0x1e5000
+0xc1d54: ldr x0, [x0, #0xb28]
+0xc1d58: bl #0x1cd4c
+0xc1d5c: mrs x8, tpidr_el0
+0xc1d60: ldr x8, [x8, #0x28]
+0xc1d64: ldur x9, [x29, #-0x58]
+0xc1d68: cmp x8, x9
+0xc1d6c: b.ne #0xc1da0
+```
+
+### block `0xc1d70` depth 1 (ret)
+
+```asm
+0xc1d70: sub sp, x29, #0x50
+0xc1d74: ldp x29, x30, [sp, #0x50]
+0xc1d78: ldp x20, x19, [sp, #0x40]
+0xc1d7c: ldp x22, x21, [sp, #0x30]
+0xc1d80: ldp x24, x23, [sp, #0x20]
+0xc1d84: ldp x26, x25, [sp, #0x10]
+0xc1d88: ldp x28, x27, [sp], #0x60
+0xc1d8c: ret 
+```
+
+### block `0xc1da0` depth 1 (cbz)
+
+```asm
+0xc1da0: bl #0x1708c0
+0xc1da4: str x21, [sp, #-0x30]!
+0xc1da8: stp x20, x19, [sp, #0x10]
+0xc1dac: stp x29, x30, [sp, #0x20]
+0xc1db0: add x29, sp, #0x20
+0xc1db4: adrp x21, #0x1e5000
+0xc1db8: ldr x21, [x21, #0x7a8]
+0xc1dbc: ldr x8, [x21]
+0xc1dc0: ldr x8, [x8, #0x158]
+0xc1dc4: cbz x8, #0xc1f98
+```
+
+### block `0xc1dc8` depth 1 (blr)
+
+```asm
+0xc1dc8: mov w1, wzr
+0xc1dcc: blr x8
+```
+
+### block `0xc1f98` depth 1 (ret)
+
+```asm
+0xc1f98: mov w0, wzr
+0xc1f9c: ldp x29, x30, [sp, #0x20]
+0xc1fa0: ldp x20, x19, [sp, #0x10]
+0xc1fa4: ldr x21, [sp], #0x30
+0xc1fa8: ret 
+```
+
+### block `0x1cd4c` depth 2 (invalid)
+
+```asm
+```
+
+### block `0x1cd84` depth 2 (invalid)
+
+```asm
+```
+
+### block `0x29414` depth 2 (invalid)
+
+```asm
+```
+

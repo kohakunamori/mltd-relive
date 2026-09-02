@@ -1,0 +1,1884 @@
+{
+  "sample_sha256": "8880c415e1ab82c31858be68ce12b76b95dc8ff8875b76c1246a8bc0679647bc",
+  "SoLibraryStart": 789860,
+  "blocks": [
+    {
+      "start": 789860,
+      "owner": {
+        "name": "SoLibraryStart",
+        "start": 789860,
+        "offset": 0,
+        "size": 52
+      },
+      "depth": 0,
+      "instructions": [
+        {
+          "address": 789860,
+          "file_offset": 789860,
+          "mnemonic": "str",
+          "op_str": "x19, [sp, #-0x20]!",
+          "symbols": [
+            "SoLibraryStart"
+          ]
+        },
+        {
+          "address": 789864,
+          "file_offset": 789864,
+          "mnemonic": "stp",
+          "op_str": "x29, x30, [sp, #0x10]"
+        },
+        {
+          "address": 789868,
+          "file_offset": 789868,
+          "mnemonic": "add",
+          "op_str": "x29, sp, #0x10"
+        },
+        {
+          "address": 789872,
+          "file_offset": 789872,
+          "mnemonic": "mov",
+          "op_str": "x19, x0"
+        },
+        {
+          "address": 789876,
+          "file_offset": 789876,
+          "mnemonic": "bl",
+          "op_str": "#0xc0d98"
+        },
+        {
+          "address": 789880,
+          "file_offset": 789880,
+          "mnemonic": "adrp",
+          "op_str": "x8, #0x1e5000"
+        },
+        {
+          "address": 789884,
+          "file_offset": 789884,
+          "mnemonic": "ldr",
+          "op_str": "x8, [x8, #0xcf0]"
+        },
+        {
+          "address": 789888,
+          "file_offset": 789888,
+          "mnemonic": "mov",
+          "op_str": "x0, x19"
+        },
+        {
+          "address": 789892,
+          "file_offset": 789892,
+          "mnemonic": "ldr",
+          "op_str": "x8, [x8]"
+        },
+        {
+          "address": 789896,
+          "file_offset": 789896,
+          "mnemonic": "blr",
+          "op_str": "x8"
+        }
+      ],
+      "termination": "blr",
+      "successors": []
+    },
+    {
+      "start": 789912,
+      "owner": {
+        "name": "SoLibraryStart",
+        "start": 789860,
+        "offset": 52,
+        "size": 52
+      },
+      "depth": 1,
+      "instructions": [
+        {
+          "address": 789912,
+          "file_offset": 789912,
+          "mnemonic": "stp",
+          "op_str": "x28, x27, [sp, #-0x60]!"
+        },
+        {
+          "address": 789916,
+          "file_offset": 789916,
+          "mnemonic": "stp",
+          "op_str": "x26, x25, [sp, #0x10]"
+        },
+        {
+          "address": 789920,
+          "file_offset": 789920,
+          "mnemonic": "stp",
+          "op_str": "x24, x23, [sp, #0x20]"
+        },
+        {
+          "address": 789924,
+          "file_offset": 789924,
+          "mnemonic": "stp",
+          "op_str": "x22, x21, [sp, #0x30]"
+        },
+        {
+          "address": 789928,
+          "file_offset": 789928,
+          "mnemonic": "stp",
+          "op_str": "x20, x19, [sp, #0x40]"
+        },
+        {
+          "address": 789932,
+          "file_offset": 789932,
+          "mnemonic": "stp",
+          "op_str": "x29, x30, [sp, #0x50]"
+        },
+        {
+          "address": 789936,
+          "file_offset": 789936,
+          "mnemonic": "add",
+          "op_str": "x29, sp, #0x50"
+        },
+        {
+          "address": 789940,
+          "file_offset": 789940,
+          "mnemonic": "sub",
+          "op_str": "sp, sp, #0x80"
+        },
+        {
+          "address": 789944,
+          "file_offset": 789944,
+          "mnemonic": "mrs",
+          "op_str": "x8, tpidr_el0"
+        },
+        {
+          "address": 789948,
+          "file_offset": 789948,
+          "mnemonic": "ldr",
+          "op_str": "x8, [x8, #0x28]"
+        },
+        {
+          "address": 789952,
+          "file_offset": 789952,
+          "mnemonic": "adrp",
+          "op_str": "x0, #0x1e5000"
+        },
+        {
+          "address": 789956,
+          "file_offset": 789956,
+          "mnemonic": "stur",
+          "op_str": "x8, [x29, #-0x58]"
+        },
+        {
+          "address": 789960,
+          "file_offset": 789960,
+          "mnemonic": "ldr",
+          "op_str": "x0, [x0, #0xb28]"
+        },
+        {
+          "address": 789964,
+          "file_offset": 789964,
+          "mnemonic": "bl",
+          "op_str": "#0x1cd84"
+        },
+        {
+          "address": 789968,
+          "file_offset": 789968,
+          "mnemonic": "adrp",
+          "op_str": "x10, #0x1e6000"
+        },
+        {
+          "address": 789972,
+          "file_offset": 789972,
+          "mnemonic": "ldr",
+          "op_str": "x10, [x10, #0xc0]"
+        },
+        {
+          "address": 789976,
+          "file_offset": 789976,
+          "mnemonic": "ldr",
+          "op_str": "w9, [x10]"
+        },
+        {
+          "address": 789980,
+          "file_offset": 789980,
+          "mnemonic": "cbnz",
+          "op_str": "w9, #0xc15e8"
+        }
+      ],
+      "termination": "cbnz",
+      "successors": [
+        789984,
+        792040
+      ]
+    },
+    {
+      "start": 118148,
+      "owner": {
+        "name": "IIiIIiIiiI",
+        "start": 58748,
+        "offset": 59400,
+        "size": 19740
+      },
+      "depth": 2,
+      "instructions": [],
+      "termination": "invalid",
+      "successors": []
+    },
+    {
+      "start": 792040,
+      "owner": {
+        "name": "SoLibraryStart",
+        "start": 789860,
+        "offset": 2180,
+        "size": 52
+      },
+      "depth": 1,
+      "instructions": [
+        {
+          "address": 792040,
+          "file_offset": 792040,
+          "mnemonic": "add",
+          "op_str": "w9, w9, #1"
+        },
+        {
+          "address": 792044,
+          "file_offset": 792044,
+          "mnemonic": "str",
+          "op_str": "w9, [x10]"
+        },
+        {
+          "address": 792048,
+          "file_offset": 792048,
+          "mnemonic": "adrp",
+          "op_str": "x9, #0x1e5000"
+        },
+        {
+          "address": 792052,
+          "file_offset": 792052,
+          "mnemonic": "ldr",
+          "op_str": "x9, [x9, #0x6f8]"
+        },
+        {
+          "address": 792056,
+          "file_offset": 792056,
+          "mnemonic": "mov",
+          "op_str": "x8, xzr"
+        },
+        {
+          "address": 792060,
+          "file_offset": 792060,
+          "mnemonic": "ldrb",
+          "op_str": "w10, [x9, x8]"
+        },
+        {
+          "address": 792064,
+          "file_offset": 792064,
+          "mnemonic": "add",
+          "op_str": "x8, x8, #1"
+        },
+        {
+          "address": 792068,
+          "file_offset": 792068,
+          "mnemonic": "cbnz",
+          "op_str": "w10, #0xc15fc"
+        }
+      ],
+      "termination": "cbnz",
+      "successors": [
+        792060,
+        792072
+      ]
+    },
+    {
+      "start": 789984,
+      "owner": {
+        "name": "SoLibraryStart",
+        "start": 789860,
+        "offset": 124,
+        "size": 52
+      },
+      "depth": 1,
+      "instructions": [
+        {
+          "address": 789984,
+          "file_offset": 789984,
+          "mnemonic": "adrp",
+          "op_str": "x19, #0x1e5000"
+        },
+        {
+          "address": 789988,
+          "file_offset": 789988,
+          "mnemonic": "ldr",
+          "op_str": "x19, [x19, #0xc68]"
+        },
+        {
+          "address": 789992,
+          "file_offset": 789992,
+          "mnemonic": "adrp",
+          "op_str": "x11, #0x1e5000"
+        },
+        {
+          "address": 789996,
+          "file_offset": 789996,
+          "mnemonic": "mov",
+          "op_str": "w7, #-0x1cb00000"
+        },
+        {
+          "address": 790000,
+          "file_offset": 790000,
+          "mnemonic": "mov",
+          "op_str": "w9, #7"
+        },
+        {
+          "address": 790004,
+          "file_offset": 790004,
+          "mnemonic": "ldr",
+          "op_str": "x8, [x19]"
+        },
+        {
+          "address": 790008,
+          "file_offset": 790008,
+          "mnemonic": "mov",
+          "op_str": "w2, #7"
+        },
+        {
+          "address": 790012,
+          "file_offset": 790012,
+          "mnemonic": "sub",
+          "op_str": "x3, x29, #0x90"
+        },
+        {
+          "address": 790016,
+          "file_offset": 790016,
+          "mnemonic": "sub",
+          "op_str": "x4, x29, #0x94"
+        },
+        {
+          "address": 790020,
+          "file_offset": 790020,
+          "mnemonic": "ldp",
+          "op_str": "x10, x8, [x8, #0xe0]"
+        },
+        {
+          "address": 790024,
+          "file_offset": 790024,
+          "mnemonic": "ldr",
+          "op_str": "x11, [x11, #0xd38]"
+        },
+        {
+          "address": 790028,
+          "file_offset": 790028,
+          "mnemonic": "mov",
+          "op_str": "w5, #0xe2"
+        },
+        {
+          "address": 790032,
+          "file_offset": 790032,
+          "mnemonic": "mov",
+          "op_str": "w6, #0xd9"
+        },
+        {
+          "address": 790036,
+          "file_offset": 790036,
+          "mnemonic": "add",
+          "op_str": "x8, x8, #0xfff"
+        },
+        {
+          "address": 790040,
+          "file_offset": 790040,
+          "mnemonic": "ldr",
+          "op_str": "x11, [x11, #0xa0]"
+        },
+        {
+          "address": 790044,
+          "file_offset": 790044,
+          "mnemonic": "and",
+          "op_str": "x0, x10, #0xfffffffffffff000"
+        },
+        {
+          "address": 790048,
+          "file_offset": 790048,
+          "mnemonic": "and",
+          "op_str": "x8, x8, #0xfffffffffffff000"
+        },
+        {
+          "address": 790052,
+          "file_offset": 790052,
+          "mnemonic": "sub",
+          "op_str": "x1, x8, x0"
+        },
+        {
+          "address": 790056,
+          "file_offset": 790056,
+          "mnemonic": "movk",
+          "op_str": "w7, #0xf787"
+        },
+        {
+          "address": 790060,
+          "file_offset": 790060,
+          "mnemonic": "stur",
+          "op_str": "x1, [x29, #-0x90]"
+        },
+        {
+          "address": 790064,
+          "file_offset": 790064,
+          "mnemonic": "stur",
+          "op_str": "w9, [x29, #-0x94]"
+        },
+        {
+          "address": 790068,
+          "file_offset": 790068,
+          "mnemonic": "blr",
+          "op_str": "x11"
+        }
+      ],
+      "termination": "blr",
+      "successors": []
+    },
+    {
+      "start": 792060,
+      "owner": {
+        "name": "SoLibraryStart",
+        "start": 789860,
+        "offset": 2200,
+        "size": 52
+      },
+      "depth": 1,
+      "instructions": [
+        {
+          "address": 792060,
+          "file_offset": 792060,
+          "mnemonic": "ldrb",
+          "op_str": "w10, [x9, x8]"
+        },
+        {
+          "address": 792064,
+          "file_offset": 792064,
+          "mnemonic": "add",
+          "op_str": "x8, x8, #1"
+        },
+        {
+          "address": 792068,
+          "file_offset": 792068,
+          "mnemonic": "cbnz",
+          "op_str": "w10, #0xc15fc"
+        }
+      ],
+      "termination": "cbnz",
+      "successors": [
+        792060,
+        792072
+      ]
+    },
+    {
+      "start": 792072,
+      "owner": {
+        "name": "SoLibraryStart",
+        "start": 789860,
+        "offset": 2212,
+        "size": 52
+      },
+      "depth": 1,
+      "instructions": [
+        {
+          "address": 792072,
+          "file_offset": 792072,
+          "mnemonic": "cmp",
+          "op_str": "x8, #1"
+        },
+        {
+          "address": 792076,
+          "file_offset": 792076,
+          "mnemonic": "b.eq",
+          "op_str": "#0xc163c"
+        }
+      ],
+      "termination": "b.eq",
+      "successors": [
+        792080,
+        792124
+      ]
+    },
+    {
+      "start": 792124,
+      "owner": {
+        "name": "SoLibraryStart",
+        "start": 789860,
+        "offset": 2264,
+        "size": 52
+      },
+      "depth": 1,
+      "instructions": [
+        {
+          "address": 792124,
+          "file_offset": 792124,
+          "mnemonic": "adrp",
+          "op_str": "x0, #0x1e5000"
+        },
+        {
+          "address": 792128,
+          "file_offset": 792128,
+          "mnemonic": "ldr",
+          "op_str": "x0, [x0, #0xb28]"
+        },
+        {
+          "address": 792132,
+          "file_offset": 792132,
+          "mnemonic": "bl",
+          "op_str": "#0x1cd4c"
+        },
+        {
+          "address": 792136,
+          "file_offset": 792136,
+          "mnemonic": "mrs",
+          "op_str": "x8, tpidr_el0"
+        },
+        {
+          "address": 792140,
+          "file_offset": 792140,
+          "mnemonic": "ldr",
+          "op_str": "x8, [x8, #0x28]"
+        },
+        {
+          "address": 792144,
+          "file_offset": 792144,
+          "mnemonic": "ldur",
+          "op_str": "x9, [x29, #-0x58]"
+        },
+        {
+          "address": 792148,
+          "file_offset": 792148,
+          "mnemonic": "cmp",
+          "op_str": "x8, x9"
+        },
+        {
+          "address": 792152,
+          "file_offset": 792152,
+          "mnemonic": "b.ne",
+          "op_str": "#0xc168c"
+        }
+      ],
+      "termination": "b.ne",
+      "successors": [
+        792156,
+        792204
+      ]
+    },
+    {
+      "start": 792080,
+      "owner": {
+        "name": "SoLibraryStart",
+        "start": 789860,
+        "offset": 2220,
+        "size": 52
+      },
+      "depth": 1,
+      "instructions": [
+        {
+          "address": 792080,
+          "file_offset": 792080,
+          "mnemonic": "adrp",
+          "op_str": "x0, #0x1e5000"
+        },
+        {
+          "address": 792084,
+          "file_offset": 792084,
+          "mnemonic": "adrp",
+          "op_str": "x1, #0x1e5000"
+        },
+        {
+          "address": 792088,
+          "file_offset": 792088,
+          "mnemonic": "ldr",
+          "op_str": "x0, [x0, #0x658]"
+        },
+        {
+          "address": 792092,
+          "file_offset": 792092,
+          "mnemonic": "ldr",
+          "op_str": "x1, [x1, #0x6f8]"
+        },
+        {
+          "address": 792096,
+          "file_offset": 792096,
+          "mnemonic": "bl",
+          "op_str": "#0x29414"
+        },
+        {
+          "address": 792100,
+          "file_offset": 792100,
+          "mnemonic": "tbnz",
+          "op_str": "w0, #0, #0xc163c"
+        }
+      ],
+      "termination": "tbnz",
+      "successors": [
+        792104,
+        792124
+      ]
+    },
+    {
+      "start": 118092,
+      "owner": {
+        "name": "IIiIIiIiiI",
+        "start": 58748,
+        "offset": 59344,
+        "size": 19740
+      },
+      "depth": 2,
+      "instructions": [],
+      "termination": "invalid",
+      "successors": []
+    },
+    {
+      "start": 792204,
+      "owner": {
+        "name": "SoLibraryStart",
+        "start": 789860,
+        "offset": 2344,
+        "size": 52
+      },
+      "depth": 1,
+      "instructions": [
+        {
+          "address": 792204,
+          "file_offset": 792204,
+          "mnemonic": "bl",
+          "op_str": "#0x1708c0"
+        },
+        {
+          "address": 792208,
+          "file_offset": 792208,
+          "mnemonic": "ldur",
+          "op_str": "x8, [x29, #-0x68]"
+        },
+        {
+          "address": 792212,
+          "file_offset": 792212,
+          "mnemonic": "mov",
+          "op_str": "x19, x0"
+        },
+        {
+          "address": 792216,
+          "file_offset": 792216,
+          "mnemonic": "cbz",
+          "op_str": "x8, #0xc16a8"
+        }
+      ],
+      "termination": "cbz",
+      "successors": [
+        792220,
+        792232
+      ]
+    },
+    {
+      "start": 792156,
+      "owner": {
+        "name": "SoLibraryStart",
+        "start": 789860,
+        "offset": 2296,
+        "size": 52
+      },
+      "depth": 1,
+      "instructions": [
+        {
+          "address": 792156,
+          "file_offset": 792156,
+          "mnemonic": "sub",
+          "op_str": "sp, x29, #0x50"
+        },
+        {
+          "address": 792160,
+          "file_offset": 792160,
+          "mnemonic": "ldp",
+          "op_str": "x29, x30, [sp, #0x50]"
+        },
+        {
+          "address": 792164,
+          "file_offset": 792164,
+          "mnemonic": "ldp",
+          "op_str": "x20, x19, [sp, #0x40]"
+        },
+        {
+          "address": 792168,
+          "file_offset": 792168,
+          "mnemonic": "ldp",
+          "op_str": "x22, x21, [sp, #0x30]"
+        },
+        {
+          "address": 792172,
+          "file_offset": 792172,
+          "mnemonic": "ldp",
+          "op_str": "x24, x23, [sp, #0x20]"
+        },
+        {
+          "address": 792176,
+          "file_offset": 792176,
+          "mnemonic": "ldp",
+          "op_str": "x26, x25, [sp, #0x10]"
+        },
+        {
+          "address": 792180,
+          "file_offset": 792180,
+          "mnemonic": "ldp",
+          "op_str": "x28, x27, [sp], #0x60"
+        },
+        {
+          "address": 792184,
+          "file_offset": 792184,
+          "mnemonic": "ret",
+          "op_str": ""
+        }
+      ],
+      "termination": "ret",
+      "successors": []
+    },
+    {
+      "start": 168980,
+      "owner": {
+        "name": "IIiIIiIiiI",
+        "start": 58748,
+        "offset": 110232,
+        "size": 19740
+      },
+      "depth": 2,
+      "instructions": [],
+      "termination": "invalid",
+      "successors": []
+    },
+    {
+      "start": 792104,
+      "owner": {
+        "name": "SoLibraryStart",
+        "start": 789860,
+        "offset": 2244,
+        "size": 52
+      },
+      "depth": 1,
+      "instructions": [
+        {
+          "address": 792104,
+          "file_offset": 792104,
+          "mnemonic": "adrp",
+          "op_str": "x8, #0x1e5000"
+        },
+        {
+          "address": 792108,
+          "file_offset": 792108,
+          "mnemonic": "ldr",
+          "op_str": "x8, [x8, #0x6b0]"
+        },
+        {
+          "address": 792112,
+          "file_offset": 792112,
+          "mnemonic": "ldr",
+          "op_str": "w9, [x8]"
+        },
+        {
+          "address": 792116,
+          "file_offset": 792116,
+          "mnemonic": "orr",
+          "op_str": "w9, w9, #8"
+        },
+        {
+          "address": 792120,
+          "file_offset": 792120,
+          "mnemonic": "str",
+          "op_str": "w9, [x8]"
+        },
+        {
+          "address": 792124,
+          "file_offset": 792124,
+          "mnemonic": "adrp",
+          "op_str": "x0, #0x1e5000"
+        },
+        {
+          "address": 792128,
+          "file_offset": 792128,
+          "mnemonic": "ldr",
+          "op_str": "x0, [x0, #0xb28]"
+        },
+        {
+          "address": 792132,
+          "file_offset": 792132,
+          "mnemonic": "bl",
+          "op_str": "#0x1cd4c"
+        },
+        {
+          "address": 792136,
+          "file_offset": 792136,
+          "mnemonic": "mrs",
+          "op_str": "x8, tpidr_el0"
+        },
+        {
+          "address": 792140,
+          "file_offset": 792140,
+          "mnemonic": "ldr",
+          "op_str": "x8, [x8, #0x28]"
+        },
+        {
+          "address": 792144,
+          "file_offset": 792144,
+          "mnemonic": "ldur",
+          "op_str": "x9, [x29, #-0x58]"
+        },
+        {
+          "address": 792148,
+          "file_offset": 792148,
+          "mnemonic": "cmp",
+          "op_str": "x8, x9"
+        },
+        {
+          "address": 792152,
+          "file_offset": 792152,
+          "mnemonic": "b.ne",
+          "op_str": "#0xc168c"
+        }
+      ],
+      "termination": "b.ne",
+      "successors": [
+        792156,
+        792204
+      ]
+    },
+    {
+      "start": 792232,
+      "owner": {
+        "name": "SoLibraryStart",
+        "start": 789860,
+        "offset": 2372,
+        "size": 52
+      },
+      "depth": 1,
+      "instructions": [
+        {
+          "address": 792232,
+          "file_offset": 792232,
+          "mnemonic": "mov",
+          "op_str": "x0, x19"
+        },
+        {
+          "address": 792236,
+          "file_offset": 792236,
+          "mnemonic": "bl",
+          "op_str": "#0x170680"
+        },
+        {
+          "address": 792240,
+          "file_offset": 792240,
+          "mnemonic": "stp",
+          "op_str": "x28, x27, [sp, #-0x60]!"
+        },
+        {
+          "address": 792244,
+          "file_offset": 792244,
+          "mnemonic": "stp",
+          "op_str": "x26, x25, [sp, #0x10]"
+        },
+        {
+          "address": 792248,
+          "file_offset": 792248,
+          "mnemonic": "stp",
+          "op_str": "x24, x23, [sp, #0x20]"
+        },
+        {
+          "address": 792252,
+          "file_offset": 792252,
+          "mnemonic": "stp",
+          "op_str": "x22, x21, [sp, #0x30]"
+        },
+        {
+          "address": 792256,
+          "file_offset": 792256,
+          "mnemonic": "stp",
+          "op_str": "x20, x19, [sp, #0x40]"
+        },
+        {
+          "address": 792260,
+          "file_offset": 792260,
+          "mnemonic": "stp",
+          "op_str": "x29, x30, [sp, #0x50]"
+        },
+        {
+          "address": 792264,
+          "file_offset": 792264,
+          "mnemonic": "add",
+          "op_str": "x29, sp, #0x50"
+        },
+        {
+          "address": 792268,
+          "file_offset": 792268,
+          "mnemonic": "sub",
+          "op_str": "sp, sp, #0x90"
+        },
+        {
+          "address": 792272,
+          "file_offset": 792272,
+          "mnemonic": "mrs",
+          "op_str": "x8, tpidr_el0"
+        },
+        {
+          "address": 792276,
+          "file_offset": 792276,
+          "mnemonic": "ldr",
+          "op_str": "x8, [x8, #0x28]"
+        },
+        {
+          "address": 792280,
+          "file_offset": 792280,
+          "mnemonic": "adrp",
+          "op_str": "x0, #0x1e5000"
+        },
+        {
+          "address": 792284,
+          "file_offset": 792284,
+          "mnemonic": "stur",
+          "op_str": "x8, [x29, #-0x58]"
+        },
+        {
+          "address": 792288,
+          "file_offset": 792288,
+          "mnemonic": "ldr",
+          "op_str": "x0, [x0, #0xb28]"
+        },
+        {
+          "address": 792292,
+          "file_offset": 792292,
+          "mnemonic": "bl",
+          "op_str": "#0x1cd84"
+        },
+        {
+          "address": 792296,
+          "file_offset": 792296,
+          "mnemonic": "adrp",
+          "op_str": "x8, #0x1e6000"
+        },
+        {
+          "address": 792300,
+          "file_offset": 792300,
+          "mnemonic": "ldr",
+          "op_str": "x8, [x8, #0xc0]"
+        },
+        {
+          "address": 792304,
+          "file_offset": 792304,
+          "mnemonic": "ldr",
+          "op_str": "w9, [x8]"
+        },
+        {
+          "address": 792308,
+          "file_offset": 792308,
+          "mnemonic": "sub",
+          "op_str": "w9, w9, #1"
+        },
+        {
+          "address": 792312,
+          "file_offset": 792312,
+          "mnemonic": "str",
+          "op_str": "w9, [x8]"
+        },
+        {
+          "address": 792316,
+          "file_offset": 792316,
+          "mnemonic": "cbnz",
+          "op_str": "w9, #0xc1d50"
+        }
+      ],
+      "termination": "cbnz",
+      "successors": [
+        792320,
+        793936
+      ]
+    },
+    {
+      "start": 792220,
+      "owner": {
+        "name": "SoLibraryStart",
+        "start": 789860,
+        "offset": 2360,
+        "size": 52
+      },
+      "depth": 1,
+      "instructions": [
+        {
+          "address": 792220,
+          "file_offset": 792220,
+          "mnemonic": "mov",
+          "op_str": "x0, x8"
+        },
+        {
+          "address": 792224,
+          "file_offset": 792224,
+          "mnemonic": "bl",
+          "op_str": "#0x16fec0"
+        },
+        {
+          "address": 792228,
+          "file_offset": 792228,
+          "mnemonic": "stur",
+          "op_str": "xzr, [x29, #-0x68]"
+        },
+        {
+          "address": 792232,
+          "file_offset": 792232,
+          "mnemonic": "mov",
+          "op_str": "x0, x19"
+        },
+        {
+          "address": 792236,
+          "file_offset": 792236,
+          "mnemonic": "bl",
+          "op_str": "#0x170680"
+        },
+        {
+          "address": 792240,
+          "file_offset": 792240,
+          "mnemonic": "stp",
+          "op_str": "x28, x27, [sp, #-0x60]!"
+        },
+        {
+          "address": 792244,
+          "file_offset": 792244,
+          "mnemonic": "stp",
+          "op_str": "x26, x25, [sp, #0x10]"
+        },
+        {
+          "address": 792248,
+          "file_offset": 792248,
+          "mnemonic": "stp",
+          "op_str": "x24, x23, [sp, #0x20]"
+        },
+        {
+          "address": 792252,
+          "file_offset": 792252,
+          "mnemonic": "stp",
+          "op_str": "x22, x21, [sp, #0x30]"
+        },
+        {
+          "address": 792256,
+          "file_offset": 792256,
+          "mnemonic": "stp",
+          "op_str": "x20, x19, [sp, #0x40]"
+        },
+        {
+          "address": 792260,
+          "file_offset": 792260,
+          "mnemonic": "stp",
+          "op_str": "x29, x30, [sp, #0x50]"
+        },
+        {
+          "address": 792264,
+          "file_offset": 792264,
+          "mnemonic": "add",
+          "op_str": "x29, sp, #0x50"
+        },
+        {
+          "address": 792268,
+          "file_offset": 792268,
+          "mnemonic": "sub",
+          "op_str": "sp, sp, #0x90"
+        },
+        {
+          "address": 792272,
+          "file_offset": 792272,
+          "mnemonic": "mrs",
+          "op_str": "x8, tpidr_el0"
+        },
+        {
+          "address": 792276,
+          "file_offset": 792276,
+          "mnemonic": "ldr",
+          "op_str": "x8, [x8, #0x28]"
+        },
+        {
+          "address": 792280,
+          "file_offset": 792280,
+          "mnemonic": "adrp",
+          "op_str": "x0, #0x1e5000"
+        },
+        {
+          "address": 792284,
+          "file_offset": 792284,
+          "mnemonic": "stur",
+          "op_str": "x8, [x29, #-0x58]"
+        },
+        {
+          "address": 792288,
+          "file_offset": 792288,
+          "mnemonic": "ldr",
+          "op_str": "x0, [x0, #0xb28]"
+        },
+        {
+          "address": 792292,
+          "file_offset": 792292,
+          "mnemonic": "bl",
+          "op_str": "#0x1cd84"
+        },
+        {
+          "address": 792296,
+          "file_offset": 792296,
+          "mnemonic": "adrp",
+          "op_str": "x8, #0x1e6000"
+        },
+        {
+          "address": 792300,
+          "file_offset": 792300,
+          "mnemonic": "ldr",
+          "op_str": "x8, [x8, #0xc0]"
+        },
+        {
+          "address": 792304,
+          "file_offset": 792304,
+          "mnemonic": "ldr",
+          "op_str": "w9, [x8]"
+        },
+        {
+          "address": 792308,
+          "file_offset": 792308,
+          "mnemonic": "sub",
+          "op_str": "w9, w9, #1"
+        },
+        {
+          "address": 792312,
+          "file_offset": 792312,
+          "mnemonic": "str",
+          "op_str": "w9, [x8]"
+        },
+        {
+          "address": 792316,
+          "file_offset": 792316,
+          "mnemonic": "cbnz",
+          "op_str": "w9, #0xc1d50"
+        }
+      ],
+      "termination": "cbnz",
+      "successors": [
+        792320,
+        793936
+      ]
+    },
+    {
+      "start": 793936,
+      "owner": {
+        "name": "SoLibraryStart",
+        "start": 789860,
+        "offset": 4076,
+        "size": 52
+      },
+      "depth": 1,
+      "instructions": [
+        {
+          "address": 793936,
+          "file_offset": 793936,
+          "mnemonic": "adrp",
+          "op_str": "x0, #0x1e5000"
+        },
+        {
+          "address": 793940,
+          "file_offset": 793940,
+          "mnemonic": "ldr",
+          "op_str": "x0, [x0, #0xb28]"
+        },
+        {
+          "address": 793944,
+          "file_offset": 793944,
+          "mnemonic": "bl",
+          "op_str": "#0x1cd4c"
+        },
+        {
+          "address": 793948,
+          "file_offset": 793948,
+          "mnemonic": "mrs",
+          "op_str": "x8, tpidr_el0"
+        },
+        {
+          "address": 793952,
+          "file_offset": 793952,
+          "mnemonic": "ldr",
+          "op_str": "x8, [x8, #0x28]"
+        },
+        {
+          "address": 793956,
+          "file_offset": 793956,
+          "mnemonic": "ldur",
+          "op_str": "x9, [x29, #-0x58]"
+        },
+        {
+          "address": 793960,
+          "file_offset": 793960,
+          "mnemonic": "cmp",
+          "op_str": "x8, x9"
+        },
+        {
+          "address": 793964,
+          "file_offset": 793964,
+          "mnemonic": "b.ne",
+          "op_str": "#0xc1da0"
+        }
+      ],
+      "termination": "b.ne",
+      "successors": [
+        793968,
+        794016
+      ]
+    },
+    {
+      "start": 792320,
+      "owner": {
+        "name": "SoLibraryStart",
+        "start": 789860,
+        "offset": 2460,
+        "size": 52
+      },
+      "depth": 1,
+      "instructions": [
+        {
+          "address": 792320,
+          "file_offset": 792320,
+          "mnemonic": "adrp",
+          "op_str": "x19, #0x1e5000"
+        },
+        {
+          "address": 792324,
+          "file_offset": 792324,
+          "mnemonic": "ldr",
+          "op_str": "x19, [x19, #0xc68]"
+        },
+        {
+          "address": 792328,
+          "file_offset": 792328,
+          "mnemonic": "adrp",
+          "op_str": "x11, #0x1e5000"
+        },
+        {
+          "address": 792332,
+          "file_offset": 792332,
+          "mnemonic": "mov",
+          "op_str": "w7, #-0x1cb00000"
+        },
+        {
+          "address": 792336,
+          "file_offset": 792336,
+          "mnemonic": "mov",
+          "op_str": "w9, #7"
+        },
+        {
+          "address": 792340,
+          "file_offset": 792340,
+          "mnemonic": "ldr",
+          "op_str": "x8, [x19]"
+        },
+        {
+          "address": 792344,
+          "file_offset": 792344,
+          "mnemonic": "mov",
+          "op_str": "w2, #7"
+        },
+        {
+          "address": 792348,
+          "file_offset": 792348,
+          "mnemonic": "sub",
+          "op_str": "x3, x29, #0x90"
+        },
+        {
+          "address": 792352,
+          "file_offset": 792352,
+          "mnemonic": "sub",
+          "op_str": "x4, x29, #0x94"
+        },
+        {
+          "address": 792356,
+          "file_offset": 792356,
+          "mnemonic": "ldp",
+          "op_str": "x10, x8, [x8, #0xe0]"
+        },
+        {
+          "address": 792360,
+          "file_offset": 792360,
+          "mnemonic": "ldr",
+          "op_str": "x11, [x11, #0xd38]"
+        },
+        {
+          "address": 792364,
+          "file_offset": 792364,
+          "mnemonic": "mov",
+          "op_str": "w5, #0xe2"
+        },
+        {
+          "address": 792368,
+          "file_offset": 792368,
+          "mnemonic": "mov",
+          "op_str": "w6, #0xd9"
+        },
+        {
+          "address": 792372,
+          "file_offset": 792372,
+          "mnemonic": "add",
+          "op_str": "x8, x8, #0xfff"
+        },
+        {
+          "address": 792376,
+          "file_offset": 792376,
+          "mnemonic": "ldr",
+          "op_str": "x11, [x11, #0xa0]"
+        },
+        {
+          "address": 792380,
+          "file_offset": 792380,
+          "mnemonic": "and",
+          "op_str": "x0, x10, #0xfffffffffffff000"
+        },
+        {
+          "address": 792384,
+          "file_offset": 792384,
+          "mnemonic": "and",
+          "op_str": "x8, x8, #0xfffffffffffff000"
+        },
+        {
+          "address": 792388,
+          "file_offset": 792388,
+          "mnemonic": "sub",
+          "op_str": "x1, x8, x0"
+        },
+        {
+          "address": 792392,
+          "file_offset": 792392,
+          "mnemonic": "movk",
+          "op_str": "w7, #0xf787"
+        },
+        {
+          "address": 792396,
+          "file_offset": 792396,
+          "mnemonic": "stur",
+          "op_str": "x1, [x29, #-0x90]"
+        },
+        {
+          "address": 792400,
+          "file_offset": 792400,
+          "mnemonic": "stur",
+          "op_str": "w9, [x29, #-0x94]"
+        },
+        {
+          "address": 792404,
+          "file_offset": 792404,
+          "mnemonic": "blr",
+          "op_str": "x11"
+        }
+      ],
+      "termination": "blr",
+      "successors": []
+    },
+    {
+      "start": 794016,
+      "owner": {
+        "name": "SoLibraryStart",
+        "start": 789860,
+        "offset": 4156,
+        "size": 52
+      },
+      "depth": 1,
+      "instructions": [
+        {
+          "address": 794016,
+          "file_offset": 794016,
+          "mnemonic": "bl",
+          "op_str": "#0x1708c0"
+        },
+        {
+          "address": 794020,
+          "file_offset": 794020,
+          "mnemonic": "str",
+          "op_str": "x21, [sp, #-0x30]!"
+        },
+        {
+          "address": 794024,
+          "file_offset": 794024,
+          "mnemonic": "stp",
+          "op_str": "x20, x19, [sp, #0x10]"
+        },
+        {
+          "address": 794028,
+          "file_offset": 794028,
+          "mnemonic": "stp",
+          "op_str": "x29, x30, [sp, #0x20]"
+        },
+        {
+          "address": 794032,
+          "file_offset": 794032,
+          "mnemonic": "add",
+          "op_str": "x29, sp, #0x20"
+        },
+        {
+          "address": 794036,
+          "file_offset": 794036,
+          "mnemonic": "adrp",
+          "op_str": "x21, #0x1e5000"
+        },
+        {
+          "address": 794040,
+          "file_offset": 794040,
+          "mnemonic": "ldr",
+          "op_str": "x21, [x21, #0x7a8]"
+        },
+        {
+          "address": 794044,
+          "file_offset": 794044,
+          "mnemonic": "ldr",
+          "op_str": "x8, [x21]"
+        },
+        {
+          "address": 794048,
+          "file_offset": 794048,
+          "mnemonic": "ldr",
+          "op_str": "x8, [x8, #0x158]"
+        },
+        {
+          "address": 794052,
+          "file_offset": 794052,
+          "mnemonic": "cbz",
+          "op_str": "x8, #0xc1f98"
+        }
+      ],
+      "termination": "cbz",
+      "successors": [
+        794056,
+        794520
+      ]
+    },
+    {
+      "start": 793968,
+      "owner": {
+        "name": "SoLibraryStart",
+        "start": 789860,
+        "offset": 4108,
+        "size": 52
+      },
+      "depth": 1,
+      "instructions": [
+        {
+          "address": 793968,
+          "file_offset": 793968,
+          "mnemonic": "sub",
+          "op_str": "sp, x29, #0x50"
+        },
+        {
+          "address": 793972,
+          "file_offset": 793972,
+          "mnemonic": "ldp",
+          "op_str": "x29, x30, [sp, #0x50]"
+        },
+        {
+          "address": 793976,
+          "file_offset": 793976,
+          "mnemonic": "ldp",
+          "op_str": "x20, x19, [sp, #0x40]"
+        },
+        {
+          "address": 793980,
+          "file_offset": 793980,
+          "mnemonic": "ldp",
+          "op_str": "x22, x21, [sp, #0x30]"
+        },
+        {
+          "address": 793984,
+          "file_offset": 793984,
+          "mnemonic": "ldp",
+          "op_str": "x24, x23, [sp, #0x20]"
+        },
+        {
+          "address": 793988,
+          "file_offset": 793988,
+          "mnemonic": "ldp",
+          "op_str": "x26, x25, [sp, #0x10]"
+        },
+        {
+          "address": 793992,
+          "file_offset": 793992,
+          "mnemonic": "ldp",
+          "op_str": "x28, x27, [sp], #0x60"
+        },
+        {
+          "address": 793996,
+          "file_offset": 793996,
+          "mnemonic": "ret",
+          "op_str": ""
+        }
+      ],
+      "termination": "ret",
+      "successors": []
+    },
+    {
+      "start": 794520,
+      "owner": {
+        "name": "SoLibraryStart",
+        "start": 789860,
+        "offset": 4660,
+        "size": 52
+      },
+      "depth": 1,
+      "instructions": [
+        {
+          "address": 794520,
+          "file_offset": 794520,
+          "mnemonic": "mov",
+          "op_str": "w0, wzr"
+        },
+        {
+          "address": 794524,
+          "file_offset": 794524,
+          "mnemonic": "ldp",
+          "op_str": "x29, x30, [sp, #0x20]"
+        },
+        {
+          "address": 794528,
+          "file_offset": 794528,
+          "mnemonic": "ldp",
+          "op_str": "x20, x19, [sp, #0x10]"
+        },
+        {
+          "address": 794532,
+          "file_offset": 794532,
+          "mnemonic": "ldr",
+          "op_str": "x21, [sp], #0x30"
+        },
+        {
+          "address": 794536,
+          "file_offset": 794536,
+          "mnemonic": "ret",
+          "op_str": ""
+        }
+      ],
+      "termination": "ret",
+      "successors": []
+    },
+    {
+      "start": 794056,
+      "owner": {
+        "name": "SoLibraryStart",
+        "start": 789860,
+        "offset": 4196,
+        "size": 52
+      },
+      "depth": 1,
+      "instructions": [
+        {
+          "address": 794056,
+          "file_offset": 794056,
+          "mnemonic": "mov",
+          "op_str": "w1, wzr"
+        },
+        {
+          "address": 794060,
+          "file_offset": 794060,
+          "mnemonic": "blr",
+          "op_str": "x8"
+        }
+      ],
+      "termination": "blr",
+      "successors": []
+    }
+  ],
+  "calls": [
+    {
+      "address": 789876,
+      "file_offset": 789876,
+      "target": 789912,
+      "target_symbols": [],
+      "target_nearest": {
+        "name": "SoLibraryStart",
+        "start": 789860,
+        "offset": 52,
+        "size": 52
+      },
+      "plt_import": null,
+      "owner": {
+        "name": "SoLibraryStart",
+        "start": 789860,
+        "offset": 16,
+        "size": 52
+      },
+      "depth": 0
+    },
+    {
+      "address": 789964,
+      "file_offset": 789964,
+      "target": 118148,
+      "target_symbols": [],
+      "target_nearest": {
+        "name": "IIiIIiIiiI",
+        "start": 58748,
+        "offset": 59400,
+        "size": 19740
+      },
+      "plt_import": null,
+      "owner": {
+        "name": "SoLibraryStart",
+        "start": 789860,
+        "offset": 104,
+        "size": 52
+      },
+      "depth": 1
+    },
+    {
+      "address": 792132,
+      "file_offset": 792132,
+      "target": 118092,
+      "target_symbols": [],
+      "target_nearest": {
+        "name": "IIiIIiIiiI",
+        "start": 58748,
+        "offset": 59344,
+        "size": 19740
+      },
+      "plt_import": null,
+      "owner": {
+        "name": "SoLibraryStart",
+        "start": 789860,
+        "offset": 2272,
+        "size": 52
+      },
+      "depth": 1
+    },
+    {
+      "address": 792096,
+      "file_offset": 792096,
+      "target": 168980,
+      "target_symbols": [],
+      "target_nearest": {
+        "name": "IIiIIiIiiI",
+        "start": 58748,
+        "offset": 110232,
+        "size": 19740
+      },
+      "plt_import": null,
+      "owner": {
+        "name": "SoLibraryStart",
+        "start": 789860,
+        "offset": 2236,
+        "size": 52
+      },
+      "depth": 1
+    },
+    {
+      "address": 792204,
+      "file_offset": 792204,
+      "target": 1509568,
+      "target_symbols": [],
+      "target_nearest": {
+        "name": "iIIIIIIiIi",
+        "start": 1365388,
+        "offset": 144180,
+        "size": 660
+      },
+      "plt_import": "__stack_chk_fail",
+      "owner": {
+        "name": "SoLibraryStart",
+        "start": 789860,
+        "offset": 2344,
+        "size": 52
+      },
+      "depth": 1
+    },
+    {
+      "address": 792132,
+      "file_offset": 792132,
+      "target": 118092,
+      "target_symbols": [],
+      "target_nearest": {
+        "name": "IIiIIiIiiI",
+        "start": 58748,
+        "offset": 59344,
+        "size": 19740
+      },
+      "plt_import": null,
+      "owner": {
+        "name": "SoLibraryStart",
+        "start": 789860,
+        "offset": 2272,
+        "size": 52
+      },
+      "depth": 1
+    },
+    {
+      "address": 792236,
+      "file_offset": 792236,
+      "target": 1508992,
+      "target_symbols": [],
+      "target_nearest": {
+        "name": "iIIIIIIiIi",
+        "start": 1365388,
+        "offset": 143604,
+        "size": 660
+      },
+      "plt_import": "_Unwind_Resume",
+      "owner": {
+        "name": "SoLibraryStart",
+        "start": 789860,
+        "offset": 2376,
+        "size": 52
+      },
+      "depth": 1
+    },
+    {
+      "address": 792292,
+      "file_offset": 792292,
+      "target": 118148,
+      "target_symbols": [],
+      "target_nearest": {
+        "name": "IIiIIiIiiI",
+        "start": 58748,
+        "offset": 59400,
+        "size": 19740
+      },
+      "plt_import": null,
+      "owner": {
+        "name": "SoLibraryStart",
+        "start": 789860,
+        "offset": 2432,
+        "size": 52
+      },
+      "depth": 1
+    },
+    {
+      "address": 792224,
+      "file_offset": 792224,
+      "target": 1507008,
+      "target_symbols": [],
+      "target_nearest": {
+        "name": "iIIIIIIiIi",
+        "start": 1365388,
+        "offset": 141620,
+        "size": 660
+      },
+      "plt_import": "free",
+      "owner": {
+        "name": "SoLibraryStart",
+        "start": 789860,
+        "offset": 2364,
+        "size": 52
+      },
+      "depth": 1
+    },
+    {
+      "address": 792236,
+      "file_offset": 792236,
+      "target": 1508992,
+      "target_symbols": [],
+      "target_nearest": {
+        "name": "iIIIIIIiIi",
+        "start": 1365388,
+        "offset": 143604,
+        "size": 660
+      },
+      "plt_import": "_Unwind_Resume",
+      "owner": {
+        "name": "SoLibraryStart",
+        "start": 789860,
+        "offset": 2376,
+        "size": 52
+      },
+      "depth": 1
+    },
+    {
+      "address": 792292,
+      "file_offset": 792292,
+      "target": 118148,
+      "target_symbols": [],
+      "target_nearest": {
+        "name": "IIiIIiIiiI",
+        "start": 58748,
+        "offset": 59400,
+        "size": 19740
+      },
+      "plt_import": null,
+      "owner": {
+        "name": "SoLibraryStart",
+        "start": 789860,
+        "offset": 2432,
+        "size": 52
+      },
+      "depth": 1
+    },
+    {
+      "address": 793944,
+      "file_offset": 793944,
+      "target": 118092,
+      "target_symbols": [],
+      "target_nearest": {
+        "name": "IIiIIiIiiI",
+        "start": 58748,
+        "offset": 59344,
+        "size": 19740
+      },
+      "plt_import": null,
+      "owner": {
+        "name": "SoLibraryStart",
+        "start": 789860,
+        "offset": 4084,
+        "size": 52
+      },
+      "depth": 1
+    },
+    {
+      "address": 794016,
+      "file_offset": 794016,
+      "target": 1509568,
+      "target_symbols": [],
+      "target_nearest": {
+        "name": "iIIIIIIiIi",
+        "start": 1365388,
+        "offset": 144180,
+        "size": 660
+      },
+      "plt_import": "__stack_chk_fail",
+      "owner": {
+        "name": "SoLibraryStart",
+        "start": 789860,
+        "offset": 4156,
+        "size": 52
+      },
+      "depth": 1
+    }
+  ],
+  "import_call_counts": {
+    "__stack_chk_fail": 2,
+    "_Unwind_Resume": 2,
+    "free": 1
+  },
+  "udf_sites": [],
+  "invalid_sites": [
+    {
+      "address": 118148,
+      "file_offset": 118148,
+      "owner": {
+        "name": "IIiIIiIiiI",
+        "start": 58748,
+        "offset": 59400,
+        "size": 19740
+      },
+      "depth": 2
+    },
+    {
+      "address": 118092,
+      "file_offset": 118092,
+      "owner": {
+        "name": "IIiIIiIiiI",
+        "start": 58748,
+        "offset": 59344,
+        "size": 19740
+      },
+      "depth": 2
+    },
+    {
+      "address": 168980,
+      "file_offset": 168980,
+      "owner": {
+        "name": "IIiIIiIiiI",
+        "start": 58748,
+        "offset": 110232,
+        "size": 19740
+      },
+      "depth": 2
+    }
+  ],
+  "stats": {
+    "blocks": 22,
+    "instructions": 204,
+    "calls": 13,
+    "udf": 0,
+    "invalid": 3
+  }
+}
