@@ -1,0 +1,107 @@
+{
+  "sample_sha256": "8880c415e1ab82c31858be68ce12b76b95dc8ff8875b76c1246a8bc0679647bc",
+  "dynamic_relocations": 3105,
+  "globals": [
+    {
+      "name": "runtime_config_source",
+      "slot": 1988256,
+      "slot_file_offset": 1922720,
+      "raw_u64": 0,
+      "relocations": [
+        {
+          "table": "RELA",
+          "rela_va": 563928,
+          "offset": 1988256,
+          "type": 1025,
+          "type_name": "R_AARCH64_GLOB_DAT",
+          "addend": 0,
+          "symbol": {
+            "index": 43,
+            "name": "iiIiiIIiII1",
+            "value": 2380
+          }
+        }
+      ],
+      "resolved": [
+        {
+          "relocation": {
+            "table": "RELA",
+            "rela_va": 563928,
+            "offset": 1988256,
+            "type": 1025,
+            "type_name": "R_AARCH64_GLOB_DAT",
+            "addend": 0,
+            "symbol": {
+              "index": 43,
+              "name": "iiIiiIIiII1",
+              "value": 2380
+            }
+          },
+          "pointer": 2380,
+          "file_offset": 2380,
+          "file_backed": true
+        }
+      ]
+    },
+    {
+      "name": "asmfunction_tail_code_pool",
+      "slot": 1989088,
+      "slot_file_offset": 1923552,
+      "raw_u64": 0,
+      "relocations": [
+        {
+          "table": "RELA",
+          "rela_va": 564744,
+          "offset": 1989088,
+          "type": 1025,
+          "type_name": "R_AARCH64_GLOB_DAT",
+          "addend": 0,
+          "symbol": {
+            "index": 222,
+            "name": "iiliiilill",
+            "value": 865456
+          }
+        }
+      ],
+      "resolved": [
+        {
+          "relocation": {
+            "table": "RELA",
+            "rela_va": 564744,
+            "offset": 1989088,
+            "type": 1025,
+            "type_name": "R_AARCH64_GLOB_DAT",
+            "addend": 0,
+            "symbol": {
+              "index": 222,
+              "name": "iiliiilill",
+              "value": 865456
+            }
+          },
+          "pointer": 865456,
+          "file_offset": 865456,
+          "file_backed": true
+        }
+      ]
+    }
+  ],
+  "config": {
+    "available": true,
+    "source_pointer_raw": 2380,
+    "source_base": 2380,
+    "file_offset": 2380,
+    "sha256": "23de57c729f52e48552aad4221c6227aeccb56d3f568fcdbc51670a6517dddfc",
+    "size": 4208,
+    "descriptor_count": 285214125,
+    "descriptor_table_end": null,
+    "total_generated_bytes": null,
+    "descriptors": [],
+    "hex_head": "706a0000000000000064000000000000006400000000000070ce0000000000000c170000000000009402000000000000706a00000000000070ce00000000000020401700000000007ce500000000000060b6010000000000701b03000000000058be140000000000c819000000000000ad050011127863b8640400d131020b8b7f0008ebad050051ebfcff545f020e6be30304aa0cffff54e3ffff17c0035fd62cfe5e930af57ed30d686ab80e686cb8eb0360b20d682cb80e682ab8ec7f60b2ed03012aee03022a06000014bf010e6baa0300540f08058b23c21fb8f00500b90f7868b8b27d4093ad050051107872b8510600915f0209ebad0500118c000054"
+  },
+  "tail_code_pool": {
+    "pointer": 865456,
+    "file_offset": 865456,
+    "file_backed": true,
+    "nearby_hex": "ff4309d1f51300f9f44f04a9fd7b01a9fd030291730e40f94100084a020a8052e1031f2ae00313aa6a2643a9c0035fd6ff4309d1f51300f9f44f04a9fd7b01a9fd030291730e40f94100084a020a8052e1031f2ae00313aa6a2643a96042c43ce183c43ce223c53cea2712a96a5252a96112c03d00011fd64100084ae003c13ce203cc3c602e40a9c0035fd6ead308a9682a00a9ea4340f9e143843ce02700f94300062a628201ad682a00a9eb2700f94300064a002c40f9212040f9731240f9e20313aa940a40f9e00314aa000440f9c0035fd64300062ae10314aa00011fd6e20313aa082140f9a98341f84300062a1f0109ebfd7b50a9f44f48a9ff4309d1"
+  }
+}
