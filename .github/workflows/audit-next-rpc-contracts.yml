@@ -14,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: git fetch origin client-decompiled-zh-fixed-v1 --depth=1
-      - name: Resolve item and birthday RPC contracts
+      - name: Trace ItemService consumer semantics
         shell: bash
         run: |
           set -euo pipefail
@@ -23,39 +23,31 @@ jobs:
           import pathlib, re
           dump = pathlib.Path('/tmp/dump.cs').read_text(encoding='utf-8', errors='ignore')
 
-          def print_class(name):
+          def class_fields(name):
               m = re.search(rf'public class {re.escape(name)}\b.*?\{{(.*?)\n\s*// Methods', dump, flags=re.S)
               print(f'=== {name} ===')
               if not m:
-                  print('NOT FOUND')
-                  return
+                  print('NOT FOUND'); return
               for typ, field in re.findall(r'^\s*public\s+([^;\n]+?)\s+([A-Za-z0-9_]+);', m.group(1), flags=re.M):
                   print(typ.strip(), field)
 
           for name in (
-              'UseItemArgs', 'UseItemReply', 'ItemStatus',
-              'ExecuteBirthdayPresentArgs', 'ExecuteBirthdayPresentReply',
-              'BirthdayStatus', 'ResultIdol', 'ResultUser'
+              'UseGiftForCardArgs','UseGiftForCardReply',
+              'UseGiftForIdolGiftArgs','UseGiftForIdolGiftReply',
+              'UseItemArgs','UseItemReply','ResultIdol','CardStatus','IdolStatus'
           ):
-              print_class(name)
+              class_fields(name)
 
-          for needle in ('UseItem', 'ExecuteBirthdayPresent'):
-              print(f'=== CALL SITES {needle} ===')
-              hits = []
-              for m in re.finditer(rf'\b{needle}\b', dump):
-                  lo=max(0,m.start()-1800); hi=min(len(dump),m.end()+2400)
-                  snippet=dump[lo:hi]
-                  if 'public const string' in snippet and snippet.count(needle) == 1:
-                      continue
-                  hits.append(snippet)
-              for i, snippet in enumerate(hits[:20]):
-                  print(f'--- HIT {i+1} ---')
-                  print(snippet)
-
-          print('=== ITEM-SERVICE REQUEST METHODS ===')
-          m = re.search(r'public class API\.Method\.ItemService\b.*?\{(.*?)\n\s*// Methods', dump, flags=re.S)
-          if m:
-              print(m.group(1))
+          patterns = (
+              r'\.UseItem\(', r'new UseItemArgs', r'UseItemReply',
+              r'\.UseGiftForCard\(', r'new UseGiftForCardArgs', r'UseGiftForCardReply',
+              r'\.UseGiftForIdolGift\(', r'new UseGiftForIdolGiftArgs', r'UseGiftForIdolGiftReply',
+          )
+          for pat in patterns:
+              print(f'=== CONTEXT {pat} ===')
+              matches=list(re.finditer(pat, dump))
+              print('COUNT', len(matches))
+              for i,m in enumerate(matches[:30]):
+                  print(f'--- {i+1} @{m.start()} ---')
+                  print(dump[max(0,m.start()-2200):min(len(dump),m.end()+3000)])
           PY
-          echo '=== SERVER ITEM MODELS/UTILS ==='
-          grep -n -A100 -B10 -E '^class (MstItem|Item|Birthday|MstBirthday)|def add_item|def get_item_list' standalone/mltd/models/models.py standalone/mltd/services/utils.py standalone/mltd/services/item.py standalone/mltd/services/birthday.py | head -n 1400 || true
