@@ -1,0 +1,36 @@
+name: Audit birthday native reward path
+
+on:
+  push:
+    branches: [fix/story-service-compat]
+    paths: ['.github/workflows/audit-birthday-native.yml']
+
+jobs:
+  audit:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - run: git fetch origin client-decompiled-zh-fixed-v1 --depth=1
+      - name: Disassemble birthday request and reward paths
+        shell: bash
+        run: |
+          set -euo pipefail
+          git show origin/client-decompiled-zh-fixed-v1:apktool/lib/arm64-v8a/libil2cpp.so > /tmp/libil2cpp.so
+          {
+            file /tmp/libil2cpp.so
+            readelf -l /tmp/libil2cpp.so | head -80
+            echo '===== OnClickPresentButton 0x240d35c ====='
+            objdump -D -b elf64-little -m aarch64 --start-address=0x240d35c --stop-address=0x240d448 /tmp/libil2cpp.so || true
+            echo '===== ProcessReward iterator MoveNext 0x189970c ====='
+            objdump -D -b elf64-little -m aarch64 --start-address=0x189970c --stop-address=0x1899dbc /tmp/libil2cpp.so || true
+            echo '===== Mission popup iterator 0x1899458 ====='
+            objdump -D -b elf64-little -m aarch64 --start-address=0x1899458 --stop-address=0x189966c /tmp/libil2cpp.so || true
+          } > /tmp/birthday-native.txt 2>&1
+          cat /tmp/birthday-native.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: birthday-native-disassembly
+          path: /tmp/birthday-native.txt
+          retention-days: 7
