@@ -1,0 +1,60 @@
+name: Emulate exact AppGuard libstub DT_INIT
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - client-zh-fixed-reconstruction
+    paths:
+      - '.github/workflows/emulate-appguard-libstub-dt-init.yml'
+      - 'tools/client-source/emulate-appguard-libstub-dt-init.py'
+      - 'tools/client-source/emulate-appguard-libstub-predecrypted.py'
+      - 'tools/client-source/emulate-appguard-libstub-stage.py'
+      - 'tools/client-source/emulate-appguard-dt-init.py'
+      - 'tools/client-source/emulate-appguard-dt-init-svc.py'
+      - 'tools/client-source/emulate-appguard-dt-init-fast.py'
+      - 'tools/client-source/emulate-appguard-dt-init-bionic.py'
+
+permissions:
+  contents: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Install emulation libraries
+        run: python -m pip install --disable-pip-version-check pyelftools unicorn capstone
+      - name: Download exact official AppGuard libraries
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p work/xapk work/native
+          curl -L --fail --retry 3 -A 'Mozilla/5.0' -o work/original.xapk \
+            'https://d.apkpure.net/b/XAPK/com.bandainamcoent.imas_millionlive_theaterdays_ch?version=latest'
+          test "$(sha1sum work/original.xapk | awk '{print $1}')" = '1b77ddd342a4020ba032ec63ae7ef9288551b6e7'
+          unzip -q work/original.xapk -d work/xapk
+          unzip -p work/xapk/config.arm64_v8a.apk lib/arm64-v8a/libcompatible.so > work/native/libcompatible.so
+          unzip -p work/xapk/config.arm64_v8a.apk lib/arm64-v8a/libstub.so > work/native/libstub.so
+          test "$(sha256sum work/native/libcompatible.so | awk '{print $1}')" = '8880c415e1ab82c31858be68ce12b76b95dc8ff8875b76c1246a8bc0679647bc'
+          test "$(sha256sum work/native/libstub.so | awk '{print $1}')" = '041c81c97b77bc182c08207a6ac174e422795c9857c5d71076b16ec48dde201b'
+      - name: Execute libstub DT_INIT
+        run: |
+          python tools/client-source/emulate-appguard-libstub-dt-init.py \
+            --libcompatible work/native/libcompatible.so \
+            --libstub work/native/libstub.so \
+            --out client/reconstruction/appguard-analysis/emulation
+      - name: Commit result
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add client/reconstruction/appguard-analysis/emulation/libstub-dt-init.json \
+                  client/reconstruction/appguard-analysis/emulation/libstub-dt-init.md
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'client: execute exact AppGuard libstub DT_INIT'
+          git push origin HEAD:client-zh-fixed-reconstruction
