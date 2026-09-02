@@ -11,7 +11,7 @@ from mltd.servers.dns import build_zone_record  # noqa: E402
 from mltd.services.asset import get_asset_version  # noqa: E402
 
 
-class AssetHostRoutingTest(unittest.TestCase):
+class AssetHttpRoutingTest(unittest.TestCase):
     def setUp(self):
         default = config['default']
         self.saved = {
@@ -35,39 +35,26 @@ class AssetHostRoutingTest(unittest.TestCase):
             'token': '0' * 40,
         })['asset_url']
 
-    def test_remote_uses_public_asset_host_without_dns_interception(self):
+    def test_remote_uses_public_https_cdn(self):
         config['default']['asset_mode'] = 'remote'
         self.assertEqual(
             self._asset_url(),
             f'{REMOTE_ASSET_ROOT}/zh-android/',
         )
-        zone = build_zone_record('192.0.2.10', None)
-        self.assertNotIn('assets.rainbowunicorn7297.com.', zone)
 
-    def test_hybrid_preserves_public_url_and_intercepts_asset_host(self):
+    def test_hybrid_desktop_uses_cleartext_asset_port_on_api_host(self):
         config['default']['asset_mode'] = 'hybrid'
         self.assertEqual(
             self._asset_url(),
-            f'{REMOTE_ASSET_ROOT}/zh-android/',
-        )
-        zone = build_zone_record('192.0.2.10', '2001:db8::10')
-        self.assertIn(
-            'assets.rainbowunicorn7297.com. 60 IN A 192.0.2.10',
-            zone,
-        )
-        self.assertIn(
-            'assets.rainbowunicorn7297.com. 60 IN AAAA 2001:db8::10',
-            zone,
+            'http://theaterdays-zh.appspot.com:7651/zh-android/',
         )
 
-    def test_desktop_local_uses_same_public_host_interception(self):
+    def test_local_desktop_uses_cleartext_asset_port_on_api_host(self):
         config['default']['asset_mode'] = 'local'
         self.assertEqual(
             self._asset_url(),
-            f'{REMOTE_ASSET_ROOT}/zh-android/',
+            'http://theaterdays-zh.appspot.com:7651/zh-android/',
         )
-        zone = build_zone_record('192.0.2.10', None)
-        self.assertIn('assets.rainbowunicorn7297.com.', zone)
 
     def test_same_device_mode_keeps_loopback_http_path(self):
         config['default']['asset_mode'] = 'hybrid'
@@ -76,12 +63,11 @@ class AssetHostRoutingTest(unittest.TestCase):
             self._asset_url(),
             'http://127.0.0.1:7651/zh-android/',
         )
-        zone = build_zone_record('192.0.2.10', None)
-        self.assertNotIn('assets.rainbowunicorn7297.com.', zone)
 
-    def test_ipv6_api_records_are_aaaa_and_do_not_replace_ipv4(self):
-        config['default']['asset_mode'] = 'remote'
+    def test_dns_intercepts_only_api_hosts(self):
+        config['default']['asset_mode'] = 'hybrid'
         zone = build_zone_record('192.0.2.10', '2001:db8::10')
+        self.assertNotIn('assets.rainbowunicorn7297.com.', zone)
         self.assertIn(
             'theaterdays-zh.appspot.com. 60 IN A 192.0.2.10',
             zone,
