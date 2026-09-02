@@ -15,14 +15,16 @@ jobs:
         with:
           fetch-depth: 1
       - run: git fetch origin client-decompiled-zh-fixed-v1 --depth=1
-      - name: Inspect profile RPC contracts
+      - name: Inspect exact profile contracts and call construction
         shell: bash
         run: |
           set -euo pipefail
           git show origin/client-decompiled-zh-fixed-v1:il2cpp-dump/dump.cs > /tmp/dump.cs
-          echo '=== USER PROFILE RPC / DTO REFERENCES ==='
-          grep -n -C 20 -E 'class (GetProfileArgs|GetProfileReply|SetSelfProfileArgs|SetSelfProfileReply|ProfileStatus|UserProfileStatus)\b|HTTPRequest (GetProfile|SetSelfProfile)\(' /tmp/dump.cs | head -n 1800 || true
-          echo '=== PROFILE CLIENT USAGE ==='
-          grep -n -C 14 -E 'GetProfile\(|SetSelfProfile\(|GetProfileReply|SetSelfProfileReply' /tmp/dump.cs | head -n 1800 || true
-          echo '=== PROFILE SERVER MODELS/SCHEMAS ==='
-          grep -n -C 24 -E '^class Profile\b|^class ProfileSchema\b' standalone/mltd/models/models.py standalone/mltd/models/schemas.py || true
+          echo '=== EXACT GetProfileReply ==='
+          sed -n '629052,629145p' /tmp/dump.cs
+          echo '=== EXACT SetSelfProfile DTO ==='
+          sed -n '635580,635620p' /tmp/dump.cs
+          echo '=== GetProfileArgs assignments / construction ==='
+          grep -n -C 18 -E '(user_id|search_user_id|name_card_url|from_page) = .*|new GetProfileArgs|GetProfileArgs args' /tmp/dump.cs | head -n 1800 || true
+          echo '=== SetSelfProfileArgs assignments ==='
+          grep -n -C 16 -E 'SetSelfProfileArgs args|new SetSelfProfileArgs|helper_card_id_list =|mst_achievement_id_list =' /tmp/dump.cs | head -n 2200 || true
