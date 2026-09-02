@@ -22,7 +22,7 @@ jobs:
         with:
           fetch-depth: 1
       - name: Install analysis libraries
-        run: python -m pip install --disable-pip-version-check pyelftools capstone
+        run: python -m pip install --disable-pip-version-check pyelftools capstone unicorn
       - name: Download exact official libcompatible
         shell: bash
         run: |
