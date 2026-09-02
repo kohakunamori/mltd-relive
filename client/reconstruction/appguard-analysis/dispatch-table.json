@@ -1,0 +1,924 @@
+{
+  "sample_sha256": "8880c415e1ab82c31858be68ce12b76b95dc8ff8875b76c1246a8bc0679647bc",
+  "dynamic_tags": {
+    "DT_RELA": 497640,
+    "DT_RELASZ": 69000,
+    "DT_RELAENT": 24,
+    "DT_JMPREL": 566640,
+    "DT_PLTRELSZ": 5520,
+    "DT_SYMTAB": 466648,
+    "DT_STRTAB": 480976,
+    "DT_SYMENT": 24,
+    "DT_PLTGOT": 1991112
+  },
+  "relocation_count": 3105,
+  "relocation_type_counts": {
+    "R_AARCH64_ABS64": 281,
+    "R_AARCH64_GLOB_DAT": 119,
+    "R_AARCH64_JUMP_SLOT": 230,
+    "R_AARCH64_RELATIVE": 2475
+  },
+  "global_accesses": [
+    {
+      "instruction": 789884,
+      "block": 789860,
+      "depth": 0,
+      "kind": "load",
+      "address": 1989872,
+      "dst": "x8"
+    },
+    {
+      "instruction": 789960,
+      "block": 789912,
+      "depth": 1,
+      "kind": "load",
+      "address": 1989416,
+      "dst": "x0"
+    },
+    {
+      "instruction": 789972,
+      "block": 789912,
+      "depth": 1,
+      "kind": "load",
+      "address": 1990848,
+      "dst": "x10"
+    },
+    {
+      "instruction": 789988,
+      "block": 789984,
+      "depth": 1,
+      "kind": "load",
+      "address": 1989736,
+      "dst": "x19"
+    },
+    {
+      "instruction": 790024,
+      "block": 789984,
+      "depth": 1,
+      "kind": "load",
+      "address": 1989944,
+      "dst": "x11"
+    },
+    {
+      "instruction": 792052,
+      "block": 792040,
+      "depth": 1,
+      "kind": "load",
+      "address": 1988344,
+      "dst": "x9"
+    },
+    {
+      "instruction": 792088,
+      "block": 792080,
+      "depth": 1,
+      "kind": "load",
+      "address": 1988184,
+      "dst": "x0"
+    },
+    {
+      "instruction": 792092,
+      "block": 792080,
+      "depth": 1,
+      "kind": "load",
+      "address": 1988344,
+      "dst": "x1"
+    },
+    {
+      "instruction": 792108,
+      "block": 792104,
+      "depth": 1,
+      "kind": "load",
+      "address": 1988272,
+      "dst": "x8"
+    },
+    {
+      "instruction": 792128,
+      "block": 792104,
+      "depth": 1,
+      "kind": "load",
+      "address": 1989416,
+      "dst": "x0"
+    },
+    {
+      "instruction": 792288,
+      "block": 792220,
+      "depth": 1,
+      "kind": "load",
+      "address": 1989416,
+      "dst": "x0"
+    },
+    {
+      "instruction": 792300,
+      "block": 792220,
+      "depth": 1,
+      "kind": "load",
+      "address": 1990848,
+      "dst": "x8"
+    },
+    {
+      "instruction": 792324,
+      "block": 792320,
+      "depth": 1,
+      "kind": "load",
+      "address": 1989736,
+      "dst": "x19"
+    },
+    {
+      "instruction": 792360,
+      "block": 792320,
+      "depth": 1,
+      "kind": "load",
+      "address": 1989944,
+      "dst": "x11"
+    },
+    {
+      "instruction": 793940,
+      "block": 793936,
+      "depth": 1,
+      "kind": "load",
+      "address": 1989416,
+      "dst": "x0"
+    },
+    {
+      "instruction": 794040,
+      "block": 794016,
+      "depth": 1,
+      "kind": "load",
+      "address": 1988520,
+      "dst": "x21"
+    }
+  ],
+  "indirect_chains": [
+    {
+      "instruction": 789892,
+      "block": 789860,
+      "depth": 0,
+      "base_reg": "x8",
+      "dst": "x8",
+      "global_slot": 1989872,
+      "field_offset": 0,
+      "resolved_fields": [
+        {
+          "slot": 2013272,
+          "file_offset": null,
+          "raw_u64": null,
+          "relocations": [],
+          "candidates": [],
+          "object_base": 2013272,
+          "field_offset": 0
+        }
+      ]
+    },
+    {
+      "instruction": 789896,
+      "block": 789860,
+      "depth": 0,
+      "blr_reg": "x8",
+      "global_slot": 1989872,
+      "field_offset": 0,
+      "is_call": true,
+      "resolved_fields": [
+        {
+          "slot": 2013272,
+          "file_offset": null,
+          "raw_u64": null,
+          "relocations": [],
+          "candidates": [],
+          "object_base": 2013272,
+          "field_offset": 0
+        }
+      ]
+    },
+    {
+      "instruction": 789976,
+      "block": 789912,
+      "depth": 1,
+      "base_reg": "x10",
+      "dst": "x9",
+      "global_slot": 1990848,
+      "field_offset": 0,
+      "resolved_fields": [
+        {
+          "slot": 2006104,
+          "file_offset": null,
+          "raw_u64": null,
+          "relocations": [],
+          "candidates": [],
+          "object_base": 2006104,
+          "field_offset": 0
+        }
+      ]
+    },
+    {
+      "instruction": 790004,
+      "block": 789984,
+      "depth": 1,
+      "base_reg": "x19",
+      "dst": "x8",
+      "global_slot": 1989736,
+      "field_offset": 0,
+      "resolved_fields": [
+        {
+          "slot": 2005928,
+          "file_offset": null,
+          "raw_u64": null,
+          "relocations": [],
+          "candidates": [],
+          "object_base": 2005928,
+          "field_offset": 0
+        }
+      ]
+    },
+    {
+      "instruction": 790040,
+      "block": 789984,
+      "depth": 1,
+      "base_reg": "x11",
+      "dst": "x11",
+      "global_slot": 1989944,
+      "field_offset": 160,
+      "resolved_fields": [
+        {
+          "slot": 2019160,
+          "file_offset": null,
+          "raw_u64": null,
+          "relocations": [],
+          "candidates": [],
+          "object_base": 2019000,
+          "field_offset": 160
+        }
+      ]
+    },
+    {
+      "instruction": 790068,
+      "block": 789984,
+      "depth": 1,
+      "blr_reg": "x11",
+      "global_slot": 1989944,
+      "field_offset": 160,
+      "is_call": true,
+      "resolved_fields": [
+        {
+          "slot": 2019160,
+          "file_offset": null,
+          "raw_u64": null,
+          "relocations": [],
+          "candidates": [],
+          "object_base": 2019000,
+          "field_offset": 160
+        }
+      ]
+    },
+    {
+      "instruction": 792112,
+      "block": 792104,
+      "depth": 1,
+      "base_reg": "x8",
+      "dst": "x9",
+      "global_slot": 1988272,
+      "field_offset": 0,
+      "resolved_fields": [
+        {
+          "slot": 2013152,
+          "file_offset": null,
+          "raw_u64": null,
+          "relocations": [],
+          "candidates": [],
+          "object_base": 2013152,
+          "field_offset": 0
+        }
+      ]
+    },
+    {
+      "instruction": 792304,
+      "block": 792220,
+      "depth": 1,
+      "base_reg": "x8",
+      "dst": "x9",
+      "global_slot": 1990848,
+      "field_offset": 0,
+      "resolved_fields": [
+        {
+          "slot": 2006104,
+          "file_offset": null,
+          "raw_u64": null,
+          "relocations": [],
+          "candidates": [],
+          "object_base": 2006104,
+          "field_offset": 0
+        }
+      ]
+    },
+    {
+      "instruction": 792340,
+      "block": 792320,
+      "depth": 1,
+      "base_reg": "x19",
+      "dst": "x8",
+      "global_slot": 1989736,
+      "field_offset": 0,
+      "resolved_fields": [
+        {
+          "slot": 2005928,
+          "file_offset": null,
+          "raw_u64": null,
+          "relocations": [],
+          "candidates": [],
+          "object_base": 2005928,
+          "field_offset": 0
+        }
+      ]
+    },
+    {
+      "instruction": 792376,
+      "block": 792320,
+      "depth": 1,
+      "base_reg": "x11",
+      "dst": "x11",
+      "global_slot": 1989944,
+      "field_offset": 160,
+      "resolved_fields": [
+        {
+          "slot": 2019160,
+          "file_offset": null,
+          "raw_u64": null,
+          "relocations": [],
+          "candidates": [],
+          "object_base": 2019000,
+          "field_offset": 160
+        }
+      ]
+    },
+    {
+      "instruction": 792404,
+      "block": 792320,
+      "depth": 1,
+      "blr_reg": "x11",
+      "global_slot": 1989944,
+      "field_offset": 160,
+      "is_call": true,
+      "resolved_fields": [
+        {
+          "slot": 2019160,
+          "file_offset": null,
+          "raw_u64": null,
+          "relocations": [],
+          "candidates": [],
+          "object_base": 2019000,
+          "field_offset": 160
+        }
+      ]
+    },
+    {
+      "instruction": 794044,
+      "block": 794016,
+      "depth": 1,
+      "base_reg": "x21",
+      "dst": "x8",
+      "global_slot": 1988520,
+      "field_offset": 0,
+      "resolved_fields": [
+        {
+          "slot": 2013888,
+          "file_offset": null,
+          "raw_u64": null,
+          "relocations": [],
+          "candidates": [],
+          "object_base": 2013888,
+          "field_offset": 0
+        }
+      ]
+    },
+    {
+      "instruction": 794048,
+      "block": 794016,
+      "depth": 1,
+      "base_reg": "x8",
+      "dst": "x8",
+      "global_slot": 1988520,
+      "field_offset": 344,
+      "resolved_fields": [
+        {
+          "slot": 2014232,
+          "file_offset": null,
+          "raw_u64": null,
+          "relocations": [],
+          "candidates": [],
+          "object_base": 2013888,
+          "field_offset": 344
+        }
+      ]
+    }
+  ],
+  "global_slots": [
+    {
+      "slot": 1988184,
+      "file_offset": 1922648,
+      "raw_u64": 1999736,
+      "relocations": [
+        {
+          "table": "RELA",
+          "rela_va": 557784,
+          "offset": 1988184,
+          "type": 1027,
+          "type_name": "R_AARCH64_RELATIVE",
+          "sym_index": 0,
+          "symbol": "",
+          "symbol_value": 0,
+          "addend": 1999736
+        }
+      ],
+      "candidates": [
+        {
+          "relocation": {
+            "table": "RELA",
+            "rela_va": 557784,
+            "offset": 1988184,
+            "type": 1027,
+            "type_name": "R_AARCH64_RELATIVE",
+            "sym_index": 0,
+            "symbol": "",
+            "symbol_value": 0,
+            "addend": 1999736
+          },
+          "resolved_pointer": {
+            "address": 1999736,
+            "mapped": true,
+            "file_backed": true,
+            "exact_symbols": [],
+            "nearest_symbol": {
+              "name": "_ZN10__cxxabiv119__terminate_handlerE",
+              "start": 1999624,
+              "offset": 112,
+              "size": 8
+            },
+            "file_offset": 1934200
+          }
+        }
+      ]
+    },
+    {
+      "slot": 1988272,
+      "file_offset": 1922736,
+      "raw_u64": 2013152,
+      "relocations": [
+        {
+          "table": "RELA",
+          "rela_va": 557952,
+          "offset": 1988272,
+          "type": 1027,
+          "type_name": "R_AARCH64_RELATIVE",
+          "sym_index": 0,
+          "symbol": "",
+          "symbol_value": 0,
+          "addend": 2013152
+        }
+      ],
+      "candidates": [
+        {
+          "relocation": {
+            "table": "RELA",
+            "rela_va": 557952,
+            "offset": 1988272,
+            "type": 1027,
+            "type_name": "R_AARCH64_RELATIVE",
+            "sym_index": 0,
+            "symbol": "",
+            "symbol_value": 0,
+            "addend": 2013152
+          },
+          "resolved_pointer": {
+            "address": 2013152,
+            "mapped": true,
+            "file_backed": false,
+            "exact_symbols": [],
+            "nearest_symbol": {
+              "name": "__bss_start__",
+              "start": 2000088,
+              "offset": 13064,
+              "size": 0
+            },
+            "file_offset": null
+          }
+        }
+      ]
+    },
+    {
+      "slot": 1988344,
+      "file_offset": 1922808,
+      "raw_u64": 2004473,
+      "relocations": [
+        {
+          "table": "RELA",
+          "rela_va": 558120,
+          "offset": 1988344,
+          "type": 1027,
+          "type_name": "R_AARCH64_RELATIVE",
+          "sym_index": 0,
+          "symbol": "",
+          "symbol_value": 0,
+          "addend": 2004473
+        }
+      ],
+      "candidates": [
+        {
+          "relocation": {
+            "table": "RELA",
+            "rela_va": 558120,
+            "offset": 1988344,
+            "type": 1027,
+            "type_name": "R_AARCH64_RELATIVE",
+            "sym_index": 0,
+            "symbol": "",
+            "symbol_value": 0,
+            "addend": 2004473
+          },
+          "resolved_pointer": {
+            "address": 2004473,
+            "mapped": true,
+            "file_backed": false,
+            "exact_symbols": [],
+            "nearest_symbol": {
+              "name": "__bss_start__",
+              "start": 2000088,
+              "offset": 4385,
+              "size": 0
+            },
+            "file_offset": null
+          }
+        }
+      ]
+    },
+    {
+      "slot": 1988520,
+      "file_offset": 1922984,
+      "raw_u64": 2013888,
+      "relocations": [
+        {
+          "table": "RELA",
+          "rela_va": 558600,
+          "offset": 1988520,
+          "type": 1027,
+          "type_name": "R_AARCH64_RELATIVE",
+          "sym_index": 0,
+          "symbol": "",
+          "symbol_value": 0,
+          "addend": 2013888
+        }
+      ],
+      "candidates": [
+        {
+          "relocation": {
+            "table": "RELA",
+            "rela_va": 558600,
+            "offset": 1988520,
+            "type": 1027,
+            "type_name": "R_AARCH64_RELATIVE",
+            "sym_index": 0,
+            "symbol": "",
+            "symbol_value": 0,
+            "addend": 2013888
+          },
+          "resolved_pointer": {
+            "address": 2013888,
+            "mapped": true,
+            "file_backed": false,
+            "exact_symbols": [],
+            "nearest_symbol": {
+              "name": "__bss_start__",
+              "start": 2000088,
+              "offset": 13800,
+              "size": 0
+            },
+            "file_offset": null
+          }
+        }
+      ]
+    },
+    {
+      "slot": 1989416,
+      "file_offset": 1923880,
+      "raw_u64": 2006064,
+      "relocations": [
+        {
+          "table": "RELA",
+          "rela_va": 560208,
+          "offset": 1989416,
+          "type": 1027,
+          "type_name": "R_AARCH64_RELATIVE",
+          "sym_index": 0,
+          "symbol": "",
+          "symbol_value": 0,
+          "addend": 2006064
+        }
+      ],
+      "candidates": [
+        {
+          "relocation": {
+            "table": "RELA",
+            "rela_va": 560208,
+            "offset": 1989416,
+            "type": 1027,
+            "type_name": "R_AARCH64_RELATIVE",
+            "sym_index": 0,
+            "symbol": "",
+            "symbol_value": 0,
+            "addend": 2006064
+          },
+          "resolved_pointer": {
+            "address": 2006064,
+            "mapped": true,
+            "file_backed": false,
+            "exact_symbols": [],
+            "nearest_symbol": {
+              "name": "__bss_start__",
+              "start": 2000088,
+              "offset": 5976,
+              "size": 0
+            },
+            "file_offset": null
+          }
+        }
+      ]
+    },
+    {
+      "slot": 1989736,
+      "file_offset": 1924200,
+      "raw_u64": 2005928,
+      "relocations": [
+        {
+          "table": "RELA",
+          "rela_va": 560856,
+          "offset": 1989736,
+          "type": 1027,
+          "type_name": "R_AARCH64_RELATIVE",
+          "sym_index": 0,
+          "symbol": "",
+          "symbol_value": 0,
+          "addend": 2005928
+        }
+      ],
+      "candidates": [
+        {
+          "relocation": {
+            "table": "RELA",
+            "rela_va": 560856,
+            "offset": 1989736,
+            "type": 1027,
+            "type_name": "R_AARCH64_RELATIVE",
+            "sym_index": 0,
+            "symbol": "",
+            "symbol_value": 0,
+            "addend": 2005928
+          },
+          "resolved_pointer": {
+            "address": 2005928,
+            "mapped": true,
+            "file_backed": false,
+            "exact_symbols": [],
+            "nearest_symbol": {
+              "name": "__bss_start__",
+              "start": 2000088,
+              "offset": 5840,
+              "size": 0
+            },
+            "file_offset": null
+          }
+        }
+      ]
+    },
+    {
+      "slot": 1989872,
+      "file_offset": 1924336,
+      "raw_u64": 2013272,
+      "relocations": [
+        {
+          "table": "RELA",
+          "rela_va": 561096,
+          "offset": 1989872,
+          "type": 1027,
+          "type_name": "R_AARCH64_RELATIVE",
+          "sym_index": 0,
+          "symbol": "",
+          "symbol_value": 0,
+          "addend": 2013272
+        }
+      ],
+      "candidates": [
+        {
+          "relocation": {
+            "table": "RELA",
+            "rela_va": 561096,
+            "offset": 1989872,
+            "type": 1027,
+            "type_name": "R_AARCH64_RELATIVE",
+            "sym_index": 0,
+            "symbol": "",
+            "symbol_value": 0,
+            "addend": 2013272
+          },
+          "resolved_pointer": {
+            "address": 2013272,
+            "mapped": true,
+            "file_backed": false,
+            "exact_symbols": [],
+            "nearest_symbol": {
+              "name": "__bss_start__",
+              "start": 2000088,
+              "offset": 13184,
+              "size": 0
+            },
+            "file_offset": null
+          }
+        }
+      ]
+    },
+    {
+      "slot": 1989944,
+      "file_offset": 1924408,
+      "raw_u64": 0,
+      "relocations": [
+        {
+          "table": "RELA",
+          "rela_va": 565632,
+          "offset": 1989944,
+          "type": 1025,
+          "type_name": "R_AARCH64_GLOB_DAT",
+          "sym_index": 376,
+          "symbol": "asmFunction",
+          "symbol_value": 2019000,
+          "addend": 0
+        }
+      ],
+      "candidates": [
+        {
+          "relocation": {
+            "table": "RELA",
+            "rela_va": 565632,
+            "offset": 1989944,
+            "type": 1025,
+            "type_name": "R_AARCH64_GLOB_DAT",
+            "sym_index": 376,
+            "symbol": "asmFunction",
+            "symbol_value": 2019000,
+            "addend": 0
+          },
+          "resolved_pointer": {
+            "address": 2019000,
+            "mapped": true,
+            "file_backed": false,
+            "exact_symbols": [
+              "asmFunction"
+            ],
+            "nearest_symbol": {
+              "name": "asmFunction",
+              "start": 2019000,
+              "offset": 0,
+              "size": 168
+            },
+            "file_offset": null
+          }
+        }
+      ]
+    },
+    {
+      "slot": 1990848,
+      "file_offset": 1925312,
+      "raw_u64": 2006104,
+      "relocations": [
+        {
+          "table": "RELA",
+          "rela_va": 563232,
+          "offset": 1990848,
+          "type": 1027,
+          "type_name": "R_AARCH64_RELATIVE",
+          "sym_index": 0,
+          "symbol": "",
+          "symbol_value": 0,
+          "addend": 2006104
+        }
+      ],
+      "candidates": [
+        {
+          "relocation": {
+            "table": "RELA",
+            "rela_va": 563232,
+            "offset": 1990848,
+            "type": 1027,
+            "type_name": "R_AARCH64_RELATIVE",
+            "sym_index": 0,
+            "symbol": "",
+            "symbol_value": 0,
+            "addend": 2006104
+          },
+          "resolved_pointer": {
+            "address": 2006104,
+            "mapped": true,
+            "file_backed": false,
+            "exact_symbols": [],
+            "nearest_symbol": {
+              "name": "__bss_start__",
+              "start": 2000088,
+              "offset": 6016,
+              "size": 0
+            },
+            "file_offset": null
+          }
+        }
+      ]
+    }
+  ],
+  "objects": [
+    {
+      "source_slot": 1988184,
+      "base": 1999736,
+      "base_description": {
+        "address": 1999736,
+        "mapped": true,
+        "file_backed": true,
+        "exact_symbols": [],
+        "nearest_symbol": {
+          "name": "_ZN10__cxxabiv119__terminate_handlerE",
+          "start": 1999624,
+          "offset": 112,
+          "size": 8
+        },
+        "file_offset": 1934200
+      },
+      "fields": [
+        {
+          "offset": 128,
+          "address": 1999864,
+          "raw_u64": 0,
+          "relocations": [],
+          "resolved": [],
+          "raw_pointer": null
+        },
+        {
+          "offset": 136,
+          "address": 1999872,
+          "raw_u64": 0,
+          "relocations": [],
+          "resolved": [],
+          "raw_pointer": null
+        },
+        {
+          "offset": 144,
+          "address": 1999880,
+          "raw_u64": 0,
+          "relocations": [],
+          "resolved": [],
+          "raw_pointer": null
+        },
+        {
+          "offset": 152,
+          "address": 1999888,
+          "raw_u64": 0,
+          "relocations": [],
+          "resolved": [],
+          "raw_pointer": null
+        },
+        {
+          "offset": 160,
+          "address": 1999896,
+          "raw_u64": 0,
+          "relocations": [],
+          "resolved": [],
+          "raw_pointer": null
+        },
+        {
+          "offset": 168,
+          "address": 1999904,
+          "raw_u64": 0,
+          "relocations": [],
+          "resolved": [],
+          "raw_pointer": null
+        },
+        {
+          "offset": 176,
+          "address": 1999912,
+          "raw_u64": 0,
+          "relocations": [],
+          "resolved": [],
+          "raw_pointer": null
+        },
+        {
+          "offset": 184,
+          "address": 1999920,
+          "raw_u64": 0,
+          "relocations": [],
+          "resolved": [],
+          "raw_pointer": null
+        },
+        {
+          "offset": 192,
+          "address": 1999928,
+          "raw_u64": 0,
+          "relocations": [],
+          "resolved": [],
+          "raw_pointer": null
+        }
+      ]
+    }
+  ]
+}
