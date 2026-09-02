@@ -1,0 +1,57 @@
+name: Fix and test favorite costume persistence
+
+on:
+  push:
+    branches: [fix/story-service-compat]
+    paths: ['.github/workflows/fix-test-favorite-costume.yml']
+
+permissions:
+  contents: write
+
+jobs:
+  fix-test:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/story-service-compat
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Fix SQLAlchemy constraint imports
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('standalone/mltd/models/models.py')
+          s = p.read_text()
+          old = 'from sqlalchemy import ForeignKey, ForeignKeyConstraint, Index, String\n'
+          new = ('from sqlalchemy import (ForeignKey, ForeignKeyConstraint, Index,\n'
+                 '                        PrimaryKeyConstraint, String, UniqueConstraint)\n')
+          if old not in s:
+              raise SystemExit('sqlalchemy import anchor not found')
+          s = s.replace(old, new, 1)
+          s = s.replace('db.PrimaryKeyConstraint(', 'PrimaryKeyConstraint(')
+          s = s.replace('db.UniqueConstraint(', 'UniqueConstraint(')
+          p.write_text(s)
+          PY
+          python -m compileall -q standalone/mltd tests/test_favorite_costume_runtime.py
+      - name: Install runtime dependencies
+        run: >-
+          python -m pip install
+          json-rpc==1.15.0
+          SQLAlchemy==2.0.19 SQLAlchemy-Utils==0.41.1
+          marshmallow==3.20.1 marshmallow-sqlalchemy==0.29.0
+          msgpack==1.0.5 pycryptodome==3.18.0
+      - name: Run real SQLAlchemy runtime test
+        working-directory: standalone
+        run: |
+          PYTHONPATH=. python -m mltd.models.setup
+          PYTHONPATH=. python ../tests/test_favorite_costume_runtime.py
+      - name: Commit fix
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add standalone/mltd/models/models.py
+          git commit -m 'fix: import favorite costume constraints'
+          git push origin HEAD:fix/story-service-compat
