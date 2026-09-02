@@ -1,0 +1,32 @@
+
+Elf file type is DYN (Shared object file)
+Entry point 0x149b340
+There are 7 program headers, starting at offset 64
+
+Program Headers:
+  Type           Offset             VirtAddr           PhysAddr
+                 FileSiz            MemSiz              Flags  Align
+  LOAD           0x0000000000000000 0x0000000000000000 0x0000000000000000
+                 0x00000000055c7ddc 0x00000000055c7ddc  R E    0x10000
+  LOAD           0x00000000055c8000 0x00000000055d8000 0x00000000055d8000
+                 0x00000000008c6398 0x0000000000bc1fe0  RW     0x10000
+  DYNAMIC        0x0000000005af6c60 0x0000000005b06c60 0x0000000005b06c60
+                 0x00000000000001f0 0x00000000000001f0  RW     0x8
+  NOTE           0x00000000000001c8 0x00000000000001c8 0x00000000000001c8
+                 0x0000000000000024 0x0000000000000024  R      0x4
+  NOTE           0x00000000055c7d44 0x00000000055c7d44 0x00000000055c7d44
+                 0x0000000000000098 0x0000000000000098  R      0x4
+  GNU_EH_FRAME   0x0000000004989348 0x0000000004989348 0x0000000004989348
+                 0x00000000001fad7c 0x00000000001fad7c  R      0x4
+  GNU_STACK      0x0000000000000000 0x0000000000000000 0x0000000000000000
+                 0x0000000000000000 0x0000000000000000  RW     0x10
+
+ Section to Segment mapping:
+  Segment Sections...
+   00     .note.gnu.build-id .hash .dynsym .dynstr .gnu.version .gnu.version_r .rela.dyn .rela.plt .plt .text il2cpp .rodata .eh_frame_hdr .eh_frame .gcc_except_table .note.android.ident 
+   01     .init_array .fini_array .data.rel.ro .dynamic .got .got.plt .data .bss 
+   02     .dynamic 
+   03     .note.gnu.build-id 
+   04     .note.android.ident 
+   05     .eh_frame_hdr 
+   06     

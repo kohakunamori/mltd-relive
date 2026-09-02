@@ -1,0 +1,1 @@
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/Metadata/global-metadata.dat: data

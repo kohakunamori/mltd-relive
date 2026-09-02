@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "815176798395",
+    "firebase_url": "https://theaterdays-zh.firebaseio.com",
+    "project_id": "theaterdays-zh",
+    "storage_bucket": "theaterdays-zh.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:815176798395:android:2e576cf2e07c6448",
+        "android_client_info": {
+          "package_name": "com.bandainamcoent.imas_millionlive_theaterdays_ch"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "815176798395-06mqnjvldrmmq5fb619mitmu857s9asu.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAtu5INl7_RYL4s53_G4Jk8XA7e40-559w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "815176798395-06mqnjvldrmmq5fb619mitmu857s9asu.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "815176798395-7bip4n04hd06lgq784t9lp6n2f28otk6.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "jp.co.bandainamcoent.BNEI0364"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

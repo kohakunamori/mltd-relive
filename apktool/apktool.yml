@@ -1,0 +1,22 @@
+version: 2.12.1
+apkFileName: mltd-relive-game-client-zh-fixed.apk
+usesFramework:
+  ids:
+  - 1
+sdkInfo:
+  minSdkVersion: 19
+  targetSdkVersion: 29
+packageInfo:
+  forcedPackageId: 127
+versionInfo:
+  versionCode: 21000
+  versionName: 2.1.000
+doNotCompress:
+- arsc
+- png
+- wav
+- assets/bin/Data/Managed/etc/mono/registry/last-btime
+- assets/bin/Data/data.unity3d
+- assets/google-services-desktop.json
+- assets/license_BNEI0310.sig
+- assets/license_theaterdays.sig

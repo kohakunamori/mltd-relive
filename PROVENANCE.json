@@ -1,0 +1,137 @@
+{
+  "baseline": "zh-fixed-v1",
+  "release_tag": "standalone-v0.1.10",
+  "source_maintenance_commit": "020f04e4f93fb232e3577642d92824e67c91864a",
+  "apk_sha256": "a423f1b09b6d9022cf255aff9a43716d6beadf32d42641da3c7b92d2e663e918",
+  "file_count_before_metadata": 9906,
+  "total_bytes_before_metadata": 689532419,
+  "large_regular_git_files_50_mib_or_more": [
+    {
+      "path": "jadx/resources/lib/arm64-v8a/libil2cpp.so",
+      "bytes": 99150888
+    },
+    {
+      "path": "apktool/lib/arm64-v8a/libil2cpp.so",
+      "bytes": 99150888
+    },
+    {
+      "path": "il2cpp-dump/script.json",
+      "bytes": 90475124
+    },
+    {
+      "path": "il2cpp-dump/il2cpp.h",
+      "bytes": 67330720
+    }
+  ],
+  "largest_files": [
+    {
+      "path": "apktool/lib/arm64-v8a/libil2cpp.so",
+      "bytes": 99150888,
+      "sha256": "52d0cdac0179ae4a5d61a00b9bfd500969730d1a3f157cf667d82c525836936b"
+    },
+    {
+      "path": "jadx/resources/lib/arm64-v8a/libil2cpp.so",
+      "bytes": 99150888,
+      "sha256": "52d0cdac0179ae4a5d61a00b9bfd500969730d1a3f157cf667d82c525836936b"
+    },
+    {
+      "path": "il2cpp-dump/script.json",
+      "bytes": 90475124,
+      "sha256": "699e66ad3976340721553e4b465d72d7a915b6ccd98913caefdf734884a9d869"
+    },
+    {
+      "path": "il2cpp-dump/il2cpp.h",
+      "bytes": 67330720,
+      "sha256": "8cf0ecd099cfd7327f47994f97f28d47d6d88c232345a874040a05626f98e673"
+    },
+    {
+      "path": "apktool/assets/bin/Data/data.unity3d",
+      "bytes": 48294685,
+      "sha256": "049ba52c8dc51ddbab171c2901c3b9d3a1b4853c41ce96127d2fe6d523913464"
+    },
+    {
+      "path": "jadx/resources/assets/bin/Data/data.unity3d",
+      "bytes": 48294685,
+      "sha256": "049ba52c8dc51ddbab171c2901c3b9d3a1b4853c41ce96127d2fe6d523913464"
+    },
+    {
+      "path": "il2cpp-dump/dump.cs",
+      "bytes": 34739049,
+      "sha256": "139f50e27a6dd6de04f61e5a2c8606a1e0b0f878ac186283c897bd5cb80d35f6"
+    },
+    {
+      "path": "apktool/assets/bin/Data/Managed/Metadata/global-metadata.dat",
+      "bytes": 21159696,
+      "sha256": "0b0913387be65fb046a7536e016cd9f8514b0ac23bd79b8b20540c73cb1d8cf0"
+    },
+    {
+      "path": "jadx/resources/assets/bin/Data/Managed/Metadata/global-metadata.dat",
+      "bytes": 21159696,
+      "sha256": "0b0913387be65fb046a7536e016cd9f8514b0ac23bd79b8b20540c73cb1d8cf0"
+    },
+    {
+      "path": "il2cpp-dump/DummyDll/Assembly-CSharp.dll",
+      "bytes": 19735552,
+      "sha256": "36fbfe41b96af1b539aa5a656fa5912bc65aedadd85ff27dcc6968a4ca787de4"
+    },
+    {
+      "path": "apktool/lib/arm64-v8a/libunity.so",
+      "bytes": 15971328,
+      "sha256": "af8b49e0ed592fcec99e0f6ebc33e86dfa7647abe9d476c70a199fd53ea03051"
+    },
+    {
+      "path": "jadx/resources/lib/arm64-v8a/libunity.so",
+      "bytes": 15971328,
+      "sha256": "af8b49e0ed592fcec99e0f6ebc33e86dfa7647abe9d476c70a199fd53ea03051"
+    },
+    {
+      "path": "apktool/build/apk/classes.dex",
+      "bytes": 4861844,
+      "sha256": "eda8f4ddefdb55a4935e41d06c4ec73dbc491ed27abe7fb9d6944907e74459c9"
+    },
+    {
+      "path": "apktool/lib/arm64-v8a/libFirebaseCppApp-6.2.0.so",
+      "bytes": 3974032,
+      "sha256": "e2b71ede73746c3e70f43daeace13519bfe4a2dea88ce4d9df2c0c81a037c731"
+    },
+    {
+      "path": "jadx/resources/lib/arm64-v8a/libFirebaseCppApp-6.2.0.so",
+      "bytes": 3974032,
+      "sha256": "e2b71ede73746c3e70f43daeace13519bfe4a2dea88ce4d9df2c0c81a037c731"
+    },
+    {
+      "path": "apktool/lib/arm64-v8a/libgpg.so",
+      "bytes": 3718560,
+      "sha256": "209f0f0681ac695bf301f9548893a773a0921260244701b7c91ee70755f3385b"
+    },
+    {
+      "path": "jadx/resources/lib/arm64-v8a/libgpg.so",
+      "bytes": 3718560,
+      "sha256": "209f0f0681ac695bf301f9548893a773a0921260244701b7c91ee70755f3385b"
+    },
+    {
+      "path": "apktool/assets/bin/Data/unity default resources",
+      "bytes": 3608452,
+      "sha256": "1117d0d52941252fbdd9476c2a0409daae7bff4a2926459bb94ba03a9845d352"
+    },
+    {
+      "path": "jadx/resources/assets/bin/Data/unity default resources",
+      "bytes": 3608452,
+      "sha256": "1117d0d52941252fbdd9476c2a0409daae7bff4a2926459bb94ba03a9845d352"
+    },
+    {
+      "path": "il2cpp-dump/DummyDll/mscorlib.dll",
+      "bytes": 2834432,
+      "sha256": "e09f9277d16ed2cc66b90349640cc2cc5e464a96337974e076df864ff713834f"
+    }
+  ],
+  "generated_by": ".github/workflows/publish-zh-fixed-decompiled.yml",
+  "excluded_generated_output": [
+    "rebuild-check/unsigned-rebuilt.apk"
+  ],
+  "source_truth_order": [
+    "apktool/smali for Android byte-level edits",
+    "jadx for Android readability only",
+    "il2cpp-dump plus libil2cpp.so for gameplay/network logic"
+  ]
+}

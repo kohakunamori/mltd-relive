@@ -1,0 +1,437 @@
+/home/runner/work/_temp/client-source-output/apktool/apktool.yml:22:- assets/license_theaterdays.sig
+/home/runner/work/_temp/client-source-output/apktool/res/layout-v21/notification_action_tombstone.xml:3:  xmlns:android="http://schemas.android.com/apk/res/android">
+/home/runner/work/_temp/client-source-output/apktool/res/layout-v21/notification_template_custom_big.xml:3:  xmlns:android="http://schemas.android.com/apk/res/android">
+/home/runner/work/_temp/client-source-output/apktool/res/layout-v21/notification_action.xml:3:  xmlns:android="http://schemas.android.com/apk/res/android">
+/home/runner/work/_temp/client-source-output/apktool/res/layout-v21/notification_template_icon_group.xml:3:  xmlns:android="http://schemas.android.com/apk/res/android">
+/home/runner/work/_temp/client-source-output/apktool/res/xml/filepaths.xml:3:  xmlns:android="http://schemas.android.com/apk/res/android">
+/home/runner/work/_temp/client-source-output/apktool/res/drawable-v21/notification_action_background.xml:3:  xmlns:android="http://schemas.android.com/apk/res/android">
+/home/runner/work/_temp/client-source-output/apktool/res/drawable-v21/notification_action_background.xml:6:          xmlns:android="http://schemas.android.com/apk/res/android">
+/home/runner/work/_temp/client-source-output/apktool/res/layout/notification_action_tombstone.xml:3:  xmlns:android="http://schemas.android.com/apk/res/android">
+/home/runner/work/_temp/client-source-output/apktool/res/layout/notification_template_custom_big.xml:3:  xmlns:android="http://schemas.android.com/apk/res/android">
+/home/runner/work/_temp/client-source-output/apktool/res/layout/notification_template_media.xml:3:  xmlns:android="http://schemas.android.com/apk/res/android">
+/home/runner/work/_temp/client-source-output/apktool/res/layout/notification_template_big_media_narrow.xml:3:  xmlns:android="http://schemas.android.com/apk/res/android">
+/home/runner/work/_temp/client-source-output/apktool/res/layout/notification_action.xml:3:  xmlns:android="http://schemas.android.com/apk/res/android">
+/home/runner/work/_temp/client-source-output/apktool/res/layout/notification_template_lines_media.xml:3:  xmlns:android="http://schemas.android.com/apk/res/android">
+/home/runner/work/_temp/client-source-output/apktool/res/layout/notification_template_big_media_custom.xml:3:  xmlns:android="http://schemas.android.com/apk/res/android">
+/home/runner/work/_temp/client-source-output/apktool/res/layout/notification_template_part_chronometer.xml:3:  xmlns:android="http://schemas.android.com/apk/res/android" />
+/home/runner/work/_temp/client-source-output/apktool/res/layout/notification_template_media_custom.xml:3:  xmlns:android="http://schemas.android.com/apk/res/android">
+/home/runner/work/_temp/client-source-output/apktool/res/layout/notification_media_action.xml:3:  xmlns:android="http://schemas.android.com/apk/res/android" />
+/home/runner/work/_temp/client-source-output/apktool/res/layout/notification_template_part_time.xml:3:  xmlns:android="http://schemas.android.com/apk/res/android" />
+/home/runner/work/_temp/client-source-output/apktool/res/layout/notification_template_big_media.xml:3:  xmlns:android="http://schemas.android.com/apk/res/android">
+/home/runner/work/_temp/client-source-output/apktool/res/layout/notification_media_cancel_action.xml:3:  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" />
+/home/runner/work/_temp/client-source-output/apktool/res/layout/notification_template_icon_group.xml:3:  xmlns:android="http://schemas.android.com/apk/res/android" />
+/home/runner/work/_temp/client-source-output/apktool/res/layout/notification_template_big_media_narrow_custom.xml:3:  xmlns:android="http://schemas.android.com/apk/res/android">
+/home/runner/work/_temp/client-source-output/apktool/res/color/common_google_signin_btn_text_light.xml:3:  xmlns:android="http://schemas.android.com/apk/res/android">
+/home/runner/work/_temp/client-source-output/apktool/res/color/common_google_signin_btn_text_dark.xml:3:  xmlns:android="http://schemas.android.com/apk/res/android">
+/home/runner/work/_temp/client-source-output/apktool/res/color/common_google_signin_btn_tint.xml:3:  xmlns:android="http://schemas.android.com/apk/res/android">
+/home/runner/work/_temp/client-source-output/apktool/res/drawable-watch-v20/common_google_signin_btn_text_dark_normal.xml:3:  xmlns:android="http://schemas.android.com/apk/res/android">
+/home/runner/work/_temp/client-source-output/apktool/res/drawable-watch-v20/common_google_signin_btn_text_disabled.xml:3:  xmlns:android="http://schemas.android.com/apk/res/android">
+/home/runner/work/_temp/client-source-output/apktool/res/drawable-watch-v20/common_google_signin_btn_text_light_normal.xml:3:  xmlns:android="http://schemas.android.com/apk/res/android">
+/home/runner/work/_temp/client-source-output/apktool/res/drawable/common_google_signin_btn_icon_disabled.xml:3:  xmlns:android="http://schemas.android.com/apk/res/android">
+/home/runner/work/_temp/client-source-output/apktool/res/drawable/common_google_signin_btn_text_dark_normal.xml:3:  xmlns:android="http://schemas.android.com/apk/res/android">
+/home/runner/work/_temp/client-source-output/apktool/res/drawable/common_google_signin_btn_icon_light_normal.xml:3:  xmlns:android="http://schemas.android.com/apk/res/android">
+/home/runner/work/_temp/client-source-output/apktool/res/drawable/common_google_signin_btn_text_light_focused.xml:3:  xmlns:android="http://schemas.android.com/apk/res/android">
+/home/runner/work/_temp/client-source-output/apktool/res/drawable/common_google_signin_btn_text_disabled.xml:3:  xmlns:android="http://schemas.android.com/apk/res/android">
+/home/runner/work/_temp/client-source-output/apktool/res/drawable/notification_tile_bg.xml:3:  xmlns:android="http://schemas.android.com/apk/res/android" />
+/home/runner/work/_temp/client-source-output/apktool/res/drawable/common_google_signin_btn_icon_dark.xml:3:  xmlns:android="http://schemas.android.com/apk/res/android">
+/home/runner/work/_temp/client-source-output/apktool/res/drawable/common_google_signin_btn_icon_dark_normal.xml:3:  xmlns:android="http://schemas.android.com/apk/res/android">
+/home/runner/work/_temp/client-source-output/apktool/res/drawable/notification_icon_background.xml:3:  xmlns:android="http://schemas.android.com/apk/res/android">
+/home/runner/work/_temp/client-source-output/apktool/res/drawable/notification_bg_low.xml:3:  xmlns:android="http://schemas.android.com/apk/res/android">
+/home/runner/work/_temp/client-source-output/apktool/res/drawable/common_google_signin_btn_text_light_normal.xml:3:  xmlns:android="http://schemas.android.com/apk/res/android">
+/home/runner/work/_temp/client-source-output/apktool/res/drawable/common_google_signin_btn_text_light.xml:3:  xmlns:android="http://schemas.android.com/apk/res/android">
+/home/runner/work/_temp/client-source-output/apktool/res/drawable/common_google_signin_btn_text_dark.xml:3:  xmlns:android="http://schemas.android.com/apk/res/android">
+/home/runner/work/_temp/client-source-output/apktool/res/drawable/common_google_signin_btn_icon_light_focused.xml:3:  xmlns:android="http://schemas.android.com/apk/res/android">
+/home/runner/work/_temp/client-source-output/apktool/res/drawable/common_google_signin_btn_text_dark_focused.xml:3:  xmlns:android="http://schemas.android.com/apk/res/android">
+/home/runner/work/_temp/client-source-output/apktool/res/drawable/common_google_signin_btn_icon_light.xml:3:  xmlns:android="http://schemas.android.com/apk/res/android">
+/home/runner/work/_temp/client-source-output/apktool/res/drawable/notification_bg.xml:3:  xmlns:android="http://schemas.android.com/apk/res/android">
+/home/runner/work/_temp/client-source-output/apktool/res/drawable/common_google_signin_btn_icon_dark_focused.xml:3:  xmlns:android="http://schemas.android.com/apk/res/android">
+/home/runner/work/_temp/client-source-output/apktool/res/mipmap-anydpi-v26/app_icon_round.xml:3:  xmlns:android="http://schemas.android.com/apk/res/android">
+/home/runner/work/_temp/client-source-output/apktool/res/mipmap-anydpi-v26/app_icon.xml:3:  xmlns:android="http://schemas.android.com/apk/res/android">
+/home/runner/work/_temp/client-source-output/apktool/res/values/strings.xml:24:    <string name="firebase_database_url">https://theaterdays-zh.firebaseio.com</string>
+/home/runner/work/_temp/client-source-output/apktool/res/values/strings.xml:30:    <string name="google_storage_bucket">theaterdays-zh.appspot.com</string>
+/home/runner/work/_temp/client-source-output/apktool/res/values/strings.xml:31:    <string name="project_id">theaterdays-zh</string>
+/home/runner/work/_temp/client-source-output/apktool/original/META-INF/MANIFEST.MF:9:Name: assets/ADX2/theaterdays.acf
+/home/runner/work/_temp/client-source-output/apktool/original/META-INF/MANIFEST.MF:136:Name: assets/license_theaterdays.sig
+/home/runner/work/_temp/client-source-output/apktool/original/META-INF/BNDLTOOL.SF:12:Name: assets/ADX2/theaterdays.acf
+/home/runner/work/_temp/client-source-output/apktool/original/META-INF/BNDLTOOL.SF:139:Name: assets/license_theaterdays.sig
+/home/runner/work/_temp/client-source-output/apktool/smali/extern/okhttp3/CertificatePinner$Pin.smali:48:    const-string v1, "http://"
+/home/runner/work/_temp/client-source-output/apktool/smali/extern/okhttp3/Cache$Entry.smali:503:    const-string v1, "https://"
+/home/runner/work/_temp/client-source-output/apktool/smali/androidx/core/content/res/TypedArrayUtils.smali:15:.field private static final NAMESPACE:Ljava/lang/String; = "http://schemas.android.com/apk/res/android"
+/home/runner/work/_temp/client-source-output/apktool/smali/androidx/core/content/res/TypedArrayUtils.smali:626:    const-string v0, "http://schemas.android.com/apk/res/android"
+/home/runner/work/_temp/client-source-output/apktool/smali/androidx/core/text/util/LinkifyCompat.smali:364:    const-string v2, "http://"
+/home/runner/work/_temp/client-source-output/apktool/smali/androidx/core/text/util/LinkifyCompat.smali:366:    const-string v4, "https://"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/unity/purchasing/googleplay/IabHelper.smali:2063:    const-string p4, "SecurityException querying inventory, update Google Play - https://github.com/googlesamples/android-play-billing/issues/26"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/adjust/sdk/ActivityHandler$4.smali:65:    const-string v1, "Event tracked before first activity resumed.\nIf it was triggered in the Application class, it might timestamp or even send an install long before the user opens the app.\nPlease check https://github.com/adjust/android_sdk#can-i-trigger-an-event-at-application-launch for more information."
+/home/runner/work/_temp/client-source-output/apktool/smali/com/adjust/sdk/Constants.smali:25:.field public static final BASE_URL:Ljava/lang/String; = "https://app.adjust.com"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/adjust/sdk/Constants.smali:49:.field public static final GDPR_URL:Ljava/lang/String; = "https://gdpr.adjust.com"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/adjust/sdk/Constants.smali:111:.field public static final SUBSCRIPTION_URL:Ljava/lang/String; = "https://subscription.adjust.com"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/adjust/sdk/AdjustFactory.smali:770:    const-string v0, "https://app.adjust.com"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/adjust/sdk/AdjustFactory.smali:775:    const-string v0, "https://gdpr.adjust.com"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/adjust/sdk/AdjustFactory.smali:780:    const-string v0, "https://subscription.adjust.com"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/adjust/sdk/network/UrlStrategy.smali:7:.field private static final BASE_URL_CHINA:Ljava/lang/String; = "https://app.adjust.world"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/adjust/sdk/network/UrlStrategy.smali:9:.field private static final BASE_URL_EU:Ljava/lang/String; = "https://app.eu.adjust.com"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/adjust/sdk/network/UrlStrategy.smali:11:.field private static final BASE_URL_INDIA:Ljava/lang/String; = "https://app.adjust.net.in"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/adjust/sdk/network/UrlStrategy.smali:13:.field private static final GDPR_URL_CHINA:Ljava/lang/String; = "https://gdpr.adjust.world"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/adjust/sdk/network/UrlStrategy.smali:15:.field private static final GDPR_URL_EU:Ljava/lang/String; = "https://gdpr.eu.adjust.com"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/adjust/sdk/network/UrlStrategy.smali:17:.field private static final GDPR_URL_INDIA:Ljava/lang/String; = "https://gdpr.adjust.net.in"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/adjust/sdk/network/UrlStrategy.smali:19:.field private static final SUBSCRIPTION_URL_CHINA:Ljava/lang/String; = "https://subscription.adjust.world"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/adjust/sdk/network/UrlStrategy.smali:21:.field private static final SUBSCRIPTION_URL_EU:Ljava/lang/String; = "https://subscription.eu.adjust.com"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/adjust/sdk/network/UrlStrategy.smali:23:.field private static final SUBSCRIPTION_URL_INDIA:Ljava/lang/String; = "https://subscription.adjust.net.in"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/adjust/sdk/network/UrlStrategy.smali:148:    const-string p0, "https://app.adjust.net.in"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/adjust/sdk/network/UrlStrategy.smali:150:    const-string v0, "https://app.adjust.com"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/adjust/sdk/network/UrlStrategy.smali:173:    const-string p0, "https://app.adjust.world"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/adjust/sdk/network/UrlStrategy.smali:175:    const-string v0, "https://app.adjust.com"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/adjust/sdk/network/UrlStrategy.smali:198:    const-string p0, "https://app.eu.adjust.com"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/adjust/sdk/network/UrlStrategy.smali:208:    const-string p0, "https://app.adjust.com"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/adjust/sdk/network/UrlStrategy.smali:210:    const-string v0, "https://app.adjust.net.in"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/adjust/sdk/network/UrlStrategy.smali:212:    const-string v1, "https://app.adjust.world"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/adjust/sdk/network/UrlStrategy.smali:248:    const-string p0, "https://gdpr.adjust.net.in"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/adjust/sdk/network/UrlStrategy.smali:250:    const-string v0, "https://gdpr.adjust.com"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/adjust/sdk/network/UrlStrategy.smali:273:    const-string p0, "https://gdpr.adjust.world"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/adjust/sdk/network/UrlStrategy.smali:275:    const-string v0, "https://gdpr.adjust.com"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/adjust/sdk/network/UrlStrategy.smali:298:    const-string p0, "https://gdpr.eu.adjust.com"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/adjust/sdk/network/UrlStrategy.smali:308:    const-string p0, "https://gdpr.adjust.com"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/adjust/sdk/network/UrlStrategy.smali:310:    const-string v0, "https://gdpr.adjust.net.in"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/adjust/sdk/network/UrlStrategy.smali:312:    const-string v1, "https://gdpr.adjust.world"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/adjust/sdk/network/UrlStrategy.smali:348:    const-string p0, "https://subscription.adjust.net.in"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/adjust/sdk/network/UrlStrategy.smali:350:    const-string v0, "https://subscription.adjust.com"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/adjust/sdk/network/UrlStrategy.smali:373:    const-string p0, "https://subscription.adjust.world"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/adjust/sdk/network/UrlStrategy.smali:375:    const-string v0, "https://subscription.adjust.com"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/adjust/sdk/network/UrlStrategy.smali:398:    const-string p0, "https://subscription.eu.adjust.com"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/adjust/sdk/network/UrlStrategy.smali:408:    const-string p0, "https://subscription.adjust.com"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/adjust/sdk/network/UrlStrategy.smali:410:    const-string v0, "https://subscription.adjust.net.in"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/adjust/sdk/network/UrlStrategy.smali:412:    const-string v1, "https://subscription.adjust.world"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/criware/filesystem/CriFsWebInstaller$WebInstallerTask.smali:836:    const-string v2, "https://"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/criware/filesystem/CriFsWebInstaller$WebInstallerTask.smali:861:    const-string v3, "http://"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/smrtbeat/h.smali:7:.field static final a:Ljava/lang/String; = "https://api.smbeat.jp/api/errors"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/smrtbeat/h.smali:9:.field static final b:Ljava/lang/String; = "https://images.smbeat.jp/api/upload"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/smrtbeat/h.smali:11:.field static final c:Ljava/lang/String; = "https://minidumps.smbeat.jp/api/errors/multi"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/smrtbeat/h.smali:13:.field static final d:Ljava/lang/String; = "https://control.smbeat.jp/api/remote"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/smrtbeat/h.smali:15:.field static final e:Ljava/lang/String; = "https://abort-count.smbeat.jp/api/abort"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/smrtbeat/k$e.smali:111:    const-string v2, "https://minidumps.smbeat.jp/api/errors/multi"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/smrtbeat/k$c.smali:52:    const-string v5, "https://control.smbeat.jp/api/remote"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/smrtbeat/k.smali:917:    const-string v0, "https://api.smbeat.jp/api/errors"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/smrtbeat/k.smali:1818:    const-string v5, "https://abort-count.smbeat.jp/api/abort"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/smrtbeat/k.smali:2050:    const-string v10, "https://minidumps.smbeat.jp/api/errors/multi"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/smrtbeat/k$h.smali:86:    const-string v2, "https://images.smbeat.jp/api/upload"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/smrtbeat/j.smali:92:.field static final a:Ljava/lang/String; = "https://api.smbeat.jp/api/errors"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/smrtbeat/j.smali:96:.field static final b:Ljava/lang/String; = "https://images.smbeat.jp/api/upload"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/smrtbeat/j.smali:100:.field static final c:Ljava/lang/String; = "https://minidumps.smbeat.jp/api/errors/multi"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/smrtbeat/j.smali:104:.field static final d:Ljava/lang/String; = "https://control.smbeat.jp/api/remote"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/smrtbeat/j.smali:108:.field static final e:Ljava/lang/String; = "https://abort-count.smbeat.jp/api/abort"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/google/android/gms/ads/identifier/zza.smali:29:    const-string v1, "https://pagead2.googlesyndication.com/pagead/gen_204?id=gmob-apps"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/google/android/gms/drive/Drive.smali:147:    const-string v1, "https://www.googleapis.com/auth/drive.file"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/google/android/gms/drive/Drive.smali:155:    const-string v1, "https://www.googleapis.com/auth/drive.appdata"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/google/android/gms/drive/Drive.smali:163:    const-string v1, "https://www.googleapis.com/auth/drive"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/google/android/gms/drive/Drive.smali:171:    const-string v1, "https://www.googleapis.com/auth/drive.apps"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/google/android/gms/internal/measurement/zzjp.smali:744:    const-string v2, "https://app-measurement.com/a"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/google/android/gms/internal/measurement/zzz.smali:215:    const-string p2, "Deferring to Google Analytics for Firebase for event data collection. https://goo.gl/J1sWQy"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/google/android/gms/auth/api/signin/internal/zzd.smali:125:    const-string v3, "https://accounts.google.com/o/oauth2/revoke?token="
+/home/runner/work/_temp/client-source-output/apktool/smali/com/google/android/gms/auth/api/signin/GoogleSignInOptions.smali:197:    const-string v1, "https://www.googleapis.com/auth/games_lite"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/google/android/gms/auth/api/signin/GoogleSignInOptions.smali:206:    const-string v1, "https://www.googleapis.com/auth/games"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/google/android/gms/auth/api/credentials/IdentityProviders.smali:6:.field public static final FACEBOOK:Ljava/lang/String; = "https://www.facebook.com"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/google/android/gms/auth/api/credentials/IdentityProviders.smali:8:.field public static final GOOGLE:Ljava/lang/String; = "https://accounts.google.com"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/google/android/gms/auth/api/credentials/IdentityProviders.smali:10:.field public static final LINKEDIN:Ljava/lang/String; = "https://www.linkedin.com"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/google/android/gms/auth/api/credentials/IdentityProviders.smali:12:.field public static final MICROSOFT:Ljava/lang/String; = "https://login.live.com"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/google/android/gms/auth/api/credentials/IdentityProviders.smali:14:.field public static final PAYPAL:Ljava/lang/String; = "https://www.paypal.com"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/google/android/gms/auth/api/credentials/IdentityProviders.smali:16:.field public static final TWITTER:Ljava/lang/String; = "https://twitter.com"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/google/android/gms/auth/api/credentials/IdentityProviders.smali:18:.field public static final YAHOO:Ljava/lang/String; = "https://login.yahoo.com"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/google/android/gms/auth/api/credentials/IdentityProviders.smali:56:    const-string p0, "https://accounts.google.com"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/google/android/gms/auth/api/credentials/IdentityProviders.smali:72:    const-string p0, "https://www.facebook.com"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/google/android/gms/common/internal/zzg.smali:15:    const-string v0, "https://plus.google.com/"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/google/android/gms/common/FirstPartyScopes.smali:14:.field public static final GAMES_1P:Ljava/lang/String; = "https://www.googleapis.com/auth/games.firstparty"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/google/android/gms/common/Scopes.smali:6:.field public static final APP_STATE:Ljava/lang/String; = "https://www.googleapis.com/auth/appstate"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/google/android/gms/common/Scopes.smali:8:.field public static final CLOUD_SAVE:Ljava/lang/String; = "https://www.googleapis.com/auth/datastoremobile"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/google/android/gms/common/Scopes.smali:10:.field public static final DRIVE_APPFOLDER:Ljava/lang/String; = "https://www.googleapis.com/auth/drive.appdata"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/google/android/gms/common/Scopes.smali:12:.field public static final DRIVE_APPS:Ljava/lang/String; = "https://www.googleapis.com/auth/drive.apps"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/google/android/gms/common/Scopes.smali:17:.field public static final DRIVE_FILE:Ljava/lang/String; = "https://www.googleapis.com/auth/drive.file"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/google/android/gms/common/Scopes.smali:19:.field public static final DRIVE_FULL:Ljava/lang/String; = "https://www.googleapis.com/auth/drive"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/google/android/gms/common/Scopes.smali:26:.field public static final FITNESS_ACTIVITY_READ:Ljava/lang/String; = "https://www.googleapis.com/auth/fitness.activity.read"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/google/android/gms/common/Scopes.smali:28:.field public static final FITNESS_ACTIVITY_READ_WRITE:Ljava/lang/String; = "https://www.googleapis.com/auth/fitness.activity.write"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/google/android/gms/common/Scopes.smali:30:.field public static final FITNESS_BLOOD_GLUCOSE_READ:Ljava/lang/String; = "https://www.googleapis.com/auth/fitness.blood_glucose.read"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/google/android/gms/common/Scopes.smali:35:.field public static final FITNESS_BLOOD_GLUCOSE_READ_WRITE:Ljava/lang/String; = "https://www.googleapis.com/auth/fitness.blood_glucose.write"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/google/android/gms/common/Scopes.smali:40:.field public static final FITNESS_BLOOD_PRESSURE_READ:Ljava/lang/String; = "https://www.googleapis.com/auth/fitness.blood_pressure.read"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/google/android/gms/common/Scopes.smali:45:.field public static final FITNESS_BLOOD_PRESSURE_READ_WRITE:Ljava/lang/String; = "https://www.googleapis.com/auth/fitness.blood_pressure.write"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/google/android/gms/common/Scopes.smali:50:.field public static final FITNESS_BODY_READ:Ljava/lang/String; = "https://www.googleapis.com/auth/fitness.body.read"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/google/android/gms/common/Scopes.smali:52:.field public static final FITNESS_BODY_READ_WRITE:Ljava/lang/String; = "https://www.googleapis.com/auth/fitness.body.write"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/google/android/gms/common/Scopes.smali:54:.field public static final FITNESS_BODY_TEMPERATURE_READ:Ljava/lang/String; = "https://www.googleapis.com/auth/fitness.body_temperature.read"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/google/android/gms/common/Scopes.smali:59:.field public static final FITNESS_BODY_TEMPERATURE_READ_WRITE:Ljava/lang/String; = "https://www.googleapis.com/auth/fitness.body_temperature.write"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/google/android/gms/common/Scopes.smali:64:.field public static final FITNESS_LOCATION_READ:Ljava/lang/String; = "https://www.googleapis.com/auth/fitness.location.read"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/google/android/gms/common/Scopes.smali:66:.field public static final FITNESS_LOCATION_READ_WRITE:Ljava/lang/String; = "https://www.googleapis.com/auth/fitness.location.write"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/google/android/gms/common/Scopes.smali:68:.field public static final FITNESS_NUTRITION_READ:Ljava/lang/String; = "https://www.googleapis.com/auth/fitness.nutrition.read"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/google/android/gms/common/Scopes.smali:70:.field public static final FITNESS_NUTRITION_READ_WRITE:Ljava/lang/String; = "https://www.googleapis.com/auth/fitness.nutrition.write"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/google/android/gms/common/Scopes.smali:72:.field public static final FITNESS_OXYGEN_SATURATION_READ:Ljava/lang/String; = "https://www.googleapis.com/auth/fitness.oxygen_saturation.read"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/google/android/gms/common/Scopes.smali:77:.field public static final FITNESS_OXYGEN_SATURATION_READ_WRITE:Ljava/lang/String; = "https://www.googleapis.com/auth/fitness.oxygen_saturation.write"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/google/android/gms/common/Scopes.smali:82:.field public static final FITNESS_REPRODUCTIVE_HEALTH_READ:Ljava/lang/String; = "https://www.googleapis.com/auth/fitness.reproductive_health.read"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/google/android/gms/common/Scopes.smali:87:.field public static final FITNESS_REPRODUCTIVE_HEALTH_READ_WRITE:Ljava/lang/String; = "https://www.googleapis.com/auth/fitness.reproductive_health.write"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/google/android/gms/common/Scopes.smali:92:.field public static final GAMES:Ljava/lang/String; = "https://www.googleapis.com/auth/games"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/google/android/gms/common/Scopes.smali:94:.field public static final GAMES_LITE:Ljava/lang/String; = "https://www.googleapis.com/auth/games_lite"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/google/android/gms/common/Scopes.smali:104:.field public static final PLUS_LOGIN:Ljava/lang/String; = "https://www.googleapis.com/auth/plus.login"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/google/android/gms/common/Scopes.smali:109:.field public static final PLUS_ME:Ljava/lang/String; = "https://www.googleapis.com/auth/plus.me"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/google/android/gms/measurement/internal/zzjs.smali:1318:    const-string v0, "https://www.google.com"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/google/android/gms/measurement/internal/zzjs.smali:2947:    const-string v0, "https://www.googleadservices.com/pagead/conversion/app/deeplink?id_type=adid&sdk_version=%s&rdid=%s&bundleid=%s"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/google/android/gms/measurement/internal/zzjs.smali:5066:    const-string v0, "Invalid google_app_id. Firebase Analytics disabled. See https://goo.gl/NAOOOI. provided id"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/google/android/gms/measurement/internal/zzjs.smali:5140:    const-string p2, "Missing google_app_id. Firebase Analytics disabled. See https://goo.gl/NAOOOI"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/google/android/gms/measurement/internal/zzhj.smali:243:    const-string v5, "https://google.com/search?"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/google/android/gms/measurement/internal/zzak.smali:1324:    const-string v6, "https://app-measurement.com/a"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/google/android/gms/games/internal/zze.smali:997:    const-string v5, "https://www.googleapis.com/auth/games"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/google/android/gms/games/internal/zze.smali:1001:    const-string v3, "https://www.googleapis.com/auth/games.firstparty"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/google/android/gms/games/internal/zze.smali:1031:    const-string v6, "https://www.googleapis.com/auth/games_lite"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/google/android/gms/games/Games.smali:199:    const-string v1, "https://www.googleapis.com/auth/games"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/google/android/gms/games/Games.smali:208:    const-string v1, "https://www.googleapis.com/auth/games_lite"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/google/android/gms/games/Games.smali:230:    const-string v1, "https://www.googleapis.com/auth/games.firstparty"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays/player/R$styleable.smali:1:.class public final Lcom/bandainamcoent/imas_millionlive_theaterdays/player/R$styleable;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays/player/R$styleable.smali:8:    value = Lcom/bandainamcoent/imas_millionlive_theaterdays/player/R;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays/player/R$styleable.smali:128:    sput-object v0, Lcom/bandainamcoent/imas_millionlive_theaterdays/player/R$styleable;->ColorStateListItem:[I
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays/player/R$styleable.smali:137:    sput-object v1, Lcom/bandainamcoent/imas_millionlive_theaterdays/player/R$styleable;->CoordinatorLayout:[I
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays/player/R$styleable.smali:146:    sput-object v1, Lcom/bandainamcoent/imas_millionlive_theaterdays/player/R$styleable;->CoordinatorLayout_Layout:[I
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays/player/R$styleable.smali:155:    sput-object v1, Lcom/bandainamcoent/imas_millionlive_theaterdays/player/R$styleable;->FontFamily:[I
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays/player/R$styleable.smali:164:    sput-object v1, Lcom/bandainamcoent/imas_millionlive_theaterdays/player/R$styleable;->FontFamilyFont:[I
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays/player/R$styleable.smali:173:    sput-object v1, Lcom/bandainamcoent/imas_millionlive_theaterdays/player/R$styleable;->GradientColor:[I
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays/player/R$styleable.smali:180:    sput-object v0, Lcom/bandainamcoent/imas_millionlive_theaterdays/player/R$styleable;->GradientColorItem:[I
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays/player/OverrideActivity.smali:1:.class public Lcom/bandainamcoent/imas_millionlive_theaterdays/player/OverrideActivity;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays/player/OverrideActivity.smali:34:    invoke-virtual {p0}, Lcom/bandainamcoent/imas_millionlive_theaterdays/player/OverrideActivity;->getWindow()Landroid/view/Window;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays/player/OverrideActivity.smali:43:    new-instance p1, Lcom/bandainamcoent/imas_millionlive_theaterdays/player/OverridePlayer;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays/player/OverrideActivity.smali:45:    invoke-direct {p1, p0}, Lcom/bandainamcoent/imas_millionlive_theaterdays/player/OverridePlayer;-><init>(Landroid/content/Context;)V
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays/player/OverrideActivity.smali:47:    iput-object p1, p0, Lcom/bandainamcoent/imas_millionlive_theaterdays/player/OverrideActivity;->mUnityPlayer:Lcom/unity3d/player/UnityPlayer;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays/player/OverrideActivity.smali:50:    iget-object p1, p0, Lcom/bandainamcoent/imas_millionlive_theaterdays/player/OverrideActivity;->mUnityPlayer:Lcom/unity3d/player/UnityPlayer;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays/player/OverrideActivity.smali:52:    invoke-virtual {p0, p1}, Lcom/bandainamcoent/imas_millionlive_theaterdays/player/OverrideActivity;->setContentView(Landroid/view/View;)V
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays/player/OverrideActivity.smali:55:    iget-object p1, p0, Lcom/bandainamcoent/imas_millionlive_theaterdays/player/OverrideActivity;->mUnityPlayer:Lcom/unity3d/player/UnityPlayer;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays/player/R$id.smali:1:.class public final Lcom/bandainamcoent/imas_millionlive_theaterdays/player/R$id;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays/player/R$id.smali:8:    value = Lcom/bandainamcoent/imas_millionlive_theaterdays/player/R;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays/player/R$string.smali:1:.class public final Lcom/bandainamcoent/imas_millionlive_theaterdays/player/R$string;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays/player/R$string.smali:8:    value = Lcom/bandainamcoent/imas_millionlive_theaterdays/player/R;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays/player/R$attr.smali:1:.class public final Lcom/bandainamcoent/imas_millionlive_theaterdays/player/R$attr;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays/player/R$attr.smali:8:    value = Lcom/bandainamcoent/imas_millionlive_theaterdays/player/R;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays/player/R$drawable.smali:1:.class public final Lcom/bandainamcoent/imas_millionlive_theaterdays/player/R$drawable;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays/player/R$drawable.smali:8:    value = Lcom/bandainamcoent/imas_millionlive_theaterdays/player/R;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays/player/R.smali:1:.class public final Lcom/bandainamcoent/imas_millionlive_theaterdays/player/R;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays/player/R.smali:9:        Lcom/bandainamcoent/imas_millionlive_theaterdays/player/R$styleable;,
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays/player/R.smali:10:        Lcom/bandainamcoent/imas_millionlive_theaterdays/player/R$style;,
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays/player/R.smali:11:        Lcom/bandainamcoent/imas_millionlive_theaterdays/player/R$string;,
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays/player/R.smali:12:        Lcom/bandainamcoent/imas_millionlive_theaterdays/player/R$layout;,
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays/player/R.smali:13:        Lcom/bandainamcoent/imas_millionlive_theaterdays/player/R$integer;,
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays/player/R.smali:14:        Lcom/bandainamcoent/imas_millionlive_theaterdays/player/R$id;,
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays/player/R.smali:15:        Lcom/bandainamcoent/imas_millionlive_theaterdays/player/R$drawable;,
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays/player/R.smali:16:        Lcom/bandainamcoent/imas_millionlive_theaterdays/player/R$dimen;,
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays/player/R.smali:17:        Lcom/bandainamcoent/imas_millionlive_theaterdays/player/R$color;,
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays/player/R.smali:18:        Lcom/bandainamcoent/imas_millionlive_theaterdays/player/R$attr;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays/player/OverridePlayer.smali:1:.class public Lcom/bandainamcoent/imas_millionlive_theaterdays/player/OverridePlayer;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays/player/R$color.smali:1:.class public final Lcom/bandainamcoent/imas_millionlive_theaterdays/player/R$color;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays/player/R$color.smali:8:    value = Lcom/bandainamcoent/imas_millionlive_theaterdays/player/R;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays/player/R$dimen.smali:1:.class public final Lcom/bandainamcoent/imas_millionlive_theaterdays/player/R$dimen;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays/player/R$dimen.smali:8:    value = Lcom/bandainamcoent/imas_millionlive_theaterdays/player/R;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays/player/R$integer.smali:1:.class public final Lcom/bandainamcoent/imas_millionlive_theaterdays/player/R$integer;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays/player/R$integer.smali:8:    value = Lcom/bandainamcoent/imas_millionlive_theaterdays/player/R;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays/player/BuildConfig.smali:1:.class public final Lcom/bandainamcoent/imas_millionlive_theaterdays/player/BuildConfig;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays/player/BuildConfig.smali:7:.field public static final APPLICATION_ID:Ljava/lang/String; = "com.bandainamcoent.imas_millionlive_theaterdays.player"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays/player/R$style.smali:1:.class public final Lcom/bandainamcoent/imas_millionlive_theaterdays/player/R$style;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays/player/R$style.smali:8:    value = Lcom/bandainamcoent/imas_millionlive_theaterdays/player/R;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays/player/R$layout.smali:1:.class public final Lcom/bandainamcoent/imas_millionlive_theaterdays/player/R$layout;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays/player/R$layout.smali:8:    value = Lcom/bandainamcoent/imas_millionlive_theaterdays/player/R;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/R$styleable.smali:1:.class public final Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/R$styleable;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/R$styleable.smali:8:    value = Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/R;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/R$styleable.smali:144:    sput-object v1, Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/R$styleable;->ColorStateListItem:[I
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/R$styleable.smali:153:    sput-object v2, Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/R$styleable;->CoordinatorLayout:[I
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/R$styleable.smali:162:    sput-object v2, Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/R$styleable;->CoordinatorLayout_Layout:[I
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/R$styleable.smali:171:    sput-object v2, Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/R$styleable;->FontFamily:[I
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/R$styleable.smali:180:    sput-object v2, Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/R$styleable;->FontFamilyFont:[I
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/R$styleable.smali:189:    sput-object v2, Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/R$styleable;->GradientColor:[I
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/R$styleable.smali:196:    sput-object v1, Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/R$styleable;->GradientColorItem:[I
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/R$styleable.smali:203:    sput-object v1, Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/R$styleable;->LoadingImageView:[I
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/R$styleable.smali:210:    sput-object v0, Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/R$styleable;->SignInButton:[I
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/R$id.smali:1:.class public final Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/R$id;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/R$id.smali:8:    value = Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/R;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/R$string.smali:1:.class public final Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/R$string;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/R$string.smali:8:    value = Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/R;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/R$mipmap.smali:1:.class public final Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/R$mipmap;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/R$mipmap.smali:8:    value = Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/R;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/R$attr.smali:1:.class public final Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/R$attr;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/R$attr.smali:8:    value = Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/R;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/R$drawable.smali:1:.class public final Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/R$drawable;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/R$drawable.smali:8:    value = Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/R;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/R.smali:1:.class public final Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/R;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/R.smali:9:        Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/R$xml;,
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/R.smali:10:        Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/R$styleable;,
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/R.smali:11:        Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/R$style;,
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/R.smali:12:        Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/R$string;,
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/R.smali:13:        Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/R$mipmap;,
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/R.smali:14:        Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/R$layout;,
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/R.smali:15:        Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/R$integer;,
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/R.smali:16:        Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/R$id;,
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/R.smali:17:        Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/R$drawable;,
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/R.smali:18:        Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/R$dimen;,
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/R.smali:19:        Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/R$color;,
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/R.smali:20:        Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/R$attr;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/resources/R$drawable.smali:1:.class public final Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/resources/R$drawable;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/resources/R$drawable.smali:8:    value = Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/resources/R;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/resources/R.smali:1:.class public final Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/resources/R;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/resources/R.smali:9:        Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/resources/R$xml;,
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/resources/R.smali:10:        Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/resources/R$style;,
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/resources/R.smali:11:        Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/resources/R$drawable;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/resources/BuildConfig.smali:1:.class public final Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/resources/BuildConfig;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/resources/BuildConfig.smali:7:.field public static final APPLICATION_ID:Ljava/lang/String; = "com.bandainamcoent.imas_millionlive_theaterdays_ch.resources"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/resources/R$xml.smali:1:.class public final Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/resources/R$xml;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/resources/R$xml.smali:8:    value = Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/resources/R;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/resources/R$style.smali:1:.class public final Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/resources/R$style;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/resources/R$style.smali:8:    value = Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/resources/R;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/R$color.smali:1:.class public final Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/R$color;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/R$color.smali:8:    value = Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/R;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/Manifest.smali:1:.class public final Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/Manifest;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/Manifest.smali:9:        Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/Manifest$permission;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/R$dimen.smali:1:.class public final Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/R$dimen;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/R$dimen.smali:8:    value = Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/R;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/R$integer.smali:1:.class public final Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/R$integer;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/R$integer.smali:8:    value = Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/R;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/Manifest$permission.smali:1:.class public final Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/Manifest$permission;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/Manifest$permission.smali:8:    value = Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/Manifest;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/Manifest$permission.smali:18:.field public static final C2D_MESSAGE:Ljava/lang/String; = "com.bandainamcoent.imas_millionlive_theaterdays_ch.permission.C2D_MESSAGE"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/BuildConfig.smali:1:.class public final Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/BuildConfig;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/BuildConfig.smali:7:.field public static final APPLICATION_ID:Ljava/lang/String; = "com.bandainamcoent.imas_millionlive_theaterdays_ch"
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/R$xml.smali:1:.class public final Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/R$xml;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/R$xml.smali:8:    value = Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/R;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/R$style.smali:1:.class public final Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/R$style;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/R$style.smali:8:    value = Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/R;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/R$layout.smali:1:.class public final Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/R$layout;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/bandainamcoent/imas_millionlive_theaterdays_ch/R$layout.smali:8:    value = Lcom/bandainamcoent/imas_millionlive_theaterdays_ch/R;
+/home/runner/work/_temp/client-source-output/apktool/smali/com/nbsi/nedev/webviewobject/WebviewObjectWebViewClient.smali:863:    const-string v0, "https://play.google.com/store/apps"
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:1:;;; Provided courtesy of http://browsers.garykeith.com
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:87:[* (compatible; Googlebot-Mobile/2.1; *http://www.google.com/bot.html)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:98:[AdsBot-Google (?http://www.google.com/adsbot.html)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:114:[Google OpenSocial agent (http://www.google.com/feedfetcher.html)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:139:[Googlebot/2.1 (?http://www.google.com/bot.html)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:143:[Googlebot/2.1 (?http://www.googlebot.com/bot.html)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:173:[Mozilla/5.0 (compatible; Googlebot/2.1; ?http://www.google.com/bot.html)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:216:[Mozilla/5.0 (compatible; Yahoo! DE Slurp; http://help.yahoo.com/help/us/ysearch/slurp)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:220:[Mozilla/5.0 (compatible; Yahoo! Slurp China; http://misc.yahoo.com.cn/help.html)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:224:[Mozilla/5.0 (compatible; Yahoo! Slurp/3.0; http://help.yahoo.com/help/us/ysearch/slurp)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:231:[Mozilla/5.0 (compatible; Yahoo! Slurp; http://help.yahoo.com/help/us/ysearch/slurp)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:242:[Mozilla/5.0 (Slurp/cat; slurp@inktomi.com; http://www.inktomi.com/slurp.html)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:246:[Mozilla/5.0 (Slurp/si; slurp@inktomi.com; http://www.inktomi.com/slurp.html)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:350:[adidxbot/1.1 (?http://search.msn.com/msnbot.htm)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:411:[msnbot-webmaster/1.0 (*http://search.msn.com/msnbot.htm)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:440:[renlifangbot/1.0 (?http://search.msn.com/msnbot.htm)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:539:[Mozilla/4.0 (compatible; BOTW Feed Grabber; *http://botw.org)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:545:[Mozilla/4.0 (compatible; BOTW Spider; *http://botw.org)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:601:[DotBot/* (http://www.dotnetdotcom.org/*)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:604:[Mozilla/5.0 (compatible; DotBot/*; http://www.dotnetdotcom.org/*)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:624:[Speedy?Spider?(http://www.entireweb.com*)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:638:[envolk/* (?http://www.envolk.com/envolk*)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:641:[envolk?ITS?spider/* (?http://www.envolk.com/envolk*)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:996:[Best Whois (http://www.bestwhois.net/)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:1050:[ddetailsbot (http://www.displaydetails.com)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:1054:[DomainCrawler/1.0 (info@domaincrawler.com; http://www.domaincrawler.com/domains/view/*)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:1116:[http://hilfe.acont.de/bot.html ACONTBOT]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:1168:[MapoftheInternet.com?(?http://MapoftheInternet.com)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:1184:[Metaspinner/0.01 (Metaspinner; http://www.meta-spinner.de/; support@meta-spinner.de/)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:1271:[Mozilla/5.0 (*http://gnomit.com/) Gecko/* Gnomit/1.0]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:1286:[Mozilla/5.0 (compatible; Diffbot/0.1;  http://www.diffbot.com)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:1294:[mozilla/5.0 (compatible; genevabot  http://www.healthdash.com)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:1298:[Mozilla/5.0 (compatible; JadynAveBot; *http://www.jadynave.com/robot*]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:1303:[Mozilla/5.0 (compatible; Kyluka crawl; http://www.kyluka.com/crawl.html; crawl@kyluka.com)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:1307:[Mozilla/5.0 (compatible; MJ12bot/v1.2.*; http://www.majestic12.co.uk/bot.php*)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:1314:[Mozilla/5.0 (compatible; MSIE 7.0 ?http://www.europarchive.org)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:1323:[Mozilla/5.0 (compatible; Twingly Recon; http://www.twingly.com/)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:1327:[Mozilla/5.0 (compatible; unwrapbot/2.*;  http://www.unwrap.jp*)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:1394:[OpenTaggerBot (http://www.opentagger.com/opentaggerbot.htm)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:1417:[Patwebbot (http://www.herz-power.de/technik.html)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:1469:[RixBot (http://babelserver.org/rix)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:1473:[Rome Client (http://tinyurl.com/64t5n) Ver: 0.*]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:1591:[Tecomi Bot (http://www.tecomi.com/bot.htm)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:1705:[YooW!/* (?http://www.yoow.eu)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:1755:[AnswerBus (http://www.answerbus.com/)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:1782:[Busiversebot/v1.0 (http://www.busiverse.com/bot.php)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:1787:[CatchBot/*;  http://www.catchbot.com]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:1794:[CipinetBot (http://www.cipinet.com/bot.html)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:1802:[compatible; Mozilla 4.0; MSIE 5.5; (SqwidgeBot v1.01 - http://www.sqwidge.com/bot/)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:1864:[GOFORITBOT (?http://www.goforit.com/about/?)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:1885:[HolmesBot (http://holmes.ge)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:1910:[InfociousBot (?http://corp.infocious.com/tech_crawler.php)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:1923:[Knight/0.? (Zook Knight; http://knight.zook.in/; knight@zook.in)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:1977:[Mozilla/4.0 (compatible; http://search.thunderstone.com/texis/websearch/about.html)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:1982:[Mozilla/4.0 (compatible; MSIE *; Windows NT; Girafabot; girafabot at girafa dot com; http://www.girafa.com)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:1995:[Mozilla/4.7 (compatible; WhizBang; http://www.whizbang.com/crawler)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:2004:[Mozilla/5.0 (compatible; ActiveTouristBot*; http://www.activetourist.com)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:2022:[Mozilla/5.0 (compatible; DBLBot/1.0; ?http://www.dontbuylists.com/)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:2033:[Mozilla/5.0 (compatible; Lipperhey Spider; http://www.lipperhey.com/)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:2037:[Mozilla/5.0 (compatible; MojeekBot/*; http://www.mojeek.com/bot.html)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:2058:[Mozilla/5.0 (compatible; ScoutJet;  *http://www.scoutjet.com/)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:2062:[Mozilla/5.0 (compatible; Scrubby/*;  http://www.scrubtheweb.com/abs/meta-check.html)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:2067:[Mozilla/5.0 (compatible; YoudaoBot/1.*; http://www.youdao.com/help/webmaster/spider/*)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:2112:[Pagebull http://www.pagebull.com/]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:2156:[SiteSpider  (http://www.SiteSpider.com/)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:2234:[voyager/2.0 (http://www.kosmix.com/html/crawler.html)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:2875:[Bloglines/* (http://www.bloglines.com*)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:2895:[kinjabot (http://www.kinja.com; *)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:2976:[FeedOnFeeds/0.1.* ( http://minutillo.com/steve/feedonfeeds/)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:3015:[Liferea/1.5* (Linux; *; http://liferea.sf.net/)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:3020:[livedoor FeedFetcher/0.0* (http://reader.livedoor.com/;*)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:3036:[Mozilla/5.0 (*; Rojo *; http://www.rojo.com/corporate/help/agg; *)*]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:3040:[Mozilla/5.0 (*aggregator:TailRank; http://tailrank.com/robot)*]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:3048:[Mozilla/5.0 (compatible; Newz Crawler *; http://www.newzcrawler.com/?)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:3123:[Strategic Board Bot (?http://www.strategicboard.com)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:3136:[Tumblr/* RSS syndication ( http://www.tumblr.com/) (support@tumblr.com)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:3166:[CC Metadata Scaper http://wiki.creativecommons.org/Metadata_Scraper]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:3174:[Mozilla/5.0 http://www.inclue.com; graeme@inclue.com]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:3178:[Runnk online rss reader : http://www.runnk.com/ : RSS favorites : RSS ranking : RSS aggregator*]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:3207:[(HTML Validator http://www.searchengineworld.com/validator/)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:3289:[HTML2JPG Blackbox, http://www.html2jpg.com]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:3317:[rssImagesBot/0.1 (*http://herbert.groot.jebbink.nl/?app=rssImages)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:3325:[WebImages * (?http://herbert.groot.jebbink.nl/?app=WebImages?)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:3343:[!Susie (http://www.sync2it.com/susie)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:3416:[DocWeb Link Crawler (http://doc.php.net)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:3494:[Mozilla/* (compatible; linktiger/*; *http://www.linktiger.com*)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:3503:[Mozilla/4.0 (compatible; Link Utility; http://net-promoter.com)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:3541:[online link validator (http://www.dead-links.com/)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:3563:[SafariBookmarkChecker*(?http://www.coriolis.ch/)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:3570:[Simpy/* (Simpy; http://www.simpy.com/?ref=bot; feedback at simpy dot com)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:3578:[Susie (http://www.sync2it.com/bms/susie.php]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:3613:[Live (http://www.live.com/)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:3923:[http://Anonymouse.org/*]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:4002:[annotate_google; http://ponderer.org/*]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:4006:[CMS crawler (?http://buytaert.net/crawler/)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:4009:[e-SocietyRobot(http://www.yama.info.waseda.ac.jp/~yamana/es/)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:4025:[http://buytaert.net/crawler]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:4028:[inetbot/* (?http://www.inetbot.com/bot.html)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:4051:[Mozilla/5.0 (compatible; Webscan v0.*;  http://otc.dyndns.org/webscan/)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:4338:[Kapere (http://www.kapere.com)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:4649:[Kevin http://*]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:4736:[BookmarkBase(2/;http://bookmarkbase.com)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:4740:[Cocoal.icio.us/1.0 (v43) (Mac OS X; http://www.scifihifi.com/cocoalicious)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:4791:[Automated Browscap.ini Updater. To report issues contact us at http://www.skycomp.ca]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:4795:[BMC Link Validator (http://www.briansmodelcars.com/links/)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:4809:[Browser Capabilities Project (http://browsers.garykeith.com; http://browsers.garykeith.com/sitemail/contact-me.asp)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:4838:[Subtext Version 1.9* - http://subtextproject.com/ (Microsoft Windows NT 5.2.*)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:4914:[FeedHub FeedDiscovery/1.0 (http://www.feedhub.com)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:4921:[FeedHub FeedFetcher/1.0 (http://www.feedhub.com)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:4928:[FeedHub MetaDataFetcher/1.0 (http://www.feedhub.com)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/browscap.ini:16487:[Advanced Browser (http://www.avantbrowser.com)]
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/2.0/DefaultWsdlHelpGenerator.aspx:8:// (C) 2003 Ximian, Inc.  http://www.ximian.com
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/2.0/DefaultWsdlHelpGenerator.aspx:792:		static readonly XmlQualifiedName arrayType = new XmlQualifiedName ("Array","http://schemas.xmlsoap.org/soap/encoding/");
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/2.0/DefaultWsdlHelpGenerator.aspx:793:		static readonly XmlQualifiedName arrayTypeRefName = new XmlQualifiedName ("arrayType","http://schemas.xmlsoap.org/soap/encoding/");
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/2.0/DefaultWsdlHelpGenerator.aspx:794:		const string SoapEnvelopeNamespace = "http://schemas.xmlsoap.org/soap/envelope/";
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/2.0/DefaultWsdlHelpGenerator.aspx:795:		const string WsdlNamespace = "http://schemas.xmlsoap.org/wsdl/";
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/2.0/DefaultWsdlHelpGenerator.aspx:796:		const string SoapEncodingNamespace = "http://schemas.xmlsoap.org/soap/encoding/";
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/4.5/DefaultWsdlHelpGenerator.aspx:8:// (C) 2003 Ximian, Inc.  http://www.ximian.com
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/4.5/DefaultWsdlHelpGenerator.aspx:792:		static readonly XmlQualifiedName arrayType = new XmlQualifiedName ("Array","http://schemas.xmlsoap.org/soap/encoding/");
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/4.5/DefaultWsdlHelpGenerator.aspx:793:		static readonly XmlQualifiedName arrayTypeRefName = new XmlQualifiedName ("arrayType","http://schemas.xmlsoap.org/soap/encoding/");
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/4.5/DefaultWsdlHelpGenerator.aspx:794:		const string SoapEnvelopeNamespace = "http://schemas.xmlsoap.org/soap/envelope/";
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/4.5/DefaultWsdlHelpGenerator.aspx:795:		const string WsdlNamespace = "http://schemas.xmlsoap.org/wsdl/";
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/4.5/DefaultWsdlHelpGenerator.aspx:796:		const string SoapEncodingNamespace = "http://schemas.xmlsoap.org/soap/encoding/";
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/4.0/DefaultWsdlHelpGenerator.aspx:8:// (C) 2003 Ximian, Inc.  http://www.ximian.com
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/4.0/DefaultWsdlHelpGenerator.aspx:792:		static readonly XmlQualifiedName arrayType = new XmlQualifiedName ("Array","http://schemas.xmlsoap.org/soap/encoding/");
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/4.0/DefaultWsdlHelpGenerator.aspx:793:		static readonly XmlQualifiedName arrayTypeRefName = new XmlQualifiedName ("arrayType","http://schemas.xmlsoap.org/soap/encoding/");
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/4.0/DefaultWsdlHelpGenerator.aspx:794:		const string SoapEnvelopeNamespace = "http://schemas.xmlsoap.org/soap/envelope/";
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/4.0/DefaultWsdlHelpGenerator.aspx:795:		const string WsdlNamespace = "http://schemas.xmlsoap.org/wsdl/";
+/home/runner/work/_temp/client-source-output/apktool/assets/bin/Data/Managed/etc/mono/4.0/DefaultWsdlHelpGenerator.aspx:796:		const string SoapEncodingNamespace = "http://schemas.xmlsoap.org/soap/encoding/";
+/home/runner/work/_temp/client-source-output/apktool/assets/google-services-desktop.json:4:    "firebase_url": "https://theaterdays-zh.firebaseio.com",
+/home/runner/work/_temp/client-source-output/apktool/assets/google-services-desktop.json:5:    "project_id": "theaterdays-zh",
+/home/runner/work/_temp/client-source-output/apktool/assets/google-services-desktop.json:6:    "storage_bucket": "theaterdays-zh.appspot.com"
+/home/runner/work/_temp/client-source-output/apktool/assets/google-services-desktop.json:13:          "package_name": "com.bandainamcoent.imas_millionlive_theaterdays_ch"
+/home/runner/work/_temp/client-source-output/apktool/assets/google-services-desktop.json:38:                "bundle_id": "jp.co.bandainamcoent.BNEI0364"
+/home/runner/work/_temp/client-source-output/apktool/AndroidManifest.xml:2:<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:compileSdkVersion="23" android:compileSdkVersionCodename="6.0-2438415" android:installLocation="preferExternal" package="com.bandainamcoent.imas_millionlive_theaterdays_ch.local" platformBuildVersionCode="21000" platformBuildVersionName="2.1.000">
+/home/runner/work/_temp/client-source-output/apktool/AndroidManifest.xml:23:        <activity android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|density|layoutDirection|fontScale" android:exported="true" android:hardwareAccelerated="false" android:label="@string/app_name" android:launchMode="singleTask" android:name="com.bandainamcoent.imas_millionlive_theaterdays.player.OverrideActivity" android:resizeableActivity="true" android:screenOrientation="sensorLandscape">
+/home/runner/work/_temp/client-source-output/apktool/AndroidManifest.xml:32:                <data android:scheme="theaterdays"/>
+/home/runner/work/_temp/client-source-output/apktool/AndroidManifest.xml:62:        <provider android:authorities="com.bandainamcoent.imas_millionlive_theaterdays_ch.local.firebaseinitprovider" android:exported="false" android:initOrder="100" android:name="com.google.firebase.provider.FirebaseInitProvider"/>
+/home/runner/work/_temp/client-source-output/apktool/AndroidManifest.xml:88:        <provider android:authorities="com.bandainamcoent.imas_millionlive_theaterdays_ch.local.fileprovider" android:exported="false" android:grantUriPermissions="true" android:name="androidx.core.content.FileProvider">
+/home/runner/work/_temp/client-source-output/apktool/AndroidManifest.xml:95:        <meta-data android:name="com.android.stamp.source" android:value="https://play.google.com/store"/>

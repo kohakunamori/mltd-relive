@@ -1,0 +1,17 @@
+package com.google.android.gms.common.api.internal;
+
+import android.app.Activity;
+import com.google.android.gms.common.annotation.KeepForSdk;
+
+/* JADX INFO: loaded from: classes.dex */
+@KeepForSdk
+public abstract class ActivityLifecycleObserver {
+    @KeepForSdk
+    public abstract ActivityLifecycleObserver onStopCallOnce(Runnable runnable);
+
+    @KeepForSdk
+    /* JADX INFO: renamed from: of */
+    public static final ActivityLifecycleObserver m11of(Activity activity) {
+        return new zaa(activity);
+    }
+}

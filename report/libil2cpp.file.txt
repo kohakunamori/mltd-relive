@@ -1,0 +1,1 @@
+/home/runner/work/_temp/client-source-output/apktool/lib/arm64-v8a/libil2cpp.so: ELF 64-bit LSB shared object, ARM aarch64, version 1 (SYSV), dynamically linked, BuildID[sha1]=24247de7ee7284697b388dec0e4e1f8fc7365fca, stripped

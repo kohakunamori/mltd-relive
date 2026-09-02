@@ -1,0 +1,28 @@
+{
+  "apk": "mltd-relive-game-client-zh-fixed.apk",
+  "entries": 205,
+  "dex_files": [
+    "classes.dex"
+  ],
+  "native_abis": [
+    "arm64-v8a"
+  ],
+  "native_libraries": [
+    "lib/arm64-v8a/libAudioPlayer.so",
+    "lib/arm64-v8a/libBlueDoveMediaRender.so",
+    "lib/arm64-v8a/libFirebaseCppApp-6.2.0.so",
+    "lib/arm64-v8a/libFirebaseCppMessaging.so",
+    "lib/arm64-v8a/libSmartBeatNdk.so",
+    "lib/arm64-v8a/lib_burst_generated.so",
+    "lib/arm64-v8a/libcri_ware_unity.so",
+    "lib/arm64-v8a/libgpg.so",
+    "lib/arm64-v8a/libil2cpp.so",
+    "lib/arm64-v8a/libmain.so",
+    "lib/arm64-v8a/libunity.so",
+    "lib/arm64-v8a/libzipw.so"
+  ],
+  "il2cpp_global_metadata": [
+    "assets/bin/Data/Managed/Metadata/global-metadata.dat"
+  ],
+  "has_libil2cpp": true
+}

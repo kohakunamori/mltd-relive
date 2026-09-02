@@ -1,0 +1,465 @@
+{
+  "service_count": 75,
+  "rpc_method_count": 309,
+  "services": {
+    "ADService": [
+      "DoCostumeAD",
+      "DoIdolAD",
+      "GetCostumeAD",
+      "GetCostumeADResult",
+      "GetDoCostumeHistory",
+      "GetDoCostumeHistorySummary",
+      "GetDoIdolHistory",
+      "GetDoIdolHistorySummary",
+      "GetIdolAD",
+      "GetIdolADIdolResult",
+      "GetIdolADResult"
+    ],
+    "AchievementService": [
+      "GetAchievementList"
+    ],
+    "AnniversaryService": [
+      "ExchangeA1stShopItem",
+      "GetAnniversaryA1stShopItemList"
+    ],
+    "ArService": [
+      "GetArMenu"
+    ],
+    "AssetService": [
+      "GetAssetVersion"
+    ],
+    "AuthService": [
+      "GetConnectURLAndToken",
+      "GetTransferURL",
+      "Login",
+      "Register",
+      "TransferPassword"
+    ],
+    "BannerService": [
+      "GetBannerList"
+    ],
+    "BirthdayService": [
+      "ExecuteBirthdayPresent",
+      "GetBirthday"
+    ],
+    "BlogService": [
+      "GetBlogList",
+      "LikeBlog",
+      "ReadBlog"
+    ],
+    "BoardService": [
+      "AddBoardBlacklist",
+      "GetBoardCommentList",
+      "PostBoardComment"
+    ],
+    "CampaignService": [
+      "GetCampaignList"
+    ],
+    "CardService": [
+      "GetAlbumList",
+      "GetCardList"
+    ],
+    "CostumeService": [
+      "GetCostumeList",
+      "SetCostume"
+    ],
+    "DramaService": [
+      "GetDramaList"
+    ],
+    "EventDeckService": [
+      "GetEventDeckList",
+      "GetEventDeckRecommendedList",
+      "SetEventDeck"
+    ],
+    "EventLoginBonusService": [
+      "ExecuteEventLoginBonus"
+    ],
+    "EventService": [
+      "BuyEventPeriodShopExchangeItem",
+      "BuyEventShopExchangeItem",
+      "CastCoinGasha",
+      "FinishEventStory",
+      "FinishEventTalkStory",
+      "GetCoinGasha",
+      "GetCoinGashaHistory",
+      "GetCoinGashaRewardList",
+      "GetEndRoll",
+      "GetEventData",
+      "GetEventList",
+      "GetEventLiveInfo",
+      "GetEventMacaroon",
+      "GetEventPeriodShopHistory",
+      "GetEventPeriodShopList",
+      "GetEventPoint",
+      "GetEventRankingRewardList",
+      "GetEventScheduleList",
+      "GetEventShopListWithItems",
+      "GetEventStoryList",
+      "GetEventTalkArchiveList",
+      "GetEventTalkList",
+      "GetEventTalkStoryDetail",
+      "GetEventTour",
+      "PrepareEventTour",
+      "ReleaseEventEncounterMessage",
+      "ReleaseEventMemory",
+      "ReleaseEventStory",
+      "ReleaseEventTalkStory"
+    ],
+    "EventTensionService": [
+      "GetEventTensionList"
+    ],
+    "EventType10Service": [
+      "GetEventTensionList",
+      "GetEventType10"
+    ],
+    "EventType11Service": [
+      "GetEventType11",
+      "SetEventType11Idol"
+    ],
+    "EventType1Service": [
+      "GetEventType1"
+    ],
+    "EventType2Service": [
+      "GetEventType2"
+    ],
+    "EventType3Service": [
+      "GetEventType3"
+    ],
+    "EventType4Service": [
+      "GetEventType4"
+    ],
+    "EventType5Service": [
+      "ExecuteA1stIdolCostume",
+      "ExecuteCarnivalMission",
+      "GetA1stIdolCostumeList",
+      "GetCarnivalMissionList",
+      "GetDailyEventPoint",
+      "GetEventType5",
+      "GetIdolRanking",
+      "GetIntervalList",
+      "GetMyIdolRanking",
+      "ReceiveBoost",
+      "SetCarnivalIdol",
+      "SetInterval",
+      "UseBoost"
+    ],
+    "EventType6Service": [
+      "GetEventType6"
+    ],
+    "EventType9Service": [
+      "CastBoxCoinGasha",
+      "GetBoxCoinGasha",
+      "GetEventType9",
+      "SetPickupBoxCoinGashaItem",
+      "SwitchBoxCoinGasha"
+    ],
+    "FriendService": [
+      "AcceptFriend",
+      "ExecFlowerStandReward",
+      "GetCommentList",
+      "GetFlowerStandCount",
+      "GetFlowerStandList",
+      "GetFriendList",
+      "GetRecommendUserList",
+      "RemoveFriend",
+      "RequestFriend",
+      "SendComment",
+      "SendFlowerStand",
+      "SendFlowerStandMulti"
+    ],
+    "FukubuclothService": [
+      "ExecCostume"
+    ],
+    "GalleryService": [
+      "GetGallery",
+      "GetGalleryEndRoll"
+    ],
+    "GameCornerService": [
+      "GetGameCornerList"
+    ],
+    "GameService": [
+      "GetVersion"
+    ],
+    "GameSettingService": [
+      "GetItemDays",
+      "GetSetting"
+    ],
+    "GashaMedalService": [
+      "GetGashaMedal",
+      "GetGashaMedalHistory"
+    ],
+    "GashaService": [
+      "CastGasha",
+      "CastGashaTicket",
+      "ExchangeDrawCost",
+      "ExchangeDrawPoint",
+      "ExchangeItemPoint",
+      "GetDrawPointExchangeList",
+      "GetGashaCardHistory",
+      "GetGashaCardList",
+      "GetGashaList",
+      "GetItemPointExchangeList",
+      "GetItemPointHistory",
+      "RefreshDrawPoint"
+    ],
+    "GrailService": [
+      "ExchangeGrail",
+      "GetGrailCandidateList"
+    ],
+    "GrecoService": [
+      "AppBoot",
+      "CompletePerformance",
+      "TouchReaction"
+    ],
+    "GuestCharacterService": [
+      "FinishGuestCharacterMainStory",
+      "GetGuestCharacterList"
+    ],
+    "HeroesService": [
+      "FinishHeroesStage",
+      "GetHeroes",
+      "ResetHeroesData",
+      "SaveHeroesState",
+      "SaveHeroesUnit"
+    ],
+    "IdolDetailService": [
+      "GetIdolDetailList"
+    ],
+    "IdolService": [
+      "BuyCostume",
+      "GetBulkChangeCostumeGroupList",
+      "GetIdolList",
+      "GetSalesCostumeList",
+      "SetFavoriteCostume"
+    ],
+    "InspectService": [
+      "CheckNGWord"
+    ],
+    "ItemService": [
+      "ExecuteItemShop",
+      "GetItemList",
+      "GetItemShopHistory",
+      "GetItemShopList",
+      "UseGiftForCard",
+      "UseGiftForIdolGift",
+      "UseItem"
+    ],
+    "JewelService": [
+      "GetJewel"
+    ],
+    "JobService": [
+      "BreakJob",
+      "CancelJob",
+      "FinishJob",
+      "GetJobList",
+      "StartJob"
+    ],
+    "LastUpdateDateService": [
+      "GetLastUpdateDateList"
+    ],
+    "LessonService": [
+      "AwakeLesson",
+      "ExMasterLesson",
+      "MasterLesson2",
+      "MasterLessonFive",
+      "NormalLesson",
+      "Training"
+    ],
+    "LiveService": [
+      "BreakRehearsal",
+      "BreakSong",
+      "ContinueSong",
+      "FinishRehearsal",
+      "FinishSong",
+      "GetRandomGuestList",
+      "GetRandomLive",
+      "PostLog",
+      "RestartSong",
+      "SetRandomLive",
+      "StartRehearsal",
+      "StartSong"
+    ],
+    "LoginBonusService": [
+      "ExecuteLoginBonus"
+    ],
+    "LoungeGalleryService": [
+      "GetLoungeContributionList",
+      "GetLoungeEventList"
+    ],
+    "LoungeService": [
+      "AcceptJoinLounge",
+      "AssignLoungeMaster",
+      "CreateLounge",
+      "DeleteLounge",
+      "GetLounge",
+      "GetLoungeChatList",
+      "GetLoungeUserList",
+      "GetSelfLounge",
+      "InheritLoungeMaster",
+      "InviteLounge",
+      "JoinLounge",
+      "KickLoungeUser",
+      "LeaveLounge",
+      "SearchLoungeList",
+      "SendLoungeChat",
+      "SetLoungeInfo"
+    ],
+    "MailService": [
+      "GetMailList",
+      "ReadMail",
+      "ResponseMail"
+    ],
+    "MissionService": [
+      "DoClientMission",
+      "FinishPanelMission",
+      "GetMissionList"
+    ],
+    "NamecardService": [
+      "DeleteNamecardHolder",
+      "FavoriteNamecardHolder",
+      "GetNamecard",
+      "GetNamecardHolder",
+      "ReadNamecardHolder",
+      "SendNamecardHolder",
+      "SetNamecard"
+    ],
+    "NaviService": [
+      "GetNaviList"
+    ],
+    "OctopusService": [
+      "GetOctopusInfo",
+      "UpdateOctopusProgress"
+    ],
+    "OfferService": [
+      "CancelOffer",
+      "ExecuteOffer",
+      "GetOfferList",
+      "GetOfferTextList",
+      "UpdateMapLevel"
+    ],
+    "OysterService": [
+      "GetOysterInfo",
+      "UpdateProgress"
+    ],
+    "PaymentService": [
+      "PrepareReceipt",
+      "ResultReceipt",
+      "VerifyReceipt"
+    ],
+    "PresentService": [
+      "GetPresentCount",
+      "GetPresentHistory",
+      "GetPresentList",
+      "ReceivePresent"
+    ],
+    "RankingService": [
+      "GetMyRanking",
+      "GetRanking"
+    ],
+    "SalmonService": [
+      "FinishSalmonStage",
+      "GetSalmon",
+      "SaveSalmonState",
+      "SaveSalmonUnit"
+    ],
+    "SelectionTicketService": [
+      "BuyTicket",
+      "GetSalesTicketPriceList",
+      "GetSelectionTicketList",
+      "UseSelectionTicket"
+    ],
+    "ShellfishService": [
+      "FinishShellfish",
+      "GetShellfish",
+      "StartShellfish"
+    ],
+    "ShopService": [
+      "GetShopItemList"
+    ],
+    "SongRankingService": [
+      "GetSongRanking"
+    ],
+    "SongService": [
+      "BuySong",
+      "GetCourse",
+      "GetSalesSongList",
+      "GetSampleSongList",
+      "GetSongList",
+      "UnLockExtendSong",
+      "UnLockSong"
+    ],
+    "SpecialEventService": [
+      "ExecuteSpecialEventShopItem",
+      "GetEmotionStat",
+      "GetSpecialEvent",
+      "GetSpecialEventChatList",
+      "GetSpecialEventShopItemList",
+      "GetStreamInfo",
+      "GetStreamStatus",
+      "SendEmotion",
+      "SendSpecialEventChat"
+    ],
+    "StoryService": [
+      "FinishCostumeAdv",
+      "FinishEpisode",
+      "FinishMainStory",
+      "FinishMemorial",
+      "FinishOfferStory",
+      "FinishSpecialStory",
+      "GetComicList",
+      "GetOfferStoryList",
+      "GetSpecialList",
+      "GetSpecialStoryList",
+      "GetStoryList",
+      "GetTopicsList",
+      "GetWhiteBoardList",
+      "PlayStoryMV"
+    ],
+    "SystemSettingService": [
+      "SetSystemSetting"
+    ],
+    "TheaterService": [
+      "FinishContact",
+      "FinishTheaterOpening",
+      "GetTheater"
+    ],
+    "TunaService": [
+      "ApplyReadTunaPrologue",
+      "ExecuteTuna",
+      "GetTunaAreaAll",
+      "GetTunaRanking",
+      "ResetTuna"
+    ],
+    "TutorialService": [
+      "FinishTutorial",
+      "SetTutorialProgress"
+    ],
+    "UnitService": [
+      "GetSongUnitList",
+      "GetUnitList",
+      "SetSongUnit",
+      "SetUnit"
+    ],
+    "UserService": [
+      "GetConnectURL",
+      "GetDirectMessage",
+      "GetLoungeInvitationList",
+      "GetPendingData",
+      "GetProducerRankList",
+      "GetProfile",
+      "GetRecordTimeList",
+      "GetSelf",
+      "GetSelfProfile",
+      "ReadDirectMessage",
+      "RecordTime",
+      "RecoverVitalityByItem",
+      "RecoverVitalityByItemMulti",
+      "RecoverVitalityByJewel",
+      "ReleaseBNID",
+      "RemoveLoungeInvitation",
+      "SetAchievementList",
+      "SetSelfProfile",
+      "SetTransferPassword"
+    ]
+  }
+}

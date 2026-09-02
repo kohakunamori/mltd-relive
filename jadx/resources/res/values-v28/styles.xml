@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="BaseUnityTheme" parent="@android:style/Theme.Material.Light.NoActionBar.Fullscreen">
+        <item name="android:windowLayoutInDisplayCutoutMode">1</item>
+    </style>
+    <style name="UnityThemeSelector" parent="@android:style/Theme.Material.NoActionBar.Fullscreen">
+        <item name="android:textColorPrimary">#ff000000</item>
+        <item name="android:windowLayoutInDisplayCutoutMode">1</item>
+    </style>
+</resources>

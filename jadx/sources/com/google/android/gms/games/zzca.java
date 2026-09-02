@@ -1,0 +1,23 @@
+package com.google.android.gms.games;
+
+import androidx.annotation.Nullable;
+import com.google.android.gms.common.api.Result;
+import com.google.android.gms.common.internal.PendingResultUtil;
+import com.google.android.gms.games.snapshot.SnapshotMetadata;
+import com.google.android.gms.games.snapshot.Snapshots;
+
+/* JADX INFO: loaded from: classes.dex */
+final class zzca implements PendingResultUtil.ResultConverter<Snapshots.CommitSnapshotResult, SnapshotMetadata> {
+    zzca() {
+    }
+
+    @Override // com.google.android.gms.common.internal.PendingResultUtil.ResultConverter
+    public final /* synthetic */ SnapshotMetadata convert(@Nullable Result result) {
+        SnapshotMetadata snapshotMetadata;
+        Snapshots.CommitSnapshotResult commitSnapshotResult = (Snapshots.CommitSnapshotResult) result;
+        if (commitSnapshotResult == null || (snapshotMetadata = commitSnapshotResult.getSnapshotMetadata()) == null) {
+            return null;
+        }
+        return snapshotMetadata.freeze();
+    }
+}

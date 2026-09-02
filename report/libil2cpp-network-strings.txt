@@ -1,0 +1,41 @@
+An alternate API is available: Emit the MarshalAs custom attribute instead. http://go.microsoft.com/fwlink/?linkid=14202
+Deny is obsolete and will be removed in a future release of the .NET Framework. See http://go.microsoft.com/fwlink/?LinkID=155570 for more information.
+Serialization is obsoleted for this type. http://go.microsoft.com/fwlink/?linkid=14202
+SupportsIPv4 is obsoleted for this type, please use OSSupportsIPv4 instead. http://go.microsoft.com/fwlink/?linkid=14202
+SupportsIPv6 is obsoleted for this type, please use OSSupportsIPv6 instead. http://go.microsoft.com/fwlink/?linkid=14202
+The constructor has been deprecated. Please new Uri(Uri, string). The dontEscape parameter is deprecated and is always false. http://go.microsoft.com/fwlink/?linkid=14202
+The constructor has been deprecated. Please use new Uri(string). The dontEscape parameter is deprecated and is always false. http://go.microsoft.com/fwlink/?linkid=14202
+The method has been deprecated. It is not used by the system. http://go.microsoft.com/fwlink/?linkid=14202
+The method has been deprecated. Please use GetComponents() or static EscapeUriString() to escape a Uri component or a string. http://go.microsoft.com/fwlink/?linkid=14202
+The method has been deprecated. Please use GetComponents() or static UnescapeDataString() to unescape a Uri component or a string. http://go.microsoft.com/fwlink/?linkid=14202
+The method has been deprecated. Please use MakeRelativeUri(Uri uri). http://go.microsoft.com/fwlink/?linkid=14202
+This attribute has been deprecated. Use DesignerSerializerAttribute instead.  For example, to specify a root designer for CodeDom, use DesignerSerializerAttribute(...,typeof(TypeCodeDomSerializer)).  http://go.microsoft.com/fwlink/?linkid=14202
+This class has been deprecated.  http://go.microsoft.com/fwlink/?linkid=14202
+This class has been deprecated. Please use WebRequest.DefaultWebProxy instead to access and set the global default proxy. Use 'null' instead of GetEmptyWebProxy. http://go.microsoft.com/fwlink/?linkid=14202
+This interface has been deprecated. Add a TypeDescriptionProvider to handle type TypeDescriptor.ComObjectType instead.  http://go.microsoft.com/fwlink/?linkid=14202
+This is an obsolete method. Please use the adjust purchase SDK for purchase verification (https://github.com/adjust/unity_purchase_sdk)
+This method has been deprecated. Please use Assembly.Load() instead. http://go.microsoft.com/fwlink/?linkid=14202
+This method has been deprecated. Please use TcpListener(IPAddress localaddr, int port) instead. http://go.microsoft.com/fwlink/?linkid=14202
+This method has been deprecated. Please use the proxy selected for you by default. http://go.microsoft.com/fwlink/?linkid=14202
+This method has been deprecated. Use GetInvocationTarget instead.  http://go.microsoft.com/fwlink/?linkid=14202
+This property has been deprecated.  Use a type description provider to supply type information for COM types instead.  http://go.microsoft.com/fwlink/?linkid=14202
+This property has been deprecated. It is address family dependent. Please use IPAddress.Equals method to perform comparisons. http://go.microsoft.com/fwlink/?linkid=14202
+Use System.Xml.Schema.XmlSchemaSet for schema compilation and validation. http://go.microsoft.com/fwlink/?linkid=14202
+http://hutonggames.com/playmakerforum/index.php?topic=1711.0
+http://hutonggames.com/playmakerforum/index.php?topic=4734.0
+http://hutonggames.com/playmakerforum/index.php?topic=4758.0
+http://www.w3.org/2001/XMLSchema
+https://developers.google.com/vr/reference/unity/class/GvrControllerInput
+https://developers.google.com/vr/unity/reference/class/GvrAllEventsTrigger
+https://developers.google.com/vr/unity/reference/class/GvrDropdown
+https://developers.google.com/vr/unity/reference/class/GvrEditorEmulator
+https://developers.google.com/vr/unity/reference/class/GvrHeadset
+https://developers.google.com/vr/unity/reference/class/GvrKeyboard
+https://developers.google.com/vr/unity/reference/class/GvrPointerGraphicRaycaster
+https://developers.google.com/vr/unity/reference/class/GvrPointerInputModule
+https://developers.google.com/vr/unity/reference/class/GvrPointerPhysicsRaycaster
+https://developers.google.com/vr/unity/reference/class/GvrReticlePointer
+https://developers.google.com/vr/unity/reference/class/GvrScrollSettings
+https://developers.google.com/vr/unity/reference/class/GvrVideoPlayerTexture
+iphlpapi.dll
+not enough space for format expansion (Please submit full bug report at http://gcc.gnu.org/bugs.html):

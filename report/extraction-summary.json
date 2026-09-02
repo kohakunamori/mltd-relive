@@ -1,0 +1,14 @@
+{
+  "apktool": {
+    "files": 5858,
+    "bytes": 246821561
+  },
+  "jadx": {
+    "files": 3936,
+    "bytes": 216340648
+  },
+  "report": {
+    "files": 24,
+    "bytes": 232924
+  }
+}

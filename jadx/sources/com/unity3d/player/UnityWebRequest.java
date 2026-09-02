@@ -1,0 +1,458 @@
+package com.unity3d.player;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.CookieHandler;
+import java.net.CookieManager;
+import java.net.CookieStore;
+import java.net.HttpCookie;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
+import java.net.SocketTimeoutException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.UnknownHostException;
+import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
+import java.security.cert.CertPathValidatorException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLException;
+import javax.net.ssl.SSLKeyException;
+import javax.net.ssl.SSLPeerUnverifiedException;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocketFactory;
+
+/* JADX INFO: loaded from: classes.dex */
+class UnityWebRequest implements Runnable {
+
+    /* JADX INFO: renamed from: m */
+    private static final HostnameVerifier f581m;
+
+    /* JADX INFO: renamed from: a */
+    private long f582a;
+
+    /* JADX INFO: renamed from: b */
+    private String f583b;
+
+    /* JADX INFO: renamed from: c */
+    private String f584c;
+
+    /* JADX INFO: renamed from: d */
+    private Map f585d;
+
+    /* JADX INFO: renamed from: e */
+    private boolean f586e;
+
+    /* JADX INFO: renamed from: f */
+    private int f587f;
+
+    /* JADX INFO: renamed from: g */
+    private long f588g;
+
+    /* JADX INFO: renamed from: h */
+    private long f589h;
+
+    /* JADX INFO: renamed from: i */
+    private boolean f590i;
+
+    /* JADX INFO: renamed from: j */
+    private boolean f591j;
+
+    /* JADX INFO: renamed from: k */
+    private Thread f592k;
+
+    /* JADX INFO: renamed from: l */
+    private boolean f593l;
+
+    static {
+        if (CookieHandler.getDefault() == null) {
+            CookieHandler.setDefault(new CookieManager());
+        }
+        f581m = new HostnameVerifier() { // from class: com.unity3d.player.UnityWebRequest.1
+            @Override // javax.net.ssl.HostnameVerifier
+            public final boolean verify(String str, SSLSession sSLSession) {
+                return true;
+            }
+        };
+    }
+
+    UnityWebRequest(long j, String str, Map map, String str2, boolean z, int i) {
+        this.f582a = j;
+        this.f583b = str2;
+        this.f584c = str;
+        this.f585d = map;
+        this.f586e = z;
+        this.f587f = i;
+    }
+
+    /* JADX INFO: Access modifiers changed from: private */
+    public synchronized boolean aborted() {
+        return this.f593l;
+    }
+
+    static void clearCookieCache(String str, String str2) {
+        CookieStore cookieStore;
+        CookieHandler cookieHandler = CookieHandler.getDefault();
+        if (cookieHandler == null || !(cookieHandler instanceof CookieManager) || (cookieStore = ((CookieManager) cookieHandler).getCookieStore()) == null) {
+            return;
+        }
+        if (str == null) {
+            cookieStore.removeAll();
+            return;
+        }
+        try {
+            URI uri = new URI(null, str, str2, null);
+            List<HttpCookie> list = cookieStore.get(uri);
+            if (list != null) {
+                Iterator<HttpCookie> it = list.iterator();
+                while (it.hasNext()) {
+                    cookieStore.remove(uri, it.next());
+                }
+            }
+        } catch (URISyntaxException unused) {
+            C0458g.Log(6, String.format("UnityWebRequest: failed to parse URI %s", str));
+        }
+    }
+
+    private static native void contentLengthCallback(long j, int i);
+
+    private static native boolean downloadCallback(long j, ByteBuffer byteBuffer, int i);
+
+    private static native void errorCallback(long j, int i, String str);
+
+    private boolean hasTimedOut() {
+        return this.f587f > 0 && System.currentTimeMillis() - this.f588g >= ((long) this.f587f);
+    }
+
+    private static native void headerCallback(long j, String str, String str2);
+
+    private static native void responseCodeCallback(long j, int i);
+
+    private void runSafe() {
+        StringBuilder sb;
+        String message;
+        C0453b.b bVar;
+        this.f588g = System.currentTimeMillis();
+        try {
+            URL url = new URL(this.f583b);
+            URLConnection uRLConnectionOpenConnection = url.openConnection();
+            uRLConnectionOpenConnection.setConnectTimeout(this.f587f);
+            uRLConnectionOpenConnection.setReadTimeout(this.f587f);
+            InputStream inputStream = null;
+            if (uRLConnectionOpenConnection instanceof HttpsURLConnection) {
+                HttpsURLConnection httpsURLConnection = (HttpsURLConnection) uRLConnectionOpenConnection;
+                if (this.f586e) {
+                    bVar = new C0453b.b() { // from class: com.unity3d.player.UnityWebRequest.2
+                        @Override // com.unity3d.player.C0453b.b, javax.net.ssl.X509TrustManager
+                        public final void checkServerTrusted(X509Certificate[] x509CertificateArr, String str) throws CertificateException {
+                            byte[] encoded = (x509CertificateArr == null || x509CertificateArr.length <= 0) ? new byte[0] : x509CertificateArr[0].getEncoded();
+                            if (!UnityWebRequest.this.aborted() && !UnityWebRequest.this.validateCertificateCallback(encoded)) {
+                                throw new CertificateException();
+                            }
+                        }
+                    };
+                    httpsURLConnection.setHostnameVerifier(f581m);
+                } else {
+                    bVar = null;
+                }
+                SSLSocketFactory sSLSocketFactoryM500a = C0453b.m500a(bVar);
+                if (sSLSocketFactoryM500a != null) {
+                    httpsURLConnection.setSSLSocketFactory(sSLSocketFactoryM500a);
+                }
+            }
+            if (url.getProtocol().equalsIgnoreCase("file") && !url.getHost().isEmpty()) {
+                malformattedUrlCallback("file:// must use an absolute path");
+                return;
+            }
+            boolean z = uRLConnectionOpenConnection instanceof HttpURLConnection;
+            int i = 0;
+            if (z) {
+                try {
+                    HttpURLConnection httpURLConnection = (HttpURLConnection) uRLConnectionOpenConnection;
+                    httpURLConnection.setRequestMethod(this.f584c);
+                    httpURLConnection.setInstanceFollowRedirects(false);
+                    if (this.f589h > 0) {
+                        if (this.f591j) {
+                            httpURLConnection.setChunkedStreamingMode(0);
+                        } else {
+                            httpURLConnection.setFixedLengthStreamingMode((int) this.f589h);
+                        }
+                        if (this.f590i) {
+                            httpURLConnection.addRequestProperty("Expect", "100-continue");
+                        }
+                    }
+                } catch (ProtocolException e) {
+                    badProtocolCallback(e.toString());
+                    return;
+                }
+            }
+            if (this.f585d != null) {
+                for (Map.Entry entry : this.f585d.entrySet()) {
+                    uRLConnectionOpenConnection.addRequestProperty((String) entry.getKey(), (String) entry.getValue());
+                }
+            }
+            ByteBuffer byteBufferAllocateDirect = ByteBuffer.allocateDirect(131072);
+            if (uploadCallback(null) > 0) {
+                uRLConnectionOpenConnection.setDoOutput(true);
+                try {
+                    OutputStream outputStream = uRLConnectionOpenConnection.getOutputStream();
+                    while (true) {
+                        int iUploadCallback = uploadCallback(byteBufferAllocateDirect);
+                        if (iUploadCallback <= 0) {
+                            break;
+                        }
+                        if (hasTimedOut()) {
+                            outputStream.close();
+                            errorCallback(this.f582a, 14, "WebRequest timed out.");
+                            return;
+                        }
+                        outputStream.write(byteBufferAllocateDirect.array(), byteBufferAllocateDirect.arrayOffset(), iUploadCallback);
+                    }
+                } catch (Exception e2) {
+                    if (this.f593l) {
+                        return;
+                    }
+                    errorCallback(e2.toString());
+                    return;
+                }
+            }
+            if (z) {
+                try {
+                    responseCodeCallback(((HttpURLConnection) uRLConnectionOpenConnection).getResponseCode());
+                } catch (SocketTimeoutException e3) {
+                    errorCallback(this.f582a, 14, e3.toString());
+                    return;
+                } catch (UnknownHostException e4) {
+                    unknownHostCallback(e4.toString());
+                    return;
+                } catch (SSLException e5) {
+                    sslCannotConnectCallback(e5);
+                    return;
+                } catch (IOException e6) {
+                    if (this.f593l) {
+                        return;
+                    }
+                    errorCallback(e6.toString());
+                    return;
+                }
+            }
+            Map<String, List<String>> headerFields = uRLConnectionOpenConnection.getHeaderFields();
+            headerCallback(headerFields);
+            if ((headerFields == null || !headerFields.containsKey("content-length")) && uRLConnectionOpenConnection.getContentLength() != -1) {
+                headerCallback("content-length", String.valueOf(uRLConnectionOpenConnection.getContentLength()));
+            }
+            if ((headerFields == null || !headerFields.containsKey("content-type")) && uRLConnectionOpenConnection.getContentType() != null) {
+                headerCallback("content-type", uRLConnectionOpenConnection.getContentType());
+            }
+            if (headerFields != null && headerFields.containsKey("Set-Cookie") && CookieHandler.getDefault() != null && (CookieHandler.getDefault() instanceof CookieManager)) {
+                CookieStore cookieStore = ((CookieManager) CookieHandler.getDefault()).getCookieStore();
+                for (String str : headerFields.get("Set-Cookie")) {
+                    try {
+                        HttpCookie httpCookie = HttpCookie.parse(str).get(i);
+                        if (httpCookie.getPath() != null && !httpCookie.getPath().equals("") && (httpCookie.getDomain() == null || httpCookie.getDomain().equals(url.getHost()))) {
+                            URI uri = new URI(url.getProtocol(), url.getHost(), httpCookie.getPath(), null);
+                            httpCookie.setDomain(url.getHost());
+                            cookieStore.add(uri, httpCookie);
+                        }
+                    } catch (IllegalArgumentException e7) {
+                        sb = new StringBuilder("UnityWebRequest: error parsing cookie '");
+                        sb.append(str);
+                        sb.append("': ");
+                        message = e7.getMessage();
+                        sb.append(message);
+                        C0458g.Log(6, sb.toString());
+                    } catch (URISyntaxException e8) {
+                        sb = new StringBuilder("UnityWebRequest: error constructing URI: ");
+                        message = e8.getMessage();
+                        sb.append(message);
+                        C0458g.Log(6, sb.toString());
+                    }
+                    i = 0;
+                }
+            }
+            contentLengthCallback(uRLConnectionOpenConnection.getContentLength());
+            try {
+                if (uRLConnectionOpenConnection instanceof HttpURLConnection) {
+                    HttpURLConnection httpURLConnection2 = (HttpURLConnection) uRLConnectionOpenConnection;
+                    responseCodeCallback(httpURLConnection2.getResponseCode());
+                    inputStream = httpURLConnection2.getErrorStream();
+                }
+                if (inputStream == null) {
+                    inputStream = uRLConnectionOpenConnection.getInputStream();
+                }
+                ReadableByteChannel readableByteChannelNewChannel = Channels.newChannel(inputStream);
+                while (true) {
+                    int i2 = readableByteChannelNewChannel.read(byteBufferAllocateDirect);
+                    if (i2 == -1) {
+                        break;
+                    }
+                    if (hasTimedOut()) {
+                        readableByteChannelNewChannel.close();
+                        errorCallback(this.f582a, 14, "WebRequest timed out.");
+                        return;
+                    } else if (!downloadCallback(byteBufferAllocateDirect, i2)) {
+                        break;
+                    } else {
+                        byteBufferAllocateDirect.clear();
+                    }
+                }
+                readableByteChannelNewChannel.close();
+            } catch (SocketTimeoutException e9) {
+                errorCallback(this.f582a, 14, e9.toString());
+            } catch (UnknownHostException e10) {
+                unknownHostCallback(e10.toString());
+            } catch (SSLException e11) {
+                sslCannotConnectCallback(e11);
+            } catch (IOException e12) {
+                if (this.f593l) {
+                    return;
+                }
+                errorCallback(this.f582a, 12, e12.toString());
+            } catch (Exception e13) {
+                errorCallback(e13.toString());
+            }
+        } catch (MalformedURLException e14) {
+            malformattedUrlCallback(e14.toString());
+        } catch (IOException e15) {
+            if (this.f593l) {
+                return;
+            }
+            errorCallback(e15.toString());
+        }
+    }
+
+    private static native int uploadCallback(long j, ByteBuffer byteBuffer);
+
+    private static native boolean validateCertificateCallback(long j, byte[] bArr);
+
+    public void abort() {
+        try {
+            synchronized (this) {
+                this.f593l = true;
+                if (this.f592k != null) {
+                    this.f592k.interrupt();
+                }
+            }
+        } catch (Exception e) {
+            C0458g.Log(6, "UnityWebRequest: abort threw an exception " + e.getMessage());
+        }
+    }
+
+    protected void badProtocolCallback(String str) {
+        C0458g.Log(6, String.format("UnityWebRequest: badProtocolCallback with error=%s url=%s", str, this.f583b));
+        errorCallback(this.f582a, 4, str);
+    }
+
+    protected void contentLengthCallback(int i) {
+        contentLengthCallback(this.f582a, i);
+    }
+
+    protected boolean downloadCallback(ByteBuffer byteBuffer, int i) {
+        return downloadCallback(this.f582a, byteBuffer, i);
+    }
+
+    protected void errorCallback(String str) {
+        C0458g.Log(6, String.format("UnityWebRequest: errorCallback with error=%s url=%s", str, this.f583b));
+        errorCallback(this.f582a, 2, str);
+    }
+
+    protected void headerCallback(String str, String str2) {
+        headerCallback(this.f582a, str, str2);
+    }
+
+    protected void headerCallback(Map map) {
+        if (map == null || map.size() == 0) {
+            return;
+        }
+        for (Map.Entry entry : map.entrySet()) {
+            String str = (String) entry.getKey();
+            if (str == null) {
+                str = "Status";
+            }
+            Iterator it = ((List) entry.getValue()).iterator();
+            while (it.hasNext()) {
+                headerCallback(str, (String) it.next());
+            }
+        }
+    }
+
+    protected void malformattedUrlCallback(String str) {
+        C0458g.Log(6, String.format("UnityWebRequest: malformattedUrlCallback with error=%s url=%s", str, this.f583b));
+        errorCallback(this.f582a, 5, str);
+    }
+
+    protected void responseCodeCallback(int i) {
+        responseCodeCallback(this.f582a, i);
+    }
+
+    @Override // java.lang.Runnable
+    public void run() {
+        try {
+            try {
+                synchronized (this) {
+                    this.f592k = Thread.currentThread();
+                }
+                runSafe();
+                synchronized (this) {
+                    this.f592k = null;
+                }
+            } catch (Exception e) {
+                errorCallback(e.toString());
+                synchronized (this) {
+                    this.f592k = null;
+                }
+            }
+        } catch (Throwable th) {
+            synchronized (this) {
+                this.f592k = null;
+                throw th;
+            }
+        }
+    }
+
+    void setupTransferSettings(long j, boolean z, boolean z2) {
+        this.f589h = j;
+        this.f590i = z;
+        this.f591j = z2;
+    }
+
+    protected void sslCannotConnectCallback(SSLException sSLException) {
+        int i;
+        String string = sSLException.toString();
+        C0458g.Log(6, String.format("UnityWebRequest: sslCannotConnectCallback with error=%s url=%s", string, this.f583b));
+        for (Throwable cause = sSLException; cause != null; cause = cause.getCause()) {
+            if (cause instanceof SSLKeyException) {
+                i = 23;
+            } else if ((cause instanceof SSLPeerUnverifiedException) || (cause instanceof CertPathValidatorException)) {
+                i = 25;
+            }
+            errorCallback(this.f582a, i, string);
+        }
+        i = 16;
+        errorCallback(this.f582a, i, string);
+    }
+
+    protected void unknownHostCallback(String str) {
+        C0458g.Log(6, String.format("UnityWebRequest: unknownHostCallback with error=%s url=%s", str, this.f583b));
+        errorCallback(this.f582a, 7, str);
+    }
+
+    protected int uploadCallback(ByteBuffer byteBuffer) {
+        return uploadCallback(this.f582a, byteBuffer);
+    }
+
+    protected boolean validateCertificateCallback(byte[] bArr) {
+        return validateCertificateCallback(this.f582a, bArr);
+    }
+}
