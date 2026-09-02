@@ -1,0 +1,32 @@
+name: Test core RPC compatibility
+
+on:
+  push:
+    branches:
+      - fix/story-service-compat
+    paths:
+      - 'standalone/mltd/services/__init__.py'
+      - 'standalone/mltd/services/theater_compat.py'
+      - 'tests/test_theater_opening_compat.py'
+      - '.github/workflows/test-core-rpc-compat.yml'
+  pull_request:
+    paths:
+      - 'standalone/mltd/services/__init__.py'
+      - 'standalone/mltd/services/theater_compat.py'
+      - 'tests/test_theater_opening_compat.py'
+      - '.github/workflows/test-core-rpc-compat.yml'
+
+jobs:
+  theater-opening:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m unittest tests.test_theater_opening_compat -v
+      - run: python -m pip install json-rpc==1.15.0
+      - name: Runtime wire-shape smoke
+        working-directory: standalone
+        run: >-
+          python -c "from mltd.services.theater_compat import finish_theater_opening; r=finish_theater_opening({'mst_theater_opening_id': 1}); assert set(r)=={'theater_opening'}; assert r['theater_opening']['mst_theater_opening_id']==0; assert r['theater_opening']['mv_status']=={'mst_song_id': 0, 'mv_unit_idol_list': None}; print('FinishTheaterOpening OK')"
