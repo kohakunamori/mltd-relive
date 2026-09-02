@@ -5,7 +5,7 @@ import threading
 import traceback
 from http.server import ThreadingHTTPServer
 from os import path
-from ssl import PROTOCOL_TLS_SERVER, SSLContext
+from ssl import PROTOCOL_TLS_SERVER, SSLContext, SSLError
 from urllib.parse import unquote, urlsplit
 
 import requests
@@ -76,7 +76,14 @@ class ThreadedProxyServer(ThreadingHTTPServer):
     request_queue_size = _REQUEST_QUEUE_SIZE
 
     def get_request(self):
-        request, client_address = super().get_request()
+        try:
+            request, client_address = super().get_request()
+        except SSLError as exc:
+            # With listener-wrapped TLS the handshake happens during accept().
+            # Logging here distinguishes certificate/protocol rejection from a
+            # later HTTP/Asset 404, which is critical for corrected-client tests.
+            logger.warning(f'TLS handshake failed before HTTP dispatch: {exc}')
+            raise
         _tune_client_socket(request)
         return request, client_address
 
@@ -313,10 +320,14 @@ def start(port=proxy_port, conn=None):
     )
 
     def select_sni_context(ssl_socket, server_name, initial_context):
-        if (_ASSET_HOST and server_name
-                and server_name.rstrip('.').lower() == _ASSET_HOST):
+        normalized = (server_name or '').rstrip('.').lower()
+        if _ASSET_HOST and normalized == _ASSET_HOST:
+            logger.debug(f'TLS SNI route: {server_name} -> asset context')
             ssl_socket.context = asset_context
         else:
+            logger.debug(
+                f'TLS SNI route: {server_name or "<none>"} -> API context'
+            )
             ssl_socket.context = api_context
 
     api_context.set_servername_callback(select_sni_context)
