@@ -9,6 +9,7 @@ on:
       - '.github/workflows/analyze-appguard-asmfunction-defs.yml'
       - 'tools/client-source/trace-appguard-asmfunction-defs.py'
       - 'tools/client-source/trace-appguard-register-chain.py'
+      - 'tools/client-source/analyze-appguard-trampoline-builder.py'
       - 'client/reconstruction/appguard-analysis/bootstrap-cfg.json'
       - 'client/reconstruction/appguard-analysis/asmfunction-init.json'
 
@@ -24,7 +25,7 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Trace nearest definitions and address provenance
+      - name: Trace definitions, provenance and trampoline builder
         shell: bash
         run: |
           set -euo pipefail
@@ -33,6 +34,9 @@ jobs:
             --asm-init client/reconstruction/appguard-analysis/asmfunction-init.json \
             --out client/reconstruction/appguard-analysis
           python tools/client-source/trace-appguard-register-chain.py \
+            --bootstrap client/reconstruction/appguard-analysis/bootstrap-cfg.json \
+            --out client/reconstruction/appguard-analysis
+          python tools/client-source/analyze-appguard-trampoline-builder.py \
             --bootstrap client/reconstruction/appguard-analysis/bootstrap-cfg.json \
             --out client/reconstruction/appguard-analysis
 
@@ -45,7 +49,9 @@ jobs:
           git add client/reconstruction/appguard-analysis/asmfunction-defs.json \
                   client/reconstruction/appguard-analysis/asmfunction-defs.md \
                   client/reconstruction/appguard-analysis/asmfunction-provenance.json \
-                  client/reconstruction/appguard-analysis/asmfunction-provenance.md
+                  client/reconstruction/appguard-analysis/asmfunction-provenance.md \
+                  client/reconstruction/appguard-analysis/trampoline-builder.json \
+                  client/reconstruction/appguard-analysis/trampoline-builder.md
           if git diff --cached --quiet; then exit 0; fi
-          git commit -m 'client: trace asmFunction address provenance'
+          git commit -m 'client: analyze AppGuard RWX trampoline builder'
           git push origin HEAD:client-zh-fixed-reconstruction
