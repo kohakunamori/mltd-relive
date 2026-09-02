@@ -9,6 +9,7 @@ on:
       - '.github/workflows/analyze-appguard-syscalls.yml'
       - 'tools/client-source/analyze-appguard-syscalls.py'
       - 'tools/client-source/analyze-appguard-direct-calls.py'
+      - 'tools/client-source/analyze-appguard-bootstrap.py'
 
 permissions:
   contents: write
@@ -43,7 +44,7 @@ jobs:
           unzip -q work/xapk/config.arm64_v8a.apk 'lib/arm64-v8a/*.so' -d work/split
           cp work/split/lib/arm64-v8a/*.so work/native/
 
-      - name: Recover direct syscall and loader maps
+      - name: Recover direct syscall, loader and bootstrap maps
         shell: bash
         run: |
           set -euo pipefail
@@ -53,6 +54,9 @@ jobs:
             --out client/reconstruction/appguard-analysis
           python tools/client-source/analyze-appguard-direct-calls.py \
             --native-dir work/native \
+            --out client/reconstruction/appguard-analysis
+          python tools/client-source/analyze-appguard-bootstrap.py \
+            --libcompatible work/native/libcompatible.so \
             --out client/reconstruction/appguard-analysis
 
       - name: Commit maps
@@ -64,7 +68,9 @@ jobs:
           git add client/reconstruction/appguard-analysis/syscall-map.json \
                   client/reconstruction/appguard-analysis/syscall-map.md \
                   client/reconstruction/appguard-analysis/direct-call-map.json \
-                  client/reconstruction/appguard-analysis/direct-call-map.md
+                  client/reconstruction/appguard-analysis/direct-call-map.md \
+                  client/reconstruction/appguard-analysis/bootstrap-cfg.json \
+                  client/reconstruction/appguard-analysis/bootstrap-cfg.md
           if git diff --cached --quiet; then exit 0; fi
-          git commit -m 'client: recover AppGuard direct calls through packed code regions'
+          git commit -m 'client: trace AppGuard bootstrap CFG from DT_INIT'
           git push origin HEAD:client-zh-fixed-reconstruction
