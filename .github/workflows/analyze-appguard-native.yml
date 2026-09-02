@@ -55,15 +55,74 @@ jobs:
             -o work/apktool \
             work/xapk/com.bandainamcoent.imas_millionlive_theaterdays_ch.apk
 
-      - name: Build exact-sample native/JNI map
+      - name: Classify AppGuard native payload formats
         shell: bash
         run: |
           set -euo pipefail
           rm -rf client/reconstruction/appguard-analysis
+          mkdir -p client/reconstruction/appguard-analysis work/nonelf
+          python - <<'PY'
+          import hashlib, json, math
+          from collections import Counter
+          from pathlib import Path
+
+          rows=[]
+          for p in sorted(Path('work/native').glob('*.so')):
+              data=p.read_bytes()
+              count=Counter(data)
+              n=len(data)
+              ent=-sum((v/n)*math.log2(v/n) for v in count.values()) if n else 0.0
+              rows.append({
+                  'name':p.name,
+                  'size':n,
+                  'sha256':hashlib.sha256(data).hexdigest(),
+                  'is_elf':data.startswith(b'\x7fELF'),
+                  'first_32_bytes_hex':data[:32].hex(),
+                  'entropy_bits_per_byte':round(ent,6),
+              })
+          out=Path('client/reconstruction/appguard-analysis/payload-formats.json')
+          out.write_text(json.dumps(rows,indent=2)+'\n',encoding='utf-8')
+          for row in rows:
+              if not row['is_elf']:
+                  src=Path('work/native')/row['name']
+                  src.rename(Path('work/nonelf')/row['name'])
+          print(json.dumps(rows,indent=2))
+          PY
+          {
+            echo '# AppGuard payload formats'
+            echo
+            echo '| File | Type | Size | SHA-256 | Entropy | First 16 bytes |'
+            echo '|---|---|---:|---|---:|---|'
+            python - <<'PY'
+          import json
+          for r in json.load(open('client/reconstruction/appguard-analysis/payload-formats.json')):
+              kind='ELF' if r['is_elf'] else 'non-ELF / protected payload'
+              print(f"| `{r['name']}` | {kind} | {r['size']} | `{r['sha256']}` | {r['entropy_bits_per_byte']:.4f} | `{r['first_32_bytes_hex'][:32]}` |")
+          PY
+          } > client/reconstruction/appguard-analysis/payload-formats.md
+
+      - name: Build exact-sample native/JNI map
+        shell: bash
+        run: |
+          set -euo pipefail
           python tools/client-source/analyze-appguard-native.py \
             --native-dir work/native \
             --apktool-tree work/apktool \
             --out client/reconstruction/appguard-analysis
+
+      - name: Add non-ELF protected-payload evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT=client/reconstruction/appguard-analysis/nonelf-tools
+          mkdir -p "$OUT"
+          for f in work/nonelf/*.so; do
+            [[ -f "$f" ]] || continue
+            name=$(basename "$f")
+            file "$f" > "$OUT/${name}.file.txt" || true
+            strings -a -t x "$f" > "$OUT/${name}.strings.txt" || true
+            xxd -l 4096 "$f" > "$OUT/${name}.head.hex.txt" || true
+          done
 
       - name: Add raw ELF tool summaries
         shell: bash
@@ -71,8 +130,7 @@ jobs:
           set -euo pipefail
           OUT=client/reconstruction/appguard-analysis/elf-tools
           mkdir -p "$OUT"
-          for f in work/native/libcompatible.so work/native/libcompatible_x86.so \
-                   work/native/libengine-hlp.so work/native/libengine.so work/native/libstub.so; do
+          for f in work/native/*.so; do
             [[ -f "$f" ]] || continue
             name=$(basename "$f")
             readelf -h -l -S -d -Ws -r "$f" > "$OUT/${name}.readelf.txt" 2>&1 || true
