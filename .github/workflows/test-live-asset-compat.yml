@@ -7,12 +7,14 @@ on:
     paths:
       - 'standalone/mltd/services/asset.py'
       - 'standalone/mltd/services/unit.py'
+      - 'standalone/mltd/servers/asset_cache.py'
       - 'standalone/mltd/servers/config.py'
       - 'standalone/mltd/servers/dns.py'
       - 'standalone/mltd/servers/proxy.py'
+      - 'tools/cache_assets.py'
       - 'tests/test_api_serial_compat.py'
+      - 'tests/test_asset_cache_tool.py'
       - 'tests/test_asset_host_routing.py'
-      - 'tests/test_local_asset_runtime.py'
       - 'tests/test_proxy_tls_compat.py'
       - 'tests/test_strict_local_and_api.py'
       - 'tests/test_unit_sqlalchemy_compat.py'
@@ -31,6 +33,16 @@ jobs:
           requests==2.31.0 msgpack==1.0.5 json-rpc==1.15.0
           dnslib==0.9.23 netifaces==0.11.0
       - run: python -m unittest tests.test_asset_host_routing -v
+
+  asset-cache:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install requests==2.31.0 msgpack==1.0.5
+      - run: python -m unittest tests.test_asset_cache_tool -v
 
   proxy-compat:
     runs-on: ubuntu-22.04
@@ -61,16 +73,6 @@ jobs:
           python-version: '3.11'
       - run: python -m pip install requests==2.31.0 msgpack==1.0.5
       - run: python -m unittest tests.test_api_serial_compat -v
-
-  local-runtime:
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-      - run: python -m pip install requests==2.31.0 msgpack==1.0.5
-      - run: python -m unittest tests.test_local_asset_runtime -v
 
   unit-sqlalchemy:
     runs-on: ubuntu-22.04
