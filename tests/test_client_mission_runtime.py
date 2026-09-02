@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 
 from mltd.models.engine import engine
 from mltd.models.models import Mission, Present
+from mltd.services.mission import update_mission_progress
 from mltd.services.mission_client import do_client_mission
 
 
@@ -118,6 +119,28 @@ class ClientMissionRuntimeTest(unittest.TestCase):
         )
         self.assertEqual(self._mission_state(20109), (3, 1))
         self.assertEqual(self._mission_state(20110), (3, 1))
+
+    def test_generic_progress_path_can_complete_training_mission(self):
+        """Class 74/75 must not crash the legacy generic reward helper."""
+        before_present = self._present_count()
+        with Session(engine) as session:
+            mission = session.scalar(
+                select(Mission)
+                .where(Mission.user_id == self.user_id)
+                .where(Mission.mst_mission_id == 20107)
+            )
+            self.assertTrue(
+                update_mission_progress(
+                    session=session,
+                    user=mission.user,
+                    mission=mission,
+                    progress=1,
+                )
+            )
+            session.commit()
+
+        self.assertEqual(self._mission_state(20107), (3, 1))
+        self.assertEqual(self._present_count(), before_present + 1)
 
     def test_unknown_or_stale_reports_are_noops(self):
         with Session(engine) as session:
