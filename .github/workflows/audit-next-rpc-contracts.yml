@@ -2,10 +2,8 @@ name: Audit next active RPC contracts
 
 on:
   push:
-    branches:
-      - fix/story-service-compat
-    paths:
-      - '.github/workflows/audit-next-rpc-contracts.yml'
+    branches: [fix/story-service-compat]
+    paths: ['.github/workflows/audit-next-rpc-contracts.yml']
   workflow_dispatch:
 
 jobs:
@@ -16,75 +14,20 @@ jobs:
         with:
           fetch-depth: 1
       - run: git fetch origin client-decompiled-zh-fixed-v1 --depth=1
-      - name: Build focused remaining-RPC report
+      - name: Audit preserved native/master evidence
         shell: bash
         run: |
           set -euo pipefail
-          git show origin/client-decompiled-zh-fixed-v1:il2cpp-dump/dump.cs > /tmp/dump.cs
-          git show origin/client-decompiled-zh-fixed-v1:il2cpp-dump/script.json > /tmp/script.json
-          python - <<'PY' > /tmp/rpc-contract-audit.txt
-          from pathlib import Path
-          import re, json
-
-          lines = Path('/tmp/dump.cs').read_text(encoding='utf-8', errors='ignore').splitlines()
-          script = Path('/tmp/script.json').read_text(encoding='utf-8', errors='ignore')
-
-          def emit_context(needle, before=45, after=90, cap=30):
-              hits=[i for i,l in enumerate(lines) if needle in l]
-              print(f'\n===== CONTEXT {needle} count={len(hits)} =====')
-              for n,i in enumerate(hits[:cap],1):
-                  lo=max(0,i-before); hi=min(len(lines),i+after+1)
-                  print(f'--- hit {n}: dump lines {lo+1}-{hi} ---')
-                  for j in range(lo,hi): print(f'{j+1}: {lines[j]}')
-
-          def emit_class(name):
-              pat=re.compile(r'^public (?:sealed )?class '+re.escape(name)+r'\b')
-              hits=[i for i,l in enumerate(lines) if pat.match(l.strip())]
-              print(f'\n===== CLASS {name} count={len(hits)} =====')
-              for i in hits:
-                  depth=0; started=False
-                  for j in range(i,min(len(lines),i+240)):
-                      line=lines[j]
-                      print(f'{j+1}: {line}')
-                      depth += line.count('{')-line.count('}')
-                      if '{' in line: started=True
-                      if started and depth<=0: break
-
-          for name in [
-              'BirthdayStatus','PresentStatus','ResultIdol','IdolStatus',
-              'SalesCostumeStatus','CostumeStatus',
-              'SetFavoriteCostumeArgs','SetFavoriteCostumeReply',
-              'GetSalesCostumeListReply','ExecuteBirthdayPresentReply'
-          ]:
-              emit_class(name)
-
-          for needle in [
-              'ExecuteBirthdayPresent', 'ProcessReward(ExecuteBirthdayPresentReply',
-              'OnClickPresentButton', 'BdlCommuView',
-              'RegistFavoriteCostumeContent', '_RegistFavoriteCostume',
-              'CostumeFavariteData', 'CommGetCostumeList', 'CostumeBuyContent',
-              'SalesCostumeStatus'
-          ]:
-              emit_context(needle)
-
-          print('\n===== SCRIPT.JSON TARGETS =====')
-          for needle in [
-              'ExecuteBirthdayPresent','ProcessReward','OnClickPresentButton',
-              'SetFavoriteCostume','RegistFavoriteCostume','GetSalesCostumeList',
-              'CommGetCostumeList'
-          ]:
-              print(f'-- {needle} --')
-              for m in re.finditer(re.escape(needle), script):
-                  lo=max(0,m.start()-350); hi=min(len(script),m.end()+550)
-                  print(script[lo:hi])
-                  print()
-          PY
-          wc -l /tmp/rpc-contract-audit.txt
-          tail -n 80 /tmp/rpc-contract-audit.txt
-      - name: Upload focused audit report
-        uses: actions/upload-artifact@v4
+          {
+            echo '===== NATIVE/APK FILES ====='
+            git ls-tree -r --name-only origin/client-decompiled-zh-fixed-v1 | grep -Ei '(^|/)(libil2cpp\.so|[^/]+\.apk)$' || true
+            echo '===== BIRTHDAY/SALES COSTUME FILES ====='
+            git ls-tree -r --name-only origin/client-decompiled-zh-fixed-v1 | grep -Ei 'birthday|sales.?costume|costume.?sales|mst_sales' || true
+            echo '===== SERVER PRESERVED MASTER FILES ====='
+            find standalone -type f | grep -Ei 'birthday|sales.?costume|costume.?sales|mst_sales' || true
+          } | tee /tmp/evidence.txt
+      - uses: actions/upload-artifact@v4
         with:
-          name: remaining-rpc-contract-audit
-          path: /tmp/rpc-contract-audit.txt
-          if-no-files-found: error
+          name: preserved-evidence-audit
+          path: /tmp/evidence.txt
           retention-days: 7
