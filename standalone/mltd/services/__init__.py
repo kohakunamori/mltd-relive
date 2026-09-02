@@ -6,6 +6,7 @@ __all__ = [
     'birthday',
     'campaign',
     'card',
+    'client_compat',
     'event',
     'friend',
     'game',
