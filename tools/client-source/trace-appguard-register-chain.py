@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
 """Recursively recover register provenance for AppGuard trampoline addresses.
 
-Seeds are the two address expressions already proven to populate asmFunction:
+Seeds cover the two address expressions that populate asmFunction plus the
+trampoline descriptor/config pointer (x28) and template-code base (x22):
   0x7eec: add x27, x20, w14, uxtw
+  0x7dd0: ldr w10, [x28, #0x70]       # descriptor count
+  0x7ef8: add x11, x22, w9/uxtw       # template source
   0xc2240: add x19, x14, w12, uxtw #2
 The slicer walks backwards through normal CFG and direct-call entry edges, finds
 nearest definitions of each source register, then recursively slices the source
-registers of those definitions.  This exposes the code-pool bases and indices
-without requiring the opaque state machine to evaluate to concrete constants.
+registers of those definitions. This exposes code-pool/config bases without
+requiring AppGuard's opaque state machine to evaluate to concrete constants.
 """
 from __future__ import annotations
 
@@ -53,10 +56,8 @@ def source_regs(ins: dict) -> list[str]:
         for x in re.findall(r'\b[wx]\d+\b',tok):
             r=norm(x)
             if r not in regs:regs.append(r)
-    # exclude destination operand for ordinary defining instructions
     start=1 if defined_regs(ins) else 0
     for tok in ops[start:]:add_token(tok)
-    # stores use first operand as source and memory base(s)
     if m.startswith('st'):
         for tok in ops:add_token(tok)
     return regs
@@ -83,7 +84,7 @@ def main():
         if pc in loc and d in blocks:
             preds[d].append({'block':loc[pc][0],'kind':'call','callsite':pc})
 
-    def nearest_defs(use_pc:int,reg:str,max_edges=40):
+    def nearest_defs(use_pc:int,reg:str,max_edges=48):
         reg=norm(reg)
         if use_pc not in loc:return []
         st,idx=loc[use_pc];insns=blocks[st].get('instructions',[])
@@ -93,9 +94,9 @@ def main():
         q=deque([(st,[])]);seen={st};found=[];best=None
         while q:
             cur,path=q.popleft();dep=len(path)
-            if dep>=max_edges or (best is not None and dep>best+2):continue
+            if dep>=max_edges or (best is not None and dep>best+3):continue
             for e in preds.get(cur,[]):
-                pb=int(e['block']);key=(pb,e['kind'],e.get('callsite'))
+                pb=int(e['block'])
                 if pb in seen:continue
                 seen.add(pb);pp=path+[{'from':pb,'to':cur,**e}]
                 pins=blocks[pb].get('instructions',[]);limit=len(pins)
@@ -110,41 +111,42 @@ def main():
                     found.append({'pc':int(ii['address']),'block':pb,'distance':d,'path':pp,'instruction':ii,'context':ctx(pins,j)})
                 else:q.append((pb,pp))
         dd={(x['pc'],x['distance']):x for x in found}
-        return sorted(dd.values(),key=lambda x:(x['distance'],x['pc']))[:12]
+        return sorted(dd.values(),key=lambda x:(x['distance'],x['pc']))[:16]
 
     seeds=[
         {'name':'asmFunction slots 0x00..0x90','use_pc':0x7eec,'registers':['x20','x14']},
+        {'name':'trampoline config / descriptor base','use_pc':0x7dd0,'registers':['x28']},
+        {'name':'trampoline template-code base','use_pc':0x7ef8,'registers':['x22']},
         {'name':'asmFunction slots 0x98/0xa0','use_pc':0xc2240,'registers':['x14','x12']},
     ]
-    nodes={};edges=[];queue=deque();
+    nodes={};edges=[];queue=deque()
     for seed in seeds:
         for r in seed['registers']:queue.append((seed['use_pc'],norm(r),0,seed['name']))
     seen=set()
     while queue:
         use,reg,depth,root=queue.popleft();key=(use,reg,root)
-        if key in seen or depth>7:continue
+        if key in seen or depth>9:continue
         seen.add(key);defs=nearest_defs(use,reg)
         nodekey=f'{root}|0x{use:x}|{reg}'
         nodes[nodekey]={'root':root,'use_pc':use,'reg':reg,'depth':depth,'definitions':defs}
-        for d in defs[:4]:
+        for d in defs[:5]:
             srcs=[r for r in source_regs(d['instruction']) if r!=reg]
             edges.append({'root':root,'use_pc':use,'reg':reg,'def_pc':d['pc'],'sources':srcs})
             for sr in srcs:queue.append((d['pc'],sr,depth+1,root))
     report={'seeds':seeds,'nodes':list(nodes.values()),'edges':edges}
     a.out.mkdir(parents=True,exist_ok=True);(a.out/'asmfunction-provenance.json').write_text(json.dumps(report,indent=2)+'\n')
-    L=['# AppGuard `asmFunction` address provenance','']
+    L=['# AppGuard `asmFunction` / trampoline provenance','']
     for seed in seeds:
         L += [f"## {seed['name']}",'',f"Seed instruction: `0x{seed['use_pc']:x}`",'']
         related=sorted((n for n in nodes.values() if n['root']==seed['name']),key=lambda n:(n['depth'],n['use_pc'],n['reg']))
         for n in related:
-            defs=n['definitions'];dt='; '.join(f"0x{d['pc']:x}: {d['instruction']['mnemonic']} {d['instruction']['op_str']} (edges={d['distance']})" for d in defs[:5]) or 'unresolved'
+            defs=n['definitions'];dt='; '.join(f"0x{d['pc']:x}: {d['instruction']['mnemonic']} {d['instruction']['op_str']} (edges={d['distance']})" for d in defs[:6]) or 'unresolved'
             L.append(f"- depth {n['depth']} use `0x{n['use_pc']:x}` `{n['reg']}` <- {dt}")
         L.append('')
-    # Detail the first few levels with context.
     for n in sorted(nodes.values(),key=lambda n:(n['root'],n['depth'],n['use_pc'],n['reg'])):
-        if n['depth']>3 or not n['definitions']:continue
+        if n['depth']>4 or not n['definitions']:continue
         L += [f"### {n['root']}: `{n['reg']}` used at `0x{n['use_pc']:x}`",'']
-        for d in n['definitions'][:3]:
+        for d in n['definitions'][:4]:
             L += [f"Definition `0x{d['pc']:x}`:",'```asm']
             for ii in d['context']:
                 mark='  ; <-- definition' if int(ii['address'])==d['pc'] else ''
