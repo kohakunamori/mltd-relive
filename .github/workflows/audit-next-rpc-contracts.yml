@@ -1,0 +1,32 @@
+name: Audit next active RPC contracts
+
+on:
+  push:
+    branches:
+      - fix/story-service-compat
+    paths:
+      - '.github/workflows/audit-next-rpc-contracts.yml'
+
+jobs:
+  audit:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: git fetch origin client-decompiled-zh-fixed-v1 --depth=1
+      - name: Extract exact DTOs and client call sites
+        shell: bash
+        run: |
+          set -euo pipefail
+          git show origin/client-decompiled-zh-fixed-v1:il2cpp-dump/dump.cs > /tmp/dump.cs
+          for name in \
+            ExecuteBirthdayPresent \
+            GetProducerRankList \
+            RecoverVitalityByItem \
+            RecoverVitalityByItemMulti \
+            RecoverVitalityByJewel \
+            SetAchievementList; do
+            echo "=== ${name} DTO ==="
+            grep -n -A 75 -B 5 -E "public class (${name}Args|${name}Reply)\\b" /tmp/dump.cs | head -n 240 || true
+            echo "=== ${name} CLIENT USAGE ==="
+            grep -n -C 22 -E "${name}\\(|${name}Args|${name}Reply" /tmp/dump.cs | head -n 700 || true
+          done
