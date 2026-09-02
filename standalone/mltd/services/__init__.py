@@ -35,4 +35,5 @@ __all__ = [
     'theater_compat',
     'unit',
     'user',
+    'user_profile',
 ]
