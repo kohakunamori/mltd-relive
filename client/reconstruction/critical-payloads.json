@@ -1,0 +1,65 @@
+[
+  {
+    "path": "AndroidManifest.xml",
+    "original_source": "base.apk",
+    "original_size": 19700,
+    "fixed_size": 17536,
+    "original_sha256": "bdba590bb1f29b1ea4edf60989560f92920cfd46cf6913f9780e0d45740c00d7",
+    "fixed_sha256": "bbec6258e54bea112639d50eac7fb1b1a11e97906c45f3c2f50bea74059574e6",
+    "identical": false
+  },
+  {
+    "path": "resources.arsc",
+    "original_source": "base.apk",
+    "original_size": 172104,
+    "fixed_size": 171820,
+    "original_sha256": "54d699a035db8f9c000ad0de8969d6f9830b373a56b4172df985b2c7cacf899a",
+    "fixed_sha256": "cf0002af2bb6b1e67816778114af0096dc7a6259a5a6e4459d77f6041e947671",
+    "identical": false
+  },
+  {
+    "path": "classes.dex",
+    "original_source": "base.apk",
+    "original_size": 4929808,
+    "fixed_size": 4907728,
+    "original_sha256": "82949ead060507eed6b9f8c035c49f0be9fa68082df6c7762b5ac98f77dce925",
+    "fixed_sha256": "2660a104b9d5746d920be6651aff2ed7d2a0834a8dc94b8f0166760e1a90d6df",
+    "identical": false
+  },
+  {
+    "path": "global-metadata.dat",
+    "original_source": "base.apk",
+    "original_size": 21159696,
+    "fixed_size": 21159696,
+    "original_sha256": "aaf8b0d5a559d49aa5cca5937fc87beed7217c497d96cfc470d5d58abe987d69",
+    "fixed_sha256": "0b0913387be65fb046a7536e016cd9f8514b0ac23bd79b8b20540c73cb1d8cf0",
+    "identical": false
+  },
+  {
+    "path": "data.unity3d",
+    "original_source": "base.apk",
+    "original_size": 48294685,
+    "fixed_size": 48294685,
+    "original_sha256": "049ba52c8dc51ddbab171c2901c3b9d3a1b4853c41ce96127d2fe6d523913464",
+    "fixed_sha256": "049ba52c8dc51ddbab171c2901c3b9d3a1b4853c41ce96127d2fe6d523913464",
+    "identical": true
+  },
+  {
+    "path": "libunity.so",
+    "original_source": "arm64.apk",
+    "original_size": 15971328,
+    "fixed_size": 15971328,
+    "original_sha256": "af8b49e0ed592fcec99e0f6ebc33e86dfa7647abe9d476c70a199fd53ea03051",
+    "fixed_sha256": "af8b49e0ed592fcec99e0f6ebc33e86dfa7647abe9d476c70a199fd53ea03051",
+    "identical": true
+  },
+  {
+    "path": "libil2cpp.so",
+    "original_source": "arm64.apk",
+    "original_size": 105866464,
+    "fixed_size": 99150888,
+    "original_sha256": "1a774f6ddf828179b94d40294a01b5ea6b9c8bc89769d36719bec7d56c167acf",
+    "fixed_sha256": "52d0cdac0179ae4a5d61a00b9bfd500969730d1a3f157cf667d82c525836936b",
+    "identical": false
+  }
+]

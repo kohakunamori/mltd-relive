@@ -1,0 +1,103 @@
+{
+  "original_size": 21159696,
+  "fixed_size": 21159696,
+  "same_size": true,
+  "original_sha256": "aaf8b0d5a559d49aa5cca5937fc87beed7217c497d96cfc470d5d58abe987d69",
+  "fixed_sha256": "0b0913387be65fb046a7536e016cd9f8514b0ac23bd79b8b20540c73cb1d8cf0",
+  "original_prefix_hex": "41454910df420110e17e0004e17e00f800640f45afd471fe69277dfbe187e8ec85d986475f9c0c5bc4735bcb0c49661311b639c75e52834a8240950222db1dfd",
+  "fixed_prefix_hex": "af1bb1fa1800000010010000b8450300c8460300f8fd0900c0440d00e8c51f00a80a2d00e00d000088182d00b03f060038583300f0e9690028429d00547e0000",
+  "original_has_il2cpp_magic": false,
+  "fixed_has_il2cpp_magic": true,
+  "original_entropy": 4.094943997663742,
+  "fixed_entropy": 5.217206422655109,
+  "original_printable_ratio": 0.15043614048141335,
+  "fixed_printable_ratio": 0.2533385640322999,
+  "common_length": 21159696,
+  "equal_bytes": 4898564,
+  "equal_ratio": 0.2315044601774997,
+  "xor_entropy": 6.583195961777865,
+  "xor_unique_values": 256,
+  "xor_most_common": [
+    {
+      "value": 0,
+      "count": 4898564,
+      "ratio": 0.2315044601774997
+    },
+    {
+      "value": 255,
+      "count": 1258402,
+      "ratio": 0.05947164836394625
+    },
+    {
+      "value": 1,
+      "count": 713847,
+      "ratio": 0.0337361652076665
+    },
+    {
+      "value": 96,
+      "count": 314784,
+      "ratio": 0.014876584238261268
+    },
+    {
+      "value": 4,
+      "count": 234620,
+      "ratio": 0.011088061000498306
+    },
+    {
+      "value": 32,
+      "count": 196910,
+      "ratio": 0.009305899290802666
+    },
+    {
+      "value": 8,
+      "count": 188332,
+      "ratio": 0.008900505942996535
+    },
+    {
+      "value": 2,
+      "count": 185256,
+      "ratio": 0.008755135234457055
+    },
+    {
+      "value": 16,
+      "count": 160846,
+      "ratio": 0.007601526978459426
+    },
+    {
+      "value": 6,
+      "count": 156187,
+      "ratio": 0.007381344231032431
+    },
+    {
+      "value": 3,
+      "count": 154851,
+      "ratio": 0.007318205327713593
+    },
+    {
+      "value": 9,
+      "count": 127561,
+      "ratio": 0.00602848925617835
+    },
+    {
+      "value": 17,
+      "count": 117504,
+      "ratio": 0.0055531988739346725
+    },
+    {
+      "value": 160,
+      "count": 114851,
+      "ratio": 0.00542781900080228
+    },
+    {
+      "value": 192,
+      "count": 106176,
+      "ratio": 0.005017841466153389
+    },
+    {
+      "value": 5,
+      "count": 93151,
+      "ratio": 0.004402284418452892
+    }
+  ],
+  "exact_repeating_xor_period_le_512": null
+}

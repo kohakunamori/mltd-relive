@@ -1,0 +1,1047 @@
+{
+  "smali": {
+    "original_smali_files": 5445,
+    "fixed_smali_files": 5428,
+    "semantic_identical_files": 5427,
+    "semantic_changed_files": 1,
+    "original_only": [
+      "smali/com/bandainamcoent/imas_millionlive_theaterdays/player/OverrideEventListener$1.smali",
+      "smali/com/bandainamcoent/imas_millionlive_theaterdays/player/OverrideEventListener$2.smali",
+      "smali/com/bandainamcoent/imas_millionlive_theaterdays/player/OverrideEventListener$3.smali",
+      "smali/com/bandainamcoent/imas_millionlive_theaterdays/player/OverrideEventListener.smali",
+      "smali/com/inca/security/Core/ObjectReflector.smali",
+      "smali/com/inca/security/DexProtect/Binder.smali",
+      "smali/com/inca/security/DexProtect/SupportActivity$1.smali",
+      "smali/com/inca/security/DexProtect/SupportActivity.smali",
+      "smali/com/inca/security/IiiIiiiiiI.smali",
+      "smali/com/inca/security/Proxy/AppGuardFrontApplication.smali",
+      "smali/com/inca/security/Proxy/AppGuardProxyApplication.smali",
+      "smali/com/inca/security/Proxy/AppGuardProxyHandler.smali",
+      "smali/com/inca/security/Proxy/JNISoxProxy.smali",
+      "smali/com/inca/security/Proxy/iIiIiIiIii.smali",
+      "smali/com/inca/security/Service/AppGuardService.smali",
+      "smali/com/inca/security/Service/AppGuardServiceCaller.smali",
+      "smali/com/inca/security/iiIiiiiIIi.smali"
+    ],
+    "fixed_only": [],
+    "changed": [
+      {
+        "path": "smali/com/bandainamcoent/imas_millionlive_theaterdays/player/OverrideActivity.smali",
+        "original_normalized_sha256": "2caecd0c75c2b1c307de5769fb4b083ce26ab0ba73d4569f049424f50c2cde4f",
+        "fixed_normalized_sha256": "ccac84c1b91cd3f092311f43b08d98eb0452f1c02d9ed0c6f66dcee32eba3a9c",
+        "patch_lines": 305
+      }
+    ]
+  },
+  "manifest": {
+    "name": "AndroidManifest.xml",
+    "identical": false,
+    "original_sha256": "1e779ded511afe93e5ad690c1b8f4e5130f69e1d5031e22283a724354ac3abc1",
+    "fixed_sha256": "8a257970ca1746718aa0a3482ea84e1be8965d1fa199c95b80c7801b1ab5180a",
+    "patch_lines": 78
+  },
+  "resources": {
+    "original_files": 221,
+    "fixed_files": 221,
+    "original_only": [],
+    "fixed_only": [],
+    "changed": [
+      {
+        "path": "drawable-hdpi/common_full_open_on_phone.png",
+        "original_size": 681,
+        "fixed_size": 818,
+        "original_sha256": "e8e2fecfbf111cc5ef65dbb6c7395a5ae16a68f7e0922738d0c802b26e866e49",
+        "fixed_sha256": "ca57e6af6dccf996ca4d2e1edb802e85323b5d87ffe86510bbd215bb5ccf4382"
+      },
+      {
+        "path": "drawable-hdpi/common_google_signin_btn_icon_light_normal_background.9.png",
+        "original_size": 769,
+        "fixed_size": 709,
+        "original_sha256": "1c4650d1e04a03d990c49e3d7e800c0b17a0565f337bb58586dc8db58f13a5a5",
+        "fixed_sha256": "a1015930454621ee3d3d70d2f62ee74bfaef7639b65e29d42a2d3bd44e964361"
+      },
+      {
+        "path": "drawable-hdpi/googleg_disabled_color_18.png",
+        "original_size": 410,
+        "fixed_size": 628,
+        "original_sha256": "f73508090d3e6bbc3e39ba768e71855aad52ecaaaccda676d43a1860010cc557",
+        "fixed_sha256": "30c2f27d5879907b17ce124fd29f9a665df4d083601515e38ff4d6e8295a8adf"
+      },
+      {
+        "path": "drawable-hdpi/googleg_standard_color_18.png",
+        "original_size": 808,
+        "fixed_size": 993,
+        "original_sha256": "f221f962a62c954a11b1734e9631fc8531e34bee557665fea864aa4386e25e39",
+        "fixed_sha256": "496cefa4d0ceea7043c4c3d8a7856592f917d3e6d9fc95523deb57f9c394d0d8"
+      },
+      {
+        "path": "drawable-hdpi/icon_notification.png",
+        "original_size": 965,
+        "fixed_size": 1518,
+        "original_sha256": "4b517b5faba72d0310fee16c2a73b55187fef21ab4db5edbcfdf3b55b33bd7e8",
+        "fixed_sha256": "560ef6ea7c4b56af181c6c129cdc703ff815f97ef7c1be9a887cd25d6b3f4cbd"
+      },
+      {
+        "path": "drawable-hdpi/notify_panel_notification_icon_bg.png",
+        "original_size": 107,
+        "fixed_size": 93,
+        "original_sha256": "8430ec003e003f3f2ba2f78d48fd150e25407667e530e82e87a7d4841c0fd676",
+        "fixed_sha256": "a3d6ba61761e3957ef14110a4fb26fa2d0255605acf496e7133093e01392a069"
+      },
+      {
+        "path": "drawable-ldpi/icon_notification.png",
+        "original_size": 414,
+        "fixed_size": 416,
+        "original_sha256": "02af08cbd49b37e937c5fd590b0babf2abafdd619e8887d9a36b7642f29ccb61",
+        "fixed_sha256": "45fd00b674c9591f81a241121328b8ab19bf1e1c8d10345c368feed9ef81bc90"
+      },
+      {
+        "path": "drawable-mdpi/googleg_disabled_color_18.png",
+        "original_size": 281,
+        "fixed_size": 462,
+        "original_sha256": "7c1e1629c95fb2603fbdeab93a8fbf30b9c80be11ef483d497f8a88e8f67bd6b",
+        "fixed_sha256": "72a0204b3c9d3d82f6791586ebe58808c31be1955ffe99481dbd21c678bf0b83"
+      },
+      {
+        "path": "drawable-mdpi/googleg_standard_color_18.png",
+        "original_size": 562,
+        "fixed_size": 692,
+        "original_sha256": "788a3b9472e9a46e1b6b68d918cd1571914b732e93aab014d77f20be5374e9de",
+        "fixed_sha256": "7ad722c7e644caa240d8957a1e11fce4f7cbe82804aad83be83bf4ff80a98aa8"
+      },
+      {
+        "path": "drawable-mdpi/icon_notification.png",
+        "original_size": 574,
+        "fixed_size": 565,
+        "original_sha256": "23b06477b6cf6a79a7a8d7a9f5efd818f598b8f2ac03cbc117fdd3983557c5e3",
+        "fixed_sha256": "de613ed267734a415618da70644a807b9ccccae36ade08fe55d60ec5c8b60221"
+      },
+      {
+        "path": "drawable-mdpi/notify_panel_notification_icon_bg.png",
+        "original_size": 98,
+        "fixed_size": 93,
+        "original_sha256": "0d773e62c756422313262846c787e58f67e0ee87e45e1ae9942002e816c4cb9e",
+        "fixed_sha256": "2e28693300c8cd5dbdd49cbc71970454e9ebd2aa3aa62ed97a97dc1f6894843c"
+      },
+      {
+        "path": "drawable-xhdpi/common_full_open_on_phone.png",
+        "original_size": 489,
+        "fixed_size": 516,
+        "original_sha256": "e816dc0998f4ee90d7b630f17e16fcc2e72d91078c5315adaac4bc2da4c226d7",
+        "fixed_sha256": "2df4203afdab73e8e41dc7e14daf13cb61e4b255d1f6e1e57de9cfc6facf88be"
+      },
+      {
+        "path": "drawable-xhdpi/googleg_disabled_color_18.png",
+        "original_size": 516,
+        "fixed_size": 792,
+        "original_sha256": "6083523032ab5df9e6cb82e4ff3d48af7738900a2e9b23d991beaa2eba7862e9",
+        "fixed_sha256": "43430468576caf34ab87d1973e32acf0eb4e6eed2aed252cc9fa067872de34f4"
+      },
+      {
+        "path": "drawable-xhdpi/googleg_standard_color_18.png",
+        "original_size": 982,
+        "fixed_size": 1233,
+        "original_sha256": "90c44675525e290332f7dba6adb97c7af3b8299e56cf5211e893d0e1dec41547",
+        "fixed_sha256": "0c25b718297962725b5a70c81c0ae3ae55990cbf126ec18982622d351c3666dc"
+      },
+      {
+        "path": "drawable-xhdpi/icon_notification.png",
+        "original_size": 1372,
+        "fixed_size": 2001,
+        "original_sha256": "65fb85be9cba10957a25da8f6a4cb97d2511b79522fb888f4dc9a1e8f9e21a29",
+        "fixed_sha256": "3ba001511616bfdfdde15a6fc4d7f20c705a5807ad72aa8ce4897557ce642cb8"
+      },
+      {
+        "path": "drawable-xhdpi/notify_panel_notification_icon_bg.png",
+        "original_size": 138,
+        "fixed_size": 99,
+        "original_sha256": "b44eeda34d7a529c2fe55719eb098fa29707caa91d18de06a7a775d6e6bcf973",
+        "fixed_sha256": "6598a6e07bd8876909eb886ebb75529bb91fa8677e0e5718ac38eb2962833da3"
+      },
+      {
+        "path": "drawable-xxhdpi/googleg_disabled_color_18.png",
+        "original_size": 727,
+        "fixed_size": 1068,
+        "original_sha256": "5db3ab4d30063b5e8fa63ae2993f83efd0af71d6526b3a1468f9e3bf891af587",
+        "fixed_sha256": "e9968348ae655a1915d3429685fb3865986b25e825fb2e3cd1637e673fd24d8c"
+      },
+      {
+        "path": "drawable-xxhdpi/googleg_standard_color_18.png",
+        "original_size": 1615,
+        "fixed_size": 1894,
+        "original_sha256": "db95c3dc6c2a73bbfda0c6f04f8434c7b04ab99e21534870e2e8af9b2bc40893",
+        "fixed_sha256": "334905570e59f15fb22d846ab651e33c9c17b7557b34a8b19c53679e42219670"
+      },
+      {
+        "path": "drawable-xxhdpi/icon_notification.png",
+        "original_size": 2222,
+        "fixed_size": 2790,
+        "original_sha256": "b358f18366c7153395b570d2024331435b3482bf4793a8594cda82498cbbf0b0",
+        "fixed_sha256": "8f4161d4974851649aece70f44a9fd07f479ec426270a2b3e497f0b7b0a62913"
+      },
+      {
+        "path": "drawable-xxxhdpi/icon_notification.png",
+        "original_size": 2895,
+        "fixed_size": 3307,
+        "original_sha256": "c3a81365dcbabd18f094d471b701adc3c7adaf53a413f5becc1435fec130873d",
+        "fixed_sha256": "b1441d53413846c1203b58c2950b3d42c26073280efacd8312214e65cabf5e03"
+      },
+      {
+        "path": "drawable-xxxhdpi/icon_notification_l.png",
+        "original_size": 92125,
+        "fixed_size": 114103,
+        "original_sha256": "b93aeffea2a17606db0617bd32fcc527c2edfde1285b00ac566efb0ef70d04a7",
+        "fixed_sha256": "a1b6098cb68a8c6329e9175c4e1595a8f369d471b3d443502137d825e34258a9"
+      },
+      {
+        "path": "mipmap-hdpi/app_icon.png",
+        "original_size": 10484,
+        "fixed_size": 11152,
+        "original_sha256": "f9c2b2e641b663278786b7880731bb343e5ce00758828e32cdbd575a68d91348",
+        "fixed_sha256": "977c8dcca16180ae662ac01b87856bf82e4a7c9b3b8a8def6b2edd9bc27ec789"
+      },
+      {
+        "path": "mipmap-hdpi/app_icon_round.png",
+        "original_size": 10484,
+        "fixed_size": 11152,
+        "original_sha256": "f9c2b2e641b663278786b7880731bb343e5ce00758828e32cdbd575a68d91348",
+        "fixed_sha256": "977c8dcca16180ae662ac01b87856bf82e4a7c9b3b8a8def6b2edd9bc27ec789"
+      },
+      {
+        "path": "mipmap-hdpi/ic_launcher_foreground.png",
+        "original_size": 43021,
+        "fixed_size": 47084,
+        "original_sha256": "7ffb4859bb743de3bb84e4c1816a6d86a592ac1a01e04d41a984843428ebbb60",
+        "fixed_sha256": "aefac152870c0aff067c34e1dff5d5f6743ef8ef32fd6386c8ccf79ee36ac73a"
+      },
+      {
+        "path": "mipmap-ldpi/app_icon.png",
+        "original_size": 3156,
+        "fixed_size": 3276,
+        "original_sha256": "61af3930dd97f96ed329d0acfb9142257001253925f954ea17bc58dc9a14f044",
+        "fixed_sha256": "c03593357ce2b3e68fbe76582f1a68f2d500b0b2c9cc5339e7f97b66f6c9c004"
+      },
+      {
+        "path": "mipmap-ldpi/app_icon_round.png",
+        "original_size": 3156,
+        "fixed_size": 3276,
+        "original_sha256": "61af3930dd97f96ed329d0acfb9142257001253925f954ea17bc58dc9a14f044",
+        "fixed_sha256": "c03593357ce2b3e68fbe76582f1a68f2d500b0b2c9cc5339e7f97b66f6c9c004"
+      },
+      {
+        "path": "mipmap-ldpi/ic_launcher_foreground.png",
+        "original_size": 13076,
+        "fixed_size": 14125,
+        "original_sha256": "210b3c037a6d23718a1847cd3dccfe60b85e3f98a4ffbb0ecfec36ed4b8734bf",
+        "fixed_sha256": "0b9f48048ee320279b062353c1fd86d273a64ed69c3c438686638cb5f501c8b0"
+      },
+      {
+        "path": "mipmap-mdpi/app_icon.png",
+        "original_size": 5197,
+        "fixed_size": 5490,
+        "original_sha256": "41c4ef3b4ad3fdfb9f548a7c6482f1b04276347bbc2eca5461dedf99b8924fcc",
+        "fixed_sha256": "15319048d02907d4c2df55e9c659c2b9c153ff67ae332d8608508fe873d2277a"
+      },
+      {
+        "path": "mipmap-mdpi/app_icon_round.png",
+        "original_size": 5197,
+        "fixed_size": 5490,
+        "original_sha256": "41c4ef3b4ad3fdfb9f548a7c6482f1b04276347bbc2eca5461dedf99b8924fcc",
+        "fixed_sha256": "15319048d02907d4c2df55e9c659c2b9c153ff67ae332d8608508fe873d2277a"
+      },
+      {
+        "path": "mipmap-mdpi/ic_launcher_foreground.png",
+        "original_size": 21512,
+        "fixed_size": 23464,
+        "original_sha256": "4977a6790e4f6e3132eacd2dde99e361c1c01a5b7b355ba444ac53a5ae016918",
+        "fixed_sha256": "5c4bb376281d0a0f5b5791399a5633af7f95c95734d5bfba8dede5622275b964"
+      },
+      {
+        "path": "mipmap-xhdpi/app_icon.png",
+        "original_size": 17076,
+        "fixed_size": 18379,
+        "original_sha256": "5941a97c0fc879a1491820f7bdba4a81c608d1cb4dd93639dcf8e8eb0eebbb2e",
+        "fixed_sha256": "990600c72bcaa8e72655cf61357174ec7c3f0a1a6558f1f0a20296fb0987497b"
+      },
+      {
+        "path": "mipmap-xhdpi/app_icon_round.png",
+        "original_size": 17076,
+        "fixed_size": 18379,
+        "original_sha256": "5941a97c0fc879a1491820f7bdba4a81c608d1cb4dd93639dcf8e8eb0eebbb2e",
+        "fixed_sha256": "990600c72bcaa8e72655cf61357174ec7c3f0a1a6558f1f0a20296fb0987497b"
+      },
+      {
+        "path": "mipmap-xhdpi/ic_launcher_foreground.png",
+        "original_size": 70007,
+        "fixed_size": 76499,
+        "original_sha256": "ecf540255ce1740b2cd25ab2ac95b6a78c6bc788fb02ca659fc7d7946ab256c1",
+        "fixed_sha256": "79c163dd3afd6ab097981bef8ae24b44b2d377e3b6ac5b447def62a5dfce68ef"
+      },
+      {
+        "path": "mipmap-xxhdpi/app_icon.png",
+        "original_size": 33632,
+        "fixed_size": 40658,
+        "original_sha256": "faf3625effb177cf5ac7f19f110f6664c2a11198fee811d4c30773ac48fc6069",
+        "fixed_sha256": "fc2c0ddedab002522438358d6858b12130241892028b6c587cb0060a4cfef843"
+      },
+      {
+        "path": "mipmap-xxhdpi/app_icon_round.png",
+        "original_size": 33632,
+        "fixed_size": 40658,
+        "original_sha256": "faf3625effb177cf5ac7f19f110f6664c2a11198fee811d4c30773ac48fc6069",
+        "fixed_sha256": "fc2c0ddedab002522438358d6858b12130241892028b6c587cb0060a4cfef843"
+      },
+      {
+        "path": "mipmap-xxhdpi/ic_launcher_foreground.png",
+        "original_size": 136707,
+        "fixed_size": 150060,
+        "original_sha256": "6604067383559be4bcfaff533f1e04758b4ff2b1fd56cb0ea9a7d59cb5ae6a54",
+        "fixed_sha256": "3d680b50974d160ebb88ea3e9a9245896b60296412268dc4f71e21fad2caf16a"
+      },
+      {
+        "path": "mipmap-xxxhdpi/app_icon.png",
+        "original_size": 54210,
+        "fixed_size": 66340,
+        "original_sha256": "6c1f20a59de0ed693921496de853fc366ec62b105bf82b4e71bafff5218a3b63",
+        "fixed_sha256": "2d72a1561fd20e6d349b50bb8add9e42b56261563b1da9c35a0e81acc1f88d83"
+      },
+      {
+        "path": "mipmap-xxxhdpi/app_icon_round.png",
+        "original_size": 54210,
+        "fixed_size": 66340,
+        "original_sha256": "6c1f20a59de0ed693921496de853fc366ec62b105bf82b4e71bafff5218a3b63",
+        "fixed_sha256": "2d72a1561fd20e6d349b50bb8add9e42b56261563b1da9c35a0e81acc1f88d83"
+      },
+      {
+        "path": "mipmap-xxxhdpi/ic_launcher_foreground.png",
+        "original_size": 219442,
+        "fixed_size": 241165,
+        "original_sha256": "703eadaaa169f19f2a2b8fe0a09a47140ccfb12dbbea5609bbf25da0457c51a0",
+        "fixed_sha256": "0f64a3623ee381c18d48580af13c9462c08b998c9eb344072334ba635041e1c4"
+      },
+      {
+        "path": "values/strings.xml",
+        "original_size": 2943,
+        "fixed_size": 2944,
+        "original_sha256": "19bb3f0a552614f69d8fe3eef949e143782e453d73f6594c9716d7b2049fdd10",
+        "fixed_sha256": "b713073e61f7874411da8c5ba2a8dc0d439b9c506db1cb4e57a882e1fda4d94f",
+        "text_patch_lines": 11
+      }
+    ]
+  },
+  "metadata": {
+    "original_size": 21159696,
+    "fixed_size": 21159696,
+    "same_size": true,
+    "original_sha256": "aaf8b0d5a559d49aa5cca5937fc87beed7217c497d96cfc470d5d58abe987d69",
+    "fixed_sha256": "0b0913387be65fb046a7536e016cd9f8514b0ac23bd79b8b20540c73cb1d8cf0",
+    "original_prefix_hex": "41454910df420110e17e0004e17e00f800640f45afd471fe69277dfbe187e8ec85d986475f9c0c5bc4735bcb0c49661311b639c75e52834a8240950222db1dfd",
+    "fixed_prefix_hex": "af1bb1fa1800000010010000b8450300c8460300f8fd0900c0440d00e8c51f00a80a2d00e00d000088182d00b03f060038583300f0e9690028429d00547e0000",
+    "original_has_il2cpp_magic": false,
+    "fixed_has_il2cpp_magic": true,
+    "original_entropy": 4.094943997663742,
+    "fixed_entropy": 5.217206422655109,
+    "original_printable_ratio": 0.15043614048141335,
+    "fixed_printable_ratio": 0.2533385640322999,
+    "common_length": 21159696,
+    "equal_bytes": 4898564,
+    "equal_ratio": 0.2315044601774997,
+    "xor_entropy": 6.583195961777865,
+    "xor_unique_values": 256,
+    "xor_most_common": [
+      {
+        "value": 0,
+        "count": 4898564,
+        "ratio": 0.2315044601774997
+      },
+      {
+        "value": 255,
+        "count": 1258402,
+        "ratio": 0.05947164836394625
+      },
+      {
+        "value": 1,
+        "count": 713847,
+        "ratio": 0.0337361652076665
+      },
+      {
+        "value": 96,
+        "count": 314784,
+        "ratio": 0.014876584238261268
+      },
+      {
+        "value": 4,
+        "count": 234620,
+        "ratio": 0.011088061000498306
+      },
+      {
+        "value": 32,
+        "count": 196910,
+        "ratio": 0.009305899290802666
+      },
+      {
+        "value": 8,
+        "count": 188332,
+        "ratio": 0.008900505942996535
+      },
+      {
+        "value": 2,
+        "count": 185256,
+        "ratio": 0.008755135234457055
+      },
+      {
+        "value": 16,
+        "count": 160846,
+        "ratio": 0.007601526978459426
+      },
+      {
+        "value": 6,
+        "count": 156187,
+        "ratio": 0.007381344231032431
+      },
+      {
+        "value": 3,
+        "count": 154851,
+        "ratio": 0.007318205327713593
+      },
+      {
+        "value": 9,
+        "count": 127561,
+        "ratio": 0.00602848925617835
+      },
+      {
+        "value": 17,
+        "count": 117504,
+        "ratio": 0.0055531988739346725
+      },
+      {
+        "value": 160,
+        "count": 114851,
+        "ratio": 0.00542781900080228
+      },
+      {
+        "value": 192,
+        "count": 106176,
+        "ratio": 0.005017841466153389
+      },
+      {
+        "value": 5,
+        "count": 93151,
+        "ratio": 0.004402284418452892
+      }
+    ],
+    "exact_repeating_xor_period_le_512": null
+  },
+  "elf": {
+    "original_file": {
+      "size": 105866464,
+      "sha256": "1a774f6ddf828179b94d40294a01b5ea6b9c8bc89769d36719bec7d56c167acf"
+    },
+    "fixed_file": {
+      "size": 99150888,
+      "sha256": "52d0cdac0179ae4a5d61a00b9bfd500969730d1a3f157cf667d82c525836936b"
+    },
+    "sections": [
+      {
+        "name": "",
+        "original": null,
+        "fixed": {
+          "name": "",
+          "type": "SHT_NULL",
+          "flags": 0,
+          "address": 0,
+          "offset": 0,
+          "size": 0,
+          "sha256": null,
+          "entropy": 0.0
+        },
+        "identical_size": false,
+        "identical_hash": false
+      },
+      {
+        "name": ".bss",
+        "original": null,
+        "fixed": {
+          "name": ".bss",
+          "type": "SHT_NOBITS",
+          "flags": 3,
+          "address": 99214240,
+          "offset": 99148696,
+          "size": 3128384,
+          "sha256": "a46358a8526ae4b7f9ff5da22e9fe252e97f0993c31353071e23a7f0eda2f512",
+          "entropy": -0.0
+        },
+        "identical_size": false,
+        "identical_hash": false
+      },
+      {
+        "name": ".comment",
+        "original": null,
+        "fixed": {
+          "name": ".comment",
+          "type": "SHT_PROGBITS",
+          "flags": 48,
+          "address": 0,
+          "offset": 99148696,
+          "size": 100,
+          "sha256": "55a2fa74370b9de9963d6872498d13c29929115dae64804c375063afa5df2d4f",
+          "entropy": 4.7528786893420305
+        },
+        "identical_size": false,
+        "identical_hash": false
+      },
+      {
+        "name": ".data",
+        "original": null,
+        "fixed": {
+          "name": ".data",
+          "type": "SHT_PROGBITS",
+          "flags": 3,
+          "address": 96855312,
+          "offset": 96789776,
+          "size": 2358920,
+          "sha256": "79ef5d7e054ceb8d3ce166398bc689f421745e21209f83c3d6e31fc72de1d8de",
+          "entropy": 2.3447076710725905
+        },
+        "identical_size": false,
+        "identical_hash": false
+      },
+      {
+        "name": ".data.rel.ro",
+        "original": null,
+        "fixed": {
+          "name": ".data.rel.ro",
+          "type": "SHT_PROGBITS",
+          "flags": 3,
+          "address": 90014080,
+          "offset": 89948544,
+          "size": 5434080,
+          "sha256": "2bb4065ac2b8f1f0dccd68aafeaaf2bb6aa22c2c64d9984375182b373afcb9df",
+          "entropy": 4.157882013896988
+        },
+        "identical_size": false,
+        "identical_hash": false
+      },
+      {
+        "name": ".dynamic",
+        "original": {
+          "name": ".dynamic",
+          "type": "SHT_DYNAMIC",
+          "flags": 3,
+          "address": 95448160,
+          "offset": 95382624,
+          "size": 496,
+          "sha256": "9d2a93818be554de20daa4a38d3317561f1ce751ae657af8582fd9cb8290aeef",
+          "entropy": 1.2459870354975555
+        },
+        "fixed": {
+          "name": ".dynamic",
+          "type": "SHT_DYNAMIC",
+          "flags": 3,
+          "address": 95448160,
+          "offset": 95382624,
+          "size": 496,
+          "sha256": "2ef447cd1ff133cb00eb5cb432ac08572685e47bebac9c40bf32ce750499c082",
+          "entropy": 1.7335423455954475
+        },
+        "identical_size": true,
+        "identical_hash": false
+      },
+      {
+        "name": ".dynstr",
+        "original": {
+          "name": ".dynstr",
+          "type": "SHT_STRTAB",
+          "flags": 2,
+          "address": 22720,
+          "offset": 22720,
+          "size": 18694,
+          "sha256": "b4d1bc3a9200141ab4eba26ef6d589ae268ea146fb323142e6d0da53c0b79f15",
+          "entropy": 0.0595691951462721
+        },
+        "fixed": {
+          "name": ".dynstr",
+          "type": "SHT_STRTAB",
+          "flags": 2,
+          "address": 22720,
+          "offset": 22720,
+          "size": 18694,
+          "sha256": "3ba402559faf2ef5b836b4cc7a90aebf91d19e9bbf1929fe17899bf660ba141f",
+          "entropy": 4.895036404983499
+        },
+        "identical_size": true,
+        "identical_hash": false
+      },
+      {
+        "name": ".dynsym",
+        "original": {
+          "name": ".dynsym",
+          "type": "SHT_DYNSYM",
+          "flags": 2,
+          "address": 5464,
+          "offset": 5464,
+          "size": 17256,
+          "sha256": "d8b80479300737c2db76ed559ec590b8b3d1011b003bd52956760801f30db798",
+          "entropy": 0.001798495815183589
+        },
+        "fixed": {
+          "name": ".dynsym",
+          "type": "SHT_DYNSYM",
+          "flags": 2,
+          "address": 5464,
+          "offset": 5464,
+          "size": 17256,
+          "sha256": "09f3cb76fc7417048fe445e5defccf0ec92ad9b025ee6ac2d8a263c2a3c3a5fb",
+          "entropy": 2.7126941778460885
+        },
+        "identical_size": true,
+        "identical_hash": false
+      },
+      {
+        "name": ".eh_frame",
+        "original": null,
+        "fixed": {
+          "name": ".eh_frame",
+          "type": "SHT_PROGBITS",
+          "flags": 2,
+          "address": 79184072,
+          "offset": 79184072,
+          "size": 8179344,
+          "sha256": "bf87a29a9d5eec3e48bbdf0e3e454cecaf27f500c3996129264e79992072b434",
+          "entropy": 4.724599007267439
+        },
+        "identical_size": false,
+        "identical_hash": false
+      },
+      {
+        "name": ".eh_frame_hdr",
+        "original": null,
+        "fixed": {
+          "name": ".eh_frame_hdr",
+          "type": "SHT_PROGBITS",
+          "flags": 2,
+          "address": 77108040,
+          "offset": 77108040,
+          "size": 2076028,
+          "sha256": "0dd0b0f5caa8cf4eed1a5aed59802afaf8f5a38f9f092d77c948b728db32a27e",
+          "entropy": 7.016247253384944
+        },
+        "identical_size": false,
+        "identical_hash": false
+      },
+      {
+        "name": ".fini_array",
+        "original": null,
+        "fixed": {
+          "name": ".fini_array",
+          "type": "SHT_FINI_ARRAY",
+          "flags": 3,
+          "address": 90014056,
+          "offset": 89948520,
+          "size": 8,
+          "sha256": "35081f76e35ab2e3eed6c4a2f2cc8b8504de1080d875a62120b611513b97db71",
+          "entropy": 2.0
+        },
+        "identical_size": false,
+        "identical_hash": false
+      },
+      {
+        "name": ".gcc_except_table",
+        "original": null,
+        "fixed": {
+          "name": ".gcc_except_table",
+          "type": "SHT_PROGBITS",
+          "flags": 2,
+          "address": 87363416,
+          "offset": 87363416,
+          "size": 2584044,
+          "sha256": "d57952d9d73174b418f523c6b28d36bcc4de1f0d5983d3f2ced5539665dfac84",
+          "entropy": 3.0810581445795746
+        },
+        "identical_size": false,
+        "identical_hash": false
+      },
+      {
+        "name": ".gnu.version",
+        "original": null,
+        "fixed": {
+          "name": ".gnu.version",
+          "type": "SHT_GNU_versym",
+          "flags": 2,
+          "address": 41414,
+          "offset": 41414,
+          "size": 1438,
+          "sha256": "6b93e82846f617c28ad1004bed9a4e23fd948ea5b8a61193657bd1428b479eab",
+          "entropy": 1.549972376671366
+        },
+        "identical_size": false,
+        "identical_hash": false
+      },
+      {
+        "name": ".gnu.version_r",
+        "original": null,
+        "fixed": {
+          "name": ".gnu.version_r",
+          "type": "SHT_GNU_verneed",
+          "flags": 2,
+          "address": 42856,
+          "offset": 42856,
+          "size": 96,
+          "sha256": "731fd33a0b77c81a6eba4af3f799ae8c5452e1b7b1541eb13dc515146e869cd0",
+          "entropy": 2.2299756245218414
+        },
+        "identical_size": false,
+        "identical_hash": false
+      },
+      {
+        "name": ".gnu_debuglink",
+        "original": null,
+        "fixed": {
+          "name": ".gnu_debuglink",
+          "type": "SHT_PROGBITS",
+          "flags": 0,
+          "address": 0,
+          "offset": 99148796,
+          "size": 20,
+          "sha256": "61fc8c414edab2c168928ed2d5b3863677f5eb202d671cbd76a4f27c7f80bc38",
+          "entropy": 3.784183719779189
+        },
+        "identical_size": false,
+        "identical_hash": false
+      },
+      {
+        "name": ".got",
+        "original": null,
+        "fixed": {
+          "name": ".got",
+          "type": "SHT_PROGBITS",
+          "flags": 3,
+          "address": 95448656,
+          "offset": 95383120,
+          "size": 1403632,
+          "sha256": "ca0eb5924acf6ad96b75a0d5f1773bfd2f09b66d016a1df876a7a20a6a646c6f",
+          "entropy": 4.1392325835320225
+        },
+        "identical_size": false,
+        "identical_hash": false
+      },
+      {
+        "name": ".got.plt",
+        "original": null,
+        "fixed": {
+          "name": ".got.plt",
+          "type": "SHT_PROGBITS",
+          "flags": 3,
+          "address": 96852288,
+          "offset": 96786752,
+          "size": 3024,
+          "sha256": "c68b35e8c0348a50fe623c21ef3e3dff08efbcd5ef3880603741afddabf0fba2",
+          "entropy": 1.992018055234734
+        },
+        "identical_size": false,
+        "identical_hash": false
+      },
+      {
+        "name": ".hash",
+        "original": null,
+        "fixed": {
+          "name": ".hash",
+          "type": "SHT_HASH",
+          "flags": 2,
+          "address": 496,
+          "offset": 496,
+          "size": 4968,
+          "sha256": "756bbda5381d9c487d07fabfc2726ab90a5a5eed92db529950fc24c4703ad1b1",
+          "entropy": 2.2572120231677317
+        },
+        "identical_size": false,
+        "identical_hash": false
+      },
+      {
+        "name": ".init_array",
+        "original": null,
+        "fixed": {
+          "name": ".init_array",
+          "type": "SHT_INIT_ARRAY",
+          "flags": 3,
+          "address": 90013696,
+          "offset": 89948160,
+          "size": 352,
+          "sha256": "6cb13c509afa31e1a9ed62772fc676e0fa8966dc5e3dda31e1db0a19903a96b7",
+          "entropy": 3.091305928892903
+        },
+        "identical_size": false,
+        "identical_hash": false
+      },
+      {
+        "name": ".note.android.ident",
+        "original": null,
+        "fixed": {
+          "name": ".note.android.ident",
+          "type": "SHT_NOTE",
+          "flags": 2,
+          "address": 89947460,
+          "offset": 89947460,
+          "size": 152,
+          "sha256": "b94508b0705fea4b18889bf2ce89fb4f37b854fea4c0f252f42db515079b666b",
+          "entropy": 1.1530749430618352
+        },
+        "identical_size": false,
+        "identical_hash": false
+      },
+      {
+        "name": ".note.gnu.build-id",
+        "original": null,
+        "fixed": {
+          "name": ".note.gnu.build-id",
+          "type": "SHT_NOTE",
+          "flags": 2,
+          "address": 456,
+          "offset": 456,
+          "size": 36,
+          "sha256": "9d6cb43d10e41f602b00c5a94d60025ddb9b00e0224b85b3437d9def469355ac",
+          "entropy": 4.136056086195822
+        },
+        "identical_size": false,
+        "identical_hash": false
+      },
+      {
+        "name": ".plt",
+        "original": null,
+        "fixed": {
+          "name": ".plt",
+          "type": "SHT_PROGBITS",
+          "flags": 6,
+          "address": 21601200,
+          "offset": 21601200,
+          "size": 6032,
+          "sha256": "110916565f3374c775c7a3f4a588fbe2a129e93f48f46c9c6b2c2b35d6030798",
+          "entropy": 4.815586463549814
+        },
+        "identical_size": false,
+        "identical_hash": false
+      },
+      {
+        "name": ".rela.dyn",
+        "original": null,
+        "fixed": {
+          "name": ".rela.dyn",
+          "type": "SHT_RELA",
+          "flags": 2,
+          "address": 42952,
+          "offset": 42952,
+          "size": 21549240,
+          "sha256": "b05944555d50a77d868c13fdc5349d57e81acf66def05b03950166ac9cd5da56",
+          "entropy": 3.5468623598032734
+        },
+        "identical_size": false,
+        "identical_hash": false
+      },
+      {
+        "name": ".rela.plt",
+        "original": null,
+        "fixed": {
+          "name": ".rela.plt",
+          "type": "SHT_RELA",
+          "flags": 66,
+          "address": 21592192,
+          "offset": 21592192,
+          "size": 9000,
+          "sha256": "34c9f6bb787d2b72b31b24b863a416bf8a6f21997b63222936dec9b5a8f838f2",
+          "entropy": 2.4715613707554005
+        },
+        "identical_size": false,
+        "identical_hash": false
+      },
+      {
+        "name": ".rodata",
+        "original": null,
+        "fixed": {
+          "name": ".rodata",
+          "type": "SHT_PROGBITS",
+          "flags": 2,
+          "address": 72121440,
+          "offset": 72121440,
+          "size": 4986597,
+          "sha256": "52a38e82e2d62d03e58c07c67b0daf252e53d7adae25e9f3b079f409748c8b04",
+          "entropy": 4.473589112044021
+        },
+        "identical_size": false,
+        "identical_hash": false
+      },
+      {
+        "name": ".shstrtab",
+        "original": {
+          "name": ".shstrtab",
+          "type": "SHT_STRTAB",
+          "flags": 0,
+          "address": 0,
+          "offset": 99148816,
+          "size": 278,
+          "sha256": "63dcd9662e97ee022ebac31fad09f82e9026d41e3bf86d235376072be32a2bd6",
+          "entropy": 4.309670740513857
+        },
+        "fixed": {
+          "name": ".shstrtab",
+          "type": "SHT_STRTAB",
+          "flags": 0,
+          "address": 0,
+          "offset": 99148816,
+          "size": 278,
+          "sha256": "63dcd9662e97ee022ebac31fad09f82e9026d41e3bf86d235376072be32a2bd6",
+          "entropy": 4.309670740513857
+        },
+        "identical_size": true,
+        "identical_hash": true
+      },
+      {
+        "name": ".text",
+        "original": null,
+        "fixed": {
+          "name": ".text",
+          "type": "SHT_PROGBITS",
+          "flags": 6,
+          "address": 21607232,
+          "offset": 21607232,
+          "size": 3607584,
+          "sha256": "4e7b29a7e9b7b217f9a807cb7b865b614096dd15e29f1822998c9e8f3b06be65",
+          "entropy": 6.165207504942043
+        },
+        "identical_size": false,
+        "identical_hash": false
+      },
+      {
+        "name": "il2cpp",
+        "original": null,
+        "fixed": {
+          "name": "il2cpp",
+          "type": "SHT_PROGBITS",
+          "flags": 6,
+          "address": 25214816,
+          "offset": 25214816,
+          "size": 46906620,
+          "sha256": "b1fddade4957bb311a5b037a87f6a7a1b5c9a139231d4d4806d0e9880b1996c2",
+          "entropy": 6.425027131054688
+        },
+        "identical_size": false,
+        "identical_hash": false
+      }
+    ],
+    "fixed_patch_point_context_mapping": [
+      {
+        "id": "rendering.resolution",
+        "fixed_offset": 26543252,
+        "fixed_bytes": "095a8052",
+        "original_context_matches": [],
+        "original_bytes_at_matches": []
+      },
+      {
+        "id": "framerate.on_begin_scene",
+        "fixed_offset": 31677588,
+        "fixed_bytes": "e00f1e32",
+        "original_context_matches": [],
+        "original_bytes_at_matches": []
+      },
+      {
+        "id": "framerate.setup_live_mv_special_level",
+        "fixed_offset": 31680364,
+        "fixed_bytes": "e00f1e32",
+        "original_context_matches": [],
+        "original_bytes_at_matches": []
+      },
+      {
+        "id": "framerate.setup_live_special_level",
+        "fixed_offset": 31678844,
+        "fixed_bytes": "e00f1e32",
+        "original_context_matches": [],
+        "original_bytes_at_matches": []
+      },
+      {
+        "id": "framerate.setup_theater_special_level",
+        "fixed_offset": 31676844,
+        "fixed_bytes": "e00f1e32",
+        "original_context_matches": [],
+        "original_bytes_at_matches": []
+      },
+      {
+        "id": "framerate.setup_commu_special_plus_level",
+        "fixed_offset": 31677924,
+        "fixed_bytes": "e00f1e32",
+        "original_context_matches": [],
+        "original_bytes_at_matches": []
+      },
+      {
+        "id": "framerate.setup_gasha_special_plus_level",
+        "fixed_offset": 31678348,
+        "fixed_bytes": "e00f1e32",
+        "original_context_matches": [],
+        "original_bytes_at_matches": []
+      }
+    ]
+  },
+  "critical": [
+    {
+      "path": "AndroidManifest.xml",
+      "original_source": "base.apk",
+      "original_size": 19700,
+      "fixed_size": 17536,
+      "original_sha256": "bdba590bb1f29b1ea4edf60989560f92920cfd46cf6913f9780e0d45740c00d7",
+      "fixed_sha256": "bbec6258e54bea112639d50eac7fb1b1a11e97906c45f3c2f50bea74059574e6",
+      "identical": false
+    },
+    {
+      "path": "resources.arsc",
+      "original_source": "base.apk",
+      "original_size": 172104,
+      "fixed_size": 171820,
+      "original_sha256": "54d699a035db8f9c000ad0de8969d6f9830b373a56b4172df985b2c7cacf899a",
+      "fixed_sha256": "cf0002af2bb6b1e67816778114af0096dc7a6259a5a6e4459d77f6041e947671",
+      "identical": false
+    },
+    {
+      "path": "classes.dex",
+      "original_source": "base.apk",
+      "original_size": 4929808,
+      "fixed_size": 4907728,
+      "original_sha256": "82949ead060507eed6b9f8c035c49f0be9fa68082df6c7762b5ac98f77dce925",
+      "fixed_sha256": "2660a104b9d5746d920be6651aff2ed7d2a0834a8dc94b8f0166760e1a90d6df",
+      "identical": false
+    },
+    {
+      "path": "global-metadata.dat",
+      "original_source": "base.apk",
+      "original_size": 21159696,
+      "fixed_size": 21159696,
+      "original_sha256": "aaf8b0d5a559d49aa5cca5937fc87beed7217c497d96cfc470d5d58abe987d69",
+      "fixed_sha256": "0b0913387be65fb046a7536e016cd9f8514b0ac23bd79b8b20540c73cb1d8cf0",
+      "identical": false
+    },
+    {
+      "path": "data.unity3d",
+      "original_source": "base.apk",
+      "original_size": 48294685,
+      "fixed_size": 48294685,
+      "original_sha256": "049ba52c8dc51ddbab171c2901c3b9d3a1b4853c41ce96127d2fe6d523913464",
+      "fixed_sha256": "049ba52c8dc51ddbab171c2901c3b9d3a1b4853c41ce96127d2fe6d523913464",
+      "identical": true
+    },
+    {
+      "path": "libunity.so",
+      "original_source": "arm64.apk",
+      "original_size": 15971328,
+      "fixed_size": 15971328,
+      "original_sha256": "af8b49e0ed592fcec99e0f6ebc33e86dfa7647abe9d476c70a199fd53ea03051",
+      "fixed_sha256": "af8b49e0ed592fcec99e0f6ebc33e86dfa7647abe9d476c70a199fd53ea03051",
+      "identical": true
+    },
+    {
+      "path": "libil2cpp.so",
+      "original_source": "arm64.apk",
+      "original_size": 105866464,
+      "fixed_size": 99150888,
+      "original_sha256": "1a774f6ddf828179b94d40294a01b5ea6b9c8bc89769d36719bec7d56c167acf",
+      "fixed_sha256": "52d0cdac0179ae4a5d61a00b9bfd500969730d1a3f157cf667d82c525836936b",
+      "identical": false
+    }
+  ]
+}

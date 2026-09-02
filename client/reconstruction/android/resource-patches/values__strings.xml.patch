@@ -1,0 +1,11 @@
+--- original/res/values/strings.xml
++++ zh-fixed/res/values/strings.xml
+@@ -1,7 +1,7 @@
+ <?xml version="1.0" encoding="utf-8"?>
+ <resources>
+-    <string name="app_name">劇場時光</string>
++    <string name="app_name">劇場時光L</string>
+     <string name="common_google_play_services_enable_button">Enable</string>
+     <string name="common_google_play_services_enable_text">"%1$s won't work unless you enable Google Play services."</string>
+     <string name="common_google_play_services_enable_title">Enable Google Play services</string>
+     <string name="common_google_play_services_install_button">Install</string>

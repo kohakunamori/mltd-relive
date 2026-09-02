@@ -1,0 +1,22 @@
+{
+  "official_bundle": {
+    "package": "com.bandainamcoent.imas_millionlive_theaterdays_ch",
+    "version_code": 21000,
+    "version_name": "2.1.000",
+    "base_apk": {
+      "file": "base.apk",
+      "size": 63467824,
+      "sha256": "8b8a3976687f606cba2fe3a605d80ae0f7d9cbaa72e6b97ab4bed8c556ba9081"
+    },
+    "arm64_split": {
+      "file": "arm64.apk",
+      "size": 42641009,
+      "sha256": "9932366bd357dc33701a6e7282d26ed67630db95486f596328aade8523032e46"
+    }
+  },
+  "zh_fixed": {
+    "file": "fixed.apk",
+    "size": 96249978,
+    "sha256": "a423f1b09b6d9022cf255aff9a43716d6beadf32d42641da3c7b92d2e663e918"
+  }
+}

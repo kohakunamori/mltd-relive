@@ -1,0 +1,34 @@
+{
+  "original_smali_files": 5445,
+  "fixed_smali_files": 5428,
+  "semantic_identical_files": 5427,
+  "semantic_changed_files": 1,
+  "original_only": [
+    "smali/com/bandainamcoent/imas_millionlive_theaterdays/player/OverrideEventListener$1.smali",
+    "smali/com/bandainamcoent/imas_millionlive_theaterdays/player/OverrideEventListener$2.smali",
+    "smali/com/bandainamcoent/imas_millionlive_theaterdays/player/OverrideEventListener$3.smali",
+    "smali/com/bandainamcoent/imas_millionlive_theaterdays/player/OverrideEventListener.smali",
+    "smali/com/inca/security/Core/ObjectReflector.smali",
+    "smali/com/inca/security/DexProtect/Binder.smali",
+    "smali/com/inca/security/DexProtect/SupportActivity$1.smali",
+    "smali/com/inca/security/DexProtect/SupportActivity.smali",
+    "smali/com/inca/security/IiiIiiiiiI.smali",
+    "smali/com/inca/security/Proxy/AppGuardFrontApplication.smali",
+    "smali/com/inca/security/Proxy/AppGuardProxyApplication.smali",
+    "smali/com/inca/security/Proxy/AppGuardProxyHandler.smali",
+    "smali/com/inca/security/Proxy/JNISoxProxy.smali",
+    "smali/com/inca/security/Proxy/iIiIiIiIii.smali",
+    "smali/com/inca/security/Service/AppGuardService.smali",
+    "smali/com/inca/security/Service/AppGuardServiceCaller.smali",
+    "smali/com/inca/security/iiIiiiiIIi.smali"
+  ],
+  "fixed_only": [],
+  "changed": [
+    {
+      "path": "smali/com/bandainamcoent/imas_millionlive_theaterdays/player/OverrideActivity.smali",
+      "original_normalized_sha256": "2caecd0c75c2b1c307de5769fb4b083ce26ab0ba73d4569f049424f50c2cde4f",
+      "fixed_normalized_sha256": "ccac84c1b91cd3f092311f43b08d98eb0452f1c02d9ed0c6f66dcee32eba3a9c",
+      "patch_lines": 305
+    }
+  ]
+}

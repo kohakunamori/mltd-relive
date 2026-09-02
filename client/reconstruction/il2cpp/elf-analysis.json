@@ -1,0 +1,547 @@
+{
+  "original_file": {
+    "size": 105866464,
+    "sha256": "1a774f6ddf828179b94d40294a01b5ea6b9c8bc89769d36719bec7d56c167acf"
+  },
+  "fixed_file": {
+    "size": 99150888,
+    "sha256": "52d0cdac0179ae4a5d61a00b9bfd500969730d1a3f157cf667d82c525836936b"
+  },
+  "sections": [
+    {
+      "name": "",
+      "original": null,
+      "fixed": {
+        "name": "",
+        "type": "SHT_NULL",
+        "flags": 0,
+        "address": 0,
+        "offset": 0,
+        "size": 0,
+        "sha256": null,
+        "entropy": 0.0
+      },
+      "identical_size": false,
+      "identical_hash": false
+    },
+    {
+      "name": ".bss",
+      "original": null,
+      "fixed": {
+        "name": ".bss",
+        "type": "SHT_NOBITS",
+        "flags": 3,
+        "address": 99214240,
+        "offset": 99148696,
+        "size": 3128384,
+        "sha256": "a46358a8526ae4b7f9ff5da22e9fe252e97f0993c31353071e23a7f0eda2f512",
+        "entropy": -0.0
+      },
+      "identical_size": false,
+      "identical_hash": false
+    },
+    {
+      "name": ".comment",
+      "original": null,
+      "fixed": {
+        "name": ".comment",
+        "type": "SHT_PROGBITS",
+        "flags": 48,
+        "address": 0,
+        "offset": 99148696,
+        "size": 100,
+        "sha256": "55a2fa74370b9de9963d6872498d13c29929115dae64804c375063afa5df2d4f",
+        "entropy": 4.7528786893420305
+      },
+      "identical_size": false,
+      "identical_hash": false
+    },
+    {
+      "name": ".data",
+      "original": null,
+      "fixed": {
+        "name": ".data",
+        "type": "SHT_PROGBITS",
+        "flags": 3,
+        "address": 96855312,
+        "offset": 96789776,
+        "size": 2358920,
+        "sha256": "79ef5d7e054ceb8d3ce166398bc689f421745e21209f83c3d6e31fc72de1d8de",
+        "entropy": 2.3447076710725905
+      },
+      "identical_size": false,
+      "identical_hash": false
+    },
+    {
+      "name": ".data.rel.ro",
+      "original": null,
+      "fixed": {
+        "name": ".data.rel.ro",
+        "type": "SHT_PROGBITS",
+        "flags": 3,
+        "address": 90014080,
+        "offset": 89948544,
+        "size": 5434080,
+        "sha256": "2bb4065ac2b8f1f0dccd68aafeaaf2bb6aa22c2c64d9984375182b373afcb9df",
+        "entropy": 4.157882013896988
+      },
+      "identical_size": false,
+      "identical_hash": false
+    },
+    {
+      "name": ".dynamic",
+      "original": {
+        "name": ".dynamic",
+        "type": "SHT_DYNAMIC",
+        "flags": 3,
+        "address": 95448160,
+        "offset": 95382624,
+        "size": 496,
+        "sha256": "9d2a93818be554de20daa4a38d3317561f1ce751ae657af8582fd9cb8290aeef",
+        "entropy": 1.2459870354975555
+      },
+      "fixed": {
+        "name": ".dynamic",
+        "type": "SHT_DYNAMIC",
+        "flags": 3,
+        "address": 95448160,
+        "offset": 95382624,
+        "size": 496,
+        "sha256": "2ef447cd1ff133cb00eb5cb432ac08572685e47bebac9c40bf32ce750499c082",
+        "entropy": 1.7335423455954475
+      },
+      "identical_size": true,
+      "identical_hash": false
+    },
+    {
+      "name": ".dynstr",
+      "original": {
+        "name": ".dynstr",
+        "type": "SHT_STRTAB",
+        "flags": 2,
+        "address": 22720,
+        "offset": 22720,
+        "size": 18694,
+        "sha256": "b4d1bc3a9200141ab4eba26ef6d589ae268ea146fb323142e6d0da53c0b79f15",
+        "entropy": 0.0595691951462721
+      },
+      "fixed": {
+        "name": ".dynstr",
+        "type": "SHT_STRTAB",
+        "flags": 2,
+        "address": 22720,
+        "offset": 22720,
+        "size": 18694,
+        "sha256": "3ba402559faf2ef5b836b4cc7a90aebf91d19e9bbf1929fe17899bf660ba141f",
+        "entropy": 4.895036404983499
+      },
+      "identical_size": true,
+      "identical_hash": false
+    },
+    {
+      "name": ".dynsym",
+      "original": {
+        "name": ".dynsym",
+        "type": "SHT_DYNSYM",
+        "flags": 2,
+        "address": 5464,
+        "offset": 5464,
+        "size": 17256,
+        "sha256": "d8b80479300737c2db76ed559ec590b8b3d1011b003bd52956760801f30db798",
+        "entropy": 0.001798495815183589
+      },
+      "fixed": {
+        "name": ".dynsym",
+        "type": "SHT_DYNSYM",
+        "flags": 2,
+        "address": 5464,
+        "offset": 5464,
+        "size": 17256,
+        "sha256": "09f3cb76fc7417048fe445e5defccf0ec92ad9b025ee6ac2d8a263c2a3c3a5fb",
+        "entropy": 2.7126941778460885
+      },
+      "identical_size": true,
+      "identical_hash": false
+    },
+    {
+      "name": ".eh_frame",
+      "original": null,
+      "fixed": {
+        "name": ".eh_frame",
+        "type": "SHT_PROGBITS",
+        "flags": 2,
+        "address": 79184072,
+        "offset": 79184072,
+        "size": 8179344,
+        "sha256": "bf87a29a9d5eec3e48bbdf0e3e454cecaf27f500c3996129264e79992072b434",
+        "entropy": 4.724599007267439
+      },
+      "identical_size": false,
+      "identical_hash": false
+    },
+    {
+      "name": ".eh_frame_hdr",
+      "original": null,
+      "fixed": {
+        "name": ".eh_frame_hdr",
+        "type": "SHT_PROGBITS",
+        "flags": 2,
+        "address": 77108040,
+        "offset": 77108040,
+        "size": 2076028,
+        "sha256": "0dd0b0f5caa8cf4eed1a5aed59802afaf8f5a38f9f092d77c948b728db32a27e",
+        "entropy": 7.016247253384944
+      },
+      "identical_size": false,
+      "identical_hash": false
+    },
+    {
+      "name": ".fini_array",
+      "original": null,
+      "fixed": {
+        "name": ".fini_array",
+        "type": "SHT_FINI_ARRAY",
+        "flags": 3,
+        "address": 90014056,
+        "offset": 89948520,
+        "size": 8,
+        "sha256": "35081f76e35ab2e3eed6c4a2f2cc8b8504de1080d875a62120b611513b97db71",
+        "entropy": 2.0
+      },
+      "identical_size": false,
+      "identical_hash": false
+    },
+    {
+      "name": ".gcc_except_table",
+      "original": null,
+      "fixed": {
+        "name": ".gcc_except_table",
+        "type": "SHT_PROGBITS",
+        "flags": 2,
+        "address": 87363416,
+        "offset": 87363416,
+        "size": 2584044,
+        "sha256": "d57952d9d73174b418f523c6b28d36bcc4de1f0d5983d3f2ced5539665dfac84",
+        "entropy": 3.0810581445795746
+      },
+      "identical_size": false,
+      "identical_hash": false
+    },
+    {
+      "name": ".gnu.version",
+      "original": null,
+      "fixed": {
+        "name": ".gnu.version",
+        "type": "SHT_GNU_versym",
+        "flags": 2,
+        "address": 41414,
+        "offset": 41414,
+        "size": 1438,
+        "sha256": "6b93e82846f617c28ad1004bed9a4e23fd948ea5b8a61193657bd1428b479eab",
+        "entropy": 1.549972376671366
+      },
+      "identical_size": false,
+      "identical_hash": false
+    },
+    {
+      "name": ".gnu.version_r",
+      "original": null,
+      "fixed": {
+        "name": ".gnu.version_r",
+        "type": "SHT_GNU_verneed",
+        "flags": 2,
+        "address": 42856,
+        "offset": 42856,
+        "size": 96,
+        "sha256": "731fd33a0b77c81a6eba4af3f799ae8c5452e1b7b1541eb13dc515146e869cd0",
+        "entropy": 2.2299756245218414
+      },
+      "identical_size": false,
+      "identical_hash": false
+    },
+    {
+      "name": ".gnu_debuglink",
+      "original": null,
+      "fixed": {
+        "name": ".gnu_debuglink",
+        "type": "SHT_PROGBITS",
+        "flags": 0,
+        "address": 0,
+        "offset": 99148796,
+        "size": 20,
+        "sha256": "61fc8c414edab2c168928ed2d5b3863677f5eb202d671cbd76a4f27c7f80bc38",
+        "entropy": 3.784183719779189
+      },
+      "identical_size": false,
+      "identical_hash": false
+    },
+    {
+      "name": ".got",
+      "original": null,
+      "fixed": {
+        "name": ".got",
+        "type": "SHT_PROGBITS",
+        "flags": 3,
+        "address": 95448656,
+        "offset": 95383120,
+        "size": 1403632,
+        "sha256": "ca0eb5924acf6ad96b75a0d5f1773bfd2f09b66d016a1df876a7a20a6a646c6f",
+        "entropy": 4.1392325835320225
+      },
+      "identical_size": false,
+      "identical_hash": false
+    },
+    {
+      "name": ".got.plt",
+      "original": null,
+      "fixed": {
+        "name": ".got.plt",
+        "type": "SHT_PROGBITS",
+        "flags": 3,
+        "address": 96852288,
+        "offset": 96786752,
+        "size": 3024,
+        "sha256": "c68b35e8c0348a50fe623c21ef3e3dff08efbcd5ef3880603741afddabf0fba2",
+        "entropy": 1.992018055234734
+      },
+      "identical_size": false,
+      "identical_hash": false
+    },
+    {
+      "name": ".hash",
+      "original": null,
+      "fixed": {
+        "name": ".hash",
+        "type": "SHT_HASH",
+        "flags": 2,
+        "address": 496,
+        "offset": 496,
+        "size": 4968,
+        "sha256": "756bbda5381d9c487d07fabfc2726ab90a5a5eed92db529950fc24c4703ad1b1",
+        "entropy": 2.2572120231677317
+      },
+      "identical_size": false,
+      "identical_hash": false
+    },
+    {
+      "name": ".init_array",
+      "original": null,
+      "fixed": {
+        "name": ".init_array",
+        "type": "SHT_INIT_ARRAY",
+        "flags": 3,
+        "address": 90013696,
+        "offset": 89948160,
+        "size": 352,
+        "sha256": "6cb13c509afa31e1a9ed62772fc676e0fa8966dc5e3dda31e1db0a19903a96b7",
+        "entropy": 3.091305928892903
+      },
+      "identical_size": false,
+      "identical_hash": false
+    },
+    {
+      "name": ".note.android.ident",
+      "original": null,
+      "fixed": {
+        "name": ".note.android.ident",
+        "type": "SHT_NOTE",
+        "flags": 2,
+        "address": 89947460,
+        "offset": 89947460,
+        "size": 152,
+        "sha256": "b94508b0705fea4b18889bf2ce89fb4f37b854fea4c0f252f42db515079b666b",
+        "entropy": 1.1530749430618352
+      },
+      "identical_size": false,
+      "identical_hash": false
+    },
+    {
+      "name": ".note.gnu.build-id",
+      "original": null,
+      "fixed": {
+        "name": ".note.gnu.build-id",
+        "type": "SHT_NOTE",
+        "flags": 2,
+        "address": 456,
+        "offset": 456,
+        "size": 36,
+        "sha256": "9d6cb43d10e41f602b00c5a94d60025ddb9b00e0224b85b3437d9def469355ac",
+        "entropy": 4.136056086195822
+      },
+      "identical_size": false,
+      "identical_hash": false
+    },
+    {
+      "name": ".plt",
+      "original": null,
+      "fixed": {
+        "name": ".plt",
+        "type": "SHT_PROGBITS",
+        "flags": 6,
+        "address": 21601200,
+        "offset": 21601200,
+        "size": 6032,
+        "sha256": "110916565f3374c775c7a3f4a588fbe2a129e93f48f46c9c6b2c2b35d6030798",
+        "entropy": 4.815586463549814
+      },
+      "identical_size": false,
+      "identical_hash": false
+    },
+    {
+      "name": ".rela.dyn",
+      "original": null,
+      "fixed": {
+        "name": ".rela.dyn",
+        "type": "SHT_RELA",
+        "flags": 2,
+        "address": 42952,
+        "offset": 42952,
+        "size": 21549240,
+        "sha256": "b05944555d50a77d868c13fdc5349d57e81acf66def05b03950166ac9cd5da56",
+        "entropy": 3.5468623598032734
+      },
+      "identical_size": false,
+      "identical_hash": false
+    },
+    {
+      "name": ".rela.plt",
+      "original": null,
+      "fixed": {
+        "name": ".rela.plt",
+        "type": "SHT_RELA",
+        "flags": 66,
+        "address": 21592192,
+        "offset": 21592192,
+        "size": 9000,
+        "sha256": "34c9f6bb787d2b72b31b24b863a416bf8a6f21997b63222936dec9b5a8f838f2",
+        "entropy": 2.4715613707554005
+      },
+      "identical_size": false,
+      "identical_hash": false
+    },
+    {
+      "name": ".rodata",
+      "original": null,
+      "fixed": {
+        "name": ".rodata",
+        "type": "SHT_PROGBITS",
+        "flags": 2,
+        "address": 72121440,
+        "offset": 72121440,
+        "size": 4986597,
+        "sha256": "52a38e82e2d62d03e58c07c67b0daf252e53d7adae25e9f3b079f409748c8b04",
+        "entropy": 4.473589112044021
+      },
+      "identical_size": false,
+      "identical_hash": false
+    },
+    {
+      "name": ".shstrtab",
+      "original": {
+        "name": ".shstrtab",
+        "type": "SHT_STRTAB",
+        "flags": 0,
+        "address": 0,
+        "offset": 99148816,
+        "size": 278,
+        "sha256": "63dcd9662e97ee022ebac31fad09f82e9026d41e3bf86d235376072be32a2bd6",
+        "entropy": 4.309670740513857
+      },
+      "fixed": {
+        "name": ".shstrtab",
+        "type": "SHT_STRTAB",
+        "flags": 0,
+        "address": 0,
+        "offset": 99148816,
+        "size": 278,
+        "sha256": "63dcd9662e97ee022ebac31fad09f82e9026d41e3bf86d235376072be32a2bd6",
+        "entropy": 4.309670740513857
+      },
+      "identical_size": true,
+      "identical_hash": true
+    },
+    {
+      "name": ".text",
+      "original": null,
+      "fixed": {
+        "name": ".text",
+        "type": "SHT_PROGBITS",
+        "flags": 6,
+        "address": 21607232,
+        "offset": 21607232,
+        "size": 3607584,
+        "sha256": "4e7b29a7e9b7b217f9a807cb7b865b614096dd15e29f1822998c9e8f3b06be65",
+        "entropy": 6.165207504942043
+      },
+      "identical_size": false,
+      "identical_hash": false
+    },
+    {
+      "name": "il2cpp",
+      "original": null,
+      "fixed": {
+        "name": "il2cpp",
+        "type": "SHT_PROGBITS",
+        "flags": 6,
+        "address": 25214816,
+        "offset": 25214816,
+        "size": 46906620,
+        "sha256": "b1fddade4957bb311a5b037a87f6a7a1b5c9a139231d4d4806d0e9880b1996c2",
+        "entropy": 6.425027131054688
+      },
+      "identical_size": false,
+      "identical_hash": false
+    }
+  ],
+  "fixed_patch_point_context_mapping": [
+    {
+      "id": "rendering.resolution",
+      "fixed_offset": 26543252,
+      "fixed_bytes": "095a8052",
+      "original_context_matches": [],
+      "original_bytes_at_matches": []
+    },
+    {
+      "id": "framerate.on_begin_scene",
+      "fixed_offset": 31677588,
+      "fixed_bytes": "e00f1e32",
+      "original_context_matches": [],
+      "original_bytes_at_matches": []
+    },
+    {
+      "id": "framerate.setup_live_mv_special_level",
+      "fixed_offset": 31680364,
+      "fixed_bytes": "e00f1e32",
+      "original_context_matches": [],
+      "original_bytes_at_matches": []
+    },
+    {
+      "id": "framerate.setup_live_special_level",
+      "fixed_offset": 31678844,
+      "fixed_bytes": "e00f1e32",
+      "original_context_matches": [],
+      "original_bytes_at_matches": []
+    },
+    {
+      "id": "framerate.setup_theater_special_level",
+      "fixed_offset": 31676844,
+      "fixed_bytes": "e00f1e32",
+      "original_context_matches": [],
+      "original_bytes_at_matches": []
+    },
+    {
+      "id": "framerate.setup_commu_special_plus_level",
+      "fixed_offset": 31677924,
+      "fixed_bytes": "e00f1e32",
+      "original_context_matches": [],
+      "original_bytes_at_matches": []
+    },
+    {
+      "id": "framerate.setup_gasha_special_plus_level",
+      "fixed_offset": 31678348,
+      "fixed_bytes": "e00f1e32",
+      "original_context_matches": [],
+      "original_bytes_at_matches": []
+    }
+  ]
+}
