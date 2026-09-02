@@ -1,0 +1,49 @@
+name: Build no-card-contact diagnostic
+
+on:
+  push:
+    branches:
+      - diagnose/v0.1.9-no-card-contact
+
+jobs:
+  build-ubuntu:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+      - name: Verify selective Theater filter
+        run: |
+          rm -f standalone/mltd-relive.db standalone/config.ini
+          cd standalone
+          PYTHONPATH=. python - <<'PY'
+          from mltd.models.setup import setup
+          setup()
+          from mltd.servers import handler
+
+          context = {'user_id': 'ffffffff-ffff-ffff-ffff-ffffffffffff'}
+          safe_rooms = 0
+          for _ in range(500):
+              result = handler._diagnostic_get_theater_without_card_contacts({}, context)
+              theater = result['theater']
+              assert 'prior_lot_rate_table_list' in theater
+              for room in theater['room_list']:
+                  assert room['balloon']['resource_id'] != 'card_0000_contact'
+                  safe_rooms += 1
+          assert safe_rooms > 0, 'filter removed all dynamic Theater rooms'
+          print(f'no-card-contact Theater override: PASS safe_rooms={safe_rooms}')
+          PY
+      - name: Build Ubuntu package
+        run: |
+          cd standalone
+          pyinstaller gui_ubuntu.spec
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mltd-relive-v0.1.9-no-card-contact-ubuntu
+          path: standalone/dist
