@@ -55,3 +55,15 @@ def exec_flower_stand_reward(params):
         'is_received': False,
         'flower_stand_name_list': [],
     }
+
+
+@dispatcher.add_method(name='FriendService.GetCommentList')
+def get_comment_list(params):
+    """Return the truthful empty offline comment history.
+
+    GetCommentListArgs has no fields and GetCommentListReply contains only a
+    CommentStatus array. The standalone schema has no persisted friend-comment
+    table, so an empty array is preferable to fabricated comments and lets the
+    comment page open without a Method-not-found error.
+    """
+    return {'comment_list': []}
