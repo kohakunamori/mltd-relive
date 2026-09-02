@@ -24,6 +24,7 @@ __all__ = [
     'item',
     'jewel',
     'job',
+    'job_compat',
     'last_update_date',
     'live',
     'login_bonus',
