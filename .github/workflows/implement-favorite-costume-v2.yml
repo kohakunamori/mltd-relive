@@ -29,7 +29,9 @@ jobs:
           script = textwrap.dedent(workflow[start:end])
           exec(compile(script, '<favorite-costume-patch>', 'exec'), {})
           test = Path('tests/test_favorite_costume_runtime.py')
-          test.write_text(test.read_text().replace('\\n', '\n'))
+          content = test.read_text()
+          content = content.replace('\\\"', '"').replace('\\n', '\n')
+          test.write_text(content)
           PY
           python -m compileall -q standalone/mltd tests/test_favorite_costume_runtime.py
       - name: Commit implementation
