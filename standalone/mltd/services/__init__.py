@@ -27,6 +27,7 @@ __all__ = [
     'live',
     'login_bonus',
     'mission',
+    'mission_client',
     'offer',
     'present',
     'song',
