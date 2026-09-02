@@ -27,7 +27,6 @@ _HOP_BY_HOP_HEADERS = {
     'upgrade',
 }
 _thread_local = threading.local()
-_API_COMPAT_LOCK = threading.Lock()
 _REQUEST_QUEUE_SIZE = 512
 _SOCKET_TIMEOUT = 60
 
@@ -77,17 +76,12 @@ class ProxyHTTPRequestHandler(BaseHTTPRequestHandler):
         self.send_error(404)
 
     def do_POST(self):
-        # Preserve the original corrected-client API behavior while Asset
-        # traffic is fully remote and no longer shares this process/listener.
-        self.close_connection = True
-
-        with _API_COMPAT_LOCK:
-            content_len = int(self.headers.get('Content-Length', '0'))
-            req_body = self.rfile.read(content_len)
-            if type(self).api_application is not None:
-                self._dispatch_wsgi(req_body)
-            else:
-                self._forward_to_local_api(req_body)
+        content_len = int(self.headers.get('Content-Length', '0'))
+        req_body = self.rfile.read(content_len)
+        if type(self).api_application is not None:
+            self._dispatch_wsgi(req_body)
+        else:
+            self._forward_to_local_api(req_body)
 
     def _dispatch_wsgi(self, req_body: bytes):
         application = type(self).api_application
@@ -109,7 +103,7 @@ class ProxyHTTPRequestHandler(BaseHTTPRequestHandler):
             'wsgi.url_scheme': 'https',
             'wsgi.input': io.BytesIO(req_body),
             'wsgi.errors': sys.stderr,
-            'wsgi.multithread': False,
+            'wsgi.multithread': True,
             'wsgi.multiprocess': True,
             'wsgi.run_once': False,
         }
@@ -197,8 +191,6 @@ class ProxyHTTPRequestHandler(BaseHTTPRequestHandler):
                 self.send_header(header, value)
             if not has_content_length:
                 self.send_header('Content-Length', str(len(content)))
-            if self.close_connection:
-                self.send_header('Connection', 'close')
             self.end_headers()
             if content:
                 self.wfile.write(content)
@@ -240,11 +232,9 @@ def start(port=proxy_port, conn=None):
 
     logger.info(f'TLS API server is running on port {port}...')
     logger.info('TLS handshakes: listener-wrapped compatibility mode')
-    logger.info(
-        'API dispatch: direct WSGI, serialized Connection: close compatibility'
-    )
+    logger.info('API dispatch: direct WSGI, concurrent HTTP/1.1 keep-alive')
     if config.asset_remote_url:
-        logger.info(f'Asset transport: remote relay {config.asset_remote_url}')
+        logger.info(f'Asset transport: remote endpoint {config.asset_remote_url}')
     else:
         logger.info('Asset transport: Rainbow remote CDN')
     if conn:
