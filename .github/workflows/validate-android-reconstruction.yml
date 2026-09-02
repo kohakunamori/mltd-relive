@@ -60,7 +60,7 @@ jobs:
         run: |
           set -euo pipefail
           python - <<'PY'
-          import hashlib, json, xml.etree.ElementTree as ET
+          import json, xml.etree.ElementTree as ET
           from pathlib import Path
 
           A='{http://schemas.android.com/apk/res/android}'
@@ -71,7 +71,16 @@ jobs:
                   if s.startswith(('.line ', '.source ', '.prologue', '.epilogue', '.local ', '.end local', '.restart local')):
                       continue
                   out.append(raw.rstrip())
-              return '\n'.join(out).strip()+'\n'
+              compact=[]
+              blank=False
+              for line in out:
+                  if line.strip():
+                      compact.append(line)
+                      blank=False
+                  elif not blank:
+                      compact.append('')
+                      blank=True
+              return '\n'.join(compact).strip()+'\n'
           def smali(root):
               return {str(p.relative_to(root)).replace('\\','/'):norm(p.read_text(encoding='utf-8',errors='replace')) for p in root.rglob('*.smali')}
 
