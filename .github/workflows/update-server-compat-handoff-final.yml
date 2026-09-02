@@ -17,44 +17,21 @@ jobs:
           ref: fix/story-service-compat
           fetch-depth: 0
       - name: Append final pre-device checkpoint
+        env:
+          APPENDIX_B64: 'IyMgMTMuIEZpbmFsIHByZS1kZXZpY2UgYWNjZXB0YW5jZSBjaGVja3BvaW50ICgyMDI2LTA5LTAzKQoKVGhlIGZpdmUtUlBDIGNsb3Nlb3V0IGNsdXN0ZXIgZnJvbSBzZWN0aW9uIDcgaXMgcmVzb2x2ZWQ6CgotIGBJdGVtU2VydmljZS5Vc2VJdGVtYDogaW50ZW50aW9uYWxseSBub3QgcmVnaXN0ZXJlZC4gUmV2ZXJzZSBhdWRpdCBmb3VuZCB0aGUgQVBJIGNvbnN0YW50L3dyYXBwZXIvRFRPIGJ1dCBubyBhY3RpdmUgVUkvYnVzaW5lc3MgcmVxdWVzdCBjYWxsc2l0ZS4gR2lmdCBmbG93cyB1c2UgYFVzZUdpZnRGb3JDYXJkYCAvIGBVc2VHaWZ0Rm9ySWRvbEdpZnRgOyB2aXRhbGl0eSBpdGVtcyB1c2UgYFJlY292ZXJWaXRhbGl0eUJ5SXRlbSpgLgotIGBCaXJ0aGRheVNlcnZpY2UuRXhlY3V0ZUJpcnRoZGF5UHJlc2VudGA6IGltcGxlbWVudGVkIHdpdGggcGVyc2lzdGVudCwgcmVwbGF5LXNhZmUgc2VtYW50aWNzIHVzaW5nIHByZXNlcnZlZCBiaXJ0aGRheS9tYXN0ZXIgZGF0YS4gSURzIGFyZSB2YWxpZGF0ZWQsIHJld2FyZCBkYXRhIGNvbWVzIGZyb20gYE1zdEJpcnRoZGF5UHJlc2VudGAsIGV4ZWN1dGlvbiBzdGF0ZSBhbmQgc3VwcG9ydGVkIGlkb2wtYWZmZWN0aW9uL3Jlc3VsdCBzdGF0ZSBhcmUgdXBkYXRlZCBhdG9taWNhbGx5LCBhbmQgb3ZlcmZsb3cgcmV3YXJkcyBhcmUgbm90IHNpbGVudGx5IGxvc3QuCi0gYElkb2xTZXJ2aWNlLlNldEZhdm9yaXRlQ29zdHVtZWA6IGltcGxlbWVudGVkIGFzIHBlcnNpc3RlbnQgb3JkZXJlZCBwZXItdXNlci1pZG9sIHN0YXRlLiBPd25lcnNoaXAvaWRvbCBtZW1iZXJzaGlwIGlzIHZhbGlkYXRlZCBiZWZvcmUgYXRvbWljIHJlcGxhY2VtZW50OyBjbGVhci9yZXBsYXkgYXJlIHN1cHBvcnRlZDsgYElkb2xTY2hlbWEuZmF2b3JpdGVfY29zdHVtZV9saXN0YCByZWZsZWN0cyBzYXZlZCBzdGF0ZTsgb2xkIHNhdmVzIGdldCB0aGUgYWRkaXRpdmUgdGFibGUgdGhyb3VnaCBpZGVtcG90ZW50IGBjaGVja2ZpcnN0YCBjcmVhdGlvbi4KLSBgSWRvbFNlcnZpY2UuR2V0U2FsZXNDb3N0dW1lTGlzdGA6IGV4YWN0IGVtcHR5LWxpc3QgY29tcGF0aWJpbGl0eSBpcyBpbnRlbnRpb25hbCBiZWNhdXNlIHRoZSBwcmVzZXJ2ZWQgZGF0YWJhc2UgbGFja3MgdGhlIHNhbGVzIGNhdGFsb2d1ZS9wcmljZS9wcmVyZXF1aXNpdGUgZGF0YSByZXF1aXJlZCBmb3IgdHJ1dGhmdWwgYFNhbGVzQ29zdHVtZVN0YXR1c2Agcm93cy4KLSBgUHJlc2VudFNlcnZpY2UuR2V0UHJlc2VudEhpc3RvcnlgOiBleGFjdCBlbXB0eS1oaXN0b3J5IGNvbXBhdGliaWxpdHkgcmVtYWlucyBpbnRlbnRpb25hbCBiZWNhdXNlIHRoZSBwcmVzZXJ2ZWQgZGF0YWJhc2UgaGFzIG5vIGhpc3RvcmljYWwgcHJlc2VudCBsZWRnZXIuCgojIyMgQXV0b21hdGVkIGFjY2VwdGFuY2UKCkFjY2VwdGFuY2Ugd29ya2Zsb3cgcnVuIGAzMzY2MzU4NDkwMGAgdGVzdGVkIGNvbW1pdCBgNjBkODUyYjcyODY5OTU3MDdhMDEzZDI5YmEzYzk5YTA5OTc2MTEzNmAgYW5kIGFsbCB0aHJlZSBqb2JzIHN1Y2NlZWRlZDoKCjEuIEZ1bGwgc3RhbmRhbG9uZSBydW50aW1lIHN1aXRlOiBmcmVzaCBTUUxpdGUgZGF0YWJhc2UgdmlhIG5vcm1hbCBgbWx0ZC5tb2RlbHMuc2V0dXBgOyAqKjgwIHRlc3RzIHBhc3NlZCoqLiBUaGlzIGluY2x1ZGVzIFNRTEFsY2hlbXkgc3RhdGUgdGVzdHMgZm9yIEJpcnRoZGF5LCBGYXZvcml0ZUNvc3R1bWUsIFN0b3J5LCBGcmllbmQsIGludGVycnVwdGVkIEpvYiByZWNvdmVyeSwgUHJvZmlsZSwgUHJvZHVjZXIgUmFuaywgU3lzdGVtIFNldHRpbmcsIFZpdGFsaXR5LCBvZmZsaW5lLWNvbnRlbnQgZmFsbGJhY2tzLCBVbml0IGNvbXBhdGliaWxpdHksIEFQSSB0cmFuc3BvcnQsIGFuZCByZWxhdGVkIHJlZ3Jlc3Npb25zLgoyLiBDdXJyZW50IGNsaWVudC9zZXJ2ZXIgUlBDIGF1ZGl0OiBzdWNjZXNzLiBSYXcgSUwyQ1BQIHN1cmZhY2UgaXMgMzA5IFJQQyBjb25zdGFudHM7IGN1cnJlbnQgc2VydmVyIHJlZ2lzdGVycyAxMTEgaGFuZGxlcnM7IDE5OCBuYW1lcyBhcmUgdW5tYXRjaGVkIHN0cmluZyBzdXJmYWNlcy4gVGhpcyBpcyBub3QgYW4gYWN0aXZlLVJQQyBiYWNrbG9nOiBpdCBpbmNsdWRlcyBldmVudCwgc2hvcC9wYXltZW50LCBMb3VuZ2UsIGhpc3RvcmljYWwvbWluaWdhbWUsIGxlZ2FjeSBhbmQgZGVhZCBzdXJmYWNlcy4gRm9yIHRoZSBmaXZlIGNsb3Nlb3V0IHRhcmdldHMsIEJpcnRoZGF5L0Zhdm9yaXRlQ29zdHVtZS9TYWxlc0Nvc3R1bWUvUHJlc2VudEhpc3RvcnkgYXJlIHJlZ2lzdGVyZWQgYW5kIGBJdGVtU2VydmljZS5Vc2VJdGVtYCBpcyBkZWxpYmVyYXRlbHkgbm90IHJlZ2lzdGVyZWQuCjMuIFVidW50dSBzdGFuZGFsb25lIEdVSTogUHlJbnN0YWxsZXIgYnVpbGQsIGV4ZWN1dGFibGUgY2hlY2sgYW5kIGFydGlmYWN0IHVwbG9hZCBzdWNjZWVkZWQuIEFydGlmYWN0IElEIGA5ODU5Njc5ODAwYDsgZXhlY3V0YWJsZSBTSEEtMjU2IGAzYmQzMmZhNGU3YzNkZjg0ZmE4MGZkNzI1YzA1YTYxOGEyNTJmNzE5NThmM2VhZTc1YWVkZjc2YzkzMTI4OTYyYC4KCkEgbm9uLWZhdGFsIFNRTEFsY2hlbXkgMi4wIGRlcHJlY2F0aW9uIHdhcm5pbmcgcmVtYWlucyBpbiBsZWdhY3kgYGpvYi5weWAgZm9yIGBSb3cudHVwbGUoKWA7IGl0IGRpZCBub3QgYWZmZWN0IHRoZSA4MC10ZXN0IGFjY2VwdGFuY2UgcnVuLgoKIyMjIFJlbWFpbmluZyBnYXRlCgpTZXJ2ZXItc2lkZS9yZXZlcnNlLWVuZ2luZWVyaW5nIGFjY2VwdGFuY2UgaXMgY29tcGxldGUuIFRoZSBvbmx5IHJlcXVpcmVkIGdhdGUgYmVmb3JlIFBSL21lcmdlL3JlbGVhc2UgaXMgdGhlIGNlbnRyYWxpemVkIHJlYWwtZGV2aWNlIHNtb2tlIGluIHNlY3Rpb24gMTAuIERvIG5vdCBtZXJnZSB0byBgbWFpbmAgYW5kIGRvIG5vdCBjcmVhdGUgYSBuZXcgc3RhbmRhbG9uZSByZWxlYXNlIHVudGlsIHRoYXQgZGV2aWNlIHNtb2tlIHBhc3Nlcy4KClBvc3QtYWNjZXB0YW5jZSBjb21taXRzIG1heSByZW1vdmUgdGVtcG9yYXJ5IENJIGhlbHBlcnMgb3IgdXBkYXRlIHRoaXMgaGFuZG9mZiB3aXRob3V0IGNoYW5naW5nIHJ1bnRpbWUgc2VtYW50aWNzLiBBbHdheXMgZmV0Y2ggYWN0dWFsIGJyYW5jaCBIRUFEIGFuZCBkaXN0aW5ndWlzaCBkb2NzL0NJLW9ubHkgbW92ZW1lbnQgZnJvbSBydW50aW1lIGNoYW5nZXMuCg=='
         shell: bash
         run: |
           set -euo pipefail
           python - <<'PY'
+          import base64
+          import os
           from pathlib import Path
           p = Path('docs/SERVER_COMPAT_AGENT_HANDOFF.md')
           text = p.read_text(encoding='utf-8')
           marker = '## 13. Final pre-device acceptance checkpoint (2026-09-03)'
           if marker not in text:
-              text += r'''
-
-## 13. Final pre-device acceptance checkpoint (2026-09-03)
-
-The five-RPC closeout cluster from section 7 is now resolved. Do not reopen these conclusions without new client/native evidence:
-
-- `ItemService.UseItem`: **intentionally not registered**. Reverse audit found the API constant/wrapper/DTO but no active UI/business request callsite. Actual gift flows use `UseGiftForCard` / `UseGiftForIdolGift`; vitality items use `RecoverVitalityByItem*`. Adding a generic handler would risk inventing consumption semantics.
-- `BirthdayService.ExecuteBirthdayPresent`: implemented with persistent, replay-safe semantics using preserved birthday/master data. The handler validates live/present/idol IDs, derives the reward from `MstBirthdayPresent`, updates birthday execution state atomically, applies supported idol-affection/result state, and preserves overflow rewards through the present path rather than dropping them. Attendant/macaron behavior is covered separately from idol mutation.
-- `IdolService.SetFavoriteCostume`: implemented as real persistent ordered state. `favorite_costume` stores per-user-idol selections; the RPC validates ownership and idol membership before mutation, atomically replaces the list, supports clearing, is idempotent on replay, and `IdolSchema.favorite_costume_list` reflects persisted state after reload. Existing saves get the additive table via idempotent `checkfirst` creation.
-- `IdolService.GetSalesCostumeList`: exact empty-list compatibility is intentional. The preserved database has costume ownership/master rows but not the separate sales catalogue/price/prerequisite state required to construct truthful `SalesCostumeStatus` rows.
-- `PresentService.GetPresentHistory`: exact empty-history compatibility remains intentional because received presents are consumed/deleted and the preserved database has no historical present ledger.
-
-### Final automated acceptance before device smoke
-
-Acceptance workflow run `33663584900` tested commit `60d852b7286995707a013d29ba3c99a099761136` and succeeded in all three jobs:
-
-1. **Full standalone runtime suite**: fresh SQLite database created through normal `mltd.models.setup`; `python -m unittest discover` ran **80 tests**, all passing. This includes real SQLAlchemy state tests for Birthday, FavoriteCostume, Story, Friend, interrupted Job recovery, Profile, Producer Rank, System Setting, Vitality, offline-content fallbacks, Unit compatibility, API transport, and related regressions.
-2. **Current client/server RPC audit**: success. The raw IL2CPP string surface contains 309 RPC constants and the current server registers 111 handlers; 198 names remain unmatched. This raw difference is **not** an active-RPC backlog: it includes event, shop/payment, Lounge, historical/minigame and legacy/dead surfaces. For the five closeout targets, Birthday/FavoriteCostume/SalesCostume/PresentHistory are registered and `ItemService.UseItem` is deliberately not registered for the evidence-backed reason above.
-3. **Ubuntu standalone GUI build**: PyInstaller build, executable check and artifact upload all succeeded. Artifact ID `9859679800`, artifact name `mltd-relive-story-compat-ubuntu-60d852b7286995707a013d29ba3c99a099761136`. The executable SHA-256 was independently rechecked as `3bd32fa4e7c3df84fa80fd725c05a618a252f71958f3eae75aedf76c93128962`.
-
-A non-fatal SQLAlchemy 2.0 deprecation warning remains in legacy `job.py` for `Row.tuple()`; it did not affect the 80-test acceptance run and is not a compatibility blocker.
-
-### State after automated acceptance
-
-The server-side/reverse-engineering acceptance gates are complete. The only remaining required gate before PR/merge/release is the centralized **real-device smoke** in section 10. Do not merge to `main` and do not create a new standalone release until that device smoke passes.
-
-Post-acceptance commits may remove temporary CI helpers or update this handoff without changing runtime server semantics. Always fetch the actual branch HEAD, but use the acceptance run and its tested code SHA above to distinguish documentation/CI-only movement from runtime changes.
-'''
-              p.write_text(text, encoding='utf-8')
+              appendix = base64.b64decode(os.environ['APPENDIX_B64']).decode('utf-8')
+              p.write_text(text.rstrip() + '\n\n' + appendix, encoding='utf-8')
           PY
       - name: Commit handoff update
         shell: bash
