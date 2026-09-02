@@ -1,0 +1,666 @@
+{
+  "runtime_config": {
+    "count": 18,
+    "descriptor_count_parsed": 18,
+    "descriptors": [
+      {
+        "index": 0,
+        "offset": 116,
+        "u32_0": 3,
+        "u32_4": 388,
+        "u32_8": 60
+      },
+      {
+        "index": 1,
+        "offset": 128,
+        "u32_0": 9,
+        "u32_4": 452,
+        "u32_8": 60
+      },
+      {
+        "index": 2,
+        "offset": 140,
+        "u32_0": 11,
+        "u32_4": 516,
+        "u32_8": 60
+      },
+      {
+        "index": 3,
+        "offset": 152,
+        "u32_0": 8,
+        "u32_4": 580,
+        "u32_8": 60
+      },
+      {
+        "index": 4,
+        "offset": 164,
+        "u32_0": 14,
+        "u32_4": 644,
+        "u32_8": 60
+      },
+      {
+        "index": 5,
+        "offset": 176,
+        "u32_0": 7,
+        "u32_4": 708,
+        "u32_8": 60
+      },
+      {
+        "index": 6,
+        "offset": 188,
+        "u32_0": 18,
+        "u32_4": 772,
+        "u32_8": 60
+      },
+      {
+        "index": 7,
+        "offset": 200,
+        "u32_0": 2,
+        "u32_4": 836,
+        "u32_8": 60
+      },
+      {
+        "index": 8,
+        "offset": 212,
+        "u32_0": 12,
+        "u32_4": 900,
+        "u32_8": 60
+      },
+      {
+        "index": 9,
+        "offset": 224,
+        "u32_0": 13,
+        "u32_4": 964,
+        "u32_8": 60
+      },
+      {
+        "index": 10,
+        "offset": 236,
+        "u32_0": 4,
+        "u32_4": 1028,
+        "u32_8": 60
+      },
+      {
+        "index": 11,
+        "offset": 248,
+        "u32_0": 5,
+        "u32_4": 1092,
+        "u32_8": 60
+      },
+      {
+        "index": 12,
+        "offset": 260,
+        "u32_0": 10,
+        "u32_4": 1156,
+        "u32_8": 60
+      },
+      {
+        "index": 13,
+        "offset": 272,
+        "u32_0": 6,
+        "u32_4": 1220,
+        "u32_8": 60
+      },
+      {
+        "index": 14,
+        "offset": 284,
+        "u32_0": 16,
+        "u32_4": 1284,
+        "u32_8": 60
+      },
+      {
+        "index": 15,
+        "offset": 296,
+        "u32_0": 15,
+        "u32_4": 1348,
+        "u32_8": 60
+      },
+      {
+        "index": 16,
+        "offset": 308,
+        "u32_0": 17,
+        "u32_4": 1412,
+        "u32_8": 60
+      },
+      {
+        "index": 17,
+        "offset": 320,
+        "u32_0": 22,
+        "u32_4": 1476,
+        "u32_8": 60
+      }
+    ],
+    "config_sha256": "16690f02ead131518d784c3678b8e8a452dba7878faec4817b32cd39f8aa6417"
+  },
+  "rwx": {
+    "base": 347892355072,
+    "size": 4096,
+    "nonzero_bytes": 818
+  },
+  "slots": [
+    {
+      "slot": 0,
+      "field": 0,
+      "pointer": 347892355312,
+      "class": "rwx-generated",
+      "rwx_offset": 240,
+      "instructions": [
+        {
+          "address": 347892355312,
+          "mnemonic": "mov",
+          "op_str": "x8, #0xde"
+        },
+        {
+          "address": 347892355316,
+          "mnemonic": "svc",
+          "op_str": "#0"
+        },
+        {
+          "address": 347892355320,
+          "mnemonic": "ret",
+          "op_str": ""
+        }
+      ],
+      "syscall": {
+        "nr": 222,
+        "name": "mmap"
+      }
+    },
+    {
+      "slot": 1,
+      "field": 8,
+      "pointer": 347892355972,
+      "class": "rwx-generated",
+      "rwx_offset": 900,
+      "instructions": [
+        {
+          "address": 347892355972,
+          "mnemonic": "mov",
+          "op_str": "x8, #0x38"
+        },
+        {
+          "address": 347892355976,
+          "mnemonic": "svc",
+          "op_str": "#0"
+        },
+        {
+          "address": 347892355980,
+          "mnemonic": "ret",
+          "op_str": ""
+        }
+      ],
+      "syscall": {
+        "nr": 56,
+        "name": "openat"
+      }
+    },
+    {
+      "slot": 2,
+      "field": 16,
+      "pointer": 347892355852,
+      "class": "rwx-generated",
+      "rwx_offset": 780,
+      "instructions": [
+        {
+          "address": 347892355852,
+          "mnemonic": "mov",
+          "op_str": "x8, #0x39"
+        },
+        {
+          "address": 347892355856,
+          "mnemonic": "svc",
+          "op_str": "#0"
+        },
+        {
+          "address": 347892355860,
+          "mnemonic": "ret",
+          "op_str": ""
+        }
+      ],
+      "syscall": {
+        "nr": 57,
+        "name": "close"
+      }
+    },
+    {
+      "slot": 3,
+      "field": 24,
+      "pointer": 347892355612,
+      "class": "rwx-generated",
+      "rwx_offset": 540,
+      "instructions": [
+        {
+          "address": 347892355612,
+          "mnemonic": "mov",
+          "op_str": "x8, #0xac"
+        },
+        {
+          "address": 347892355616,
+          "mnemonic": "svc",
+          "op_str": "#0"
+        },
+        {
+          "address": 347892355620,
+          "mnemonic": "ret",
+          "op_str": ""
+        }
+      ],
+      "syscall": {
+        "nr": 172,
+        "name": "getpid"
+      }
+    },
+    {
+      "slot": 4,
+      "field": 32,
+      "pointer": 347892355072,
+      "class": "rwx-generated",
+      "rwx_offset": 0,
+      "instructions": [
+        {
+          "address": 347892355072,
+          "mnemonic": "mov",
+          "op_str": "x8, #0x1b"
+        },
+        {
+          "address": 347892355076,
+          "mnemonic": "svc",
+          "op_str": "#0"
+        },
+        {
+          "address": 347892355080,
+          "mnemonic": "ret",
+          "op_str": ""
+        }
+      ],
+      "syscall": {
+        "nr": 27,
+        "name": "inotify_add_watch"
+      }
+    },
+    {
+      "slot": 5,
+      "field": 40,
+      "pointer": 347892355792,
+      "class": "rwx-generated",
+      "rwx_offset": 720,
+      "instructions": [
+        {
+          "address": 347892355792,
+          "mnemonic": "mov",
+          "op_str": "x8, #0x1a"
+        },
+        {
+          "address": 347892355796,
+          "mnemonic": "svc",
+          "op_str": "#0"
+        },
+        {
+          "address": 347892355800,
+          "mnemonic": "ret",
+          "op_str": ""
+        }
+      ],
+      "syscall": {
+        "nr": 26,
+        "name": "inotify_init1"
+      }
+    },
+    {
+      "slot": 6,
+      "field": 48,
+      "pointer": 347892355132,
+      "class": "rwx-generated",
+      "rwx_offset": 60,
+      "instructions": [
+        {
+          "address": 347892355132,
+          "mnemonic": "mov",
+          "op_str": "x8, #0x75"
+        },
+        {
+          "address": 347892355136,
+          "mnemonic": "svc",
+          "op_str": "#0"
+        },
+        {
+          "address": 347892355140,
+          "mnemonic": "ret",
+          "op_str": ""
+        }
+      ],
+      "syscall": {
+        "nr": 117,
+        "name": "ptrace"
+      }
+    },
+    {
+      "slot": 7,
+      "field": 56,
+      "pointer": 347892355732,
+      "class": "rwx-generated",
+      "rwx_offset": 660,
+      "instructions": [
+        {
+          "address": 347892355732,
+          "mnemonic": "mov",
+          "op_str": "x8, #0x104"
+        },
+        {
+          "address": 347892355736,
+          "mnemonic": "svc",
+          "op_str": "#0"
+        },
+        {
+          "address": 347892355740,
+          "mnemonic": "ret",
+          "op_str": ""
+        }
+      ],
+      "syscall": {
+        "nr": 260,
+        "name": "wait4"
+      }
+    },
+    {
+      "slot": 8,
+      "field": 64,
+      "pointer": 347892356032,
+      "class": "rwx-generated",
+      "rwx_offset": 960,
+      "instructions": [
+        {
+          "address": 347892356032,
+          "mnemonic": "mov",
+          "op_str": "x8, #0xd7"
+        },
+        {
+          "address": 347892356036,
+          "mnemonic": "svc",
+          "op_str": "#0"
+        },
+        {
+          "address": 347892356040,
+          "mnemonic": "ret",
+          "op_str": ""
+        }
+      ],
+      "syscall": {
+        "nr": 215,
+        "name": "munmap"
+      }
+    },
+    {
+      "slot": 9,
+      "field": 72,
+      "pointer": 347892355192,
+      "class": "rwx-generated",
+      "rwx_offset": 120,
+      "instructions": [
+        {
+          "address": 347892355192,
+          "mnemonic": "mov",
+          "op_str": "x8, #0xe2"
+        },
+        {
+          "address": 347892355196,
+          "mnemonic": "svc",
+          "op_str": "#0"
+        },
+        {
+          "address": 347892355200,
+          "mnemonic": "ret",
+          "op_str": ""
+        }
+      ],
+      "syscall": {
+        "nr": 226,
+        "name": "mprotect"
+      }
+    },
+    {
+      "slot": 10,
+      "field": 80,
+      "pointer": 347892355912,
+      "class": "rwx-generated",
+      "rwx_offset": 840,
+      "instructions": [
+        {
+          "address": 347892355912,
+          "mnemonic": "mov",
+          "op_str": "x8, #0x3e"
+        },
+        {
+          "address": 347892355916,
+          "mnemonic": "svc",
+          "op_str": "#0"
+        },
+        {
+          "address": 347892355920,
+          "mnemonic": "ret",
+          "op_str": ""
+        }
+      ],
+      "syscall": {
+        "nr": 62,
+        "name": "lseek"
+      }
+    },
+    {
+      "slot": 11,
+      "field": 88,
+      "pointer": 347892355252,
+      "class": "rwx-generated",
+      "rwx_offset": 180,
+      "instructions": [
+        {
+          "address": 347892355252,
+          "mnemonic": "mov",
+          "op_str": "x8, #0x3f"
+        },
+        {
+          "address": 347892355256,
+          "mnemonic": "svc",
+          "op_str": "#0"
+        },
+        {
+          "address": 347892355260,
+          "mnemonic": "ret",
+          "op_str": ""
+        }
+      ],
+      "syscall": {
+        "nr": 63,
+        "name": "read"
+      }
+    },
+    {
+      "slot": 12,
+      "field": 96,
+      "pointer": 347892355552,
+      "class": "rwx-generated",
+      "rwx_offset": 480,
+      "instructions": [
+        {
+          "address": 347892355552,
+          "mnemonic": "mov",
+          "op_str": "x8, #0x40"
+        },
+        {
+          "address": 347892355556,
+          "mnemonic": "svc",
+          "op_str": "#0"
+        },
+        {
+          "address": 347892355560,
+          "mnemonic": "ret",
+          "op_str": ""
+        }
+      ],
+      "syscall": {
+        "nr": 64,
+        "name": "write"
+      }
+    },
+    {
+      "slot": 13,
+      "field": 104,
+      "pointer": 347892355372,
+      "class": "rwx-generated",
+      "rwx_offset": 300,
+      "instructions": [
+        {
+          "address": 347892355372,
+          "mnemonic": "mov",
+          "op_str": "x8, #0x81"
+        },
+        {
+          "address": 347892355376,
+          "mnemonic": "svc",
+          "op_str": "#0"
+        },
+        {
+          "address": 347892355380,
+          "mnemonic": "ret",
+          "op_str": ""
+        }
+      ],
+      "syscall": {
+        "nr": 129,
+        "name": "kill"
+      }
+    },
+    {
+      "slot": 14,
+      "field": 112,
+      "pointer": 347892355432,
+      "class": "rwx-generated",
+      "rwx_offset": 360,
+      "instructions": [
+        {
+          "address": 347892355432,
+          "mnemonic": "mov",
+          "op_str": "x8, #0xa7"
+        },
+        {
+          "address": 347892355436,
+          "mnemonic": "svc",
+          "op_str": "#0"
+        },
+        {
+          "address": 347892355440,
+          "mnemonic": "ret",
+          "op_str": ""
+        }
+      ],
+      "syscall": {
+        "nr": 167,
+        "name": "prctl"
+      }
+    },
+    {
+      "slot": 15,
+      "field": 120,
+      "pointer": 347892355672,
+      "class": "rwx-generated",
+      "rwx_offset": 600,
+      "instructions": [
+        {
+          "address": 347892355672,
+          "mnemonic": "mov",
+          "op_str": "x8, #0x4e"
+        },
+        {
+          "address": 347892355676,
+          "mnemonic": "svc",
+          "op_str": "#0"
+        },
+        {
+          "address": 347892355680,
+          "mnemonic": "ret",
+          "op_str": ""
+        }
+      ],
+      "syscall": {
+        "nr": 78,
+        "name": "readlinkat"
+      }
+    },
+    {
+      "slot": 16,
+      "field": 128,
+      "pointer": 0,
+      "class": "zero"
+    },
+    {
+      "slot": 17,
+      "field": 136,
+      "pointer": 347892355492,
+      "class": "rwx-generated",
+      "rwx_offset": 420,
+      "instructions": [
+        {
+          "address": 347892355492,
+          "mnemonic": "mov",
+          "op_str": "x8, #0x3d"
+        },
+        {
+          "address": 347892355496,
+          "mnemonic": "svc",
+          "op_str": "#0"
+        },
+        {
+          "address": 347892355500,
+          "mnemonic": "ret",
+          "op_str": ""
+        }
+      ],
+      "syscall": {
+        "nr": 61,
+        "name": "getdents64"
+      }
+    },
+    {
+      "slot": 18,
+      "field": 144,
+      "pointer": 347892356092,
+      "class": "rwx-generated",
+      "rwx_offset": 1020,
+      "instructions": [
+        {
+          "address": 347892356092,
+          "mnemonic": "mov",
+          "op_str": "x8, #0x4f"
+        },
+        {
+          "address": 347892356096,
+          "mnemonic": "svc",
+          "op_str": "#0"
+        },
+        {
+          "address": 347892356100,
+          "mnemonic": "ret",
+          "op_str": ""
+        }
+      ],
+      "syscall": {
+        "nr": 79,
+        "name": "newfstatat"
+      }
+    },
+    {
+      "slot": 19,
+      "field": 152,
+      "pointer": 0,
+      "class": "zero"
+    },
+    {
+      "slot": 20,
+      "field": 160,
+      "pointer": 0,
+      "class": "zero"
+    }
+  ],
+  "unique_nonzero_pointers": 18,
+  "duplicate_pointers": {}
+}
