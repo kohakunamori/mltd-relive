@@ -32,6 +32,7 @@ __all__ = [
     'story',
     'story_legacy',
     'theater',
+    'theater_compat',
     'unit',
     'user',
 ]
