@@ -1,6 +1,7 @@
 import logging
 from configparser import ConfigParser
 from datetime import timedelta, timezone
+from urllib.parse import urlsplit
 
 version = '0.1.10'
 api_port = 7650
@@ -13,6 +14,9 @@ _asset_cache_root = 'asset-cache'
 _asset_prefetch_workers = 48
 _asset_upstream_proxy = ''
 _asset_local_scopes = 'zh-android'
+_asset_public_url = ''
+_asset_tls_cert = ''
+_asset_tls_key = ''
 
 ASSET_MODES = ('remote', 'hybrid', 'local')
 ASSET_LANGUAGES = ('zh', 'ko')
@@ -48,6 +52,9 @@ class CustomConfigParser(ConfigParser):
                 'asset_prefetch_workers': _asset_prefetch_workers,
                 'asset_upstream_proxy': _asset_upstream_proxy,
                 'asset_local_scopes': _asset_local_scopes,
+                'asset_public_url': _asset_public_url,
+                'asset_tls_cert': _asset_tls_cert,
+                'asset_tls_key': _asset_tls_key,
             }
         })
         if not self.read('config.ini'):
@@ -70,8 +77,7 @@ class CustomConfigParser(ConfigParser):
                 # v0.1.9 made desktop hybrid the default, but its self-signed
                 # HTTPS AssetBundle path is incompatible with the corrected
                 # client. Move existing v0.1.9 default-like configs back to
-                # the known-good remote mode. Users can explicitly re-enable
-                # hybrid to test the v0.1.10 cleartext-LAN transport.
+                # the known-good remote mode.
                 self['default']['asset_mode'] = 'remote'
             self['default']['version'] = version
             self.write_config()
@@ -186,6 +192,54 @@ class CustomConfigParser(ConfigParser):
         return tuple(dict.fromkeys(
             scope.split('-', 1)[1] for scope in self.asset_local_scopes
         ))
+
+    @property
+    def asset_public_url(self):
+        return self['default'].get(
+            'asset_public_url', _asset_public_url
+        ).strip().rstrip('/')
+
+    @asset_public_url.setter
+    def asset_public_url(self, value):
+        self['default']['asset_public_url'] = (value or '').strip().rstrip('/')
+        self.write_config()
+
+    @property
+    def asset_public_host(self):
+        value = self.asset_public_url
+        if not value:
+            return None
+        return urlsplit(value).hostname
+
+    @property
+    def asset_public_port(self):
+        value = self.asset_public_url
+        if not value:
+            return None
+        parsed = urlsplit(value)
+        if parsed.port is not None:
+            return parsed.port
+        return 443 if parsed.scheme.lower() == 'https' else 80
+
+    @property
+    def asset_tls_cert(self):
+        value = self['default'].get('asset_tls_cert', _asset_tls_cert).strip()
+        return value or None
+
+    @asset_tls_cert.setter
+    def asset_tls_cert(self, value):
+        self['default']['asset_tls_cert'] = (value or '').strip()
+        self.write_config()
+
+    @property
+    def asset_tls_key(self):
+        value = self['default'].get('asset_tls_key', _asset_tls_key).strip()
+        return value or None
+
+    @asset_tls_key.setter
+    def asset_tls_key(self, value):
+        self['default']['asset_tls_key'] = (value or '').strip()
+        self.write_config()
 
     def write_config(self):
         with open('config.ini', 'w') as config_file:
