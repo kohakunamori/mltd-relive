@@ -1,0 +1,22 @@
+name: Diagnose hybrid asset route
+
+on:
+  push:
+    branches:
+      - diagnose/hybrid-asset-route
+
+jobs:
+  hybrid-route:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+      - name: Exercise local HTTPS asset path against upstream
+        run: python tools/diagnose_hybrid_asset_route.py
