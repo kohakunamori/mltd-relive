@@ -249,6 +249,16 @@ class ProxyHTTPRequestHandler(AssetHTTPRequestHandler):
         except (BrokenPipeError, ConnectionResetError):
             pass
 
+    def send_error(self, code, message=None, explain=None):
+        if code in {404, 500, 502}:
+            logger.warning(
+                'Client HTTP error: '
+                f'status={code} method={self.command} '
+                f'host={self.headers.get("Host", "")} '
+                f'path={self.path} range={self.headers.get("Range", "")}'
+            )
+        super().send_error(code, message, explain)
+
     def log_message(self, format, *args):
         pass
 
