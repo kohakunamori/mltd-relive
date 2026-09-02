@@ -1,0 +1,23 @@
+{
+  "needed": [
+    "liblog.so",
+    "libz.so",
+    "libdl.so",
+    "libc.so",
+    "libm.so",
+    "libstdc++.so",
+    "libcompatible.so"
+  ],
+  "target_imports": [],
+  "target_exports": [
+    {
+      "index": 3,
+      "name": "SoLibraryStart",
+      "value": 575036,
+      "size": 368,
+      "shndx": 10
+    }
+  ],
+  "target_relocations": [],
+  "target_callsites": []
+}
