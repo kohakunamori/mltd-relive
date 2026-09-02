@@ -76,7 +76,7 @@ class BionicEmulator(mod.FastEmulator):
             self.stub_return(value)
             return
         if n in ('srand','srandom'):
-            seed=self.uc.reg_read(mod.UC_ARM64_REG_X0) & 0xffffffff
+            seed=self.uc.reg_read(base.UC_ARM64_REG_X0) & 0xffffffff
             self.bionic_rand.srand(seed)
             self.rand_calls.append({'name':n,'seed':seed})
             self.stub_return(0)
