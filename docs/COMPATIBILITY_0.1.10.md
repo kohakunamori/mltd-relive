@@ -88,7 +88,7 @@ storage.
 The simpler and more robust model is therefore:
 
 ```text
-runtime:     client -> remote HTTPS Asset storage
+runtime:      client -> remote HTTPS Asset storage
 preservation: remote/R2 -> explicit cache tool -> local/NAS archive
 ```
 
@@ -137,31 +137,51 @@ Fix commit:
 After rebuilding with that fix, the corrected Traditional Chinese client was
 tested with remote Asset mode and Live operates normally.
 
+## Remote-only GUI build — device-confirmed
+
+The final remote-only GUI removes `Asset Mode` and `Asset Preparation` and keeps
+only optional `Asset Remote URL`. The test build at commit
+`a790bf3cb9b02336a87ec94d53868781040c543f` was device-tested with the corrected
+Traditional Chinese client and confirmed working through login and the Live
+smoke-test flow.
+
+This confirms the release Asset/UI design itself. No hybrid/local runtime path
+is required.
+
 ## Current compatibility status
 
 Device-confirmed:
 
 - remote login: working;
+- remote Asset download: working;
 - Theater flow used during testing: working;
 - Live after the SetUnit fix: working;
+- final remote-only GUI build: working;
 - v0.1.9 local self-signed Asset HTTPS: rejected (`-404 / 0`);
 - v0.1.10 Desktop cleartext Asset HTTP: rejected (`-21990`).
 
-Current runtime design:
+Current release architecture:
 
-- API HTTPS listener remains local and compatibility-oriented;
-- API responses retain `Connection: close` and serialized dispatch for now;
+- API HTTPS listener remains local and keeps the listener-wrapped TLS accept
+  path that is already confirmed compatible;
 - Asset traffic is remote HTTPS only;
 - `asset_remote_url` can redirect the client to another trusted HTTPS object
   storage endpoint;
 - Asset preservation is handled only by `tools/cache_assets.py`.
 
-## Remaining cleanup before merge/release
+## Final API transport A/B
 
-1. Run CI after the remote-only/cache-tool refactor.
-2. Rebuild the standalone test package and perform a final remote login + Live
-   smoke test.
-3. A/B test whether global API serialization and/or `Connection: close` can be
-   removed without breaking the corrected client; the SetUnit bug, not API
-   transport, was the observed Live root cause.
-4. After the final client smoke test, merge the branch and publish v0.1.10.
+The temporary global API serialization lock and forced `Connection: close` were
+introduced while the Live failure was still under investigation. The observed
+root cause was instead the SQLAlchemy `SetUnit` bug.
+
+The branch now contains an A/B candidate which restores:
+
+- concurrent direct WSGI dispatch;
+- HTTP/1.1 keep-alive;
+- `wsgi.multithread = True`.
+
+The listener-wrapped TLS behavior is intentionally unchanged. Automated tests
+must pass first, followed by one corrected-client login + Live smoke test on the
+A/B build. Only after that confirmation should the branch be merged and v0.1.10
+published.
