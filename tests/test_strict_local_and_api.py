@@ -240,19 +240,22 @@ class DirectWSGIDispatchTest(unittest.TestCase):
         proxy.api_port = self.old_api_port
         self.temp.cleanup()
 
-    def test_direct_wsgi_bypasses_local_http_api_and_keeps_connection(self):
+    def test_direct_wsgi_bypasses_local_http_api_and_closes_api_connection(self):
         conn = http.client.HTTPConnection('127.0.0.1', self.port, timeout=3)
         headers = {'Content-Length': '1', 'Host': 'theaterdays-zh.appspot.com'}
+
         conn.request('POST', '/api', body=b'a', headers=headers)
         first = conn.getresponse()
+        self.assertEqual(first.getheader('Connection'), 'close')
         self.assertEqual(first.read(), b'direct-wsgi')
-        first_socket = conn.sock
-        self.assertIsNotNone(first_socket)
 
+        # http.client transparently reconnects here. The important compatibility
+        # contract is that each API response closes the previous connection,
+        # matching the original standalone proxy, while direct WSGI is retained.
         conn.request('POST', '/api', body=b'b', headers=headers)
         second = conn.getresponse()
+        self.assertEqual(second.getheader('Connection'), 'close')
         self.assertEqual(second.read(), b'direct-wsgi')
-        self.assertIs(conn.sock, first_socket)
         self.assertEqual(FakeAPIHandler.calls, 0)
         conn.close()
 
