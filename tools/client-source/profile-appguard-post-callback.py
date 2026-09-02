@@ -14,7 +14,7 @@ from collections import Counter, deque
 from pathlib import Path
 
 from capstone import Cs, CS_ARCH_ARM64, CS_MODE_ARM
-from unicorn import UcError, UC_HOOK_MEM_WRITE
+from unicorn import UcError, UC_HOOK_CODE, UC_HOOK_INTR, UC_HOOK_MEM_INVALID, UC_HOOK_MEM_WRITE
 from unicorn.arm64_const import UC_ARM64_REG_PC
 
 HERE = Path(__file__).resolve().parent
@@ -92,9 +92,9 @@ class Profiler(bionic.BionicEmulator):
     def run_profile(self):
         self.out.mkdir(parents=True, exist_ok=True)
         self.map_memory(); relocs=self.apply_relocations(); self.setup_registers()
-        self.uc.hook_add(base.UC_HOOK_CODE, self.code_hook)
-        self.uc.hook_add(base.UC_HOOK_INTR, self.syscall_hook)
-        self.uc.hook_add(base.UC_HOOK_MEM_INVALID, self.invalid_hook)
+        self.uc.hook_add(UC_HOOK_CODE, self.code_hook)
+        self.uc.hook_add(UC_HOOK_INTR, self.syscall_hook)
+        self.uc.hook_add(UC_HOOK_MEM_INVALID, self.invalid_hook)
         self.uc.hook_add(UC_HOOK_MEM_WRITE, self.write_hook, begin=base.BIAS+WATCH_LO, end=base.BIAS+WATCH_HI-1)
         try:
             self.uc.emu_start(base.BIAS+self.image.dt_init, base.STOP_ADDR, count=base.MAX_INSNS+POST_LIMIT+2000)
@@ -162,5 +162,5 @@ def main():
     (a.out/'post-callback-profile.md').write_text(render(rep))
     first=rep['probe_snapshots'][0]['probes'] if rep['probe_snapshots'] else []
     last=rep['probe_snapshots'][-1]['probes'] if rep['probe_snapshots'] else []
-    print(json.dumps({'stop':rep['stop'],'post_count':rep['post_count'],'writes':len(rep['watch_writes']),'probe_changed':[(hex(a['address']),a['sha256']!=b['sha256']) for a,b in zip(first,last)],'top':rep['top_pcs'][:12]},indent=2))
+    print(json.dumps({'stop':rep['stop'],'post_count':rep['post_count'],'writes':len(rep['watch_writes']),'probe_changed':[(hex(x['address']),x['sha256']!=y['sha256']) for x,y in zip(first,last)],'top':rep['top_pcs'][:12]},indent=2))
 if __name__=='__main__':main()
