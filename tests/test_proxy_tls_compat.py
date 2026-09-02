@@ -24,11 +24,14 @@ class ProxyTLSCompatibilityTest(unittest.TestCase):
         )
         self.assertNotIn('process_request_thread', source)
 
-    def test_api_tls_listener_does_not_load_asset_certificate(self):
-        source = inspect.getsource(proxy.start)
-        self.assertNotIn('assets.rainbowunicorn7297.com.crt', source)
-        self.assertNotIn('assets.rainbowunicorn7297.com.key', source)
-        self.assertNotIn('set_servername_callback', source)
+    def test_api_tls_listener_is_api_only(self):
+        module_source = inspect.getsource(proxy)
+        start_source = inspect.getsource(proxy.start)
+        self.assertNotIn('create_asset_server', module_source)
+        self.assertNotIn('_start_asset_server', module_source)
+        self.assertNotIn('AssetMirror', module_source)
+        self.assertNotIn('AssetStore', module_source)
+        self.assertNotIn('set_servername_callback', start_source)
 
     def test_api_post_restores_connection_close_semantics(self):
         post_source = inspect.getsource(proxy.ProxyHTTPRequestHandler.do_POST)
@@ -40,22 +43,12 @@ class ProxyTLSCompatibilityTest(unittest.TestCase):
         post_source = inspect.getsource(proxy.ProxyHTTPRequestHandler.do_POST)
         self.assertIn('with _API_COMPAT_LOCK:', post_source)
 
-    def test_cache_modes_start_independent_asset_listener(self):
-        source = inspect.getsource(proxy._start_asset_server)
-        self.assertIn("if config.asset_mode == 'remote':", source)
-        self.assertIn('create_asset_server(', source)
-        self.assertIn("fetch_on_miss = config.asset_mode == 'hybrid'", source)
-        self.assertIn("name='mltd-asset-https'", source)
-        self.assertIn('context.load_cert_chain(certfile, keyfile)', source)
-        self.assertIn(
-            'httpd.socket = context.wrap_socket(httpd.socket, server_side=True)',
-            source,
-        )
-
-    def test_desktop_asset_listener_rejects_api_port_reuse(self):
-        source = inspect.getsource(proxy._start_asset_server)
-        self.assertIn('if listen_port == proxy_port:', source)
-        self.assertIn('cannot share API port 443', source)
+    def test_start_reports_remote_asset_transport_only(self):
+        source = inspect.getsource(proxy.start)
+        self.assertIn('Asset transport: remote relay', source)
+        self.assertIn('Asset transport: Rainbow remote CDN', source)
+        self.assertNotIn('Asset HTTP server', source)
+        self.assertNotIn('Asset HTTPS server', source)
 
 
 if __name__ == '__main__':
