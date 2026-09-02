@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "baseline": {
+      "error": "UcError: Invalid memory write (UC_ERR_WRITE_UNMAPPED)"
+    },
+    "locale-ascii": {
+      "error": "UcError: Invalid memory write (UC_ERR_WRITE_UNMAPPED)"
+    },
+    "pthread_once-execute": {
+      "error": "UcError: Invalid memory write (UC_ERR_WRITE_UNMAPPED)"
+    },
+    "locale+once": {
+      "error": "UcError: Invalid memory write (UC_ERR_WRITE_UNMAPPED)"
+    }
+  }
+}
