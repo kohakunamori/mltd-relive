@@ -65,7 +65,7 @@ jobs:
       - run: python -m pip install requests==2.31.0 msgpack==1.0.5
       - run: python -m unittest tests.test_proxy_tls_compat -v
 
-  api-close:
+  api-keepalive:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
@@ -75,7 +75,7 @@ jobs:
       - run: python -m pip install requests==2.31.0 msgpack==1.0.5
       - run: python -m unittest tests.test_strict_local_and_api.DirectWSGIDispatchTest -v
 
-  api-serial:
+  api-concurrent:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
