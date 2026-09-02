@@ -1,0 +1,247 @@
+# AppGuard `asmFunction` address provenance
+
+## asmFunction slots 0x00..0x90
+
+Seed instruction: `0x7eec`
+
+- depth 0 use `0x7eec` `x14` <- 0x7e98: mov w14, wzr (edges=1)
+- depth 0 use `0x7eec` `x20` <- 0x72cc: mov x20, #-1 (edges=9); 0x7650: mov x20, x0 (edges=9)
+- depth 1 use `0x7650` `x0` <- 0x7640: mov x0, xzr (edges=0)
+
+## asmFunction slots 0x98/0xa0
+
+Seed instruction: `0xc2240`
+
+- depth 0 use `0xc2240` `x12` <- 0xc21d0: msub w12, w8, w12, w15 (edges=0)
+- depth 0 use `0xc2240` `x14` <- 0xc2220: ldr x14, [x14, #0x9e0] (edges=0)
+- depth 1 use `0xc21d0` `x15` <- 0xc21ac: ldp w15, w18, [x11] (edges=0)
+- depth 1 use `0xc21d0` `x8` <- 0xc21cc: lsr x8, x8, #0x23 (edges=0)
+- depth 2 use `0xc21ac` `x11` <- 0xc21a8: add x11, x11, #0xf60 (edges=0)
+- depth 2 use `0xc21ac` `x18` <- 0x7eb4: movk x18, #0xac75 (edges=9); 0xc25d4: and x18, x13, #3 (edges=12); 0xc2604: add x18, x18, #0x20 (edges=12)
+- depth 3 use `0xc25d4` `x13` <- 0xc25b4: mov w13, #3 (edges=1); 0xc259c: lsr x13, x12, #3 (edges=2)
+- depth 4 use `0xc259c` `x12` <- 0xc2594: sub x12, x12, x11 (edges=0)
+- depth 5 use `0xc2594` `x11` <- 0xc256c: csel x11, x11, x10, ne (edges=1)
+- depth 6 use `0xc256c` `x10` <- 0xc2564: mov w10, #8 (edges=0)
+
+### asmFunction slots 0x00..0x90: `x14` used at `0x7eec`
+
+Definition `0x7e98`:
+```asm
+0x7e80: movk x6, #0x1ae0, lsl #16
+0x7e84: movk x7, #0x8485, lsl #16
+0x7e88: movk x4, #0xc99a, lsl #16
+0x7e8c: movk x1, #0x5826, lsl #16
+0x7e90: movk x18, #0x293a, lsl #16
+0x7e94: movk x0, #0x2d4a, lsl #16
+0x7e98: mov w14, wzr  ; <-- definition
+0x7e9c: mov x10, xzr
+0x7ea0: movk x5, #0xf135
+0x7ea4: movk x6, #0x7ed2
+0x7ea8: movk x7, #0xa384
+0x7eac: movk x4, #0xfb5b
+0x7eb0: movk x1, #0xec99
+```
+
+### asmFunction slots 0x00..0x90: `x20` used at `0x7eec`
+
+Definition `0x72cc`:
+```asm
+0x72b4: movk x9, #0x6384, lsl #16
+0x72b8: sub w8, w8, w20
+0x72bc: movk x9, #0xe3f7
+0x72c0: add x20, x8, x9
+0x72c4: bl #0x170740
+0x72c8: str w20, [x0]
+0x72cc: mov x20, #-1  ; <-- definition
+0x72d0: b #0x765c
+```
+
+Definition `0x7650`:
+```asm
+0x7638: mov w3, #0x22
+0x763c: mov w4, #-1
+0x7640: mov x0, xzr
+0x7644: mov x5, xzr
+0x7648: str x8, [x9, #0xeb0]
+0x764c: bl #0x16ffa0
+0x7650: mov x20, x0  ; <-- definition
+0x7654: cmn x20, #0xfff
+0x7658: b.hs #0x72a0
+```
+
+### asmFunction slots 0x00..0x90: `x0` used at `0x7650`
+
+Definition `0x7640`:
+```asm
+0x7628: adrp x9, #0x1ec000
+0x762c: mov w1, #0x1000
+0x7630: mov w2, #7
+0x7634: add x8, x8, x21
+0x7638: mov w3, #0x22
+0x763c: mov w4, #-1
+0x7640: mov x0, xzr  ; <-- definition
+0x7644: mov x5, xzr
+0x7648: str x8, [x9, #0xeb0]
+0x764c: bl #0x16ffa0
+0x7650: mov x20, x0
+0x7654: cmn x20, #0xfff
+0x7658: b.hs #0x72a0
+```
+
+### asmFunction slots 0x98/0xa0: `x12` used at `0xc2240`
+
+Definition `0xc21d0`:
+```asm
+0xc21b8: mov w13, #-0x77780000
+0xc21bc: mul x8, x15, x8
+0xc21c0: stur w12, [x29, #-0x40]
+0xc21c4: mov w12, #0x4b
+0xc21c8: movk w13, #0x8889
+0xc21cc: lsr x8, x8, #0x23
+0xc21d0: msub w12, w8, w12, w15  ; <-- definition
+0xc21d4: mul x8, x18, x13
+0xc21d8: mov w14, #0x1e
+0xc21dc: lsr x8, x8, #0x24
+0xc21e0: msub w15, w8, w14, w18
+0xc21e4: ldp w14, w11, [x11, #8]
+0xc21e8: mov w16, #-0x33340000
+```
+
+### asmFunction slots 0x98/0xa0: `x14` used at `0xc2240`
+
+Definition `0xc2220`:
+```asm
+0xc2208: adrp x18, #0x1e5000
+0xc220c: adrp x8, #0x1e5000
+0xc2210: msub w16, w16, w17, w14
+0xc2214: adrp x14, #0x1e5000
+0xc2218: ldr x18, [x18, #0xff0]
+0xc221c: ldr x8, [x8, #0xb40]
+0xc2220: ldr x14, [x14, #0x9e0]  ; <-- definition
+0xc2224: str q0, [sp]
+0xc2228: ldr q0, [x9]
+0xc222c: mul x9, x11, x13
+0xc2230: lsr x9, x9, #0x23
+0xc2234: lsl w13, w9, #4
+0xc2238: sub w9, w13, w9
+```
+
+### asmFunction slots 0x98/0xa0: `x15` used at `0xc21d0`
+
+Definition `0xc21ac`:
+```asm
+0xc2194: ldr q2, [x11, #0x20]
+0xc2198: stur x8, [x29, #-0x28]
+0xc219c: stur q0, [x29, #-0x50]
+0xc21a0: ldp q0, q3, [x11]
+0xc21a4: adrp x11, #0x1ec000
+0xc21a8: add x11, x11, #0xf60
+0xc21ac: ldp w15, w18, [x11]  ; <-- definition
+0xc21b0: mov w8, #0x1b4e0000
+0xc21b4: movk w8, #0x81b5
+0xc21b8: mov w13, #-0x77780000
+0xc21bc: mul x8, x15, x8
+0xc21c0: stur w12, [x29, #-0x40]
+0xc21c4: mov w12, #0x4b
+```
+
+### asmFunction slots 0x98/0xa0: `x8` used at `0xc21d0`
+
+Definition `0xc21cc`:
+```asm
+0xc21b4: movk w8, #0x81b5
+0xc21b8: mov w13, #-0x77780000
+0xc21bc: mul x8, x15, x8
+0xc21c0: stur w12, [x29, #-0x40]
+0xc21c4: mov w12, #0x4b
+0xc21c8: movk w13, #0x8889
+0xc21cc: lsr x8, x8, #0x23  ; <-- definition
+0xc21d0: msub w12, w8, w12, w15
+0xc21d4: mul x8, x18, x13
+0xc21d8: mov w14, #0x1e
+0xc21dc: lsr x8, x8, #0x24
+0xc21e0: msub w15, w8, w14, w18
+0xc21e4: ldp w14, w11, [x11, #8]
+```
+
+### asmFunction slots 0x98/0xa0: `x11` used at `0xc21ac`
+
+Definition `0xc21a8`:
+```asm
+0xc2190: ldr x10, [x11, #0x30]
+0xc2194: ldr q2, [x11, #0x20]
+0xc2198: stur x8, [x29, #-0x28]
+0xc219c: stur q0, [x29, #-0x50]
+0xc21a0: ldp q0, q3, [x11]
+0xc21a4: adrp x11, #0x1ec000
+0xc21a8: add x11, x11, #0xf60  ; <-- definition
+0xc21ac: ldp w15, w18, [x11]
+0xc21b0: mov w8, #0x1b4e0000
+0xc21b4: movk w8, #0x81b5
+0xc21b8: mov w13, #-0x77780000
+0xc21bc: mul x8, x15, x8
+0xc21c0: stur w12, [x29, #-0x40]
+```
+
+### asmFunction slots 0x98/0xa0: `x18` used at `0xc21ac`
+
+Definition `0x7eb4`:
+```asm
+0x7e9c: mov x10, xzr
+0x7ea0: movk x5, #0xf135
+0x7ea4: movk x6, #0x7ed2
+0x7ea8: movk x7, #0xa384
+0x7eac: movk x4, #0xfb5b
+0x7eb0: movk x1, #0xec99
+0x7eb4: movk x18, #0xac75  ; <-- definition
+0x7eb8: movk x0, #0x6201
+0x7ebc: sub x8, x8, x9
+0x7ec0: stur x8, [x29, #-0xc8]
+0x7ec4: ldur x8, [x29, #-0xb8]
+0x7ec8: cmp x10, x8
+0x7ecc: b.hs #0x892c
+```
+
+Definition `0xc25d4`:
+```asm
+0xc25d4: and x18, x13, #3  ; <-- definition
+0xc25d8: sub x17, x13, x18
+0xc25dc: mov x15, x11
+0xc25e0: mov x16, x10
+0xc25e4: cbz x17, #0xc261c
+```
+
+Definition `0xc2604`:
+```asm
+0xc2600: ldp q0, q1, [x18, #-0x10]
+0xc2604: add x18, x18, #0x20  ; <-- definition
+0xc2608: sub x17, x17, #4
+0xc260c: stp q0, q1, [x0, #-0x10]
+0xc2610: add x0, x0, #0x20
+0xc2614: cbnz x17, #0xc2600
+```
+
+### asmFunction slots 0x98/0xa0: `x13` used at `0xc25d4`
+
+Definition `0xc25b4`:
+```asm
+0xc25ac: add x10, sp, #0x40
+0xc25b0: mov w12, #0x18
+0xc25b4: mov w13, #3  ; <-- definition
+0xc25b8: mov x11, x20
+0xc25bc: cmp x13, #4
+0xc25c0: lsl x14, x13, #3
+0xc25c4: b.hs #0xc25d4
+```
+
+Definition `0xc259c`:
+```asm
+0xc258c: mov w12, #0x18
+0xc2590: add x10, sp, #0x40
+0xc2594: sub x12, x12, x11
+0xc2598: add x10, x10, x11
+0xc259c: lsr x13, x12, #3  ; <-- definition
+0xc25a0: add x11, x20, x11
+0xc25a4: cbnz x13, #0xc25bc
+```
+

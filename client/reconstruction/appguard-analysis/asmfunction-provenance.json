@@ -1,0 +1,1928 @@
+{
+  "seeds": [
+    {
+      "name": "asmFunction slots 0x00..0x90",
+      "use_pc": 32492,
+      "registers": [
+        "x20",
+        "x14"
+      ]
+    },
+    {
+      "name": "asmFunction slots 0x98/0xa0",
+      "use_pc": 795200,
+      "registers": [
+        "x14",
+        "x12"
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "root": "asmFunction slots 0x00..0x90",
+      "use_pc": 32492,
+      "reg": "x20",
+      "depth": 0,
+      "definitions": [
+        {
+          "pc": 29388,
+          "block": 29344,
+          "distance": 9,
+          "path": [
+            {
+              "from": 32296,
+              "to": 32464,
+              "block": 32296,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 32208,
+              "to": 32296,
+              "block": 32208,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 32096,
+              "to": 32208,
+              "block": 32096,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 32016,
+              "to": 32096,
+              "block": 32016,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 31488,
+              "to": 32016,
+              "block": 31488,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 30524,
+              "to": 31488,
+              "block": 30524,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 30408,
+              "to": 30524,
+              "block": 30408,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 30300,
+              "to": 30408,
+              "block": 30300,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 29344,
+              "to": 30300,
+              "block": 29344,
+              "kind": "cfg",
+              "callsite": null
+            }
+          ],
+          "instruction": {
+            "address": 29388,
+            "file_offset": 29388,
+            "mnemonic": "mov",
+            "op_str": "x20, #-1"
+          },
+          "context": [
+            {
+              "address": 29364,
+              "file_offset": 29364,
+              "mnemonic": "movk",
+              "op_str": "x9, #0x6384, lsl #16"
+            },
+            {
+              "address": 29368,
+              "file_offset": 29368,
+              "mnemonic": "sub",
+              "op_str": "w8, w8, w20"
+            },
+            {
+              "address": 29372,
+              "file_offset": 29372,
+              "mnemonic": "movk",
+              "op_str": "x9, #0xe3f7"
+            },
+            {
+              "address": 29376,
+              "file_offset": 29376,
+              "mnemonic": "add",
+              "op_str": "x20, x8, x9"
+            },
+            {
+              "address": 29380,
+              "file_offset": 29380,
+              "mnemonic": "bl",
+              "op_str": "#0x170740"
+            },
+            {
+              "address": 29384,
+              "file_offset": 29384,
+              "mnemonic": "str",
+              "op_str": "w20, [x0]"
+            },
+            {
+              "address": 29388,
+              "file_offset": 29388,
+              "mnemonic": "mov",
+              "op_str": "x20, #-1"
+            },
+            {
+              "address": 29392,
+              "file_offset": 29392,
+              "mnemonic": "b",
+              "op_str": "#0x765c"
+            }
+          ]
+        },
+        {
+          "pc": 30288,
+          "block": 30216,
+          "distance": 9,
+          "path": [
+            {
+              "from": 32296,
+              "to": 32464,
+              "block": 32296,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 32208,
+              "to": 32296,
+              "block": 32208,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 32096,
+              "to": 32208,
+              "block": 32096,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 32016,
+              "to": 32096,
+              "block": 32016,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 31488,
+              "to": 32016,
+              "block": 31488,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 30524,
+              "to": 31488,
+              "block": 30524,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 30408,
+              "to": 30524,
+              "block": 30408,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 30300,
+              "to": 30408,
+              "block": 30300,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 30216,
+              "to": 30300,
+              "block": 30216,
+              "kind": "cfg",
+              "callsite": null
+            }
+          ],
+          "instruction": {
+            "address": 30288,
+            "file_offset": 30288,
+            "mnemonic": "mov",
+            "op_str": "x20, x0"
+          },
+          "context": [
+            {
+              "address": 30264,
+              "file_offset": 30264,
+              "mnemonic": "mov",
+              "op_str": "w3, #0x22"
+            },
+            {
+              "address": 30268,
+              "file_offset": 30268,
+              "mnemonic": "mov",
+              "op_str": "w4, #-1"
+            },
+            {
+              "address": 30272,
+              "file_offset": 30272,
+              "mnemonic": "mov",
+              "op_str": "x0, xzr"
+            },
+            {
+              "address": 30276,
+              "file_offset": 30276,
+              "mnemonic": "mov",
+              "op_str": "x5, xzr"
+            },
+            {
+              "address": 30280,
+              "file_offset": 30280,
+              "mnemonic": "str",
+              "op_str": "x8, [x9, #0xeb0]"
+            },
+            {
+              "address": 30284,
+              "file_offset": 30284,
+              "mnemonic": "bl",
+              "op_str": "#0x16ffa0"
+            },
+            {
+              "address": 30288,
+              "file_offset": 30288,
+              "mnemonic": "mov",
+              "op_str": "x20, x0"
+            },
+            {
+              "address": 30292,
+              "file_offset": 30292,
+              "mnemonic": "cmn",
+              "op_str": "x20, #0xfff"
+            },
+            {
+              "address": 30296,
+              "file_offset": 30296,
+              "mnemonic": "b.hs",
+              "op_str": "#0x72a0"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "root": "asmFunction slots 0x00..0x90",
+      "use_pc": 32492,
+      "reg": "x14",
+      "depth": 0,
+      "definitions": [
+        {
+          "pc": 32408,
+          "block": 32296,
+          "distance": 1,
+          "path": [
+            {
+              "from": 32296,
+              "to": 32464,
+              "block": 32296,
+              "kind": "cfg",
+              "callsite": null
+            }
+          ],
+          "instruction": {
+            "address": 32408,
+            "file_offset": 32408,
+            "mnemonic": "mov",
+            "op_str": "w14, wzr"
+          },
+          "context": [
+            {
+              "address": 32384,
+              "file_offset": 32384,
+              "mnemonic": "movk",
+              "op_str": "x6, #0x1ae0, lsl #16"
+            },
+            {
+              "address": 32388,
+              "file_offset": 32388,
+              "mnemonic": "movk",
+              "op_str": "x7, #0x8485, lsl #16"
+            },
+            {
+              "address": 32392,
+              "file_offset": 32392,
+              "mnemonic": "movk",
+              "op_str": "x4, #0xc99a, lsl #16"
+            },
+            {
+              "address": 32396,
+              "file_offset": 32396,
+              "mnemonic": "movk",
+              "op_str": "x1, #0x5826, lsl #16"
+            },
+            {
+              "address": 32400,
+              "file_offset": 32400,
+              "mnemonic": "movk",
+              "op_str": "x18, #0x293a, lsl #16"
+            },
+            {
+              "address": 32404,
+              "file_offset": 32404,
+              "mnemonic": "movk",
+              "op_str": "x0, #0x2d4a, lsl #16"
+            },
+            {
+              "address": 32408,
+              "file_offset": 32408,
+              "mnemonic": "mov",
+              "op_str": "w14, wzr"
+            },
+            {
+              "address": 32412,
+              "file_offset": 32412,
+              "mnemonic": "mov",
+              "op_str": "x10, xzr"
+            },
+            {
+              "address": 32416,
+              "file_offset": 32416,
+              "mnemonic": "movk",
+              "op_str": "x5, #0xf135"
+            },
+            {
+              "address": 32420,
+              "file_offset": 32420,
+              "mnemonic": "movk",
+              "op_str": "x6, #0x7ed2"
+            },
+            {
+              "address": 32424,
+              "file_offset": 32424,
+              "mnemonic": "movk",
+              "op_str": "x7, #0xa384"
+            },
+            {
+              "address": 32428,
+              "file_offset": 32428,
+              "mnemonic": "movk",
+              "op_str": "x4, #0xfb5b"
+            },
+            {
+              "address": 32432,
+              "file_offset": 32432,
+              "mnemonic": "movk",
+              "op_str": "x1, #0xec99"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "root": "asmFunction slots 0x98/0xa0",
+      "use_pc": 795200,
+      "reg": "x14",
+      "depth": 0,
+      "definitions": [
+        {
+          "pc": 795168,
+          "block": 794960,
+          "distance": 0,
+          "path": [],
+          "instruction": {
+            "address": 795168,
+            "file_offset": 795168,
+            "mnemonic": "ldr",
+            "op_str": "x14, [x14, #0x9e0]"
+          },
+          "context": [
+            {
+              "address": 795144,
+              "file_offset": 795144,
+              "mnemonic": "adrp",
+              "op_str": "x18, #0x1e5000"
+            },
+            {
+              "address": 795148,
+              "file_offset": 795148,
+              "mnemonic": "adrp",
+              "op_str": "x8, #0x1e5000"
+            },
+            {
+              "address": 795152,
+              "file_offset": 795152,
+              "mnemonic": "msub",
+              "op_str": "w16, w16, w17, w14"
+            },
+            {
+              "address": 795156,
+              "file_offset": 795156,
+              "mnemonic": "adrp",
+              "op_str": "x14, #0x1e5000"
+            },
+            {
+              "address": 795160,
+              "file_offset": 795160,
+              "mnemonic": "ldr",
+              "op_str": "x18, [x18, #0xff0]"
+            },
+            {
+              "address": 795164,
+              "file_offset": 795164,
+              "mnemonic": "ldr",
+              "op_str": "x8, [x8, #0xb40]"
+            },
+            {
+              "address": 795168,
+              "file_offset": 795168,
+              "mnemonic": "ldr",
+              "op_str": "x14, [x14, #0x9e0]"
+            },
+            {
+              "address": 795172,
+              "file_offset": 795172,
+              "mnemonic": "str",
+              "op_str": "q0, [sp]"
+            },
+            {
+              "address": 795176,
+              "file_offset": 795176,
+              "mnemonic": "ldr",
+              "op_str": "q0, [x9]"
+            },
+            {
+              "address": 795180,
+              "file_offset": 795180,
+              "mnemonic": "mul",
+              "op_str": "x9, x11, x13"
+            },
+            {
+              "address": 795184,
+              "file_offset": 795184,
+              "mnemonic": "lsr",
+              "op_str": "x9, x9, #0x23"
+            },
+            {
+              "address": 795188,
+              "file_offset": 795188,
+              "mnemonic": "lsl",
+              "op_str": "w13, w9, #4"
+            },
+            {
+              "address": 795192,
+              "file_offset": 795192,
+              "mnemonic": "sub",
+              "op_str": "w9, w13, w9"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "root": "asmFunction slots 0x98/0xa0",
+      "use_pc": 795200,
+      "reg": "x12",
+      "depth": 0,
+      "definitions": [
+        {
+          "pc": 795088,
+          "block": 794960,
+          "distance": 0,
+          "path": [],
+          "instruction": {
+            "address": 795088,
+            "file_offset": 795088,
+            "mnemonic": "msub",
+            "op_str": "w12, w8, w12, w15"
+          },
+          "context": [
+            {
+              "address": 795064,
+              "file_offset": 795064,
+              "mnemonic": "mov",
+              "op_str": "w13, #-0x77780000"
+            },
+            {
+              "address": 795068,
+              "file_offset": 795068,
+              "mnemonic": "mul",
+              "op_str": "x8, x15, x8"
+            },
+            {
+              "address": 795072,
+              "file_offset": 795072,
+              "mnemonic": "stur",
+              "op_str": "w12, [x29, #-0x40]"
+            },
+            {
+              "address": 795076,
+              "file_offset": 795076,
+              "mnemonic": "mov",
+              "op_str": "w12, #0x4b"
+            },
+            {
+              "address": 795080,
+              "file_offset": 795080,
+              "mnemonic": "movk",
+              "op_str": "w13, #0x8889"
+            },
+            {
+              "address": 795084,
+              "file_offset": 795084,
+              "mnemonic": "lsr",
+              "op_str": "x8, x8, #0x23"
+            },
+            {
+              "address": 795088,
+              "file_offset": 795088,
+              "mnemonic": "msub",
+              "op_str": "w12, w8, w12, w15"
+            },
+            {
+              "address": 795092,
+              "file_offset": 795092,
+              "mnemonic": "mul",
+              "op_str": "x8, x18, x13"
+            },
+            {
+              "address": 795096,
+              "file_offset": 795096,
+              "mnemonic": "mov",
+              "op_str": "w14, #0x1e"
+            },
+            {
+              "address": 795100,
+              "file_offset": 795100,
+              "mnemonic": "lsr",
+              "op_str": "x8, x8, #0x24"
+            },
+            {
+              "address": 795104,
+              "file_offset": 795104,
+              "mnemonic": "msub",
+              "op_str": "w15, w8, w14, w18"
+            },
+            {
+              "address": 795108,
+              "file_offset": 795108,
+              "mnemonic": "ldp",
+              "op_str": "w14, w11, [x11, #8]"
+            },
+            {
+              "address": 795112,
+              "file_offset": 795112,
+              "mnemonic": "mov",
+              "op_str": "w16, #-0x33340000"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "root": "asmFunction slots 0x00..0x90",
+      "use_pc": 30288,
+      "reg": "x0",
+      "depth": 1,
+      "definitions": [
+        {
+          "pc": 30272,
+          "block": 30216,
+          "distance": 0,
+          "path": [],
+          "instruction": {
+            "address": 30272,
+            "file_offset": 30272,
+            "mnemonic": "mov",
+            "op_str": "x0, xzr"
+          },
+          "context": [
+            {
+              "address": 30248,
+              "file_offset": 30248,
+              "mnemonic": "adrp",
+              "op_str": "x9, #0x1ec000"
+            },
+            {
+              "address": 30252,
+              "file_offset": 30252,
+              "mnemonic": "mov",
+              "op_str": "w1, #0x1000"
+            },
+            {
+              "address": 30256,
+              "file_offset": 30256,
+              "mnemonic": "mov",
+              "op_str": "w2, #7"
+            },
+            {
+              "address": 30260,
+              "file_offset": 30260,
+              "mnemonic": "add",
+              "op_str": "x8, x8, x21"
+            },
+            {
+              "address": 30264,
+              "file_offset": 30264,
+              "mnemonic": "mov",
+              "op_str": "w3, #0x22"
+            },
+            {
+              "address": 30268,
+              "file_offset": 30268,
+              "mnemonic": "mov",
+              "op_str": "w4, #-1"
+            },
+            {
+              "address": 30272,
+              "file_offset": 30272,
+              "mnemonic": "mov",
+              "op_str": "x0, xzr"
+            },
+            {
+              "address": 30276,
+              "file_offset": 30276,
+              "mnemonic": "mov",
+              "op_str": "x5, xzr"
+            },
+            {
+              "address": 30280,
+              "file_offset": 30280,
+              "mnemonic": "str",
+              "op_str": "x8, [x9, #0xeb0]"
+            },
+            {
+              "address": 30284,
+              "file_offset": 30284,
+              "mnemonic": "bl",
+              "op_str": "#0x16ffa0"
+            },
+            {
+              "address": 30288,
+              "file_offset": 30288,
+              "mnemonic": "mov",
+              "op_str": "x20, x0"
+            },
+            {
+              "address": 30292,
+              "file_offset": 30292,
+              "mnemonic": "cmn",
+              "op_str": "x20, #0xfff"
+            },
+            {
+              "address": 30296,
+              "file_offset": 30296,
+              "mnemonic": "b.hs",
+              "op_str": "#0x72a0"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "root": "asmFunction slots 0x98/0xa0",
+      "use_pc": 795088,
+      "reg": "x8",
+      "depth": 1,
+      "definitions": [
+        {
+          "pc": 795084,
+          "block": 794960,
+          "distance": 0,
+          "path": [],
+          "instruction": {
+            "address": 795084,
+            "file_offset": 795084,
+            "mnemonic": "lsr",
+            "op_str": "x8, x8, #0x23"
+          },
+          "context": [
+            {
+              "address": 795060,
+              "file_offset": 795060,
+              "mnemonic": "movk",
+              "op_str": "w8, #0x81b5"
+            },
+            {
+              "address": 795064,
+              "file_offset": 795064,
+              "mnemonic": "mov",
+              "op_str": "w13, #-0x77780000"
+            },
+            {
+              "address": 795068,
+              "file_offset": 795068,
+              "mnemonic": "mul",
+              "op_str": "x8, x15, x8"
+            },
+            {
+              "address": 795072,
+              "file_offset": 795072,
+              "mnemonic": "stur",
+              "op_str": "w12, [x29, #-0x40]"
+            },
+            {
+              "address": 795076,
+              "file_offset": 795076,
+              "mnemonic": "mov",
+              "op_str": "w12, #0x4b"
+            },
+            {
+              "address": 795080,
+              "file_offset": 795080,
+              "mnemonic": "movk",
+              "op_str": "w13, #0x8889"
+            },
+            {
+              "address": 795084,
+              "file_offset": 795084,
+              "mnemonic": "lsr",
+              "op_str": "x8, x8, #0x23"
+            },
+            {
+              "address": 795088,
+              "file_offset": 795088,
+              "mnemonic": "msub",
+              "op_str": "w12, w8, w12, w15"
+            },
+            {
+              "address": 795092,
+              "file_offset": 795092,
+              "mnemonic": "mul",
+              "op_str": "x8, x18, x13"
+            },
+            {
+              "address": 795096,
+              "file_offset": 795096,
+              "mnemonic": "mov",
+              "op_str": "w14, #0x1e"
+            },
+            {
+              "address": 795100,
+              "file_offset": 795100,
+              "mnemonic": "lsr",
+              "op_str": "x8, x8, #0x24"
+            },
+            {
+              "address": 795104,
+              "file_offset": 795104,
+              "mnemonic": "msub",
+              "op_str": "w15, w8, w14, w18"
+            },
+            {
+              "address": 795108,
+              "file_offset": 795108,
+              "mnemonic": "ldp",
+              "op_str": "w14, w11, [x11, #8]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "root": "asmFunction slots 0x98/0xa0",
+      "use_pc": 795088,
+      "reg": "x15",
+      "depth": 1,
+      "definitions": [
+        {
+          "pc": 795052,
+          "block": 794960,
+          "distance": 0,
+          "path": [],
+          "instruction": {
+            "address": 795052,
+            "file_offset": 795052,
+            "mnemonic": "ldp",
+            "op_str": "w15, w18, [x11]"
+          },
+          "context": [
+            {
+              "address": 795028,
+              "file_offset": 795028,
+              "mnemonic": "ldr",
+              "op_str": "q2, [x11, #0x20]"
+            },
+            {
+              "address": 795032,
+              "file_offset": 795032,
+              "mnemonic": "stur",
+              "op_str": "x8, [x29, #-0x28]"
+            },
+            {
+              "address": 795036,
+              "file_offset": 795036,
+              "mnemonic": "stur",
+              "op_str": "q0, [x29, #-0x50]"
+            },
+            {
+              "address": 795040,
+              "file_offset": 795040,
+              "mnemonic": "ldp",
+              "op_str": "q0, q3, [x11]"
+            },
+            {
+              "address": 795044,
+              "file_offset": 795044,
+              "mnemonic": "adrp",
+              "op_str": "x11, #0x1ec000"
+            },
+            {
+              "address": 795048,
+              "file_offset": 795048,
+              "mnemonic": "add",
+              "op_str": "x11, x11, #0xf60"
+            },
+            {
+              "address": 795052,
+              "file_offset": 795052,
+              "mnemonic": "ldp",
+              "op_str": "w15, w18, [x11]"
+            },
+            {
+              "address": 795056,
+              "file_offset": 795056,
+              "mnemonic": "mov",
+              "op_str": "w8, #0x1b4e0000"
+            },
+            {
+              "address": 795060,
+              "file_offset": 795060,
+              "mnemonic": "movk",
+              "op_str": "w8, #0x81b5"
+            },
+            {
+              "address": 795064,
+              "file_offset": 795064,
+              "mnemonic": "mov",
+              "op_str": "w13, #-0x77780000"
+            },
+            {
+              "address": 795068,
+              "file_offset": 795068,
+              "mnemonic": "mul",
+              "op_str": "x8, x15, x8"
+            },
+            {
+              "address": 795072,
+              "file_offset": 795072,
+              "mnemonic": "stur",
+              "op_str": "w12, [x29, #-0x40]"
+            },
+            {
+              "address": 795076,
+              "file_offset": 795076,
+              "mnemonic": "mov",
+              "op_str": "w12, #0x4b"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "root": "asmFunction slots 0x98/0xa0",
+      "use_pc": 795052,
+      "reg": "x18",
+      "depth": 2,
+      "definitions": [
+        {
+          "pc": 32436,
+          "block": 32296,
+          "distance": 9,
+          "path": [
+            {
+              "from": 797096,
+              "to": 794960,
+              "block": 797096,
+              "kind": "call",
+              "callsite": 797096
+            },
+            {
+              "from": 797084,
+              "to": 797096,
+              "block": 797084,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 797044,
+              "to": 797084,
+              "block": 797044,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 796968,
+              "to": 797044,
+              "block": 796968,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 796876,
+              "to": 796968,
+              "block": 796876,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 796816,
+              "to": 796876,
+              "block": 796816,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 796688,
+              "to": 796816,
+              "block": 796688,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 35116,
+              "to": 796688,
+              "block": 35116,
+              "kind": "call",
+              "callsite": 35136
+            },
+            {
+              "from": 32296,
+              "to": 35116,
+              "block": 32296,
+              "kind": "cfg",
+              "callsite": null
+            }
+          ],
+          "instruction": {
+            "address": 32436,
+            "file_offset": 32436,
+            "mnemonic": "movk",
+            "op_str": "x18, #0xac75"
+          },
+          "context": [
+            {
+              "address": 32412,
+              "file_offset": 32412,
+              "mnemonic": "mov",
+              "op_str": "x10, xzr"
+            },
+            {
+              "address": 32416,
+              "file_offset": 32416,
+              "mnemonic": "movk",
+              "op_str": "x5, #0xf135"
+            },
+            {
+              "address": 32420,
+              "file_offset": 32420,
+              "mnemonic": "movk",
+              "op_str": "x6, #0x7ed2"
+            },
+            {
+              "address": 32424,
+              "file_offset": 32424,
+              "mnemonic": "movk",
+              "op_str": "x7, #0xa384"
+            },
+            {
+              "address": 32428,
+              "file_offset": 32428,
+              "mnemonic": "movk",
+              "op_str": "x4, #0xfb5b"
+            },
+            {
+              "address": 32432,
+              "file_offset": 32432,
+              "mnemonic": "movk",
+              "op_str": "x1, #0xec99"
+            },
+            {
+              "address": 32436,
+              "file_offset": 32436,
+              "mnemonic": "movk",
+              "op_str": "x18, #0xac75"
+            },
+            {
+              "address": 32440,
+              "file_offset": 32440,
+              "mnemonic": "movk",
+              "op_str": "x0, #0x6201"
+            },
+            {
+              "address": 32444,
+              "file_offset": 32444,
+              "mnemonic": "sub",
+              "op_str": "x8, x8, x9"
+            },
+            {
+              "address": 32448,
+              "file_offset": 32448,
+              "mnemonic": "stur",
+              "op_str": "x8, [x29, #-0xc8]"
+            },
+            {
+              "address": 32452,
+              "file_offset": 32452,
+              "mnemonic": "ldur",
+              "op_str": "x8, [x29, #-0xb8]"
+            },
+            {
+              "address": 32456,
+              "file_offset": 32456,
+              "mnemonic": "cmp",
+              "op_str": "x10, x8"
+            },
+            {
+              "address": 32460,
+              "file_offset": 32460,
+              "mnemonic": "b.hs",
+              "op_str": "#0x892c"
+            }
+          ]
+        },
+        {
+          "pc": 796116,
+          "block": 796116,
+          "distance": 12,
+          "path": [
+            {
+              "from": 797096,
+              "to": 794960,
+              "block": 797096,
+              "kind": "call",
+              "callsite": 797096
+            },
+            {
+              "from": 797084,
+              "to": 797096,
+              "block": 797084,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 797044,
+              "to": 797084,
+              "block": 797044,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 796968,
+              "to": 797044,
+              "block": 796968,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 796876,
+              "to": 796968,
+              "block": 796876,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 796816,
+              "to": 796876,
+              "block": 796816,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 796688,
+              "to": 796816,
+              "block": 796688,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 796512,
+              "to": 796688,
+              "block": 796512,
+              "kind": "call",
+              "callsite": 796520
+            },
+            {
+              "from": 796240,
+              "to": 796512,
+              "block": 796240,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 796204,
+              "to": 796240,
+              "block": 796204,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 796188,
+              "to": 796204,
+              "block": 796188,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 796116,
+              "to": 796188,
+              "block": 796116,
+              "kind": "cfg",
+              "callsite": null
+            }
+          ],
+          "instruction": {
+            "address": 796116,
+            "file_offset": 796116,
+            "mnemonic": "and",
+            "op_str": "x18, x13, #3"
+          },
+          "context": [
+            {
+              "address": 796116,
+              "file_offset": 796116,
+              "mnemonic": "and",
+              "op_str": "x18, x13, #3"
+            },
+            {
+              "address": 796120,
+              "file_offset": 796120,
+              "mnemonic": "sub",
+              "op_str": "x17, x13, x18"
+            },
+            {
+              "address": 796124,
+              "file_offset": 796124,
+              "mnemonic": "mov",
+              "op_str": "x15, x11"
+            },
+            {
+              "address": 796128,
+              "file_offset": 796128,
+              "mnemonic": "mov",
+              "op_str": "x16, x10"
+            },
+            {
+              "address": 796132,
+              "file_offset": 796132,
+              "mnemonic": "cbz",
+              "op_str": "x17, #0xc261c"
+            }
+          ]
+        },
+        {
+          "pc": 796164,
+          "block": 796160,
+          "distance": 12,
+          "path": [
+            {
+              "from": 797096,
+              "to": 794960,
+              "block": 797096,
+              "kind": "call",
+              "callsite": 797096
+            },
+            {
+              "from": 797084,
+              "to": 797096,
+              "block": 797084,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 797044,
+              "to": 797084,
+              "block": 797044,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 796968,
+              "to": 797044,
+              "block": 796968,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 796876,
+              "to": 796968,
+              "block": 796876,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 796816,
+              "to": 796876,
+              "block": 796816,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 796688,
+              "to": 796816,
+              "block": 796688,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 796512,
+              "to": 796688,
+              "block": 796512,
+              "kind": "call",
+              "callsite": 796520
+            },
+            {
+              "from": 796240,
+              "to": 796512,
+              "block": 796240,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 796204,
+              "to": 796240,
+              "block": 796204,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 796184,
+              "to": 796204,
+              "block": 796184,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 796160,
+              "to": 796184,
+              "block": 796160,
+              "kind": "cfg",
+              "callsite": null
+            }
+          ],
+          "instruction": {
+            "address": 796164,
+            "file_offset": 796164,
+            "mnemonic": "add",
+            "op_str": "x18, x18, #0x20"
+          },
+          "context": [
+            {
+              "address": 796160,
+              "file_offset": 796160,
+              "mnemonic": "ldp",
+              "op_str": "q0, q1, [x18, #-0x10]"
+            },
+            {
+              "address": 796164,
+              "file_offset": 796164,
+              "mnemonic": "add",
+              "op_str": "x18, x18, #0x20"
+            },
+            {
+              "address": 796168,
+              "file_offset": 796168,
+              "mnemonic": "sub",
+              "op_str": "x17, x17, #4"
+            },
+            {
+              "address": 796172,
+              "file_offset": 796172,
+              "mnemonic": "stp",
+              "op_str": "q0, q1, [x0, #-0x10]"
+            },
+            {
+              "address": 796176,
+              "file_offset": 796176,
+              "mnemonic": "add",
+              "op_str": "x0, x0, #0x20"
+            },
+            {
+              "address": 796180,
+              "file_offset": 796180,
+              "mnemonic": "cbnz",
+              "op_str": "x17, #0xc2600"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "root": "asmFunction slots 0x98/0xa0",
+      "use_pc": 795052,
+      "reg": "x11",
+      "depth": 2,
+      "definitions": [
+        {
+          "pc": 795048,
+          "block": 794960,
+          "distance": 0,
+          "path": [],
+          "instruction": {
+            "address": 795048,
+            "file_offset": 795048,
+            "mnemonic": "add",
+            "op_str": "x11, x11, #0xf60"
+          },
+          "context": [
+            {
+              "address": 795024,
+              "file_offset": 795024,
+              "mnemonic": "ldr",
+              "op_str": "x10, [x11, #0x30]"
+            },
+            {
+              "address": 795028,
+              "file_offset": 795028,
+              "mnemonic": "ldr",
+              "op_str": "q2, [x11, #0x20]"
+            },
+            {
+              "address": 795032,
+              "file_offset": 795032,
+              "mnemonic": "stur",
+              "op_str": "x8, [x29, #-0x28]"
+            },
+            {
+              "address": 795036,
+              "file_offset": 795036,
+              "mnemonic": "stur",
+              "op_str": "q0, [x29, #-0x50]"
+            },
+            {
+              "address": 795040,
+              "file_offset": 795040,
+              "mnemonic": "ldp",
+              "op_str": "q0, q3, [x11]"
+            },
+            {
+              "address": 795044,
+              "file_offset": 795044,
+              "mnemonic": "adrp",
+              "op_str": "x11, #0x1ec000"
+            },
+            {
+              "address": 795048,
+              "file_offset": 795048,
+              "mnemonic": "add",
+              "op_str": "x11, x11, #0xf60"
+            },
+            {
+              "address": 795052,
+              "file_offset": 795052,
+              "mnemonic": "ldp",
+              "op_str": "w15, w18, [x11]"
+            },
+            {
+              "address": 795056,
+              "file_offset": 795056,
+              "mnemonic": "mov",
+              "op_str": "w8, #0x1b4e0000"
+            },
+            {
+              "address": 795060,
+              "file_offset": 795060,
+              "mnemonic": "movk",
+              "op_str": "w8, #0x81b5"
+            },
+            {
+              "address": 795064,
+              "file_offset": 795064,
+              "mnemonic": "mov",
+              "op_str": "w13, #-0x77780000"
+            },
+            {
+              "address": 795068,
+              "file_offset": 795068,
+              "mnemonic": "mul",
+              "op_str": "x8, x15, x8"
+            },
+            {
+              "address": 795072,
+              "file_offset": 795072,
+              "mnemonic": "stur",
+              "op_str": "w12, [x29, #-0x40]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "root": "asmFunction slots 0x98/0xa0",
+      "use_pc": 796116,
+      "reg": "x13",
+      "depth": 3,
+      "definitions": [
+        {
+          "pc": 796084,
+          "block": 796076,
+          "distance": 1,
+          "path": [
+            {
+              "from": 796076,
+              "to": 796116,
+              "block": 796076,
+              "kind": "cfg",
+              "callsite": null
+            }
+          ],
+          "instruction": {
+            "address": 796084,
+            "file_offset": 796084,
+            "mnemonic": "mov",
+            "op_str": "w13, #3"
+          },
+          "context": [
+            {
+              "address": 796076,
+              "file_offset": 796076,
+              "mnemonic": "add",
+              "op_str": "x10, sp, #0x40"
+            },
+            {
+              "address": 796080,
+              "file_offset": 796080,
+              "mnemonic": "mov",
+              "op_str": "w12, #0x18"
+            },
+            {
+              "address": 796084,
+              "file_offset": 796084,
+              "mnemonic": "mov",
+              "op_str": "w13, #3"
+            },
+            {
+              "address": 796088,
+              "file_offset": 796088,
+              "mnemonic": "mov",
+              "op_str": "x11, x20"
+            },
+            {
+              "address": 796092,
+              "file_offset": 796092,
+              "mnemonic": "cmp",
+              "op_str": "x13, #4"
+            },
+            {
+              "address": 796096,
+              "file_offset": 796096,
+              "mnemonic": "lsl",
+              "op_str": "x14, x13, #3"
+            },
+            {
+              "address": 796100,
+              "file_offset": 796100,
+              "mnemonic": "b.hs",
+              "op_str": "#0xc25d4"
+            }
+          ]
+        },
+        {
+          "pc": 796060,
+          "block": 796044,
+          "distance": 2,
+          "path": [
+            {
+              "from": 796092,
+              "to": 796116,
+              "block": 796092,
+              "kind": "cfg",
+              "callsite": null
+            },
+            {
+              "from": 796044,
+              "to": 796092,
+              "block": 796044,
+              "kind": "cfg",
+              "callsite": null
+            }
+          ],
+          "instruction": {
+            "address": 796060,
+            "file_offset": 796060,
+            "mnemonic": "lsr",
+            "op_str": "x13, x12, #3"
+          },
+          "context": [
+            {
+              "address": 796044,
+              "file_offset": 796044,
+              "mnemonic": "mov",
+              "op_str": "w12, #0x18"
+            },
+            {
+              "address": 796048,
+              "file_offset": 796048,
+              "mnemonic": "add",
+              "op_str": "x10, sp, #0x40"
+            },
+            {
+              "address": 796052,
+              "file_offset": 796052,
+              "mnemonic": "sub",
+              "op_str": "x12, x12, x11"
+            },
+            {
+              "address": 796056,
+              "file_offset": 796056,
+              "mnemonic": "add",
+              "op_str": "x10, x10, x11"
+            },
+            {
+              "address": 796060,
+              "file_offset": 796060,
+              "mnemonic": "lsr",
+              "op_str": "x13, x12, #3"
+            },
+            {
+              "address": 796064,
+              "file_offset": 796064,
+              "mnemonic": "add",
+              "op_str": "x11, x20, x11"
+            },
+            {
+              "address": 796068,
+              "file_offset": 796068,
+              "mnemonic": "cbnz",
+              "op_str": "x13, #0xc25bc"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "root": "asmFunction slots 0x98/0xa0",
+      "use_pc": 796060,
+      "reg": "x12",
+      "depth": 4,
+      "definitions": [
+        {
+          "pc": 796052,
+          "block": 796044,
+          "distance": 0,
+          "path": [],
+          "instruction": {
+            "address": 796052,
+            "file_offset": 796052,
+            "mnemonic": "sub",
+            "op_str": "x12, x12, x11"
+          },
+          "context": [
+            {
+              "address": 796044,
+              "file_offset": 796044,
+              "mnemonic": "mov",
+              "op_str": "w12, #0x18"
+            },
+            {
+              "address": 796048,
+              "file_offset": 796048,
+              "mnemonic": "add",
+              "op_str": "x10, sp, #0x40"
+            },
+            {
+              "address": 796052,
+              "file_offset": 796052,
+              "mnemonic": "sub",
+              "op_str": "x12, x12, x11"
+            },
+            {
+              "address": 796056,
+              "file_offset": 796056,
+              "mnemonic": "add",
+              "op_str": "x10, x10, x11"
+            },
+            {
+              "address": 796060,
+              "file_offset": 796060,
+              "mnemonic": "lsr",
+              "op_str": "x13, x12, #3"
+            },
+            {
+              "address": 796064,
+              "file_offset": 796064,
+              "mnemonic": "add",
+              "op_str": "x11, x20, x11"
+            },
+            {
+              "address": 796068,
+              "file_offset": 796068,
+              "mnemonic": "cbnz",
+              "op_str": "x13, #0xc25bc"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "root": "asmFunction slots 0x98/0xa0",
+      "use_pc": 796052,
+      "reg": "x11",
+      "depth": 5,
+      "definitions": [
+        {
+          "pc": 796012,
+          "block": 796000,
+          "distance": 1,
+          "path": [
+            {
+              "from": 796000,
+              "to": 796044,
+              "block": 796000,
+              "kind": "cfg",
+              "callsite": null
+            }
+          ],
+          "instruction": {
+            "address": 796012,
+            "file_offset": 796012,
+            "mnemonic": "csel",
+            "op_str": "x11, x11, x10, ne"
+          },
+          "context": [
+            {
+              "address": 796000,
+              "file_offset": 796000,
+              "mnemonic": "tst",
+              "op_str": "x20, #7"
+            },
+            {
+              "address": 796004,
+              "file_offset": 796004,
+              "mnemonic": "mov",
+              "op_str": "w10, #8"
+            },
+            {
+              "address": 796008,
+              "file_offset": 796008,
+              "mnemonic": "mov",
+              "op_str": "w11, #0x18"
+            },
+            {
+              "address": 796012,
+              "file_offset": 796012,
+              "mnemonic": "csel",
+              "op_str": "x11, x11, x10, ne"
+            },
+            {
+              "address": 796016,
+              "file_offset": 796016,
+              "mnemonic": "add",
+              "op_str": "x10, sp, #0x40"
+            },
+            {
+              "address": 796020,
+              "file_offset": 796020,
+              "mnemonic": "mov",
+              "op_str": "x12, x20"
+            },
+            {
+              "address": 796024,
+              "file_offset": 796024,
+              "mnemonic": "mov",
+              "op_str": "x13, x11"
+            },
+            {
+              "address": 796028,
+              "file_offset": 796028,
+              "mnemonic": "ldrb",
+              "op_str": "w14, [x10], #1"
+            },
+            {
+              "address": 796032,
+              "file_offset": 796032,
+              "mnemonic": "sub",
+              "op_str": "x13, x13, #1"
+            },
+            {
+              "address": 796036,
+              "file_offset": 796036,
+              "mnemonic": "strb",
+              "op_str": "w14, [x12], #1"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "root": "asmFunction slots 0x98/0xa0",
+      "use_pc": 796012,
+      "reg": "x10",
+      "depth": 6,
+      "definitions": [
+        {
+          "pc": 796004,
+          "block": 796000,
+          "distance": 0,
+          "path": [],
+          "instruction": {
+            "address": 796004,
+            "file_offset": 796004,
+            "mnemonic": "mov",
+            "op_str": "w10, #8"
+          },
+          "context": [
+            {
+              "address": 796000,
+              "file_offset": 796000,
+              "mnemonic": "tst",
+              "op_str": "x20, #7"
+            },
+            {
+              "address": 796004,
+              "file_offset": 796004,
+              "mnemonic": "mov",
+              "op_str": "w10, #8"
+            },
+            {
+              "address": 796008,
+              "file_offset": 796008,
+              "mnemonic": "mov",
+              "op_str": "w11, #0x18"
+            },
+            {
+              "address": 796012,
+              "file_offset": 796012,
+              "mnemonic": "csel",
+              "op_str": "x11, x11, x10, ne"
+            },
+            {
+              "address": 796016,
+              "file_offset": 796016,
+              "mnemonic": "add",
+              "op_str": "x10, sp, #0x40"
+            },
+            {
+              "address": 796020,
+              "file_offset": 796020,
+              "mnemonic": "mov",
+              "op_str": "x12, x20"
+            },
+            {
+              "address": 796024,
+              "file_offset": 796024,
+              "mnemonic": "mov",
+              "op_str": "x13, x11"
+            },
+            {
+              "address": 796028,
+              "file_offset": 796028,
+              "mnemonic": "ldrb",
+              "op_str": "w14, [x10], #1"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "root": "asmFunction slots 0x00..0x90",
+      "use_pc": 32492,
+      "reg": "x20",
+      "def_pc": 29388,
+      "sources": []
+    },
+    {
+      "root": "asmFunction slots 0x00..0x90",
+      "use_pc": 32492,
+      "reg": "x20",
+      "def_pc": 30288,
+      "sources": [
+        "x0"
+      ]
+    },
+    {
+      "root": "asmFunction slots 0x00..0x90",
+      "use_pc": 32492,
+      "reg": "x14",
+      "def_pc": 32408,
+      "sources": []
+    },
+    {
+      "root": "asmFunction slots 0x98/0xa0",
+      "use_pc": 795200,
+      "reg": "x14",
+      "def_pc": 795168,
+      "sources": []
+    },
+    {
+      "root": "asmFunction slots 0x98/0xa0",
+      "use_pc": 795200,
+      "reg": "x12",
+      "def_pc": 795088,
+      "sources": [
+        "x8",
+        "x15"
+      ]
+    },
+    {
+      "root": "asmFunction slots 0x00..0x90",
+      "use_pc": 30288,
+      "reg": "x0",
+      "def_pc": 30272,
+      "sources": []
+    },
+    {
+      "root": "asmFunction slots 0x98/0xa0",
+      "use_pc": 795088,
+      "reg": "x8",
+      "def_pc": 795084,
+      "sources": []
+    },
+    {
+      "root": "asmFunction slots 0x98/0xa0",
+      "use_pc": 795088,
+      "reg": "x15",
+      "def_pc": 795052,
+      "sources": [
+        "x18",
+        "x11"
+      ]
+    },
+    {
+      "root": "asmFunction slots 0x98/0xa0",
+      "use_pc": 795052,
+      "reg": "x18",
+      "def_pc": 32436,
+      "sources": []
+    },
+    {
+      "root": "asmFunction slots 0x98/0xa0",
+      "use_pc": 795052,
+      "reg": "x18",
+      "def_pc": 796116,
+      "sources": [
+        "x13"
+      ]
+    },
+    {
+      "root": "asmFunction slots 0x98/0xa0",
+      "use_pc": 795052,
+      "reg": "x18",
+      "def_pc": 796164,
+      "sources": []
+    },
+    {
+      "root": "asmFunction slots 0x98/0xa0",
+      "use_pc": 795052,
+      "reg": "x11",
+      "def_pc": 795048,
+      "sources": []
+    },
+    {
+      "root": "asmFunction slots 0x98/0xa0",
+      "use_pc": 796116,
+      "reg": "x13",
+      "def_pc": 796084,
+      "sources": []
+    },
+    {
+      "root": "asmFunction slots 0x98/0xa0",
+      "use_pc": 796116,
+      "reg": "x13",
+      "def_pc": 796060,
+      "sources": [
+        "x12"
+      ]
+    },
+    {
+      "root": "asmFunction slots 0x98/0xa0",
+      "use_pc": 796060,
+      "reg": "x12",
+      "def_pc": 796052,
+      "sources": [
+        "x11"
+      ]
+    },
+    {
+      "root": "asmFunction slots 0x98/0xa0",
+      "use_pc": 796052,
+      "reg": "x11",
+      "def_pc": 796012,
+      "sources": [
+        "x10"
+      ]
+    },
+    {
+      "root": "asmFunction slots 0x98/0xa0",
+      "use_pc": 796012,
+      "reg": "x10",
+      "def_pc": 796004,
+      "sources": []
+    }
+  ]
+}
