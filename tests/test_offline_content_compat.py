@@ -6,6 +6,7 @@ from mltd.services.offline_content_compat import (
     get_mail_list,
     get_navi_list,
     get_present_history,
+    get_sales_costume_list,
 )
 
 
@@ -40,6 +41,12 @@ class OfflineContentCompatTest(unittest.TestCase):
         self.assertEqual(
             get_present_history({'cursor': '', 'limit': 50}),
             {'present_history': [], 'cursor': ''},
+        )
+
+    def test_sales_costume_list_empty_shape(self):
+        self.assertEqual(
+            get_sales_costume_list({}),
+            {'sales_costume_list': []},
         )
 
 
