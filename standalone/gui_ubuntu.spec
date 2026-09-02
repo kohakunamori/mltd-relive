@@ -1,13 +1,42 @@
 # -*- mode: python ; coding: utf-8 -*-
 
+import shutil
+import subprocess
+
 
 block_cipher = None
+
+
+def find_runtime_library(soname):
+    """Resolve a system shared library so PyInstaller is forced to bundle it."""
+    ldconfig = shutil.which('ldconfig') or '/sbin/ldconfig'
+    output = subprocess.check_output([ldconfig, '-p'], text=True)
+    for line in output.splitlines():
+        fields = line.strip().split(' => ', 1)
+        if len(fields) != 2:
+            continue
+        library_name = fields[0].split(' ', 1)[0]
+        if library_name == soname:
+            return fields[1]
+    raise RuntimeError(f'Unable to locate required Ubuntu runtime library: {soname}')
+
+
+# The GitHub Actions Python distribution exposes _tkinter, but PyInstaller
+# 5.x does not reliably collect the system Tcl/Tk shared libraries that
+# _tkinter links against.  The resulting one-file executable then crashes on
+# clean WSL/Ubuntu installations with "libtk8.6.so: cannot open shared object
+# file".  Force these two SONAMEs into the bundle so the Ubuntu artifact is
+# actually self-contained with respect to Tk.
+tk_runtime_binaries = [
+    (find_runtime_library('libtk8.6.so'), '.'),
+    (find_runtime_library('libtcl8.6.so'), '.'),
+]
 
 
 a = Analysis(
     ['gui.pyw'],
     pathex=[],
-    binaries=[],
+    binaries=tk_runtime_binaries,
     datas=[],
     hiddenimports=[],
     hookspath=['.'],
