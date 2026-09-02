@@ -55,7 +55,9 @@ def decode(path:Path):
             regs[i.reg_name(ops[0].reg)]=int(ops[1].imm)
         elif m=='add' and len(ops)>=3 and ops[0].type==ARM64_OP_REG and ops[1].type==ARM64_OP_REG and ops[2].type==ARM64_OP_IMM:
             dst=i.reg_name(ops[0].reg); src=i.reg_name(ops[1].reg)
-            if src in regs: regs[dst]=regs[src]+int(ops[2].imm)
+            shift=getattr(ops[2].shift,'value',0) or 0
+            imm=int(ops[2].imm) << int(shift)
+            if src in regs: regs[dst]=regs[src]+imm
             else: regs.pop(dst,None)
         elif m=='ldr' and len(ops)>=2 and ops[0].type==ARM64_OP_REG and ops[1].type==ARM64_OP_MEM:
             dst=i.reg_name(ops[0].reg); base=i.reg_name(ops[1].mem.base); disp=int(ops[1].mem.disp)
