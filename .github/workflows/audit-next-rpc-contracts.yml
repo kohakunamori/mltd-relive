@@ -13,20 +13,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: git fetch origin client-decompiled-zh-fixed-v1 --depth=1
-      - name: Extract exact DTOs and client call sites
+      - name: Extract producer rank and vitality contracts
         shell: bash
         run: |
           set -euo pipefail
           git show origin/client-decompiled-zh-fixed-v1:il2cpp-dump/dump.cs > /tmp/dump.cs
-          for name in \
-            ExecuteBirthdayPresent \
-            GetProducerRankList \
-            RecoverVitalityByItem \
-            RecoverVitalityByItemMulti \
-            RecoverVitalityByJewel \
-            SetAchievementList; do
-            echo "=== ${name} DTO ==="
-            grep -n -A 75 -B 5 -E "public class (${name}Args|${name}Reply)\\b" /tmp/dump.cs | head -n 240 || true
-            echo "=== ${name} CLIENT USAGE ==="
-            grep -n -C 22 -E "${name}\\(|${name}Args|${name}Reply" /tmp/dump.cs | head -n 700 || true
-          done
+
+          echo '=== PRODUCER RANK STATUS ==='
+          grep -n -A 110 -B 8 -E 'public class ProducerRankStatus\\b' /tmp/dump.cs || true
+          echo '=== PRODUCER RANK CLIENT ==='
+          grep -n -C 30 -E 'ProducerRankStatus|GetProducerRankList' /tmp/dump.cs | head -n 2200 || true
+
+          echo '=== VITALITY SUPPORT DTOS ==='
+          grep -n -A 110 -B 8 -E 'public class (ItemAmount|ItemStatus|RecoverVitalityByItemArgs|RecoverVitalityByItemReply|RecoverVitalityByItemMultiArgs|RecoverVitalityByItemMultiReply|RecoverVitalityByJewelReply)\\b' /tmp/dump.cs | head -n 2200 || true
+          echo '=== VITALITY CLIENT CONSTANTS / FORMULAS ==='
+          grep -n -C 35 -E 'RecoverVitalityBy(Item|ItemMulti|Jewel)|full_recover_date|stamina|vitality' /tmp/dump.cs | head -n 3200 || true
+
+          echo '=== SERVER ITEM / JEWEL / SETTINGS MODELS ==='
+          grep -RIn -C 18 -E 'class (Item|MstItem|Jewel|MstGameSetting)\\b|vitality|max_vitality|recover|recovery|item_type|item_value' standalone/mltd | head -n 3200 || true
+
+          echo '=== REPOSITORY MASTER-DATA RANK / RECOVERY REFERENCES ==='
+          grep -RIn -E 'producer.?rank|vitality|stamina|recover' . \
+            --exclude='*.pyc' --exclude-dir='.git' | head -n 3200 || true
