@@ -1,0 +1,50 @@
+name: Analyze AppGuard libstub init
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - client-zh-fixed-reconstruction
+    paths:
+      - '.github/workflows/analyze-appguard-stub-init.yml'
+      - 'tools/client-source/analyze-appguard-stub-init.py'
+
+permissions:
+  contents: write
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Install analysis libraries
+        run: python -m pip install --disable-pip-version-check capstone pyelftools
+      - name: Download exact official libstub
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p work/xapk work/native
+          curl -L --fail --retry 3 -A 'Mozilla/5.0' -o work/original.xapk \
+            'https://d.apkpure.net/b/XAPK/com.bandainamcoent.imas_millionlive_theaterdays_ch?version=latest'
+          test "$(sha1sum work/original.xapk | awk '{print $1}')" = '1b77ddd342a4020ba032ec63ae7ef9288551b6e7'
+          unzip -q work/original.xapk -d work/xapk
+          unzip -p work/xapk/config.arm64_v8a.apk lib/arm64-v8a/libstub.so > work/native/libstub.so
+      - name: Decode DT_INIT trampoline
+        run: |
+          python tools/client-source/analyze-appguard-stub-init.py \
+            --libstub work/native/libstub.so \
+            --out client/reconstruction/appguard-analysis
+      - name: Commit result
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add client/reconstruction/appguard-analysis/stub-init.json \
+                  client/reconstruction/appguard-analysis/stub-init.md
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'client: decode AppGuard libstub DT_INIT trampoline'
+          git push origin HEAD:client-zh-fixed-reconstruction
