@@ -49,7 +49,6 @@ class UserProfileRuntimeTest(unittest.TestCase):
                 return None
             mission.progress = 0
             mission.mission_state = 1
-            mission.finish_date = None
             session.commit()
             return mission.mst_mission_id
 
