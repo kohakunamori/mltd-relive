@@ -3,7 +3,7 @@ import socket
 import sys
 import threading
 import traceback
-from http.server import ThreadingHTTPServer
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from os import path
 from ssl import PROTOCOL_TLS_SERVER, SSLContext
 from urllib.parse import unquote, urlsplit
@@ -11,14 +11,10 @@ from urllib.parse import unquote, urlsplit
 import requests
 import urllib3
 
-from mltd.servers.asset_cache import REMOTE_ASSET_ROOT, AssetMirror, AssetStore
-from mltd.servers.asset_server import AssetHTTPRequestHandler, bind_asset_handler
-from mltd.servers.config import api_port, config
+from mltd.servers.config import api_port
 from mltd.servers.logging import logger
 
 proxy_port = 443
-_ASSET_PREFIX = '/__mltd_assets'
-_ASSET_HOST = urlsplit(REMOTE_ASSET_ROOT).hostname
 _HOP_BY_HOP_HEADERS = {
     'connection',
     'keep-alive',
@@ -58,17 +54,6 @@ def _tune_client_socket(request):
     request.settimeout(_SOCKET_TIMEOUT)
 
 
-def _normalize_host(host):
-    host = (host or '').strip().lower()
-    if host.startswith('['):
-        end = host.find(']')
-        if end != -1:
-            return host[1:end]
-    if ':' in host:
-        host = host.rsplit(':', 1)[0]
-    return host
-
-
 class ThreadedProxyServer(ThreadingHTTPServer):
     daemon_threads = True
     block_on_close = False
@@ -81,48 +66,22 @@ class ThreadedProxyServer(ThreadingHTTPServer):
         return request, client_address
 
 
-class ProxyHTTPRequestHandler(AssetHTTPRequestHandler):
+class ProxyHTTPRequestHandler(BaseHTTPRequestHandler):
     protocol_version = 'HTTP/1.1'
     api_application = None
 
     def do_HEAD(self):
-        asset_path = self._asset_path()
-        if asset_path is None:
-            self.send_error(404)
-            return
-        self._serve_path(asset_path, send_body=False)
+        self.send_error(404)
 
     def do_GET(self):
-        asset_path = self._asset_path()
-        if asset_path is None:
-            self.send_error(404)
-            return
-        self._serve_path(asset_path, send_body=True)
-
-    def _asset_path(self):
-        request_path = urlsplit(self.path).path
-        host = _normalize_host(self.headers.get('Host', ''))
-
-        # Preferred hybrid/local path: preserve the exact public asset URL and
-        # route by Host. DNS redirects assets.rainbowunicorn7297.com to this
-        # listener only when a desktop cache mode is enabled.
-        if _ASSET_HOST and host == _ASSET_HOST:
-            return request_path
-
-        # Backward-compatible route for clients/configs created by v0.1.8/0.1.9
-        # before host-based asset interception was restored.
-        if request_path == _ASSET_PREFIX:
-            return '/'
-        if request_path.startswith(_ASSET_PREFIX + '/'):
-            return request_path[len(_ASSET_PREFIX):]
-        return None
+        self.send_error(404)
 
     def do_POST(self):
         # The corrected game clients were developed against the original
         # standalone proxy which closed every API connection and dispatched
         # API requests serially. Preserve both properties for stateful RPC
-        # sequences (notably LiveService), while Asset GET/HEAD stays fully
-        # concurrent on ThreadingHTTPServer.
+        # sequences (notably LiveService). Asset traffic no longer shares this
+        # TLS listener and remains independently concurrent on port 7651.
         self.close_connection = True
 
         with _API_COMPAT_LOCK:
@@ -153,7 +112,7 @@ class ProxyHTTPRequestHandler(AssetHTTPRequestHandler):
             'wsgi.url_scheme': 'https',
             'wsgi.input': io.BytesIO(req_body),
             'wsgi.errors': sys.stderr,
-            'wsgi.multithread': True,
+            'wsgi.multithread': False,
             'wsgi.multiprocess': True,
             'wsgi.run_once': False,
         }
@@ -250,12 +209,11 @@ class ProxyHTTPRequestHandler(AssetHTTPRequestHandler):
             pass
 
     def send_error(self, code, message=None, explain=None):
-        if code in {404, 500, 502}:
+        if code in {404, 500, 502, 503}:
             logger.warning(
-                'Client HTTP error: '
+                'Client API HTTP error: '
                 f'status={code} method={self.command} '
-                f'host={self.headers.get("Host", "")} '
-                f'path={self.path} range={self.headers.get("Range", "")}'
+                f'host={self.headers.get("Host", "")} path={self.path}'
             )
         super().send_error(code, message, explain)
 
@@ -268,75 +226,27 @@ def key_path():
     return path.join(base_path, 'key')
 
 
-def _tls_context(certfile, keyfile):
-    context = SSLContext(PROTOCOL_TLS_SERVER)
-    context.load_cert_chain(certfile, keyfile)
-    return context
-
-
 def start(port=proxy_port, conn=None):
     from mltd.servers.handler import application
 
     ProxyHTTPRequestHandler.api_application = application
 
-    if config.asset_mode == 'local':
-        from mltd.servers.asset_prepare import prepare_local_assets
-        prepare_local_assets(
-            config.language,
-            config.asset_cache_root,
-            workers=config.asset_prefetch_workers,
-            upstream_proxy=config.asset_upstream_proxy,
-        )
-
-    store = AssetStore(config.asset_cache_root)
-    fetch_on_miss = config.asset_mode == 'hybrid'
-    mirror = AssetMirror(
-        store,
-        upstream_proxy=config.asset_upstream_proxy,
-    ) if fetch_on_miss else None
-    bind_asset_handler(
-        ProxyHTTPRequestHandler,
-        store,
-        mirror=mirror,
-        fetch_on_miss=fetch_on_miss,
-    )
-
     httpd = ThreadedProxyServer(('', port), ProxyHTTPRequestHandler)
-    key_dir = key_path()
-    api_context = _tls_context(
-        path.join(key_dir, 'api.crt'),
-        path.join(key_dir, 'api.key'),
-    )
-    asset_context = _tls_context(
-        path.join(key_dir, 'assets.rainbowunicorn7297.com.crt'),
-        path.join(key_dir, 'assets.rainbowunicorn7297.com.key'),
-    )
-
-    def select_sni_context(ssl_socket, server_name, initial_context):
-        if (_ASSET_HOST and server_name
-                and server_name.rstrip('.').lower() == _ASSET_HOST):
-            ssl_socket.context = asset_context
-        else:
-            ssl_socket.context = api_context
-
-    api_context.set_servername_callback(select_sni_context)
+    certfile = path.join(key_path(), 'api.crt')
+    keyfile = path.join(key_path(), 'api.key')
+    context = SSLContext(PROTOCOL_TLS_SERVER)
+    context.load_cert_chain(certfile, keyfile)
 
     # Preserve the v0.1.6 TLS accept path for corrected game-client
-    # compatibility. SNI only selects the certificate/context during the
-    # listener-wrapped handshake; accepted sockets are not re-wrapped later.
-    httpd.socket = api_context.wrap_socket(httpd.socket, server_side=True)
+    # compatibility. The listener itself is SSL-wrapped before serve_forever.
+    httpd.socket = context.wrap_socket(httpd.socket, server_side=True)
 
-    logger.info(f'TLS API/asset server is running on port {port}...')
+    logger.info(f'TLS API server is running on port {port}...')
     logger.info('TLS handshakes: listener-wrapped compatibility mode')
     logger.info(
         'API dispatch: direct WSGI, serialized Connection: close compatibility'
     )
-    logger.info(f'Asset mode: {config.asset_mode}')
-    logger.info(
-        'Asset routing: original public host via DNS/SNI in hybrid/local mode'
-    )
-    if config.asset_upstream_proxy:
-        logger.info(f'Asset upstream proxy: {config.asset_upstream_proxy}')
+    logger.info('Asset transport: separate HTTP server on port 7651')
     if conn:
         conn.send(True)
         conn.close()
