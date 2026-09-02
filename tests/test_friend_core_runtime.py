@@ -11,6 +11,7 @@ from mltd.models.engine import engine
 from mltd.models.models import Friend
 from mltd.services.friend import (
     exec_flower_stand_reward,
+    get_comment_list,
     get_flower_stand_count,
     get_flower_stand_list,
 )
@@ -61,7 +62,7 @@ class FriendCoreRuntimeTest(unittest.TestCase):
                 .where(Friend.friend_id == target)
             ) is not None
 
-    def test_flower_stand_read_contracts(self):
+    def test_flower_stand_and_comment_read_contracts(self):
         count_reply = get_flower_stand_count({})
         self.assertEqual(set(count_reply), {'flower_stand_count'})
         self.assertEqual(
@@ -90,6 +91,8 @@ class FriendCoreRuntimeTest(unittest.TestCase):
                 'flower_stand_name_list': [],
             },
         )
+
+        self.assertEqual(get_comment_list({}), {'comment_list': []})
 
     def test_get_friend_list_reports_existing_bidirectional_friend(self):
         reply = get_friend_list(
