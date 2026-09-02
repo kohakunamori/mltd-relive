@@ -12,6 +12,55 @@ from mltd.servers.logging import logger
 from mltd.servers.utilities import format_datetime
 from mltd.services import *
 
+
+# Diagnostic A/B override: keep the complete v0.1.9 server/runtime, but restore
+# only TheaterService.GetTheater to the conservative v0.1.6 response.  This
+# intentionally bypasses dynamic theater contacts/resource_id loading so a real
+# game client can determine whether login -404 is caused by Theater assets.
+@dispatcher.add_method(name='TheaterService.GetTheater')
+def _diagnostic_static_get_theater(params):
+    return {
+        'theater_opening': {
+            'mst_theater_opening_id': 0,
+            'opening_type': 0,
+            'resource_id': '',
+            'jump_type': '',
+            'cue_sheet': '',
+            'cue_name': '',
+            'mv_status': {
+                'mst_song_id': 0,
+                'mv_unit_idol_list': None
+            }
+        },
+        'theater_opening_list': None,
+        'theater': {
+            'room_list': [],
+            'idol_booking_list': [],
+            'theater_display_room': {
+                'mst_room_id': 0,
+                'balloon': {
+                    'theater_contact_category_type': 0,
+                    'room_idol_list': None,
+                    'resource_id': '',
+                    'mst_theater_contact_schedule_id': 0,
+                    'mst_theater_contact_id': 0,
+                    'mst_theater_main_story_id': 0,
+                    'mst_theater_guest_main_story_id': 0,
+                    'guest_main_story_has_intro': False,
+                    'mst_guest_main_story_id': 0,
+                    'mst_theater_blog_id': 0,
+                    'mst_theater_costume_blog_id': 0,
+                    'mst_costume_id': 0,
+                    'mst_theater_event_story_id': 0,
+                    'mst_event_story_id': 0,
+                    'mst_event_id': 0
+                }
+            },
+            'prior_lot_rate_table_list': []
+        }
+    }
+
+
 _SLOW_REQUEST_MS = 25
 _BATCH_METHOD_PREVIEW = 12
 _ALLOWED_API_HOSTS = frozenset({
