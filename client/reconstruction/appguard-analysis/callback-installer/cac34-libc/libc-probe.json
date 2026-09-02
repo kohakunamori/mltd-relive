@@ -1,16 +1,16 @@
 {
   "variants": {
     "baseline": {
-      "error": "UcError: Invalid memory write (UC_ERR_WRITE_UNMAPPED)"
+      "error": "KeyError: 'UC_ARM64_REG_X2'"
     },
     "locale-ascii": {
-      "error": "UcError: Invalid memory write (UC_ERR_WRITE_UNMAPPED)"
+      "error": "KeyError: 'UC_ARM64_REG_X2'"
     },
     "pthread_once-execute": {
-      "error": "UcError: Invalid memory write (UC_ERR_WRITE_UNMAPPED)"
+      "error": "KeyError: 'UC_ARM64_REG_X2'"
     },
     "locale+once": {
-      "error": "UcError: Invalid memory write (UC_ERR_WRITE_UNMAPPED)"
+      "error": "KeyError: 'UC_ARM64_REG_X2'"
     }
   }
 }

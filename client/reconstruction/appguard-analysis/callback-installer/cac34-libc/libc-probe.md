@@ -2,10 +2,10 @@
 
 | variant | w0 | bit0 | instructions | once initializers | error |
 |---|---:|---:|---:|---:|---|
-| `baseline` | - | - | - | - | `UcError: Invalid memory write (UC_ERR_WRITE_UNMAPPED)` |
-| `locale-ascii` | - | - | - | - | `UcError: Invalid memory write (UC_ERR_WRITE_UNMAPPED)` |
-| `pthread_once-execute` | - | - | - | - | `UcError: Invalid memory write (UC_ERR_WRITE_UNMAPPED)` |
-| `locale+once` | - | - | - | - | `UcError: Invalid memory write (UC_ERR_WRITE_UNMAPPED)` |
+| `baseline` | - | - | - | - | `KeyError: 'UC_ARM64_REG_X2'` |
+| `locale-ascii` | - | - | - | - | `KeyError: 'UC_ARM64_REG_X2'` |
+| `pthread_once-execute` | - | - | - | - | `KeyError: 'UC_ARM64_REG_X2'` |
+| `locale+once` | - | - | - | - | `KeyError: 'UC_ARM64_REG_X2'` |
 
 ## pthread_once initializers
 
