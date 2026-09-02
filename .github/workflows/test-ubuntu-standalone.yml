@@ -1,0 +1,76 @@
+name: Test Ubuntu Standalone GUI
+
+on:
+  pull_request:
+    paths:
+      - 'standalone/**'
+      - 'requirements.txt'
+      - '.github/workflows/test-ubuntu-standalone.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'standalone/**'
+      - 'requirements.txt'
+      - '.github/workflows/test-ubuntu-standalone.yml'
+
+jobs:
+  smoke-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install build and GUI test dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y libtk8.6 libtcl8.6 xvfb xauth
+          python -m venv env
+          source env/bin/activate
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+
+      - name: Build Ubuntu GUI standalone
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd standalone
+          ../env/bin/pyinstaller gui_ubuntu.spec
+
+      - name: Verify bundled Tcl/Tk libraries
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd standalone
+          ../env/bin/pyi-archive_viewer -l dist/mltd-relive-standalone | tee /tmp/archive.txt
+          grep -F 'libtk8.6.so' /tmp/archive.txt
+          grep -F 'libtcl8.6.so' /tmp/archive.txt
+
+      - name: Smoke-test GUI under Xvfb
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd standalone
+          set +e
+          timeout 8s xvfb-run -a ./dist/mltd-relive-standalone > /tmp/mltd-gui-smoke.log 2>&1
+          status=$?
+          set -e
+          cat /tmp/mltd-gui-smoke.log
+
+          # The GUI is expected to stay open until timeout. A clean exit is
+          # also accepted, but any other status means it crashed on startup.
+          if [[ "$status" -ne 0 && "$status" -ne 124 ]]; then
+            exit "$status"
+          fi
+
+          if grep -Fq 'libtk8.6.so: cannot open shared object file' /tmp/mltd-gui-smoke.log; then
+            echo 'Ubuntu standalone still cannot load Tk.' >&2
+            exit 1
+          fi
