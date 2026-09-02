@@ -1,0 +1,913 @@
+{
+  "raw_changed_count": 40,
+  "recompression_only_count": 7,
+  "semantic_changed_count": 33,
+  "recompression_only": [
+    "drawable-hdpi/common_full_open_on_phone.png",
+    "drawable-hdpi/googleg_standard_color_18.png",
+    "drawable-hdpi/notify_panel_notification_icon_bg.png",
+    "drawable-mdpi/googleg_standard_color_18.png",
+    "drawable-mdpi/notify_panel_notification_icon_bg.png",
+    "drawable-xhdpi/googleg_standard_color_18.png",
+    "drawable-xhdpi/notify_panel_notification_icon_bg.png"
+  ],
+  "semantic_changed": [
+    "drawable-hdpi/common_google_signin_btn_icon_light_normal_background.9.png",
+    "drawable-hdpi/googleg_disabled_color_18.png",
+    "drawable-hdpi/icon_notification.png",
+    "drawable-ldpi/icon_notification.png",
+    "drawable-mdpi/googleg_disabled_color_18.png",
+    "drawable-mdpi/icon_notification.png",
+    "drawable-xhdpi/common_full_open_on_phone.png",
+    "drawable-xhdpi/googleg_disabled_color_18.png",
+    "drawable-xhdpi/icon_notification.png",
+    "drawable-xxhdpi/googleg_disabled_color_18.png",
+    "drawable-xxhdpi/googleg_standard_color_18.png",
+    "drawable-xxhdpi/icon_notification.png",
+    "drawable-xxxhdpi/icon_notification.png",
+    "drawable-xxxhdpi/icon_notification_l.png",
+    "mipmap-hdpi/app_icon.png",
+    "mipmap-hdpi/app_icon_round.png",
+    "mipmap-hdpi/ic_launcher_foreground.png",
+    "mipmap-ldpi/app_icon.png",
+    "mipmap-ldpi/app_icon_round.png",
+    "mipmap-ldpi/ic_launcher_foreground.png",
+    "mipmap-mdpi/app_icon.png",
+    "mipmap-mdpi/app_icon_round.png",
+    "mipmap-mdpi/ic_launcher_foreground.png",
+    "mipmap-xhdpi/app_icon.png",
+    "mipmap-xhdpi/app_icon_round.png",
+    "mipmap-xhdpi/ic_launcher_foreground.png",
+    "mipmap-xxhdpi/app_icon.png",
+    "mipmap-xxhdpi/app_icon_round.png",
+    "mipmap-xxhdpi/ic_launcher_foreground.png",
+    "mipmap-xxxhdpi/app_icon.png",
+    "mipmap-xxxhdpi/app_icon_round.png",
+    "mipmap-xxxhdpi/ic_launcher_foreground.png",
+    "values/strings.xml"
+  ],
+  "details": [
+    {
+      "path": "drawable-hdpi/common_full_open_on_phone.png",
+      "original_image": {
+        "format": "PNG",
+        "mode": "RGBA",
+        "size": [
+          96,
+          96
+        ],
+        "rgba_sha256": "66bc8025e3f0c646575dd6c7285ae150d18953f87f4a3f35b75bb291e8dc4ae5"
+      },
+      "fixed_image": {
+        "format": "PNG",
+        "mode": "P",
+        "size": [
+          96,
+          96
+        ],
+        "rgba_sha256": "66bc8025e3f0c646575dd6c7285ae150d18953f87f4a3f35b75bb291e8dc4ae5"
+      },
+      "pixel_identical": true
+    },
+    {
+      "path": "drawable-hdpi/common_google_signin_btn_icon_light_normal_background.9.png",
+      "original_image": {
+        "format": "PNG",
+        "mode": "RGBA",
+        "size": [
+          75,
+          75
+        ],
+        "rgba_sha256": "1e8803545718d662665fa1f7f72f1cee81d341ab75f7a5a775a83d71fce2753f"
+      },
+      "fixed_image": {
+        "format": "PNG",
+        "mode": "RGBA",
+        "size": [
+          75,
+          75
+        ],
+        "rgba_sha256": "1a374cbb6f570bef05c42c45823cf5d0293347727f753d34cff8fb75dc4964b2"
+      },
+      "pixel_identical": false
+    },
+    {
+      "path": "drawable-hdpi/googleg_disabled_color_18.png",
+      "original_image": {
+        "format": "PNG",
+        "mode": "LA",
+        "size": [
+          27,
+          27
+        ],
+        "rgba_sha256": "f3b85a7a2a078e4192b5aa6c2a3db3a2df3cd0047885feb5e39f363ee405c308"
+      },
+      "fixed_image": {
+        "format": "PNG",
+        "mode": "P",
+        "size": [
+          27,
+          27
+        ],
+        "rgba_sha256": "a78c844369b1596ab480c290b8affb386b31356a8fb177276e666134be09e636"
+      },
+      "pixel_identical": false
+    },
+    {
+      "path": "drawable-hdpi/googleg_standard_color_18.png",
+      "original_image": {
+        "format": "PNG",
+        "mode": "RGBA",
+        "size": [
+          27,
+          27
+        ],
+        "rgba_sha256": "4f0dc03a39cc00b1822a0b97fbdef4bd6868c035a0b3fc91ebcd0d18e59eb67f"
+      },
+      "fixed_image": {
+        "format": "PNG",
+        "mode": "P",
+        "size": [
+          27,
+          27
+        ],
+        "rgba_sha256": "4f0dc03a39cc00b1822a0b97fbdef4bd6868c035a0b3fc91ebcd0d18e59eb67f"
+      },
+      "pixel_identical": true
+    },
+    {
+      "path": "drawable-hdpi/icon_notification.png",
+      "original_image": {
+        "format": "PNG",
+        "mode": "LA",
+        "size": [
+          36,
+          36
+        ],
+        "rgba_sha256": "66ba15dbc622346b3d710f11c4a0266eeaabe319680e2cc65cbd1e655847d686"
+      },
+      "fixed_image": {
+        "format": "PNG",
+        "mode": "P",
+        "size": [
+          36,
+          36
+        ],
+        "rgba_sha256": "a2916c8385d1e4a474d501dcad946d3f6da369a014dcead1470225de1bd1b02b"
+      },
+      "pixel_identical": false
+    },
+    {
+      "path": "drawable-hdpi/notify_panel_notification_icon_bg.png",
+      "original_image": {
+        "format": "PNG",
+        "mode": "RGB",
+        "size": [
+          14,
+          14
+        ],
+        "rgba_sha256": "3a05a8aa9498ac976e7f4993ba07fe9636b564804bbe339e77175c665296e7d2"
+      },
+      "fixed_image": {
+        "format": "PNG",
+        "mode": "P",
+        "size": [
+          14,
+          14
+        ],
+        "rgba_sha256": "3a05a8aa9498ac976e7f4993ba07fe9636b564804bbe339e77175c665296e7d2"
+      },
+      "pixel_identical": true
+    },
+    {
+      "path": "drawable-ldpi/icon_notification.png",
+      "original_image": {
+        "format": "PNG",
+        "mode": "LA",
+        "size": [
+          18,
+          18
+        ],
+        "rgba_sha256": "4a14a0fcc11cf5aca8f43388f1e40e8689092693fe4734faab4eaa9379ff7b80"
+      },
+      "fixed_image": {
+        "format": "PNG",
+        "mode": "LA",
+        "size": [
+          18,
+          18
+        ],
+        "rgba_sha256": "e8a19774801eb1e79e2b9f507759a647d19b60023e898be1797246631d177411"
+      },
+      "pixel_identical": false
+    },
+    {
+      "path": "drawable-mdpi/googleg_disabled_color_18.png",
+      "original_image": {
+        "format": "PNG",
+        "mode": "LA",
+        "size": [
+          18,
+          18
+        ],
+        "rgba_sha256": "f09fe94abad7041becfc88272f5ff4e993624d27fbbd674552644d1f345d602c"
+      },
+      "fixed_image": {
+        "format": "PNG",
+        "mode": "P",
+        "size": [
+          18,
+          18
+        ],
+        "rgba_sha256": "590d97aa47b76835c026258d91f3213b0043fe63c1c2eaf1f86c6071f60205b4"
+      },
+      "pixel_identical": false
+    },
+    {
+      "path": "drawable-mdpi/googleg_standard_color_18.png",
+      "original_image": {
+        "format": "PNG",
+        "mode": "RGBA",
+        "size": [
+          18,
+          18
+        ],
+        "rgba_sha256": "6e2ec4aa78eea2b1d9e0698560963a56246c713463bc5ae715d5ffc17e24af73"
+      },
+      "fixed_image": {
+        "format": "PNG",
+        "mode": "P",
+        "size": [
+          18,
+          18
+        ],
+        "rgba_sha256": "6e2ec4aa78eea2b1d9e0698560963a56246c713463bc5ae715d5ffc17e24af73"
+      },
+      "pixel_identical": true
+    },
+    {
+      "path": "drawable-mdpi/icon_notification.png",
+      "original_image": {
+        "format": "PNG",
+        "mode": "LA",
+        "size": [
+          24,
+          24
+        ],
+        "rgba_sha256": "0c562d4024642c6f88954151ca15143d63b5b15e3520eeb0d439be6c68654d20"
+      },
+      "fixed_image": {
+        "format": "PNG",
+        "mode": "LA",
+        "size": [
+          24,
+          24
+        ],
+        "rgba_sha256": "59b456c547025cd8a4c77617d1275b7204618971d9913adcd542a9bdcd40322d"
+      },
+      "pixel_identical": false
+    },
+    {
+      "path": "drawable-mdpi/notify_panel_notification_icon_bg.png",
+      "original_image": {
+        "format": "PNG",
+        "mode": "RGB",
+        "size": [
+          15,
+          15
+        ],
+        "rgba_sha256": "88a359b793853650a93a4d842504ba879fc42e65b833b123539c666c7e6c8a6e"
+      },
+      "fixed_image": {
+        "format": "PNG",
+        "mode": "P",
+        "size": [
+          15,
+          15
+        ],
+        "rgba_sha256": "88a359b793853650a93a4d842504ba879fc42e65b833b123539c666c7e6c8a6e"
+      },
+      "pixel_identical": true
+    },
+    {
+      "path": "drawable-xhdpi/common_full_open_on_phone.png",
+      "original_image": {
+        "format": "PNG",
+        "mode": "P",
+        "size": [
+          128,
+          128
+        ],
+        "rgba_sha256": "1b1fe3ee0450dab91bef0e3106e868c4916537d7647252187887cb2a234499a5"
+      },
+      "fixed_image": {
+        "format": "PNG",
+        "mode": "P",
+        "size": [
+          128,
+          128
+        ],
+        "rgba_sha256": "0ad8f5ba0b201614ec4b7c6538364be8a1b10e4a2c5c9815e360e04a9bf02252"
+      },
+      "pixel_identical": false
+    },
+    {
+      "path": "drawable-xhdpi/googleg_disabled_color_18.png",
+      "original_image": {
+        "format": "PNG",
+        "mode": "LA",
+        "size": [
+          36,
+          36
+        ],
+        "rgba_sha256": "d190c9122aa4a3b0cd7ea7a6f9bc336cc9ef68592add35f7fee5c70741ec1c65"
+      },
+      "fixed_image": {
+        "format": "PNG",
+        "mode": "P",
+        "size": [
+          36,
+          36
+        ],
+        "rgba_sha256": "c38f6edf2ae54d623dc1e88535a03baad6c044c47002a2623e19ea190bbd315f"
+      },
+      "pixel_identical": false
+    },
+    {
+      "path": "drawable-xhdpi/googleg_standard_color_18.png",
+      "original_image": {
+        "format": "PNG",
+        "mode": "RGBA",
+        "size": [
+          36,
+          36
+        ],
+        "rgba_sha256": "96719aded37890463943e7e1ad74cbdb93e7abff74dc0d65764f4b97954ed26c"
+      },
+      "fixed_image": {
+        "format": "PNG",
+        "mode": "P",
+        "size": [
+          36,
+          36
+        ],
+        "rgba_sha256": "96719aded37890463943e7e1ad74cbdb93e7abff74dc0d65764f4b97954ed26c"
+      },
+      "pixel_identical": true
+    },
+    {
+      "path": "drawable-xhdpi/icon_notification.png",
+      "original_image": {
+        "format": "PNG",
+        "mode": "LA",
+        "size": [
+          48,
+          48
+        ],
+        "rgba_sha256": "9027cdc1ed68850bbe7d9c9b705160d38dc9c9ebc2ff6795b347cbac8937b4c3"
+      },
+      "fixed_image": {
+        "format": "PNG",
+        "mode": "P",
+        "size": [
+          48,
+          48
+        ],
+        "rgba_sha256": "e41cdd385f2409d5450dc6a3a0ffee727bc9083069b75706c58e63d7e1af63cd"
+      },
+      "pixel_identical": false
+    },
+    {
+      "path": "drawable-xhdpi/notify_panel_notification_icon_bg.png",
+      "original_image": {
+        "format": "PNG",
+        "mode": "RGB",
+        "size": [
+          30,
+          30
+        ],
+        "rgba_sha256": "c9b32ed5716b51b085558a77493dd2e14eda8248342c1c1f8ceddafbb005fd38"
+      },
+      "fixed_image": {
+        "format": "PNG",
+        "mode": "P",
+        "size": [
+          30,
+          30
+        ],
+        "rgba_sha256": "c9b32ed5716b51b085558a77493dd2e14eda8248342c1c1f8ceddafbb005fd38"
+      },
+      "pixel_identical": true
+    },
+    {
+      "path": "drawable-xxhdpi/googleg_disabled_color_18.png",
+      "original_image": {
+        "format": "PNG",
+        "mode": "LA",
+        "size": [
+          54,
+          54
+        ],
+        "rgba_sha256": "bb9132131788849ee5228110267031ad88f3265d11cfddaf45745d14ab4771b9"
+      },
+      "fixed_image": {
+        "format": "PNG",
+        "mode": "P",
+        "size": [
+          54,
+          54
+        ],
+        "rgba_sha256": "593bc0f95db58c8afd60c37cadd4a0a880995f14cc59e1eb949138b5521e5203"
+      },
+      "pixel_identical": false
+    },
+    {
+      "path": "drawable-xxhdpi/googleg_standard_color_18.png",
+      "original_image": {
+        "format": "PNG",
+        "mode": "RGBA",
+        "size": [
+          54,
+          54
+        ],
+        "rgba_sha256": "ae0d1a812c5c207a842bf3d8a533f9bc9d88ed9930ed2668998ad878d6804fd4"
+      },
+      "fixed_image": {
+        "format": "PNG",
+        "mode": "RGBA",
+        "size": [
+          54,
+          54
+        ],
+        "rgba_sha256": "4756b167d8f1542164a07f7568e6631d60c187e78178671b7da4f2a10e9ca1d5"
+      },
+      "pixel_identical": false
+    },
+    {
+      "path": "drawable-xxhdpi/icon_notification.png",
+      "original_image": {
+        "format": "PNG",
+        "mode": "LA",
+        "size": [
+          72,
+          72
+        ],
+        "rgba_sha256": "5ecb6eda33145d75d3d3503dffcf81a1323654063e996ef84ef041a998cf86c7"
+      },
+      "fixed_image": {
+        "format": "PNG",
+        "mode": "P",
+        "size": [
+          72,
+          72
+        ],
+        "rgba_sha256": "50a8b8174cabb7b3adeee2bb97bd7498f4eb5f856b45c0953bdad562b1a56394"
+      },
+      "pixel_identical": false
+    },
+    {
+      "path": "drawable-xxxhdpi/icon_notification.png",
+      "original_image": {
+        "format": "PNG",
+        "mode": "LA",
+        "size": [
+          96,
+          96
+        ],
+        "rgba_sha256": "9a43af654eeb2b65ca93e9ba372516175c90111e961ea6a3310ae9c62d082e24"
+      },
+      "fixed_image": {
+        "format": "PNG",
+        "mode": "P",
+        "size": [
+          96,
+          96
+        ],
+        "rgba_sha256": "ea03bb1fcce0903d55fbbbe6f9e12f25c76161a238c93d942248fac081dcad62"
+      },
+      "pixel_identical": false
+    },
+    {
+      "path": "drawable-xxxhdpi/icon_notification_l.png",
+      "original_image": {
+        "format": "PNG",
+        "mode": "RGB",
+        "size": [
+          256,
+          256
+        ],
+        "rgba_sha256": "2d79ed582fb43c51dfcd719c1a9f513e23dd6021d811fd23f1adc8a5c8505ace"
+      },
+      "fixed_image": {
+        "format": "PNG",
+        "mode": "RGBA",
+        "size": [
+          256,
+          256
+        ],
+        "rgba_sha256": "2b9d699d023008721908b7ec09048fc8850d8852a094351dbddad7a7af37a859"
+      },
+      "pixel_identical": false
+    },
+    {
+      "path": "mipmap-hdpi/app_icon.png",
+      "original_image": {
+        "format": "PNG",
+        "mode": "RGB",
+        "size": [
+          72,
+          72
+        ],
+        "rgba_sha256": "b48551ff18813a270bde6d735ec48f70a7939ece66b69a4aa778a50bf4473064"
+      },
+      "fixed_image": {
+        "format": "PNG",
+        "mode": "RGB",
+        "size": [
+          72,
+          72
+        ],
+        "rgba_sha256": "151da3244d0f24b5bca28e1283cd22634a9ecbd9862d4ec9ee5c330da0233890"
+      },
+      "pixel_identical": false
+    },
+    {
+      "path": "mipmap-hdpi/app_icon_round.png",
+      "original_image": {
+        "format": "PNG",
+        "mode": "RGB",
+        "size": [
+          72,
+          72
+        ],
+        "rgba_sha256": "b48551ff18813a270bde6d735ec48f70a7939ece66b69a4aa778a50bf4473064"
+      },
+      "fixed_image": {
+        "format": "PNG",
+        "mode": "RGB",
+        "size": [
+          72,
+          72
+        ],
+        "rgba_sha256": "151da3244d0f24b5bca28e1283cd22634a9ecbd9862d4ec9ee5c330da0233890"
+      },
+      "pixel_identical": false
+    },
+    {
+      "path": "mipmap-hdpi/ic_launcher_foreground.png",
+      "original_image": {
+        "format": "PNG",
+        "mode": "RGB",
+        "size": [
+          162,
+          162
+        ],
+        "rgba_sha256": "8e233edea1477535388f3c5912e46fce95d5939ff4b0af179b435d8271bc52aa"
+      },
+      "fixed_image": {
+        "format": "PNG",
+        "mode": "RGB",
+        "size": [
+          162,
+          162
+        ],
+        "rgba_sha256": "226a04fdcabc6aea040dfb59d81e0e69990a84d7150848732a8a216ff995e13f"
+      },
+      "pixel_identical": false
+    },
+    {
+      "path": "mipmap-ldpi/app_icon.png",
+      "original_image": {
+        "format": "PNG",
+        "mode": "RGB",
+        "size": [
+          36,
+          36
+        ],
+        "rgba_sha256": "b021e0fdfd4fae782c808cd2721c4934646921d91abfd1fc63d661d16c2f3011"
+      },
+      "fixed_image": {
+        "format": "PNG",
+        "mode": "RGB",
+        "size": [
+          36,
+          36
+        ],
+        "rgba_sha256": "cc33862cb27d6fddae76623dd552fab817ed839e0f2ca7135093481147f1ccb3"
+      },
+      "pixel_identical": false
+    },
+    {
+      "path": "mipmap-ldpi/app_icon_round.png",
+      "original_image": {
+        "format": "PNG",
+        "mode": "RGB",
+        "size": [
+          36,
+          36
+        ],
+        "rgba_sha256": "b021e0fdfd4fae782c808cd2721c4934646921d91abfd1fc63d661d16c2f3011"
+      },
+      "fixed_image": {
+        "format": "PNG",
+        "mode": "RGB",
+        "size": [
+          36,
+          36
+        ],
+        "rgba_sha256": "cc33862cb27d6fddae76623dd552fab817ed839e0f2ca7135093481147f1ccb3"
+      },
+      "pixel_identical": false
+    },
+    {
+      "path": "mipmap-ldpi/ic_launcher_foreground.png",
+      "original_image": {
+        "format": "PNG",
+        "mode": "RGB",
+        "size": [
+          81,
+          81
+        ],
+        "rgba_sha256": "6e1b60376960b0cc4ec65eb69a1556470c31067623214945ea2ff02e465287dd"
+      },
+      "fixed_image": {
+        "format": "PNG",
+        "mode": "RGB",
+        "size": [
+          81,
+          81
+        ],
+        "rgba_sha256": "2308a26be4d62b86d72ffc078cff8888f3be057f1d1d11332e56e875326783eb"
+      },
+      "pixel_identical": false
+    },
+    {
+      "path": "mipmap-mdpi/app_icon.png",
+      "original_image": {
+        "format": "PNG",
+        "mode": "RGB",
+        "size": [
+          48,
+          48
+        ],
+        "rgba_sha256": "c65930801a3d0c774b54889d7e7cd051544d67895f11ab9df8e6b8a81cfde0ef"
+      },
+      "fixed_image": {
+        "format": "PNG",
+        "mode": "RGB",
+        "size": [
+          48,
+          48
+        ],
+        "rgba_sha256": "1c2933f78855af2865931ce5933642238871a9d96bdd45e4edb04646e749a595"
+      },
+      "pixel_identical": false
+    },
+    {
+      "path": "mipmap-mdpi/app_icon_round.png",
+      "original_image": {
+        "format": "PNG",
+        "mode": "RGB",
+        "size": [
+          48,
+          48
+        ],
+        "rgba_sha256": "c65930801a3d0c774b54889d7e7cd051544d67895f11ab9df8e6b8a81cfde0ef"
+      },
+      "fixed_image": {
+        "format": "PNG",
+        "mode": "RGB",
+        "size": [
+          48,
+          48
+        ],
+        "rgba_sha256": "1c2933f78855af2865931ce5933642238871a9d96bdd45e4edb04646e749a595"
+      },
+      "pixel_identical": false
+    },
+    {
+      "path": "mipmap-mdpi/ic_launcher_foreground.png",
+      "original_image": {
+        "format": "PNG",
+        "mode": "RGB",
+        "size": [
+          108,
+          108
+        ],
+        "rgba_sha256": "7bf1cf2f06ad64082ab4c1f86f9d042d1a82f2cfea6af2c62218c041395f804e"
+      },
+      "fixed_image": {
+        "format": "PNG",
+        "mode": "RGB",
+        "size": [
+          108,
+          108
+        ],
+        "rgba_sha256": "e69b2a5fd5c4a53ac99caf85806befb49584ce93a50ea70e889834c7ad5de414"
+      },
+      "pixel_identical": false
+    },
+    {
+      "path": "mipmap-xhdpi/app_icon.png",
+      "original_image": {
+        "format": "PNG",
+        "mode": "RGB",
+        "size": [
+          96,
+          96
+        ],
+        "rgba_sha256": "8b29eb8ca778a46dac67ba2e53af9f5920b79c7da88c547054c965b99680e40d"
+      },
+      "fixed_image": {
+        "format": "PNG",
+        "mode": "RGB",
+        "size": [
+          96,
+          96
+        ],
+        "rgba_sha256": "6d464ec0e1efcc2ad55c9696381310ad1a9988cc89fe34c321bac690b9185cfa"
+      },
+      "pixel_identical": false
+    },
+    {
+      "path": "mipmap-xhdpi/app_icon_round.png",
+      "original_image": {
+        "format": "PNG",
+        "mode": "RGB",
+        "size": [
+          96,
+          96
+        ],
+        "rgba_sha256": "8b29eb8ca778a46dac67ba2e53af9f5920b79c7da88c547054c965b99680e40d"
+      },
+      "fixed_image": {
+        "format": "PNG",
+        "mode": "RGB",
+        "size": [
+          96,
+          96
+        ],
+        "rgba_sha256": "6d464ec0e1efcc2ad55c9696381310ad1a9988cc89fe34c321bac690b9185cfa"
+      },
+      "pixel_identical": false
+    },
+    {
+      "path": "mipmap-xhdpi/ic_launcher_foreground.png",
+      "original_image": {
+        "format": "PNG",
+        "mode": "RGB",
+        "size": [
+          216,
+          216
+        ],
+        "rgba_sha256": "b2ba06d1f77f1805ae23888d4931e9e97aab2bd887eddeee30613d494cd40612"
+      },
+      "fixed_image": {
+        "format": "PNG",
+        "mode": "RGB",
+        "size": [
+          216,
+          216
+        ],
+        "rgba_sha256": "68114892cf5cd0f549cca8278e12592526029804975e7c0b0be081b96403f4a0"
+      },
+      "pixel_identical": false
+    },
+    {
+      "path": "mipmap-xxhdpi/app_icon.png",
+      "original_image": {
+        "format": "PNG",
+        "mode": "RGB",
+        "size": [
+          144,
+          144
+        ],
+        "rgba_sha256": "64dbd399c8b35b2b5e6b7d701945a5393a065aa0dd9ead8655a8c02893999a57"
+      },
+      "fixed_image": {
+        "format": "PNG",
+        "mode": "RGBA",
+        "size": [
+          144,
+          144
+        ],
+        "rgba_sha256": "6ee7ff337808a14caf659ec8b4c5d0dbd208ed316a8fa7dfb60fa186ed55bddb"
+      },
+      "pixel_identical": false
+    },
+    {
+      "path": "mipmap-xxhdpi/app_icon_round.png",
+      "original_image": {
+        "format": "PNG",
+        "mode": "RGB",
+        "size": [
+          144,
+          144
+        ],
+        "rgba_sha256": "64dbd399c8b35b2b5e6b7d701945a5393a065aa0dd9ead8655a8c02893999a57"
+      },
+      "fixed_image": {
+        "format": "PNG",
+        "mode": "RGBA",
+        "size": [
+          144,
+          144
+        ],
+        "rgba_sha256": "6ee7ff337808a14caf659ec8b4c5d0dbd208ed316a8fa7dfb60fa186ed55bddb"
+      },
+      "pixel_identical": false
+    },
+    {
+      "path": "mipmap-xxhdpi/ic_launcher_foreground.png",
+      "original_image": {
+        "format": "PNG",
+        "mode": "RGB",
+        "size": [
+          324,
+          324
+        ],
+        "rgba_sha256": "31225e27ebbcf6d67a2811f6b6c400b5e51b9f4b4a0ea4bc3f7811c3864de6c2"
+      },
+      "fixed_image": {
+        "format": "PNG",
+        "mode": "RGB",
+        "size": [
+          324,
+          324
+        ],
+        "rgba_sha256": "c68e27dce6b0cc0805c67a84ac14a7b91fe67a247c67cbeb1f735328f83ab12f"
+      },
+      "pixel_identical": false
+    },
+    {
+      "path": "mipmap-xxxhdpi/app_icon.png",
+      "original_image": {
+        "format": "PNG",
+        "mode": "RGB",
+        "size": [
+          192,
+          192
+        ],
+        "rgba_sha256": "d0736ee9eba54439a38f970b08ed010ab20ad9e183dac20ea10ea2713eb9a4a8"
+      },
+      "fixed_image": {
+        "format": "PNG",
+        "mode": "RGBA",
+        "size": [
+          192,
+          192
+        ],
+        "rgba_sha256": "77824b23928a059e2a3669209f42098fa0edea2b09669002f319451564a94087"
+      },
+      "pixel_identical": false
+    },
+    {
+      "path": "mipmap-xxxhdpi/app_icon_round.png",
+      "original_image": {
+        "format": "PNG",
+        "mode": "RGB",
+        "size": [
+          192,
+          192
+        ],
+        "rgba_sha256": "d0736ee9eba54439a38f970b08ed010ab20ad9e183dac20ea10ea2713eb9a4a8"
+      },
+      "fixed_image": {
+        "format": "PNG",
+        "mode": "RGBA",
+        "size": [
+          192,
+          192
+        ],
+        "rgba_sha256": "77824b23928a059e2a3669209f42098fa0edea2b09669002f319451564a94087"
+      },
+      "pixel_identical": false
+    },
+    {
+      "path": "mipmap-xxxhdpi/ic_launcher_foreground.png",
+      "original_image": {
+        "format": "PNG",
+        "mode": "RGB",
+        "size": [
+          432,
+          432
+        ],
+        "rgba_sha256": "83f30a6b2224ec253f367c84ee9dc6f76d9be5e5325c40cc5244b2b58d90439c"
+      },
+      "fixed_image": {
+        "format": "PNG",
+        "mode": "RGB",
+        "size": [
+          432,
+          432
+        ],
+        "rgba_sha256": "b2de2ef04437ab19929e159c333dc8803317373e89d53c1258d8d95a05fb207b"
+      },
+      "pixel_identical": false
+    },
+    {
+      "path": "values/strings.xml",
+      "pixel_identical": null
+    }
+  ]
+}

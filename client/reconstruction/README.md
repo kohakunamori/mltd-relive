@@ -17,3 +17,8 @@ This directory is generated from the verified official Traditional Chinese 2.1.0
 - `il2cpp/elf-analysis.json` — ELF section-level comparison and attempts to relocate known fixed-baseline patch-point contexts into the official library.
 
 `android/fixed-smali/` contains only the normalized fixed-side source for classes that are semantically different, so this branch preserves the actual reconstructed Android changes without committing the entire generated APKTool tree.
+
+## Refinement findings
+
+- Of the raw resource-file changes, **7** are pixel-identical PNG recompression artifacts and **33** remain semantic changes.
+- `libil2cpp.so` compares at the same file offsets for the first 99150888 bytes: **35.16%** are byte-identical; the protected official library has an extra **6715576 bytes** after the fixed library ends.
