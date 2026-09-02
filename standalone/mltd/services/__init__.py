@@ -36,4 +36,5 @@ __all__ = [
     'unit',
     'user',
     'user_profile',
+    'user_vitality',
 ]
