@@ -34,8 +34,11 @@ jobs:
           sed -i 's/moduleDescription = "/moduleDescription = "(MLTD zh 2.1.000) /g' module.gradle
           chmod +x gradlew
           ./gradlew :module:assembleRelease --stacktrace
-      - name: Inspect outputs
+      - name: Verify MLTD arm64 module
         run: |
+          test -f zygisk/out/magisk_module_release/zygisk/arm64-v8a.so
+          grep -a -q 'com.bandainamcoent.imas_millionlive_theaterdays_ch' zygisk/out/magisk_module_release/zygisk/arm64-v8a.so
+          file zygisk/out/magisk_module_release/zygisk/arm64-v8a.so
           find zygisk/out -maxdepth 4 -type f -printf '%s %p\n' | sort -n || true
       - uses: actions/upload-artifact@v4
         with:
@@ -67,6 +70,7 @@ jobs:
           PY
       - name: Package agent
         run: |
+          grep -a -q 'com.bandainamcoent.imas_millionlive_theaterdays_ch' frida-dumper/_agent.js
           mkdir -p frida-out
           cp frida-dumper/_agent.js frida-out/mltd-agent.js
           cp frida-dumper/README.md frida-out/UPSTREAM-README.md
@@ -85,21 +89,26 @@ jobs:
         run: |
           yes | sdkmanager --licenses >/dev/null || true
           sdkmanager 'ndk;25.2.9519653'
-      - name: Checkout and build IL2CPPDumper
+      - name: Checkout and build ARM64 IL2CPPDumper
         run: |
           git clone https://github.com/kp7742/IL2CPPDumper.git native-dumper
           cd native-dumper
           git rev-parse HEAD | tee ../native-dumper-upstream-sha.txt
+          sed -i 's/^APP_ABI.*/APP_ABI := arm64-v8a/' jni/Application.mk
+          cat jni/Application.mk
+          "$ANDROID_SDK_ROOT/ndk/25.2.9519653/ndk-build" -C . clean
           "$ANDROID_SDK_ROOT/ndk/25.2.9519653/ndk-build" -C .
-      - name: Collect ARM64 binaries
+      - name: Collect and verify ARM64 binary
         run: |
           mkdir -p native-out
-          find native-dumper/libs -type f -maxdepth 3 -print -exec cp {} native-out/ \;
+          test -f native-dumper/libs/arm64-v8a/il2cppdumper
+          cp native-dumper/libs/arm64-v8a/il2cppdumper native-out/
           cp native-dumper-upstream-sha.txt native-out/
+          file native-out/il2cppdumper | tee native-out/FILE.txt
+          file native-out/il2cppdumper | grep -q 'ARM aarch64\|ARM64\|aarch64'
           sha256sum native-out/* > native-out/SHA256SUMS
-          file native-out/*
       - uses: actions/upload-artifact@v4
         with:
-          name: mltd-native-il2cpp-memory-dumper
+          name: mltd-native-il2cpp-memory-dumper-arm64
           path: native-out/
           if-no-files-found: error
