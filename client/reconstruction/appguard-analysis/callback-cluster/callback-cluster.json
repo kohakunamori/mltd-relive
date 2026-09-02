@@ -1,0 +1,748 @@
+{
+  "cluster": [
+    2013184,
+    2013440
+  ],
+  "pointer_cells": [
+    {
+      "offset": 1988352,
+      "type": 1027,
+      "addend": 2013184,
+      "symbol": {
+        "index": 0,
+        "name": "",
+        "value": 0,
+        "size": 0,
+        "type": 0,
+        "bind": 0,
+        "shndx": 0
+      }
+    },
+    {
+      "offset": 1988584,
+      "type": 1027,
+      "addend": 2013232,
+      "symbol": {
+        "index": 0,
+        "name": "",
+        "value": 0,
+        "size": 0,
+        "type": 0,
+        "bind": 0,
+        "shndx": 0
+      }
+    },
+    {
+      "offset": 1988736,
+      "type": 1027,
+      "addend": 2013224,
+      "symbol": {
+        "index": 0,
+        "name": "",
+        "value": 0,
+        "size": 0,
+        "type": 0,
+        "bind": 0,
+        "shndx": 0
+      }
+    },
+    {
+      "offset": 1988920,
+      "type": 1027,
+      "addend": 2013256,
+      "symbol": {
+        "index": 0,
+        "name": "",
+        "value": 0,
+        "size": 0,
+        "type": 0,
+        "bind": 0,
+        "shndx": 0
+      }
+    },
+    {
+      "offset": 1988968,
+      "type": 1027,
+      "addend": 2013248,
+      "symbol": {
+        "index": 0,
+        "name": "",
+        "value": 0,
+        "size": 0,
+        "type": 0,
+        "bind": 0,
+        "shndx": 0
+      }
+    },
+    {
+      "offset": 1989472,
+      "type": 1027,
+      "addend": 2013296,
+      "symbol": {
+        "index": 0,
+        "name": "",
+        "value": 0,
+        "size": 0,
+        "type": 0,
+        "bind": 0,
+        "shndx": 0
+      }
+    },
+    {
+      "offset": 1989872,
+      "type": 1027,
+      "addend": 2013272,
+      "symbol": {
+        "index": 0,
+        "name": "",
+        "value": 0,
+        "size": 0,
+        "type": 0,
+        "bind": 0,
+        "shndx": 0
+      }
+    },
+    {
+      "offset": 1989912,
+      "type": 1027,
+      "addend": 2013240,
+      "symbol": {
+        "index": 0,
+        "name": "",
+        "value": 0,
+        "size": 0,
+        "type": 0,
+        "bind": 0,
+        "shndx": 0
+      }
+    },
+    {
+      "offset": 1989984,
+      "type": 1027,
+      "addend": 2013288,
+      "symbol": {
+        "index": 0,
+        "name": "",
+        "value": 0,
+        "size": 0,
+        "type": 0,
+        "bind": 0,
+        "shndx": 0
+      }
+    },
+    {
+      "offset": 1990576,
+      "type": 1027,
+      "addend": 2013280,
+      "symbol": {
+        "index": 0,
+        "name": "",
+        "value": 0,
+        "size": 0,
+        "type": 0,
+        "bind": 0,
+        "shndx": 0
+      }
+    },
+    {
+      "offset": 1990704,
+      "type": 1027,
+      "addend": 2013216,
+      "symbol": {
+        "index": 0,
+        "name": "",
+        "value": 0,
+        "size": 0,
+        "type": 0,
+        "bind": 0,
+        "shndx": 0
+      }
+    },
+    {
+      "offset": 1990744,
+      "type": 1027,
+      "addend": 2013264,
+      "symbol": {
+        "index": 0,
+        "name": "",
+        "value": 0,
+        "size": 0,
+        "type": 0,
+        "bind": 0,
+        "shndx": 0
+      }
+    }
+  ],
+  "static_xrefs": [
+    {
+      "pc": 30312,
+      "mnemonic": "ldr",
+      "op_str": "x21, [x21, #0x7e8]",
+      "resolved_address": 1988584,
+      "adrp_pc": 30304
+    },
+    {
+      "pc": 116792,
+      "mnemonic": "ldr",
+      "op_str": "x20, [x20, #0x880]",
+      "resolved_address": 1988736,
+      "adrp_pc": 116788
+    },
+    {
+      "pc": 117480,
+      "mnemonic": "ldr",
+      "op_str": "x9, [x9, #0xd18]",
+      "resolved_address": 1989912,
+      "adrp_pc": 117476
+    },
+    {
+      "pc": 164784,
+      "mnemonic": "ldr",
+      "op_str": "x10, [x10, #0x30]",
+      "resolved_address": 1990704,
+      "adrp_pc": 164776
+    },
+    {
+      "pc": 193204,
+      "mnemonic": "ldr",
+      "op_str": "x8, [x8, #0x30]",
+      "resolved_address": 1990704,
+      "adrp_pc": 193200
+    },
+    {
+      "pc": 199084,
+      "mnemonic": "ldr",
+      "op_str": "x8, [x8, #0x30]",
+      "resolved_address": 1990704,
+      "adrp_pc": 199080
+    },
+    {
+      "pc": 201676,
+      "mnemonic": "ldr",
+      "op_str": "x8, [x8, #0x30]",
+      "resolved_address": 1990704,
+      "adrp_pc": 201672
+    },
+    {
+      "pc": 201712,
+      "mnemonic": "ldr",
+      "op_str": "x9, [x9, #0x700]",
+      "resolved_address": 1988352,
+      "adrp_pc": 201708
+    },
+    {
+      "pc": 206292,
+      "mnemonic": "ldr",
+      "op_str": "x8, [x8, #0x30]",
+      "resolved_address": 1990704,
+      "adrp_pc": 206288
+    },
+    {
+      "pc": 237224,
+      "mnemonic": "ldr",
+      "op_str": "x8, [x8, #0x30]",
+      "resolved_address": 1990704,
+      "adrp_pc": 237220
+    },
+    {
+      "pc": 240500,
+      "mnemonic": "ldr",
+      "op_str": "x8, [x8, #0x30]",
+      "resolved_address": 1990704,
+      "adrp_pc": 240496
+    },
+    {
+      "pc": 332028,
+      "mnemonic": "ldr",
+      "op_str": "x8, [x8, #0xd60]",
+      "resolved_address": 1989984,
+      "adrp_pc": 332024
+    },
+    {
+      "pc": 592800,
+      "mnemonic": "ldr",
+      "op_str": "w8, [x8, #0x890]",
+      "resolved_address": 2013328,
+      "adrp_pc": 592796
+    },
+    {
+      "pc": 593428,
+      "mnemonic": "ldr",
+      "op_str": "w9, [x9, #0x890]",
+      "resolved_address": 2013328,
+      "adrp_pc": 593424
+    },
+    {
+      "pc": 593788,
+      "mnemonic": "ldr",
+      "op_str": "w12, [x12, #0x890]",
+      "resolved_address": 2013328,
+      "adrp_pc": 593784
+    },
+    {
+      "pc": 593952,
+      "mnemonic": "str",
+      "op_str": "w0, [x8, #0x890]",
+      "resolved_address": 2013328,
+      "adrp_pc": 593948
+    },
+    {
+      "pc": 594004,
+      "mnemonic": "ldr",
+      "op_str": "w8, [x8, #0x890]",
+      "resolved_address": 2013328,
+      "adrp_pc": 594000
+    },
+    {
+      "pc": 594624,
+      "mnemonic": "ldr",
+      "op_str": "w8, [x8, #0x890]",
+      "resolved_address": 2013328,
+      "adrp_pc": 594620
+    },
+    {
+      "pc": 687260,
+      "mnemonic": "str",
+      "op_str": "w0, [x10, #0x8b4]",
+      "resolved_address": 2013364,
+      "adrp_pc": 687244
+    },
+    {
+      "pc": 770244,
+      "mnemonic": "ldr",
+      "op_str": "x8, [x8, #0x58]",
+      "resolved_address": 1990744,
+      "adrp_pc": 770228
+    },
+    {
+      "pc": 770292,
+      "mnemonic": "ldr",
+      "op_str": "x8, [x8, #0x58]",
+      "resolved_address": 1990744,
+      "adrp_pc": 770276
+    },
+    {
+      "pc": 774940,
+      "mnemonic": "ldr",
+      "op_str": "x8, [x8, #0x58]",
+      "resolved_address": 1990744,
+      "adrp_pc": 774924
+    },
+    {
+      "pc": 774988,
+      "mnemonic": "ldr",
+      "op_str": "x8, [x8, #0x58]",
+      "resolved_address": 1990744,
+      "adrp_pc": 774972
+    },
+    {
+      "pc": 789884,
+      "mnemonic": "ldr",
+      "op_str": "x8, [x8, #0xcf0]",
+      "resolved_address": 1989872,
+      "adrp_pc": 789880
+    },
+    {
+      "pc": 797364,
+      "mnemonic": "ldr",
+      "op_str": "x15, [x15, #0xd18]",
+      "resolved_address": 1989912,
+      "adrp_pc": 797336
+    },
+    {
+      "pc": 797368,
+      "mnemonic": "ldr",
+      "op_str": "x16, [x16, #0x968]",
+      "resolved_address": 1988968,
+      "adrp_pc": 797340
+    },
+    {
+      "pc": 797372,
+      "mnemonic": "ldr",
+      "op_str": "x17, [x17, #0x938]",
+      "resolved_address": 1988920,
+      "adrp_pc": 797344
+    },
+    {
+      "pc": 797376,
+      "mnemonic": "ldr",
+      "op_str": "x18, [x18, #0x58]",
+      "resolved_address": 1990744,
+      "adrp_pc": 797348
+    },
+    {
+      "pc": 797380,
+      "mnemonic": "ldr",
+      "op_str": "x0, [x0, #0xcf0]",
+      "resolved_address": 1989872,
+      "adrp_pc": 797352
+    },
+    {
+      "pc": 797384,
+      "mnemonic": "ldr",
+      "op_str": "x1, [x1, #0xfb0]",
+      "resolved_address": 1990576,
+      "adrp_pc": 797356
+    },
+    {
+      "pc": 797388,
+      "mnemonic": "ldr",
+      "op_str": "x2, [x2, #0xd60]",
+      "resolved_address": 1989984,
+      "adrp_pc": 797360
+    },
+    {
+      "pc": 1254348,
+      "mnemonic": "ldrb",
+      "op_str": "w9, [x8, #0x8b0]",
+      "resolved_address": 2013360,
+      "adrp_pc": 1254344
+    },
+    {
+      "pc": 1254388,
+      "mnemonic": "strb",
+      "op_str": "w9, [x8, #0x8b0]",
+      "resolved_address": 2013360,
+      "adrp_pc": 1254344
+    },
+    {
+      "pc": 1259900,
+      "mnemonic": "ldr",
+      "op_str": "x8, [x8, #0xd18]",
+      "resolved_address": 1989912,
+      "adrp_pc": 1259896
+    },
+    {
+      "pc": 1260424,
+      "mnemonic": "ldr",
+      "op_str": "x8, [x8, #0xd18]",
+      "resolved_address": 1989912,
+      "adrp_pc": 1260420
+    },
+    {
+      "pc": 1482684,
+      "mnemonic": "ldr",
+      "op_str": "x5, [x5, #0xb60]",
+      "resolved_address": 1989472,
+      "adrp_pc": 1482672
+    },
+    {
+      "pc": 1483572,
+      "mnemonic": "ldr",
+      "op_str": "x8, [x8, #0xb60]",
+      "resolved_address": 1989472,
+      "adrp_pc": 1483568
+    },
+    {
+      "pc": 1497572,
+      "mnemonic": "ldr",
+      "op_str": "x8, [x8, #0xb60]",
+      "resolved_address": 1989472,
+      "adrp_pc": 1497568
+    }
+  ],
+  "runtime_writes": [
+    {
+      "stage": "bootstrap",
+      "stage_instruction": 0,
+      "pc": 30328,
+      "address": 2013232,
+      "size": 8,
+      "value": 347892355072
+    }
+  ],
+  "snapshots": [
+    {
+      "label": "after-bootstrap",
+      "values": [
+        {
+          "rva": 2013184,
+          "value": 0
+        },
+        {
+          "rva": 2013192,
+          "value": 0
+        },
+        {
+          "rva": 2013200,
+          "value": 0
+        },
+        {
+          "rva": 2013208,
+          "value": 0
+        },
+        {
+          "rva": 2013216,
+          "value": 0
+        },
+        {
+          "rva": 2013224,
+          "value": 0
+        },
+        {
+          "rva": 2013232,
+          "value": 347892355072
+        },
+        {
+          "rva": 2013240,
+          "value": 0
+        },
+        {
+          "rva": 2013248,
+          "value": 0
+        },
+        {
+          "rva": 2013256,
+          "value": 0
+        },
+        {
+          "rva": 2013264,
+          "value": 0
+        },
+        {
+          "rva": 2013272,
+          "value": 0
+        },
+        {
+          "rva": 2013280,
+          "value": 0
+        },
+        {
+          "rva": 2013288,
+          "value": 0
+        },
+        {
+          "rva": 2013296,
+          "value": 0
+        },
+        {
+          "rva": 2013304,
+          "value": 0
+        },
+        {
+          "rva": 2013312,
+          "value": 0
+        },
+        {
+          "rva": 2013320,
+          "value": 0
+        },
+        {
+          "rva": 2013328,
+          "value": 0
+        },
+        {
+          "rva": 2013336,
+          "value": 0
+        },
+        {
+          "rva": 2013344,
+          "value": 0
+        },
+        {
+          "rva": 2013352,
+          "value": 0
+        },
+        {
+          "rva": 2013360,
+          "value": 0
+        },
+        {
+          "rva": 2013368,
+          "value": 0
+        },
+        {
+          "rva": 2013376,
+          "value": 0
+        },
+        {
+          "rva": 2013384,
+          "value": 0
+        },
+        {
+          "rva": 2013392,
+          "value": 0
+        },
+        {
+          "rva": 2013400,
+          "value": 0
+        },
+        {
+          "rva": 2013408,
+          "value": 0
+        },
+        {
+          "rva": 2013416,
+          "value": 0
+        },
+        {
+          "rva": 2013424,
+          "value": 0
+        },
+        {
+          "rva": 2013432,
+          "value": 0
+        }
+      ]
+    },
+    {
+      "label": "after-jni-stop",
+      "values": [
+        {
+          "rva": 2013184,
+          "value": 0
+        },
+        {
+          "rva": 2013192,
+          "value": 0
+        },
+        {
+          "rva": 2013200,
+          "value": 0
+        },
+        {
+          "rva": 2013208,
+          "value": 0
+        },
+        {
+          "rva": 2013216,
+          "value": 0
+        },
+        {
+          "rva": 2013224,
+          "value": 0
+        },
+        {
+          "rva": 2013232,
+          "value": 347892355072
+        },
+        {
+          "rva": 2013240,
+          "value": 0
+        },
+        {
+          "rva": 2013248,
+          "value": 0
+        },
+        {
+          "rva": 2013256,
+          "value": 0
+        },
+        {
+          "rva": 2013264,
+          "value": 0
+        },
+        {
+          "rva": 2013272,
+          "value": 0
+        },
+        {
+          "rva": 2013280,
+          "value": 0
+        },
+        {
+          "rva": 2013288,
+          "value": 0
+        },
+        {
+          "rva": 2013296,
+          "value": 0
+        },
+        {
+          "rva": 2013304,
+          "value": 0
+        },
+        {
+          "rva": 2013312,
+          "value": 0
+        },
+        {
+          "rva": 2013320,
+          "value": 0
+        },
+        {
+          "rva": 2013328,
+          "value": 0
+        },
+        {
+          "rva": 2013336,
+          "value": 0
+        },
+        {
+          "rva": 2013344,
+          "value": 0
+        },
+        {
+          "rva": 2013352,
+          "value": 0
+        },
+        {
+          "rva": 2013360,
+          "value": 0
+        },
+        {
+          "rva": 2013368,
+          "value": 0
+        },
+        {
+          "rva": 2013376,
+          "value": 0
+        },
+        {
+          "rva": 2013384,
+          "value": 0
+        },
+        {
+          "rva": 2013392,
+          "value": 0
+        },
+        {
+          "rva": 2013400,
+          "value": 0
+        },
+        {
+          "rva": 2013408,
+          "value": 0
+        },
+        {
+          "rva": 2013416,
+          "value": 0
+        },
+        {
+          "rva": 2013424,
+          "value": 0
+        },
+        {
+          "rva": 2013432,
+          "value": 0
+        }
+      ]
+    }
+  ],
+  "bootstrap_stop": "bootstrap callback table ready",
+  "jni_stop": "reached PC=0 during JNI initialization",
+  "predecrypted_ranges": [
+    {
+      "start": 112224,
+      "end": 315856,
+      "key_source": 460812,
+      "name": "SoLibrary/JNI helper range",
+      "key16": "a80b00d008d18db9c90b00f029e12291",
+      "xor_bytes": 203632,
+      "remainder": 0,
+      "before_sha256": "7abdb0514bfca1e908ea124cf92d5324b8e604a940b748661d16bb437fd47808",
+      "after_sha256": "b2250ff2c6be56fc488055331559cb6517794a5e8c65f5f4027acbc9d4f134fb"
+    },
+    {
+      "start": 315856,
+      "end": 336380,
+      "key_source": 1512104,
+      "name": "runtime loader range",
+      "key16": "a80300b008d18db9c90300d029e12291",
+      "xor_bytes": 20512,
+      "remainder": 12,
+      "before_sha256": "4c14838ab64b90c6e4650fc5b5119c3e20ec2501af9ba97e9fe90056594bba8c",
+      "after_sha256": "d8c5c2f017a56b410f8d7f83548a2e6ea5cb72aa3c3d0e3e670c416875f20686"
+    }
+  ]
+}
