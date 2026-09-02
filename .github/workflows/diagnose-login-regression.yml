@@ -1,0 +1,78 @@
+name: Diagnose login regression
+
+on:
+  push:
+    branches:
+      - diagnose/login-regression-20260902
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout diagnostic branch with full history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install standalone dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+
+      - name: Preserve diagnostic runner outside worktree
+        run: cp tools/diagnose_login_regression.py /tmp/diagnose_login_regression.py
+
+      - name: Build source-level commit matrix
+        run: python /tmp/diagnose_login_regression.py source-matrix
+
+      - name: Verify v0.1.6 has no accepted-socket timeout
+        run: |
+          git checkout --detach 794f42f868268dc964c9ac0aa7b1ba82c019b53e
+          cd standalone
+          PYTHONPATH=. python /tmp/diagnose_login_regression.py timeout-property
+
+      - name: Exercise fresh DB after upstream service merge
+        run: |
+          git checkout --detach 5c124e0fc0ab1b044fe56f49ffe1de7589438361
+          rm -f standalone/mltd-relive.db standalone/config.ini
+          cd standalone
+          PYTHONPATH=. python -c "from mltd.models.setup import setup; setup()"
+          PYTHONPATH=. python /tmp/diagnose_login_regression.py theater-smoke --iterations 250
+          PYTHONPATH=. python /tmp/diagnose_login_regression.py theater-failure-guards
+
+      - name: Exercise v0.1.6 database migrated by v0.1.8
+        run: |
+          git checkout --detach 794f42f868268dc964c9ac0aa7b1ba82c019b53e
+          rm -f standalone/mltd-relive.db standalone/config.ini
+          cd standalone
+          PYTHONPATH=. python -c "from mltd.models.setup import setup; setup()"
+          cd ..
+          git checkout --detach aa128151a8ffa87467d718445553ba2d67feb596
+          cd standalone
+          PYTHONPATH=. python /tmp/diagnose_login_regression.py theater-smoke --iterations 250
+          PYTHONPATH=. python - <<'PY'
+          from mltd.models.setup import check_database_version
+          print('database version after v0.1.8 upgrade:', check_database_version())
+          PY
+
+      - name: Verify TLS-worker socket timeout affects persistent TLS connections
+        run: |
+          git checkout --detach 47cc9b6628ac5c73a26f32b1ac3e6dd70e5a0789
+          rm -f standalone/config.ini
+          cd standalone
+          PYTHONPATH=. python /tmp/diagnose_login_regression.py timeout-property
+          PYTHONPATH=. python /tmp/diagnose_login_regression.py tls-idle-timeout
+
+      - name: Verify hotfix still retains accepted-socket timeout
+        run: |
+          git checkout --detach d13f58723855064ace4c77b0c250f8e58fcebbec
+          rm -f standalone/config.ini
+          cd standalone
+          PYTHONPATH=. python /tmp/diagnose_login_regression.py timeout-property
+          PYTHONPATH=. python /tmp/diagnose_login_regression.py tls-idle-timeout
