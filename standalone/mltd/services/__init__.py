@@ -31,6 +31,7 @@ __all__ = [
     'song_ranking',
     'story',
     'story_legacy',
+    'system_setting',
     'theater',
     'theater_compat',
     'unit',
