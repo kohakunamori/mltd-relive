@@ -5,7 +5,8 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from mltd.models.engine import engine
-from mltd.models.models import Card, HelperCard, Mission, MstMission, Profile, User
+from mltd.models.models import (Card, Friend, HelperCard, Mission, MstMission,
+                                Profile, User)
 from mltd.models.schemas import MissionSchema, ProfileSchema
 from mltd.services.mission import update_mission_progress
 
@@ -72,6 +73,37 @@ def _find_profile(session, params, requester_id):
     return session.scalar(
         select(Profile).where(Profile.id_ == requester_id)
     )
+
+
+def _friend_state(session, requester_id, target_id):
+    """Return the client's FriendState from directional Friend rows.
+
+    A single requester -> target row represents Sent, a single reverse row
+    represents Received and both rows represent Accepted. This is the same
+    state model used by FriendService core compatibility without requiring a
+    schema migration for pending requests.
+    """
+    if requester_id == target_id:
+        return 0
+
+    outgoing = session.scalar(
+        select(Friend.user_id)
+        .where(Friend.user_id == requester_id)
+        .where(Friend.friend_id == target_id)
+    ) is not None
+    incoming = session.scalar(
+        select(Friend.user_id)
+        .where(Friend.user_id == target_id)
+        .where(Friend.friend_id == requester_id)
+    ) is not None
+
+    if outgoing and incoming:
+        return 3
+    if outgoing:
+        return 1
+    if incoming:
+        return 2
+    return 0
 
 
 def _mission_reply(session, user):
@@ -163,10 +195,9 @@ def get_profile(params, context):
             result['birthday'] = ''
 
         result.update({
-            # Friend persistence is not modelled by the standalone database;
-            # state 0 is the client's neutral/not-friend state. Do not expose a
-            # send action for the authenticated producer itself.
-            'friend_state': 0,
+            'friend_state': _friend_state(
+                session, requester_id, user.user_id
+            ),
             'lounge_id': '' if user.lounge_id is None else str(user.lounge_id),
             'lounge_name': user.lounge_name,
             'lounge_user_state': user.lounge_user_state,
