@@ -12,6 +12,7 @@ on:
       - 'tools/client-source/analyze-appguard-bootstrap.py'
       - 'tools/client-source/analyze-appguard-loader-slice.py'
       - 'tools/client-source/analyze-appguard-loader-callback.py'
+      - 'tools/client-source/analyze-appguard-stub-bridge.py'
       - 'tools/client-source/analyze-appguard-mprotect.py'
       - 'tools/client-source/summarize-appguard-init.py'
       - 'tools/client-source/analyze-appguard-solibrary.py'
@@ -76,6 +77,9 @@ jobs:
             --loader-slice client/reconstruction/appguard-analysis/loader-slice.json \
             --entry 0xd356c \
             --out client/reconstruction/appguard-analysis
+          python tools/client-source/analyze-appguard-stub-bridge.py \
+            --libstub work/native/libstub.so \
+            --out client/reconstruction/appguard-analysis
           python tools/client-source/analyze-appguard-mprotect.py \
             --bootstrap client/reconstruction/appguard-analysis/bootstrap-cfg.json \
             --loader-slice client/reconstruction/appguard-analysis/loader-slice.json \
@@ -125,6 +129,8 @@ jobs:
                   client/reconstruction/appguard-analysis/loader-slice.md \
                   client/reconstruction/appguard-analysis/loader-callback-cfg.json \
                   client/reconstruction/appguard-analysis/loader-callback-cfg.md \
+                  client/reconstruction/appguard-analysis/stub-bridge.json \
+                  client/reconstruction/appguard-analysis/stub-bridge.md \
                   client/reconstruction/appguard-analysis/mprotect-slice.json \
                   client/reconstruction/appguard-analysis/mprotect-slice.md \
                   client/reconstruction/appguard-analysis/dt-init-region.md \
@@ -142,5 +148,5 @@ jobs:
             git add client/reconstruction/appguard-analysis/static-config-0x1070.bin
           fi
           if git diff --cached --quiet; then exit 0; fi
-          git commit -m 'client: trace runtime AppGuard loader callback'
+          git commit -m 'client: recover AppGuard libstub loader bridge'
           git push origin HEAD:client-zh-fixed-reconstruction
