@@ -87,6 +87,14 @@ jobs:
           chmod +x tools/client-source/extract-il2cpp.sh
           tools/client-source/extract-il2cpp.sh client-source-output
 
+      - name: Compare recovered client contract with server
+        shell: bash
+        run: |
+          python tools/client-source/compare-server-contract.py \
+            client-source-output/report/client-rpc-methods.txt \
+            standalone/mltd/services \
+            client-source-output/report
+
       - name: Package full source bundle
         shell: bash
         run: |
