@@ -4,7 +4,8 @@ from decimal import Decimal
 from typing import List, Optional
 from uuid import UUID, uuid4
 
-from sqlalchemy import ForeignKey, ForeignKeyConstraint, Index, String
+from sqlalchemy import (ForeignKey, ForeignKeyConstraint, Index,
+                        PrimaryKeyConstraint, String, UniqueConstraint)
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy_utils import force_instant_defaults
@@ -294,9 +295,9 @@ class FavoriteCostume(Base):
     """Ordered favorite-costume selection for one user idol."""
     __tablename__ = 'favorite_costume'
     __table_args__ = (
-        db.PrimaryKeyConstraint(
+        PrimaryKeyConstraint(
             'idol_id', 'mst_costume_id', name='favorite_costume_pk'),
-        db.UniqueConstraint(
+        UniqueConstraint(
             'idol_id', 'sort_order', name='favorite_costume_order_un'),
     )
 
