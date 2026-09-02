@@ -1,7 +1,7 @@
-"""Runtime smoke tests for reverse-engineered StoryService completion RPCs.
+"""Runtime smoke tests for reverse-engineered StoryService RPCs.
 
 This script is intentionally run from ``standalone/`` after ``setup()`` has
-created the normal SQLite database.  It exercises the real SQLAlchemy models,
+created the normal SQLite database. It exercises the real SQLAlchemy models,
 relationships, schemas and service functions instead of only checking source
 shape.
 """
@@ -28,6 +28,7 @@ from mltd.services.story import (
     finish_special_story,
     play_story_mv,
 )
+from mltd.services.story_legacy import get_special_list
 
 
 ADMIN_USER_ID = UUID('ffffffff-ffff-ffff-ffff-ffffffffffff')
@@ -45,6 +46,9 @@ class StoryServiceRuntimeTest(unittest.TestCase):
             state.is_released = True
             state.is_read = False
             session.commit()
+
+    def test_legacy_get_special_list_empty_reply(self):
+        self.assertEqual(get_special_list({}), {})
 
     def test_play_story_mv_empty_reply(self):
         self.assertEqual(play_story_mv({}, CONTEXT), {})
