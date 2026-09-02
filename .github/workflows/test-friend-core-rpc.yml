@@ -6,12 +6,14 @@ on:
       - fix/story-service-compat
     paths:
       - 'standalone/mltd/services/__init__.py'
+      - 'standalone/mltd/services/friend.py'
       - 'standalone/mltd/services/friend_core.py'
       - 'tests/test_friend_core_runtime.py'
       - '.github/workflows/test-friend-core-rpc.yml'
   pull_request:
     paths:
       - 'standalone/mltd/services/__init__.py'
+      - 'standalone/mltd/services/friend.py'
       - 'standalone/mltd/services/friend_core.py'
       - 'tests/test_friend_core_runtime.py'
       - '.github/workflows/test-friend-core-rpc.yml'
@@ -30,12 +32,12 @@ jobs:
           SQLAlchemy==2.0.19 SQLAlchemy-Utils==0.41.1
           marshmallow==3.20.1 marshmallow-sqlalchemy==0.29.0
           msgpack==1.0.5 pycryptodome==3.18.0
-      - name: Import friend core service
+      - name: Import friend services
         working-directory: standalone
-        run: python -c "import mltd.services.friend_core; print('Friend core RPC import OK')"
+        run: python -c "import mltd.services.friend, mltd.services.friend_core; print('Friend RPC imports OK')"
       - name: Initialize standalone database
         working-directory: standalone
         run: python -c "from mltd.models.setup import setup; setup()"
-      - name: Exercise persistent friend state machine
+      - name: Exercise friend state and flower stand contracts
         working-directory: standalone
         run: PYTHONPATH=. python ../tests/test_friend_core_runtime.py
