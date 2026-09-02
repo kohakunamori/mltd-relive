@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 
 from mltd.models.engine import engine
 from mltd.models.models import Friend
+from mltd.services.friend import get_flower_stand_count
 from mltd.services.friend_core import (
     FRIEND_ACCEPTED,
     FRIEND_RECEIVED,
@@ -55,6 +56,14 @@ class FriendCoreRuntimeTest(unittest.TestCase):
                 .where(Friend.user_id == source)
                 .where(Friend.friend_id == target)
             ) is not None
+
+    def test_flower_stand_count_matches_client_reply_shape(self):
+        reply = get_flower_stand_count({})
+        self.assertEqual(set(reply), {'flower_stand_count'})
+        self.assertEqual(
+            set(reply['flower_stand_count']),
+            {'send_count', 'recv_count', 'all_recv_count'},
+        )
 
     def test_get_friend_list_reports_existing_bidirectional_friend(self):
         reply = get_friend_list(
