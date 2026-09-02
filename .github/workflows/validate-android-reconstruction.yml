@@ -1,0 +1,127 @@
+name: Validate Android zh-fixed reconstruction
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - client-zh-fixed-reconstruction
+    paths:
+      - '.github/workflows/validate-android-reconstruction.yml'
+      - 'tools/client-source/apply-zh-fixed-android-reconstruction.py'
+      - 'client/reconstruction/reconstruction-spec.yml'
+      - 'client/reconstruction/android/fixed-smali/**'
+
+permissions:
+  contents: write
+
+jobs:
+  validate-android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check pyyaml
+          curl -L --fail --retry 3 \
+            https://github.com/iBotPeaches/Apktool/releases/download/v2.12.1/apktool_2.12.1.jar \
+            -o "$RUNNER_TEMP/apktool.jar"
+      - name: Download official and fixed APKs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p work/xapk work/fixed
+          curl -L --fail --retry 3 -A 'Mozilla/5.0' \
+            -o work/original.xapk \
+            'https://d.apkpure.net/b/XAPK/com.bandainamcoent.imas_millionlive_theaterdays_ch?version=latest'
+          test "$(sha1sum work/original.xapk | awk '{print $1}')" = '1b77ddd342a4020ba032ec63ae7ef9288551b6e7'
+          unzip -q work/original.xapk -d work/xapk
+          cp work/xapk/com.bandainamcoent.imas_millionlive_theaterdays_ch.apk work/original.apk
+          source release/game-client.env
+          TAG=$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName --jq .tagName)
+          gh release download "$TAG" --repo "$GITHUB_REPOSITORY" \
+            --pattern 'mltd-relive-game-client-zh-fixed.apk' --dir work/fixed
+          mv work/fixed/mltd-relive-game-client-zh-fixed.apk work/fixed.apk
+          echo "${ZH_SHA256}  work/fixed.apk" | sha256sum -c -
+      - name: Decode and apply recovered Android transform
+        shell: bash
+        run: |
+          set -euo pipefail
+          java -jar "$RUNNER_TEMP/apktool.jar" d -f -o work/reconstructed work/original.apk
+          java -jar "$RUNNER_TEMP/apktool.jar" d -f -o work/fixed-tree work/fixed.apk
+          python tools/client-source/apply-zh-fixed-android-reconstruction.py \
+            work/reconstructed --reconstruction-root client/reconstruction
+      - name: Validate semantic equivalence of Java/smali shell
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib, json, xml.etree.ElementTree as ET
+          from pathlib import Path
+
+          A='{http://schemas.android.com/apk/res/android}'
+          def norm(text):
+              out=[]
+              for raw in text.splitlines():
+                  s=raw.lstrip()
+                  if s.startswith(('.line ', '.source ', '.prologue', '.epilogue', '.local ', '.end local', '.restart local')):
+                      continue
+                  out.append(raw.rstrip())
+              return '\n'.join(out).strip()+'\n'
+          def smali(root):
+              return {str(p.relative_to(root)).replace('\\','/'):norm(p.read_text(encoding='utf-8',errors='replace')) for p in root.rglob('*.smali')}
+
+          reconstructed=Path('work/reconstructed')
+          fixed=Path('work/fixed-tree')
+          ra=smali(reconstructed); fa=smali(fixed)
+          only_r=sorted(set(ra)-set(fa)); only_f=sorted(set(fa)-set(ra))
+          changed=sorted(k for k in set(ra)&set(fa) if ra[k]!=fa[k])
+
+          manifest=ET.parse(reconstructed/'AndroidManifest.xml').getroot()
+          app=manifest.find('application')
+          providers={p.get(A+'authorities') for p in app.findall('provider')}
+          names={e.get(A+'name') for e in app.iter() if e.get(A+'name')}
+          meta={m.get(A+'name'):m.get(A+'value') for m in app.findall('meta-data')}
+          strings=ET.parse(reconstructed/'res/values/strings.xml').getroot()
+          app_name=next((e.text for e in strings.findall('string') if e.get('name')=='app_name'),None)
+
+          checks={
+              'smali_same_file_set': not only_r and not only_f,
+              'smali_all_normalized_identical': not changed,
+              'package_local': manifest.get('package')=='com.bandainamcoent.imas_millionlive_theaterdays_ch.local',
+              'appguard_application_removed': app.get(A+'name')!='com.inca.security.Proxy.AppGuardFrontApplication',
+              'appguard_components_absent': not any(n and n.startswith('com.inca.security.') for n in names),
+              'firebase_provider_local': 'com.bandainamcoent.imas_millionlive_theaterdays_ch.local.firebaseinitprovider' in providers,
+              'file_provider_local': 'com.bandainamcoent.imas_millionlive_theaterdays_ch.local.fileprovider' in providers,
+              'app_name_local': app_name=='劇場時光L',
+              'fused_modules_base': meta.get('com.android.dynamic.apk.fused.modules')=='base',
+              'standalone_stamp': meta.get('com.android.stamp.type')=='STAMP_TYPE_STANDALONE_APK',
+          }
+          result={
+              'checks':checks,
+              'reconstructed_smali_files':len(ra),
+              'fixed_smali_files':len(fa),
+              'reconstructed_only_smali':only_r,
+              'fixed_only_smali':only_f,
+              'changed_normalized_smali':changed,
+          }
+          out=Path('client/reconstruction/android/APPLY_VALIDATION.json')
+          out.write_text(json.dumps(result,indent=2,ensure_ascii=False)+'\n',encoding='utf-8')
+          print(json.dumps(result,indent=2,ensure_ascii=False))
+          if not all(checks.values()):
+              raise SystemExit('Android reconstruction validation failed')
+          PY
+      - name: Commit validation report
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add client/reconstruction/android/APPLY_VALIDATION.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'client: validate Android reconstruction against zh-fixed'
+          git push origin HEAD:client-zh-fixed-reconstruction
