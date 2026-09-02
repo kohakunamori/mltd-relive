@@ -114,12 +114,17 @@ def set_unit(params, context):
             for p in params['param_list']
             for card_id in p['card_id_list'][:5]
         }
-        card_to_idol = dict(session.execute(
+        # SQLAlchemy 2.x Session.execute() returns a ChunkedIteratorResult.
+        # Passing that object directly to dict() is unsafe: Result exposes
+        # keys(), so dict() may treat it as a Mapping and try result[key], but
+        # Result is not subscriptable. Materialize the two-column rows first.
+        card_rows = session.execute(
             select(Card.card_id, MstCard.mst_idol_id)
             .join(MstCard)
             .where(Card.user_id == user_id)
             .where(Card.card_id.in_(card_ids))
-        ))
+        ).all()
+        card_to_idol = dict(card_rows)
 
         units = []
         for p in params['param_list']:
@@ -217,8 +222,8 @@ def set_song_unit(params, context):
             costume_random_type_list: An empty list.
             mst_lesson_wear_id_list: A list of 5 or 13master lesson wear
                                      IDs representing the lesson wears
-                                     selected by the user for each card
-                                     in 'card_id_list' above.
+                                     selected by the user for each card in
+                                     'card_id_list' above.
     Returns:
         A dict containing a single key named 'song_unit', whose value is
         a dict representing the song unit after applying the changes.
@@ -247,4 +252,3 @@ def set_song_unit(params, context):
         session.commit()
 
     return {'song_unit': song_unit_dict}
-
