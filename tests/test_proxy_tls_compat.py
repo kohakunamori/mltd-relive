@@ -33,19 +33,22 @@ class ProxyTLSCompatibilityTest(unittest.TestCase):
         self.assertNotIn('AssetStore', module_source)
         self.assertNotIn('set_servername_callback', start_source)
 
-    def test_api_post_restores_connection_close_semantics(self):
+    def test_api_post_does_not_force_connection_close(self):
         post_source = inspect.getsource(proxy.ProxyHTTPRequestHandler.do_POST)
         response_source = inspect.getsource(proxy.ProxyHTTPRequestHandler._send_response)
-        self.assertIn('self.close_connection = True', post_source)
-        self.assertIn("self.send_header('Connection', 'close')", response_source)
+        self.assertNotIn('self.close_connection = True', post_source)
+        self.assertNotIn("self.send_header('Connection', 'close')", response_source)
+        self.assertEqual(proxy.ProxyHTTPRequestHandler.protocol_version, 'HTTP/1.1')
 
-    def test_api_dispatch_is_serialized_for_live_compatibility(self):
+    def test_api_dispatch_has_no_global_compatibility_lock(self):
+        module_source = inspect.getsource(proxy)
         post_source = inspect.getsource(proxy.ProxyHTTPRequestHandler.do_POST)
-        self.assertIn('with _API_COMPAT_LOCK:', post_source)
+        self.assertNotIn('_API_COMPAT_LOCK', module_source)
+        self.assertNotIn('with _API_COMPAT_LOCK:', post_source)
 
     def test_start_reports_remote_asset_transport_only(self):
         source = inspect.getsource(proxy.start)
-        self.assertIn('Asset transport: remote relay', source)
+        self.assertIn('Asset transport: remote endpoint', source)
         self.assertIn('Asset transport: Rainbow remote CDN', source)
         self.assertNotIn('Asset HTTP server', source)
         self.assertNotIn('Asset HTTPS server', source)
