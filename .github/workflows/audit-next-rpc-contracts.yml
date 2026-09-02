@@ -89,3 +89,51 @@ jobs:
           for service in sorted(by_service, key=lambda s: (-len(by_service[s]), s)):
               print(f'{service}: {len(by_service[service])}: ' + ', '.join(sorted(by_service[service])))
           PY
+      - name: Dump targeted DTO contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          git show origin/client-decompiled-zh-fixed-v1:il2cpp-dump/dump.cs > /tmp/dump.cs
+          python - <<'PY'
+          import pathlib
+          import re
+
+          dump = pathlib.Path('/tmp/dump.cs').read_text(encoding='utf-8', errors='ignore')
+          targets = [
+              'ProducerRankStatus',
+              'GetProducerRankListArgs',
+              'GetProducerRankListReply',
+              'BreakJobArgs',
+              'BreakJobReply',
+              'CancelJobArgs',
+              'CancelJobReply',
+              'SetTransferPasswordArgs',
+              'SetTransferPasswordReply',
+          ]
+          for name in targets:
+              print(f'=== {name} ===')
+              match = re.search(
+                  rf'public class {re.escape(name)}\b.*?\{{(.*?)\n\s*// Methods',
+                  dump,
+                  flags=re.S,
+              )
+              if not match:
+                  print('NOT FOUND')
+                  continue
+              fields = re.findall(
+                  r'^\s*public\s+([^;\n]+?)\s+([A-Za-z0-9_]+);',
+                  match.group(1),
+                  flags=re.M,
+              )
+              for typ, field in fields:
+                  print(typ.strip(), field)
+
+          print('=== JOB HTTP REQUEST SIGNATURES ===')
+          for method in ('BreakJob', 'CancelJob'):
+              for match in re.finditer(
+                  rf'public HTTPRequest {method}\s*\([^\n]*', dump
+              ):
+                  start = max(0, match.start() - 500)
+                  end = min(len(dump), match.end() + 900)
+                  print(dump[start:end])
+          PY
