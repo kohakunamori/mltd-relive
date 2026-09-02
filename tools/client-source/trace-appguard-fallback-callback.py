@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 """Trace how fallback callback values from +0xc2a30 are consumed during JNI init.
 
-+0xcac34 now appears to be a native-bridge detector, so a false result may be
-normal on native arm64.  The remaining question is therefore whether the small
-fallback values are absolute PCs, offsets requiring a base, or selectors used
-by another dispatch layer.  Capture every JNI-stage BR/BLR to one of those
-values and the runtime instructions immediately around the callsite.
++0xcac34 is now strongly evidenced as a native-bridge / binary-translation
+fingerprint check, so a false result can be normal on native arm64.  Capture
+how the small fallback callback values are consumed instead of forcing the
+native-bridge branch.
 """
 from __future__ import annotations
 
@@ -33,8 +32,8 @@ class Trace(mod.E):
         super().__init__(image,out)
         self.md=Cs(CS_ARCH_ARM64,CS_MODE_ARM); self.md.detail=True
         self.small_indirect=[]
-        self.slot_reads=[]
         self.first_small_context=None
+        self.installer_gate_w0=None
 
     def disasm_context(self, rva, before=0x30, after=0x20):
         start=max(0,rva-before); raw=bytes(self.uc.mem_read(base.BIAS+start,before+after))
@@ -42,8 +41,12 @@ class Trace(mod.E):
                 for i in self.md.disasm(raw,start)]
 
     def code_hook(self,uc,address,size,user):
+        rva=address-base.BIAS if base.BIAS <= address < base.BIAS+0x4000000 else address
+        # +0xc2a3c is the first instruction after +0xcac34 returns.
+        if getattr(self,'stage',None)=='installer' and rva==0xC2A3C:
+            self.installer_gate_w0=uc.reg_read(UC_ARM64_REG_W0)
+
         if getattr(self,'stage',None)=='jni' and base.BIAS <= address < base.BIAS+0x4000000:
-            rva=address-base.BIAS
             try:
                 ins=next(iter(self.md.disasm(bytes(uc.mem_read(address,size)),address,count=1)),None)
             except Exception:
@@ -75,8 +78,7 @@ def render(rep):
         for i in x['context']:
             mark='  ; <--' if i['rva']==x['caller_rva'] else ''
             L.append(f"0x{i['rva']:x}: {i['bytes']:<8} {i['mnemonic']} {i['op_str']}{mark}")
-        L += ['```','', 'Registers:']
-        L.append('```text')
+        L += ['```','', 'Registers:', '```text']
         L.append(' '.join(f"x{i}=0x{x['regs'][f'x{i}']:x}" for i in range(31)))
         L += ['```','']
     return '\n'.join(L)+'\n'
@@ -86,8 +88,7 @@ def main():
     ap=argparse.ArgumentParser();ap.add_argument('--libcompatible',type=Path,required=True);ap.add_argument('--out',type=Path,required=True)
     a=ap.parse_args();a.out.mkdir(parents=True,exist_ok=True)
     e=Trace(base.Image(a.libcompatible),a.out)
-    boot=e.run_bootstrap();inst=e.run_installer();gate=(e.cac_exit or {}).get('w0',0)
-    pre=[mod.mod.decrypt_range(e,r) if hasattr(mod,'mod') else None for r in []]
+    boot=e.run_bootstrap();inst=e.run_installer();gate=e.installer_gate_w0 if e.installer_gate_w0 is not None else 0
     # Same explicit predecryption used by the canonical callback-installer harness.
     pre=[mod.mod.decrypt_range(e,r) for r in mod.mod.RANGES]
     jni=e.run_jni()
