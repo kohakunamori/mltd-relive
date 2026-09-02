@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from mltd.models.engine import engine
 from mltd.models.models import Mission, MstMission, Present, User
 from mltd.models.schemas import MissionSchema
+from mltd.services import mission as mission_service
 from mltd.services.utils import add_present
 
 
@@ -62,6 +63,25 @@ def _grant_training_mission_rewards(session, user, mst_mission):
             item_id=f'{user.user_id}_{reward.mst_item_id}',
         ),
     )
+
+
+# The legacy generic mission helper does not define a description for master
+# mission classes 74/75 and therefore raises UnboundLocalError when one of
+# these client-managed training missions happens to complete through a normal
+# server-side progress update. Keep the legacy implementation untouched for
+# every other mission class, while routing only the two verified training
+# classes through the same strict reward implementation used by
+# DoClientMission.
+_ORIGINAL_RECEIVE_MISSION_REWARDS = mission_service.receive_mission_rewards
+
+
+def _receive_mission_rewards_with_training_compat(session, user, mst_mission):
+    if mst_mission.mst_mission_class_id in _SUPPORTED_CLASSES:
+        return _grant_training_mission_rewards(session, user, mst_mission)
+    return _ORIGINAL_RECEIVE_MISSION_REWARDS(session, user, mst_mission)
+
+
+mission_service.receive_mission_rewards = _receive_mission_rewards_with_training_compat
 
 
 def _complete_client_mission(session, user, mission, progress):
