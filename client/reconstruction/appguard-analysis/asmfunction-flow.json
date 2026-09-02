@@ -1,0 +1,121 @@
+{
+  "entry": 27248,
+  "blocks": 1245,
+  "iterations": 6425,
+  "resolved_writes": [
+    {
+      "instruction": 34752,
+      "field": 0,
+      "source_reg": "x27",
+      "values": []
+    },
+    {
+      "instruction": 34772,
+      "field": 8,
+      "source_reg": "x27",
+      "values": []
+    },
+    {
+      "instruction": 34468,
+      "field": 16,
+      "source_reg": "x27",
+      "values": []
+    },
+    {
+      "instruction": 34224,
+      "field": 24,
+      "source_reg": "x27",
+      "values": []
+    },
+    {
+      "instruction": 34948,
+      "field": 32,
+      "source_reg": "x27",
+      "values": []
+    },
+    {
+      "instruction": 34964,
+      "field": 40,
+      "source_reg": "x27",
+      "values": []
+    },
+    {
+      "instruction": 34860,
+      "field": 48,
+      "source_reg": "x27",
+      "values": []
+    },
+    {
+      "instruction": 34520,
+      "field": 56,
+      "source_reg": "x27",
+      "values": []
+    },
+    {
+      "instruction": 34164,
+      "field": 64,
+      "source_reg": "x27",
+      "values": []
+    },
+    {
+      "instruction": 34372,
+      "field": 72,
+      "source_reg": "x27",
+      "values": []
+    },
+    {
+      "instruction": 34184,
+      "field": 80,
+      "source_reg": "x27",
+      "values": []
+    },
+    {
+      "instruction": 34280,
+      "field": 88,
+      "source_reg": "x27",
+      "values": []
+    },
+    {
+      "instruction": 34024,
+      "field": 96,
+      "source_reg": "x27",
+      "values": []
+    },
+    {
+      "instruction": 34060,
+      "field": 104,
+      "source_reg": "x27",
+      "values": []
+    },
+    {
+      "instruction": 34312,
+      "field": 112,
+      "source_reg": "x27",
+      "values": []
+    },
+    {
+      "instruction": 34204,
+      "field": 120,
+      "source_reg": "x27",
+      "values": []
+    },
+    {
+      "instruction": 34932,
+      "field": 128,
+      "source_reg": "x27",
+      "values": []
+    },
+    {
+      "instruction": 33980,
+      "field": 136,
+      "source_reg": "x27",
+      "values": []
+    },
+    {
+      "instruction": 35032,
+      "field": 144,
+      "source_reg": "x27",
+      "values": []
+    }
+  ]
+}
