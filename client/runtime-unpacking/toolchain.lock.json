@@ -21,9 +21,14 @@
       "role": "runtime active-call IL2CPP dump"
     },
     "native_memory_dumper": {
+      "repo": "https://github.com/Mrack/TinyDump.git",
+      "commit": "996b81dbae153b4151b9be6d082348f3c77c4ef6",
+      "role": "ARM64 process-memory SO dump with SoFixer-compatible reconstruction"
+    },
+    "legacy_reference_only": {
       "repo": "https://github.com/kp7742/IL2CPPDumper.git",
-      "ref": "master",
-      "role": "dump mapped libil2cpp.so and rebuild ELF"
+      "commit": "8c91fa606609688bd2a9864d0d62413b1a8f89a2",
+      "reason": "upstream hard-codes 32-bit address types and does not compile safely for arm64-v8a"
     }
   }
 }
