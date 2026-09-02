@@ -1,0 +1,650 @@
+{
+  "dt_init": 92744,
+  "dynamic": {
+    "DT_INIT": 92744,
+    "DT_NEEDED": 2,
+    "DT_SONAME": 48188,
+    "DT_FINI_ARRAY": 269072,
+    "DT_FINI_ARRAYSZ": 16,
+    "DT_HASH": 496,
+    "DT_STRTAB": 41704,
+    "DT_SYMTAB": 9928,
+    "DT_STRSZ": 48204,
+    "DT_SYMENT": 24,
+    "DT_PLTGOT": 269936,
+    "DT_PLTRELSZ": 24,
+    "DT_PLTREL": 7,
+    "DT_JMPREL": 92648,
+    "DT_RELA": 92624,
+    "DT_RELASZ": 0,
+    "DT_RELAENT": 24,
+    "DT_BIND_NOW": 0,
+    "DT_NULL": 0
+  },
+  "loads": [
+    {
+      "va": 0,
+      "off": 0,
+      "filesz": 264960,
+      "memsz": 264960,
+      "flags": 5
+    },
+    {
+      "va": 269056,
+      "off": 264960,
+      "filesz": 8400,
+      "memsz": 8400,
+      "flags": 6
+    }
+  ],
+  "instructions": [
+    {
+      "address": 92696,
+      "mnemonic": "udf",
+      "op_str": "#0",
+      "registers": {}
+    },
+    {
+      "address": 92700,
+      "mnemonic": "udf",
+      "op_str": "#0",
+      "registers": {}
+    },
+    {
+      "address": 92704,
+      "mnemonic": "udf",
+      "op_str": "#0",
+      "registers": {}
+    },
+    {
+      "address": 92708,
+      "mnemonic": "udf",
+      "op_str": "#0",
+      "registers": {}
+    },
+    {
+      "address": 92712,
+      "mnemonic": "stp",
+      "op_str": "x16, x30, [sp, #-0x10]!",
+      "registers": {}
+    },
+    {
+      "address": 92716,
+      "mnemonic": "adrp",
+      "op_str": "x16, #0x126000",
+      "registers": {
+        "x16": 1204224
+      }
+    },
+    {
+      "address": 92720,
+      "mnemonic": "ldr",
+      "op_str": "x17, [x16, #0x3b0]",
+      "registers": {
+        "x16": 1204224
+      }
+    },
+    {
+      "address": 92724,
+      "mnemonic": "add",
+      "op_str": "x16, x16, #0x3b0",
+      "registers": {
+        "x16": 1205168
+      }
+    },
+    {
+      "address": 92728,
+      "mnemonic": "br",
+      "op_str": "x17",
+      "registers": {
+        "x16": 1205168
+      }
+    },
+    {
+      "address": 92732,
+      "mnemonic": "nop",
+      "op_str": "",
+      "registers": {
+        "x16": 1205168
+      }
+    },
+    {
+      "address": 92736,
+      "mnemonic": "nop",
+      "op_str": "",
+      "registers": {
+        "x16": 1205168
+      }
+    },
+    {
+      "address": 92740,
+      "mnemonic": "nop",
+      "op_str": "",
+      "registers": {
+        "x16": 1205168
+      }
+    },
+    {
+      "address": 92744,
+      "mnemonic": "adrp",
+      "op_str": "x16, #0x3d000",
+      "registers": {
+        "x16": 249856
+      }
+    },
+    {
+      "address": 92748,
+      "mnemonic": "add",
+      "op_str": "x16, x16, #4, lsl #12",
+      "registers": {
+        "x16": 249860
+      }
+    },
+    {
+      "address": 92752,
+      "mnemonic": "add",
+      "op_str": "x16, x16, #0xe70",
+      "registers": {
+        "x16": 253556
+      }
+    },
+    {
+      "address": 92756,
+      "mnemonic": "ldr",
+      "op_str": "x17, [x16]",
+      "registers": {
+        "x16": 253556,
+        "x17": 14989108534992615428
+      }
+    },
+    {
+      "address": 92760,
+      "mnemonic": "adrp",
+      "op_str": "x0, #0x16000",
+      "registers": {
+        "x16": 253556,
+        "x17": 14989108534992615428,
+        "x0": 90112
+      }
+    },
+    {
+      "address": 92764,
+      "mnemonic": "br",
+      "op_str": "x17",
+      "registers": {
+        "x16": 253556,
+        "x17": 14989108534992615428,
+        "x0": 90112
+      }
+    },
+    {
+      "address": 92768,
+      "mnemonic": "add",
+      "op_str": "x16, x16, #0x3c0",
+      "registers": {
+        "x16": 254516,
+        "x17": 14989108534992615428,
+        "x0": 90112
+      }
+    },
+    {
+      "address": 92772,
+      "mnemonic": "br",
+      "op_str": "x17",
+      "registers": {
+        "x16": 254516,
+        "x17": 14989108534992615428,
+        "x0": 90112
+      }
+    },
+    {
+      "address": 92776,
+      "mnemonic": ".word",
+      "op_str": "0xe1a00000",
+      "state": {
+        "x16": 254516,
+        "x17": 14989108534992615428,
+        "x0": 90112
+      }
+    },
+    {
+      "address": 92780,
+      "mnemonic": ".word",
+      "op_str": "0xe1a00000",
+      "state": {
+        "x16": 254516,
+        "x17": 14989108534992615428,
+        "x0": 90112
+      }
+    },
+    {
+      "address": 92784,
+      "mnemonic": ".word",
+      "op_str": "0xe1a00000",
+      "state": {
+        "x16": 254516,
+        "x17": 14989108534992615428,
+        "x0": 90112
+      }
+    },
+    {
+      "address": 92788,
+      "mnemonic": ".word",
+      "op_str": "0xe1a00000",
+      "state": {
+        "x16": 254516,
+        "x17": 14989108534992615428,
+        "x0": 90112
+      }
+    },
+    {
+      "address": 92792,
+      "mnemonic": ".word",
+      "op_str": "0xe1a00000",
+      "state": {
+        "x16": 254516,
+        "x17": 14989108534992615428,
+        "x0": 90112
+      }
+    },
+    {
+      "address": 92796,
+      "mnemonic": ".word",
+      "op_str": "0xe1a00000",
+      "state": {
+        "x16": 254516,
+        "x17": 14989108534992615428,
+        "x0": 90112
+      }
+    },
+    {
+      "address": 92800,
+      "mnemonic": ".word",
+      "op_str": "0xe1a00000",
+      "state": {
+        "x16": 254516,
+        "x17": 14989108534992615428,
+        "x0": 90112
+      }
+    },
+    {
+      "address": 92804,
+      "mnemonic": ".word",
+      "op_str": "0xe1a00000",
+      "state": {
+        "x16": 254516,
+        "x17": 14989108534992615428,
+        "x0": 90112
+      }
+    },
+    {
+      "address": 92808,
+      "mnemonic": ".word",
+      "op_str": "0xe1a00000",
+      "state": {
+        "x16": 254516,
+        "x17": 14989108534992615428,
+        "x0": 90112
+      }
+    },
+    {
+      "address": 92812,
+      "mnemonic": ".word",
+      "op_str": "0xe1a00000",
+      "state": {
+        "x16": 254516,
+        "x17": 14989108534992615428,
+        "x0": 90112
+      }
+    },
+    {
+      "address": 92816,
+      "mnemonic": ".word",
+      "op_str": "0xe1a00000",
+      "state": {
+        "x16": 254516,
+        "x17": 14989108534992615428,
+        "x0": 90112
+      }
+    },
+    {
+      "address": 92820,
+      "mnemonic": ".word",
+      "op_str": "0xe1a00000",
+      "state": {
+        "x16": 254516,
+        "x17": 14989108534992615428,
+        "x0": 90112
+      }
+    },
+    {
+      "address": 92824,
+      "mnemonic": ".word",
+      "op_str": "0xe1a00000",
+      "state": {
+        "x16": 254516,
+        "x17": 14989108534992615428,
+        "x0": 90112
+      }
+    },
+    {
+      "address": 92828,
+      "mnemonic": ".word",
+      "op_str": "0xe1a00000",
+      "state": {
+        "x16": 254516,
+        "x17": 14989108534992615428,
+        "x0": 90112
+      }
+    },
+    {
+      "address": 92832,
+      "mnemonic": ".word",
+      "op_str": "0xe1a00000",
+      "state": {
+        "x16": 254516,
+        "x17": 14989108534992615428,
+        "x0": 90112
+      }
+    },
+    {
+      "address": 92836,
+      "mnemonic": ".word",
+      "op_str": "0xe1a00000",
+      "state": {
+        "x16": 254516,
+        "x17": 14989108534992615428,
+        "x0": 90112
+      }
+    },
+    {
+      "address": 92840,
+      "mnemonic": ".word",
+      "op_str": "0xe1a00000",
+      "state": {
+        "x16": 254516,
+        "x17": 14989108534992615428,
+        "x0": 90112
+      }
+    },
+    {
+      "address": 92844,
+      "mnemonic": ".word",
+      "op_str": "0xe1a00000",
+      "state": {
+        "x16": 254516,
+        "x17": 14989108534992615428,
+        "x0": 90112
+      }
+    },
+    {
+      "address": 92848,
+      "mnemonic": ".word",
+      "op_str": "0xe1a00000",
+      "state": {
+        "x16": 254516,
+        "x17": 14989108534992615428,
+        "x0": 90112
+      }
+    },
+    {
+      "address": 92852,
+      "mnemonic": ".word",
+      "op_str": "0xe1a00000",
+      "state": {
+        "x16": 254516,
+        "x17": 14989108534992615428,
+        "x0": 90112
+      }
+    },
+    {
+      "address": 92856,
+      "mnemonic": ".word",
+      "op_str": "0xe1a00000",
+      "state": {
+        "x16": 254516,
+        "x17": 14989108534992615428,
+        "x0": 90112
+      }
+    },
+    {
+      "address": 92860,
+      "mnemonic": ".word",
+      "op_str": "0xe1a00000",
+      "state": {
+        "x16": 254516,
+        "x17": 14989108534992615428,
+        "x0": 90112
+      }
+    },
+    {
+      "address": 92864,
+      "mnemonic": ".word",
+      "op_str": "0xe1a00000",
+      "state": {
+        "x16": 254516,
+        "x17": 14989108534992615428,
+        "x0": 90112
+      }
+    },
+    {
+      "address": 92868,
+      "mnemonic": ".word",
+      "op_str": "0xe1a00000",
+      "state": {
+        "x16": 254516,
+        "x17": 14989108534992615428,
+        "x0": 90112
+      }
+    },
+    {
+      "address": 92872,
+      "mnemonic": ".word",
+      "op_str": "0xe1a00000",
+      "state": {
+        "x16": 254516,
+        "x17": 14989108534992615428,
+        "x0": 90112
+      }
+    },
+    {
+      "address": 92876,
+      "mnemonic": ".word",
+      "op_str": "0xe1a00000",
+      "state": {
+        "x16": 254516,
+        "x17": 14989108534992615428,
+        "x0": 90112
+      }
+    },
+    {
+      "address": 92880,
+      "mnemonic": ".word",
+      "op_str": "0xe1a00000",
+      "state": {
+        "x16": 254516,
+        "x17": 14989108534992615428,
+        "x0": 90112
+      }
+    },
+    {
+      "address": 92884,
+      "mnemonic": ".word",
+      "op_str": "0xe1a00000",
+      "state": {
+        "x16": 254516,
+        "x17": 14989108534992615428,
+        "x0": 90112
+      }
+    },
+    {
+      "address": 92888,
+      "mnemonic": ".word",
+      "op_str": "0xe1a00000",
+      "state": {
+        "x16": 254516,
+        "x17": 14989108534992615428,
+        "x0": 90112
+      }
+    },
+    {
+      "address": 92892,
+      "mnemonic": ".word",
+      "op_str": "0xe1a00000",
+      "state": {
+        "x16": 254516,
+        "x17": 14989108534992615428,
+        "x0": 90112
+      }
+    },
+    {
+      "address": 92896,
+      "mnemonic": ".word",
+      "op_str": "0xe1a00000",
+      "state": {
+        "x16": 254516,
+        "x17": 14989108534992615428,
+        "x0": 90112
+      }
+    },
+    {
+      "address": 92900,
+      "mnemonic": ".word",
+      "op_str": "0xe1a00000",
+      "state": {
+        "x16": 254516,
+        "x17": 14989108534992615428,
+        "x0": 90112
+      }
+    },
+    {
+      "address": 92904,
+      "mnemonic": ".word",
+      "op_str": "0xe1a00000",
+      "state": {
+        "x16": 254516,
+        "x17": 14989108534992615428,
+        "x0": 90112
+      }
+    },
+    {
+      "address": 92908,
+      "mnemonic": ".word",
+      "op_str": "0xe1a00000",
+      "state": {
+        "x16": 254516,
+        "x17": 14989108534992615428,
+        "x0": 90112
+      }
+    },
+    {
+      "address": 92912,
+      "mnemonic": ".word",
+      "op_str": "0xe1a00000",
+      "state": {
+        "x16": 254516,
+        "x17": 14989108534992615428,
+        "x0": 90112
+      }
+    },
+    {
+      "address": 92916,
+      "mnemonic": ".word",
+      "op_str": "0xe1a00000",
+      "state": {
+        "x16": 254516,
+        "x17": 14989108534992615428,
+        "x0": 90112
+      }
+    },
+    {
+      "address": 92920,
+      "mnemonic": ".word",
+      "op_str": "0xe1a00000",
+      "state": {
+        "x16": 254516,
+        "x17": 14989108534992615428,
+        "x0": 90112
+      }
+    },
+    {
+      "address": 92924,
+      "mnemonic": ".word",
+      "op_str": "0xe1a00000",
+      "state": {
+        "x16": 254516,
+        "x17": 14989108534992615428,
+        "x0": 90112
+      }
+    },
+    {
+      "address": 92928,
+      "mnemonic": ".word",
+      "op_str": "0xe1a00000",
+      "state": {
+        "x16": 254516,
+        "x17": 14989108534992615428,
+        "x0": 90112
+      }
+    },
+    {
+      "address": 92932,
+      "mnemonic": ".word",
+      "op_str": "0xe1a00000",
+      "state": {
+        "x16": 254516,
+        "x17": 14989108534992615428,
+        "x0": 90112
+      }
+    }
+  ],
+  "events": [
+    {
+      "pc": 92720,
+      "kind": "load",
+      "dst": "x17",
+      "va": 1205168,
+      "file_offset": null,
+      "raw_u64": null
+    },
+    {
+      "pc": 92728,
+      "kind": "br",
+      "reg": "x17",
+      "target": null,
+      "registers": {
+        "x16": 1205168
+      }
+    },
+    {
+      "pc": 92756,
+      "kind": "load",
+      "dst": "x17",
+      "va": 253556,
+      "file_offset": 253556,
+      "raw_u64": 14989108534992615428
+    },
+    {
+      "pc": 92764,
+      "kind": "br",
+      "reg": "x17",
+      "target": 14989108534992615428,
+      "registers": {
+        "x16": 253556,
+        "x17": 14989108534992615428,
+        "x0": 90112
+      }
+    },
+    {
+      "pc": 92772,
+      "kind": "br",
+      "reg": "x17",
+      "target": 14989108534992615428,
+      "registers": {
+        "x16": 254516,
+        "x17": 14989108534992615428,
+        "x0": 90112
+      }
+    }
+  ]
+}
