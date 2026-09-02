@@ -226,6 +226,7 @@ class IdolSchema(SQLAlchemyAutoSchema):
     mst_idol = Nested('MstIdolSchema')
     lesson_wear_config = Nested('LessonWearConfigSchema')
     mst_costumes = Nested('MstCostumeSchema', many=True)
+    favorite_mst_costumes = Nested('MstCostumeSchema', many=True)
     mst_voice_categories = Nested('MstVoiceCategorySchema', many=True)
     mst_lesson_wears = Nested('MstLessonWearSchema', many=True)
 
@@ -248,7 +249,8 @@ class IdolSchema(SQLAlchemyAutoSchema):
         data['costume_list'] = data['mst_costumes']
         del data['mst_costumes']
 
-        data['favorite_costume_list'] = None
+        data['favorite_costume_list'] = data['favorite_mst_costumes']
+        del data['favorite_mst_costumes']
 
         # Populate voice_category_list.
         data['voice_category_list'] = data['mst_voice_categories']

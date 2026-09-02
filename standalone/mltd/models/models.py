@@ -225,6 +225,13 @@ class Idol(Base):
         primaryjoin='and_(Idol.user_id == Costume.user_id, '
             + 'Idol.mst_idol_id == MstCostume.mst_idol_id)',
         viewonly=True, lazy='selectin')
+    favorite_mst_costumes: Mapped[List['MstCostume']] = relationship(
+        secondary='favorite_costume',
+        primaryjoin='Idol.idol_id == FavoriteCostume.idol_id',
+        secondaryjoin=(
+            'FavoriteCostume.mst_costume_id == MstCostume.mst_costume_id'),
+        order_by='FavoriteCostume.sort_order',
+        viewonly=True, lazy='selectin')
     mst_voice_categories: Mapped[List['MstVoiceCategory']] = relationship(
         uselist=True,
         primaryjoin='and_(MstVoiceCategory.idol_detail_type == 3, '
@@ -281,6 +288,22 @@ class Costume(Base):
     user: Mapped['User'] = relationship(back_populates='costumes')
     mst_costume: Mapped['MstCostume'] = relationship(lazy='joined',
                                                      innerjoin=True)
+
+
+class FavoriteCostume(Base):
+    """Ordered favorite-costume selection for one user idol."""
+    __tablename__ = 'favorite_costume'
+    __table_args__ = (
+        db.PrimaryKeyConstraint(
+            'idol_id', 'mst_costume_id', name='favorite_costume_pk'),
+        db.UniqueConstraint(
+            'idol_id', 'sort_order', name='favorite_costume_order_un'),
+    )
+
+    idol_id = mapped_column(ForeignKey('idol.idol_id'), nullable=False)
+    mst_costume_id = mapped_column(
+        ForeignKey('mst_costume.mst_costume_id'), nullable=False)
+    sort_order: Mapped[int]
 
 
 class MstCostumeBulkChangeGroup(Base):

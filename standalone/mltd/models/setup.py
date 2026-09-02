@@ -1125,6 +1125,13 @@ def upgrade_database():
             session.commit()
         logger.info('v0.1.7 migration data validated.')
 
+    # Additive compatibility state introduced after the historical schema
+    # version stopped advancing. This is safe and idempotent for old saves.
+    with Session(engine) as session:
+        Base.metadata.tables['favorite_costume'].create(
+            bind=session.get_bind(), checkfirst=True)
+        session.commit()
+
 
 if __name__ == '__main__':
     setup()
