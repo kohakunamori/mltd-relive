@@ -112,34 +112,40 @@ Therefore the desktop HTTP `:7651` transport must be treated as an empirical com
 
 If the corrected client rejects desktop cleartext Asset HTTP, the next preferred design is a separately controlled public hostname with a valid public-CA certificate and DNS pointing to the LAN server. That preserves local caching while satisfying the stricter Asset TLS stack. APK cleartext/TLS patching remains a fallback, not the first choice.
 
-## Live performance issue
+## Live performance issue — resolved
 
-Remote mode can log in, but Live performance has separately shown incorrect behavior. `standalone/mltd/services/live.py` is byte-for-byte identical to `yuyueryuyu/mltd-relive`, so the current first target is transport compatibility rather than rewriting LiveService.
+The observed remote-mode Live failure is now device-confirmed fixed.
 
-The branch restores two original API properties while keeping Asset concurrency independent:
+The failing request was:
 
 ```text
-API POST
-  -> Connection: close
-  -> close_connection = True
-  -> global compatibility lock / serialized RPC dispatch
-
-Asset GET/HEAD
-  -> separate HTTP :7651 listener
-  -> ThreadingHTTPServer
-  -> cache / Range / hybrid fetch-on-miss
+UnitService.SetUnit
+TypeError: 'ChunkedIteratorResult' object is not subscriptable
 ```
 
-This directly tests whether the stateful Live RPC sequence depends on the original standalone server's serialized request ordering and per-request connection closure.
+The optimized `SetUnit` implementation passed the SQLAlchemy 2.x Result object directly to `dict()`. The fix materializes the two-column rows first:
 
-If Live remains broken after client testing, the next A/B step is to restore the localhost `:7650` API HTTP hop while retaining the current TLS listener and Asset server.
+```python
+card_rows = session.execute(...).all()
+card_to_idol = dict(card_rows)
+```
 
-## Required device tests before merge
+Fix commit:
+
+```text
+351161e8df288fce8ab478953c34701010106ca0
+```
+
+After rebuilding with this fix, the corrected Traditional Chinese client was tested again with `asset_mode = remote` and Live now operates normally. Therefore this observed Live failure was a service-layer SQLAlchemy compatibility bug, not an Asset/TLS failure and not evidence that `LiveService` itself is incompatible.
+
+The branch still contains `Connection: close` and serialized API dispatch compatibility changes. They are no longer considered necessary to explain the observed Live failure and should be A/B-tested independently before final release.
+
+## Remaining device tests before merge
 
 1. `asset_mode = remote`
-   - login succeeds;
-   - Theater loads;
-   - Live start/finish path is tested.
+   - login succeeds: **confirmed**;
+   - Theater loads: **confirmed for the current tested flow**;
+   - Live operates normally after the SetUnit fix: **confirmed**.
 
 2. `asset_mode = hybrid`
    - `AssetService.GetAssetVersion.asset_url` is `http://theaterdays-zh.appspot.com:7651/...`;
@@ -147,15 +153,11 @@ If Live remains broken after client testing, the next A/B step is to restore the
    - first cache miss reaches local port 7651 and then the Rainbow CDN;
    - second request is served from local cache;
    - Range requests work;
-   - Theater contact assets load.
-   - If the client fails before any request reaches port 7651, treat Android cleartext policy as the primary next suspect.
+   - Theater contact assets load;
+   - if the client fails before any request reaches port 7651, treat Android cleartext policy as the primary next suspect.
 
-3. Live compatibility
-   - song selection;
-   - guest selection;
-   - `StartSong`;
-   - normal completion / `FinishSong`;
-   - interrupted song / `BreakSong` if practical;
-   - return to song selection without stale PendingSong or connection error.
+3. API transport cleanup
+   - once Asset transport is stable, A/B remove the global API serialization lock and/or `Connection: close`;
+   - retain only transport compatibility changes proven necessary by device testing.
 
-Do not merge/release the branch solely from unit tests: the decisive Asset HTTP acceptance and Live state-machine tests require the corrected game client.
+The active blocker for v0.1.10 is now the Desktop `hybrid/local` Asset path, not Live.
