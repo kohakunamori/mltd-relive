@@ -32,6 +32,11 @@ class _ServingEntry(NamedTuple):
     metadata: dict
 
 
+class _RemoteFallback(NamedTuple):
+    location: str
+    reason: str
+
+
 def _parse_range(value: str, size: int):
     match = _RANGE_RE.fullmatch(value.strip())
     if not match:
@@ -189,6 +194,17 @@ class AssetHTTPRequestHandler(BaseHTTPRequestHandler):
         with type(self)._serving_index_lock:
             type(self)._serving_index.pop(key, None)
 
+    def _fallback_to_remote(self, language: str, platform: str,
+                            name: str, reason: str):
+        if not self.fetch_on_miss or self.mirror is None:
+            return None
+        location = self.mirror.remote_url(language, platform, name)
+        logger.warning(
+            f'Asset hybrid fallback to client CDN for '
+            f'{language}-{platform}/{name}: {reason}; {location}'
+        )
+        return _RemoteFallback(location, reason)
+
     def _resolve_entry(self, language: str, platform: str, name: str):
         entry = self._lookup_entry(language, platform, name)
         if entry is not None:
@@ -208,25 +224,49 @@ class AssetHTTPRequestHandler(BaseHTTPRequestHandler):
 
         error_status = self._fetch_missing(language, platform, name)
         if error_status is not None:
+            if error_status == 502:
+                fallback = self._fallback_to_remote(
+                    language, platform, name, 'server-side upstream unavailable'
+                )
+                if fallback is not None:
+                    return fallback
             return error_status
         return self._refresh_entry(language, platform, name) or 404
+
+    def _send_remote_fallback(self, fallback: _RemoteFallback):
+        self.send_response(307)
+        self.send_header('Location', fallback.location)
+        self.send_header('Cache-Control', 'no-store')
+        self.send_header('Content-Length', '0')
+        self.end_headers()
 
     def _serve_path(self, request_path: str, *, send_body: bool):
         path = unquote(urlsplit(request_path).path)
         match = _PATH_RE.fullmatch(path)
         if not match:
+            logger.warning(f'Asset route 404: unsupported path {path!r}')
             self.send_error(404)
             return
         language, platform, name = match.groups()
         if language not in SUPPORTED_LANGUAGES or platform not in SUPPORTED_PLATFORMS:
+            logger.warning(
+                f'Asset route 404: unsupported scope {language}-{platform}'
+            )
             self.send_error(404)
             return
         if name in {'.', '..'} or '\\' in name:
+            logger.warning(f'Asset route 404: unsafe object name {name!r}')
             self.send_error(404)
             return
 
         entry = self._resolve_entry(language, platform, name)
+        if isinstance(entry, _RemoteFallback):
+            self._send_remote_fallback(entry)
+            return
         if isinstance(entry, int):
+            logger.warning(
+                f'Asset route error {entry}: {language}-{platform}/{name}'
+            )
             self.send_error(entry)
             return
 
@@ -270,10 +310,26 @@ class AssetHTTPRequestHandler(BaseHTTPRequestHandler):
                 self._invalidate_entry(language, platform, name)
                 error_status = self._fetch_missing(language, platform, name)
                 if error_status is not None:
+                    if error_status == 502:
+                        fallback = self._fallback_to_remote(
+                            language, platform, name,
+                            'cache file disappeared and upstream is unavailable',
+                        )
+                        if fallback is not None:
+                            self._send_remote_fallback(fallback)
+                            return
+                    logger.warning(
+                        f'Asset route error {error_status}: '
+                        f'{language}-{platform}/{name}'
+                    )
                     self.send_error(error_status)
                     return
                 entry = self._refresh_entry(language, platform, name)
                 if entry is None:
+                    logger.warning(
+                        f'Asset route 404 after refill: '
+                        f'{language}-{platform}/{name}'
+                    )
                     self.send_error(404)
                     return
                 metadata = entry.metadata
@@ -294,6 +350,10 @@ class AssetHTTPRequestHandler(BaseHTTPRequestHandler):
                 try:
                     file = entry.path.open('rb')
                 except OSError:
+                    logger.warning(
+                        f'Asset route 404: cached file unavailable after refill '
+                        f'{language}-{platform}/{name}'
+                    )
                     self.send_error(404)
                     return
 
@@ -344,6 +404,7 @@ class AssetHTTPRequestHandler(BaseHTTPRequestHandler):
             return 404
 
         key = (language, platform, name)
+        remote_url = self.mirror.remote_url(language, platform, name)
         with self._download_locks_guard:
             # Keep one lock per object for the lifetime of the bound handler.
             # Removing an unlocked lock is racy because a waiter may already
@@ -358,13 +419,18 @@ class AssetHTTPRequestHandler(BaseHTTPRequestHandler):
             except requests.HTTPError as exc:
                 response = exc.response
                 if response is not None and response.status_code == 404:
+                    logger.warning(f'Asset upstream 404 for {key}: {remote_url}')
                     return 404
+                status = response.status_code if response is not None else 'unknown'
                 logger.warning(
-                    f'Asset upstream HTTP error for {key}: {exc}'
+                    f'Asset upstream HTTP {status} for {key}: '
+                    f'{remote_url}; {exc}'
                 )
                 return 502
             except (requests.RequestException, OSError) as exc:
-                logger.warning(f'Asset upstream error for {key}: {exc}')
+                logger.warning(
+                    f'Asset upstream error for {key}: {remote_url}; {exc}'
+                )
                 return 502
             return None
 
@@ -456,7 +522,8 @@ def start(port: int = asset_port, conn=None, root: str | None = None,
     logger.info(f'Asset mirror root: {Path(root).resolve()}')
     logger.info(
         'Asset cache misses: '
-        + ('fetch from remote' if fetch_on_miss else 'return 404')
+        + ('fetch from remote; client CDN fallback on upstream failure'
+           if fetch_on_miss else 'return 404')
     )
     if config.asset_upstream_proxy:
         logger.info(f'Asset upstream proxy: {config.asset_upstream_proxy}')
