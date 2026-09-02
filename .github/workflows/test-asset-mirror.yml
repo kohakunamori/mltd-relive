@@ -1,11 +1,9 @@
-name: Test local asset and server transport
+name: Test asset cache and server transport
 
 on:
   push:
     branches:
       - main
-      - perf/asset-mirror
-      - perf/local-assets-and-server
       - fix/live-asset-compat
     paths:
       - 'standalone/console.py'
@@ -17,56 +15,22 @@ on:
       - 'standalone/mltd/servers/api_server.py'
       - 'standalone/mltd/servers/asset_cache.py'
       - 'standalone/mltd/servers/asset_prepare.py'
-      - 'standalone/mltd/servers/asset_server.py'
       - 'standalone/mltd/servers/config.py'
       - 'standalone/mltd/servers/dns.py'
       - 'standalone/mltd/servers/handler.py'
       - 'standalone/mltd/servers/proxy.py'
       - 'requirements.txt'
-      - 'tools/prefetch_assets.py'
-      - 'tools/verify_asset_mirror.py'
-      - 'tests/test_api_serial_compat.py'
-      - 'tests/test_asset_mirror.py'
-      - 'tests/test_asset_prefetch_fastpath.py'
-      - 'tests/test_asset_server_hotpath.py'
-      - 'tests/test_asset_host_routing.py'
-      - 'tests/test_local_asset_runtime.py'
-      - 'tests/test_proxy_tls_compat.py'
-      - 'tests/test_strict_local_and_api.py'
+      - 'tools/cache_assets.py'
+      - 'tests/test_*.py'
       - 'tests/api_transport_benchmark.py'
-      - 'tests/asset_server_benchmark.py'
-      - 'tests/remote_asset_compat.py'
       - '.github/workflows/test-asset-mirror.yml'
   pull_request:
     paths:
-      - 'standalone/console.py'
-      - 'standalone/gui.pyw'
-      - 'standalone/main.py'
-      - 'standalone/mltd/models/**'
-      - 'standalone/mltd/services/**'
-      - 'standalone/mltd/locales/**'
-      - 'standalone/mltd/servers/api_server.py'
-      - 'standalone/mltd/servers/asset_cache.py'
-      - 'standalone/mltd/servers/asset_prepare.py'
-      - 'standalone/mltd/servers/asset_server.py'
-      - 'standalone/mltd/servers/config.py'
-      - 'standalone/mltd/servers/dns.py'
-      - 'standalone/mltd/servers/handler.py'
-      - 'standalone/mltd/servers/proxy.py'
-      - 'requirements.txt'
-      - 'tools/prefetch_assets.py'
-      - 'tools/verify_asset_mirror.py'
-      - 'tests/test_api_serial_compat.py'
-      - 'tests/test_asset_mirror.py'
-      - 'tests/test_asset_prefetch_fastpath.py'
-      - 'tests/test_asset_server_hotpath.py'
-      - 'tests/test_asset_host_routing.py'
-      - 'tests/test_local_asset_runtime.py'
-      - 'tests/test_proxy_tls_compat.py'
-      - 'tests/test_strict_local_and_api.py'
+      - 'standalone/**'
+      - 'tools/cache_assets.py'
+      - 'tests/test_*.py'
       - 'tests/api_transport_benchmark.py'
-      - 'tests/asset_server_benchmark.py'
-      - 'tests/remote_asset_compat.py'
+      - 'requirements.txt'
       - '.github/workflows/test-asset-mirror.yml'
 
 jobs:
@@ -77,7 +41,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Install minimal dependencies
+      - name: Install test dependencies
         run: >-
           python -m pip install
           requests==2.31.0
@@ -85,6 +49,7 @@ jobs:
           json-rpc==1.15.0
           dnslib==0.9.23
           netifaces==0.11.0
+          SQLAlchemy==2.0.19
       - name: Compile Python source
         run: |
           python -m compileall -q standalone/mltd/models standalone/mltd/services standalone/mltd/servers
@@ -92,25 +57,17 @@ jobs:
             standalone/console.py \
             standalone/gui.pyw \
             standalone/main.py \
-            tools/prefetch_assets.py \
-            tools/verify_asset_mirror.py \
-            tests/test_api_serial_compat.py \
-            tests/test_asset_mirror.py \
-            tests/test_asset_prefetch_fastpath.py \
-            tests/test_asset_server_hotpath.py \
+            tools/cache_assets.py \
+            tests/test_asset_cache_tool.py \
             tests/test_asset_host_routing.py \
-            tests/test_local_asset_runtime.py \
             tests/test_proxy_tls_compat.py \
             tests/test_strict_local_and_api.py \
-            tests/api_transport_benchmark.py \
-            tests/asset_server_benchmark.py \
-            tests/remote_asset_compat.py
-      - name: Run local asset and transport tests
+            tests/test_unit_sqlalchemy_compat.py \
+            tests/api_transport_benchmark.py
+      - name: Run compatibility and cache tests
         run: python -m unittest discover -s tests -p 'test_*.py' -v
       - name: Benchmark API transport
         run: python tests/api_transport_benchmark.py
-      - name: Benchmark asset serving
-        run: python tests/asset_server_benchmark.py
 
   api-runtime:
     runs-on: ubuntu-22.04
@@ -149,15 +106,3 @@ jobs:
           assert busy_timeout == 5000, busy_timeout
           print('API runtime import OK; SQLite WAL/NORMAL/busy_timeout active')
           PY
-
-  remote-compat:
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-      - name: Install minimal dependencies
-        run: python -m pip install requests==2.31.0 msgpack==1.0.5
-      - name: Compare local mirror with live CDN manifests and assets
-        run: python tests/remote_asset_compat.py
