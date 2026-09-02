@@ -1,7 +1,8 @@
-# `asmFunction` cross-block source flow
+# `asmFunction` interprocedural source flow
 
 - DT_INIT blocks in graph: **1245**
-- dataflow iterations: **6425**
+- blocks reached with abstract state: **1245**
+- dataflow iterations: **9014**
 
 | Field | Write PC | Source register | Possible source expression(s) |
 |---:|---:|---|---|
@@ -24,3 +25,5 @@
 | `+0x80` | `0x8874` | `x27` | - |
 | `+0x88` | `0x84bc` | `x27` | - |
 | `+0x90` | `0x88d8` | `x27` | - |
+| `+0x98` | `0xc2798` | `x19` | - |
+| `+0xa0` | `0xc2798` | `x19` | - |
