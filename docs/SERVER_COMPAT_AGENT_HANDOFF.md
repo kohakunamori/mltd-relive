@@ -403,3 +403,32 @@ A non-fatal SQLAlchemy 2.0 deprecation warning remains in legacy `job.py` for `R
 Server-side/reverse-engineering acceptance is complete. The only required gate before PR/merge/release is the centralized real-device smoke in section 10. Do not merge to `main` and do not create a new standalone release until that device smoke passes.
 
 Post-acceptance commits may remove temporary CI helpers or update this handoff without changing runtime semantics. Always fetch actual branch HEAD and distinguish docs/CI-only movement from runtime changes.
+
+## 14. Real-device vitality multi regression (2026-09-03)
+
+Real-device smoke exposed a protocol mismatch in `UserService.RecoverVitalityByItemMulti`.
+
+Observed device failure:
+
+- `LookupError: item not found`
+- failure path: `recover_vitality_by_item_multi -> _get_owned_item`
+
+Root cause was confirmed against `client-decompiled-zh-fixed-v1` rather than inferred from the exception:
+
+- `RecoverVitalityByItemArgs` (single-item RPC) contains `string item_id`.
+- `RecoverVitalityByItemMultiArgs` contains `ItemAmount[] item_amount_list`.
+- `ItemAmount` contains exactly `int mst_item_id`, `int item_type`, `int amount`.
+- The old standalone multi implementation/tests incorrectly used inventory-row `Item.item_id` for each multi entry. The real client sends master IDs so a normal device request could not resolve the owned row and raised `item not found`.
+
+Fix:
+
+- Single-item recovery continues to resolve the wire `item_id`, unchanged.
+- Multi recovery now resolves inventory by `(user_id, mst_item_id)`.
+- The redundant wire `item_type` is validated against `MstItem.item_type`.
+- Duplicate master IDs, non-positive amounts, wrong item types, missing ownership, and insufficient inventory are rejected before any mutation so the batch remains atomic.
+- Runtime coverage now sends the exact real-client `ItemAmount` wire shape. It also covers item-type mismatch, the formerly-assumed wrong `item_id` DTO shape, persisted deductions, reply `ItemStatus` shape, and rollback.
+
+Verification:
+
+- Targeted workflow `Test user vitality RPC compatibility`, run `33716679545` has passed on fix/test HEAD `24e9ee29638669fecf1b825eb154cef55337c22a`.
+- A fresh full acceptance and Ubuntu GUI build must be run from the post-cleanup final HEAD before asking the user to retry the device smoke.
