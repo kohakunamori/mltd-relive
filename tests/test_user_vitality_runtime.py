@@ -171,10 +171,12 @@ class UserVitalityRuntimeTest(unittest.TestCase):
 
     def test_multi_is_atomic_and_returns_item_statuses(self):
         self._reset(vitality=20, spark10=5, sparkmax=5)
+        # The real client does NOT send inventory-row item_id here. Its
+        # ItemAmount DTO contains mst_item_id, item_type and amount.
         reply = recover_vitality_by_item_multi({
             'item_amount_list': [
-                {'item_id': self.items_by_mst[20], 'amount': 2},
-                {'item_id': self.items_by_mst[23], 'amount': 1},
+                {'mst_item_id': 20, 'item_type': 6, 'amount': 2},
+                {'mst_item_id': 23, 'item_type': 6, 'amount': 1},
             ],
             'request_check_token': 'offline-test',
         }, CONTEXT)
@@ -202,6 +204,10 @@ class UserVitalityRuntimeTest(unittest.TestCase):
         }
         for item in reply['updated_item_list']:
             self.assertEqual(set(item), required_item_keys)
+        self.assertEqual(
+            {item['mst_item_id'] for item in reply['updated_item_list']},
+            {20, 23},
+        )
         stored = self._stored()
         self.assertEqual(stored['items'][20], 3)
         self.assertEqual(stored['items'][23], 4)
@@ -210,10 +216,38 @@ class UserVitalityRuntimeTest(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             recover_vitality_by_item_multi({
                 'item_amount_list': [
-                    {'item_id': self.items_by_mst[20], 'amount': 1},
-                    {'item_id': self.items_by_mst[23], 'amount': 999},
+                    {'mst_item_id': 20, 'item_type': 6, 'amount': 1},
+                    {'mst_item_id': 23, 'item_type': 6, 'amount': 999},
                 ],
                 'request_check_token': 'invalid-test',
+            }, CONTEXT)
+        after = self._stored()
+        self.assertEqual(after['items'], before['items'])
+        self.assertEqual(after['stored_vitality'], before['stored_vitality'])
+
+    def test_multi_rejects_wire_item_type_mismatch_without_mutation(self):
+        self._reset(vitality=20, spark10=5)
+        before = self._stored()
+        with self.assertRaises(RuntimeError):
+            recover_vitality_by_item_multi({
+                'item_amount_list': [
+                    {'mst_item_id': 20, 'item_type': 999, 'amount': 1},
+                ],
+                'request_check_token': 'wrong-item-type',
+            }, CONTEXT)
+        after = self._stored()
+        self.assertEqual(after['items'], before['items'])
+        self.assertEqual(after['stored_vitality'], before['stored_vitality'])
+
+    def test_multi_rejects_inventory_item_id_shape(self):
+        self._reset(vitality=20, spark10=5)
+        before = self._stored()
+        with self.assertRaises(RuntimeError):
+            recover_vitality_by_item_multi({
+                'item_amount_list': [
+                    {'item_id': self.items_by_mst[20], 'amount': 1},
+                ],
+                'request_check_token': 'wrong-dto-shape',
             }, CONTEXT)
         after = self._stored()
         self.assertEqual(after['items'], before['items'])
