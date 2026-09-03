@@ -20,6 +20,9 @@ from mltd.models.engine import engine
 from mltd.models.models import (
     AccountCredential,
     Card,
+    ClearSongCount,
+    FullComboSongCount,
+    HelperCard,
     Idol,
     Item,
     Profile,
@@ -110,6 +113,33 @@ class MultiUserAccountsRuntimeTest(unittest.TestCase):
                                 default_profile.favorite_card_id)
             self.assertTrue(new_profile.favorite_card_id.startswith(str(new_user_id)))
 
+            # Profile-owned child rows use profile.id_ instead of user_id and
+            # must be copied as part of the full-save template as well.
+            helper_cards = list(session.scalars(
+                select(HelperCard)
+                .where(HelperCard.id_ == new_user_id)
+                .order_by(HelperCard.idol_type)
+            ))
+            self.assertEqual(len(helper_cards), 4)
+            self.assertTrue(all(
+                helper.card_id.startswith(str(new_user_id) + '_')
+                for helper in helper_cards
+            ))
+            self.assertEqual(
+                session.scalar(
+                    select(func.count()).select_from(ClearSongCount)
+                    .where(ClearSongCount.id_ == new_user_id)
+                ),
+                6,
+            )
+            self.assertEqual(
+                session.scalar(
+                    select(func.count()).select_from(FullComboSongCount)
+                    .where(FullComboSongCount.id_ == new_user_id)
+                ),
+                6,
+            )
+
             # Mutating one account must not touch the default save.
             new_user.money = 12345
             new_profile.name = 'Changed'
@@ -144,6 +174,7 @@ class MultiUserAccountsRuntimeTest(unittest.TestCase):
         })
         self.assertEqual(reply['user']['user_id'], str(user_id))
         self.assertEqual(reply['user']['name'], 'ProducerB')
+        self.assertEqual(len(reply['user']['profile']['helper_card_list']), 4)
         self.assertIn('token', reply)
 
         with self.assertRaises(LookupError):
