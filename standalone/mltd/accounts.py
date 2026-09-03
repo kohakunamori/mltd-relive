@@ -91,6 +91,17 @@ def _owner_column(table):
     return None
 
 
+def _source_filter(table, source_user_id: UUID):
+    # FavoriteCostume has no user_id. Ownership is encoded in Idol.idol_id,
+    # whose project-wide format is <user_uuid>_<mst_idol_id>.
+    if table.name == 'favorite_costume':
+        return table.c.idol_id.like(f'{source_user_id}_%')
+    owner = _owner_column(table)
+    if owner is None:
+        return None
+    return owner == source_user_id
+
+
 def _remap_value(value, source_user_id: UUID, target_user_id: UUID):
     if value == source_user_id:
         return target_user_id
@@ -144,11 +155,11 @@ def clone_full_save(
     for table in Base.metadata.sorted_tables:
         if table.name in _CLONE_SKIP_TABLES:
             continue
-        owner = _owner_column(table)
-        if owner is None:
+        source_filter = _source_filter(table, source_user_id)
+        if source_filter is None:
             continue
         source_rows = session.execute(
-            select(table).where(owner == source_user_id)
+            select(table).where(source_filter)
         ).mappings().all()
         if not source_rows:
             continue
