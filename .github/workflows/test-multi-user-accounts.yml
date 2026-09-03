@@ -6,11 +6,13 @@ on:
       - main
       - feature/multi-user-accounts
       - feature/gui-user-management
+      - feature/optional-dns-gui
     paths:
       - 'standalone/**'
       - 'tests/test_multi_user_accounts_runtime.py'
       - 'tests/test_account_management_runtime.py'
       - 'tests/test_gui_remote_asset_ui.py'
+      - 'tests/test_gui_dns_control.py'
       - '.github/workflows/test-multi-user-accounts.yml'
   workflow_dispatch:
 
@@ -40,7 +42,7 @@ jobs:
           print(f'baseline FK violations: {len(baseline)}')
           PY
           PYTHONPATH=. python -m unittest discover -v -s ../tests -p 'test_*account*_runtime.py'
-          PYTHONPATH=. python -m unittest discover -v -s ../tests -p 'test_gui_remote_asset_ui.py'
+          PYTHONPATH=. python -m unittest discover -v -s ../tests -p 'test_gui_*.py'
       - name: Assert account operations add no FK violations
         run: |
           cd standalone
