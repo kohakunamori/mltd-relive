@@ -1,0 +1,119 @@
+name: Apply multi-user integration patch
+
+on:
+  push:
+    branches:
+      - feature/multi-user-accounts
+    paths:
+      - '.github/workflows/apply-multi-user-patch.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/multi-user-accounts
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Apply patch
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          # models.py: additive account credential table.
+          p = Path('standalone/mltd/models/models.py')
+          s = p.read_text(encoding='utf-8')
+          if 'class AccountCredential(Base):' not in s:
+              s += '''\n\nclass AccountCredential(Base):\n    """External login credentials mapped to one independent game save."""\n    __tablename__ = 'account_credential'\n\n    username: Mapped[str] = mapped_column(String(8), primary_key=True)\n    user_id: Mapped[UUID] = mapped_column(\n        ForeignKey('user.user_id'), unique=True, nullable=False\n    )\n    password_salt: Mapped[str] = mapped_column(String(64), nullable=False)\n    password_hash: Mapped[str] = mapped_column(String(128), nullable=False)\n    secret_hash: Mapped[str] = mapped_column(String(128), default='')\n    created_date: Mapped[datetime] = mapped_column(\n        default=lambda: datetime.now(timezone.utc)\n    )\n'''
+          p.write_text(s, encoding='utf-8')
+
+          # config.py: 0.1.11 + registration API key.
+          p = Path('standalone/mltd/servers/config.py')
+          s = p.read_text(encoding='utf-8')
+          assert "version = '0.1.10'" in s
+          s = s.replace("version = '0.1.10'", "version = '0.1.11'", 1)
+          if "_registration_api_key = ''" not in s:
+              s = s.replace("_asset_remote_url = ''\n", "_asset_remote_url = ''\n_registration_api_key = ''\n", 1)
+              s = s.replace("'asset_remote_url': _asset_remote_url,\n", "'asset_remote_url': _asset_remote_url,\n                'registration_api_key': _registration_api_key,\n", 1)
+              marker = "    @property\n    def asset_mode(self):\n"
+              assert marker in s
+              prop = "    @property\n    def registration_api_key(self):\n        return self['default'].get('registration_api_key', '').strip()\n\n    @registration_api_key.setter\n    def registration_api_key(self, value):\n        self['default']['registration_api_key'] = str(value or '').strip()\n        self.write_config()\n\n"
+              s = s.replace(marker, prop + marker, 1)
+          p.write_text(s, encoding='utf-8')
+
+          # setup.py: ensure default credential on new DB and migrate old DBs.
+          p = Path('standalone/mltd/models/setup.py')
+          s = p.read_text(encoding='utf-8')
+          init_marker = "        session.commit()\n\n    logger.info('Database initialized.')"
+          assert init_marker in s
+          init_insert = "        session.commit()\n\n    # Bind the preserved full-save user to the documented default login.\n    from mltd.accounts import ensure_default_account\n    with Session(engine) as session:\n        ensure_default_account(session)\n        session.commit()\n\n    logger.info('Database initialized.')"
+          s = s.replace(init_marker, init_insert, 1)
+          upgrade_marker = "    # Additive compatibility state introduced after the historical schema\n"
+          assert upgrade_marker in s
+          migration = "    if version_tuple(db_version) < version_tuple('0.1.11'):\n        logger.info('Upgrading database to v0.1.11...')\n        from mltd.accounts import ensure_default_account\n        with Session(engine) as session:\n            Base.metadata.tables['account_credential'].create(\n                bind=session.get_bind(), checkfirst=True)\n            ensure_default_account(session)\n            session.execute(update(ServerVersion).values(version='0.1.11'))\n            session.commit()\n        logger.info('Database upgraded to v0.1.11.')\n\n"
+          s = s.replace(upgrade_marker, migration + upgrade_marker, 1)
+          p.write_text(s, encoding='utf-8')
+
+          # auth.py: real password transfer and login-secret validation.
+          p = Path('standalone/mltd/services/auth.py')
+          s = p.read_text(encoding='utf-8')
+          import_marker = "from mltd.models.schemas import UserSchema\n"
+          assert import_marker in s
+          if 'from mltd.accounts import authenticate_transfer, verify_login_secret' not in s:
+              s = s.replace(import_marker, "from mltd.accounts import authenticate_transfer, verify_login_secret\n" + import_marker, 1)
+          pattern = re.compile(
+              r"@dispatcher\.add_method\(name='AuthService\.TransferPassword'\)\ndef transfer_password\(params\):.*?\n\n\n@dispatcher\.add_method\(name='AuthService\.Login'\)",
+              re.S,
+          )
+          replacement = '''@dispatcher.add_method(name='AuthService.TransferPassword')\ndef transfer_password(params):\n    """Authenticate an externally registered account through password transfer."""\n    authenticated = authenticate_transfer(\n        params.get('user_id', ''), params.get('password', '')\n    )\n    if authenticated is None:\n        return {'success': False, 'user_id': '', 'secret': ''}\n    user_id, secret = authenticated\n    return {\n        'success': True,\n        'user_id': str(user_id),\n        'secret': secret,\n    }\n\n\n@dispatcher.add_method(name='AuthService.Login')'''
+          s2, count = pattern.subn(replacement, s, count=1)
+          assert count == 1
+          s = s2
+          result_marker = "    result = {\n        # Skip authentication for local server. Return a static token."
+          assert result_marker in s
+          auth_check = "    if not verify_login_secret(params.get('user_id'), params.get('secret')):\n        raise LookupError('invalid user or secret')\n\n"
+          s = s.replace(result_marker, auth_check + result_marker, 1)
+          p.write_text(s, encoding='utf-8')
+
+          # handler.py: external registration endpoint. Loopback is allowed without
+          # a key; remote callers require registration_api_key as Bearer token.
+          p = Path('standalone/mltd/servers/handler.py')
+          s = p.read_text(encoding='utf-8')
+          if 'def _handle_account_registration(' not in s:
+              s = s.replace('import json\n', 'import hmac\nimport json\n', 1)
+              s = s.replace('from mltd.servers.encryption import decrypt_request, encrypt_response\n', 'from mltd.accounts import register_account\nfrom mltd.servers.config import config\nfrom mltd.servers.encryption import decrypt_request, encrypt_response\n', 1)
+              marker = "def application(environ, start_response):\n"
+              assert marker in s
+              helper = '''def _json_response(start_response, status, payload):\n    body = json.dumps(payload, separators=(',', ':')).encode('utf-8')\n    start_response(status, [\n        ('Content-Type', 'application/json; charset=utf-8'),\n        ('Content-Length', str(len(body))),\n    ])\n    return [body]\n\n\ndef _registration_authorized(environ):\n    remote = (environ.get('REMOTE_ADDR') or '').strip()\n    if remote in {'127.0.0.1', '::1'}:\n        return True\n    key = config.registration_api_key\n    if not key:\n        return False\n    supplied = environ.get('HTTP_AUTHORIZATION', '')\n    expected = 'Bearer ' + key\n    return hmac.compare_digest(supplied, expected)\n\n\ndef _handle_account_registration(environ, start_response):\n    if environ.get('REQUEST_METHOD', '').upper() != 'POST':\n        return _json_response(start_response, '405 Method Not Allowed', {\n            'error': 'method_not_allowed'\n        })\n    if not _registration_authorized(environ):\n        return _json_response(start_response, '403 Forbidden', {\n            'error': 'registration_not_authorized'\n        })\n    try:\n        length = int(environ.get('CONTENT_LENGTH') or '0')\n    except ValueError:\n        length = 0\n    if length <= 0 or length > 8192:\n        return _json_response(start_response, '400 Bad Request', {\n            'error': 'invalid_request_body'\n        })\n    try:\n        payload = json.loads(environ['wsgi.input'].read(length).decode('utf-8'))\n        result = register_account(\n            payload.get('username', ''),\n            payload.get('password', ''),\n            display_name=payload.get('display_name'),\n        )\n    except ValueError as exc:\n        status = '409 Conflict' if 'already exists' in str(exc) else '400 Bad Request'\n        return _json_response(start_response, status, {'error': str(exc)})\n    except (KeyError, TypeError, UnicodeDecodeError, json.JSONDecodeError):\n        return _json_response(start_response, '400 Bad Request', {\n            'error': 'invalid_request_body'\n        })\n    return _json_response(start_response, '201 Created', result)\n\n\n'''
+              s = s.replace(marker, helper + marker, 1)
+              app_marker = "def application(environ, start_response):\n    host = environ.get('HTTP_HOST', '')\n"
+              assert app_marker in s
+              s = s.replace(app_marker, "def application(environ, start_response):\n    if environ.get('PATH_INFO') == '/relive/accounts/register':\n        return _handle_account_registration(environ, start_response)\n\n    host = environ.get('HTTP_HOST', '')\n", 1)
+          p.write_text(s, encoding='utf-8')
+          PY
+
+      - name: Compile changed Python modules
+        run: |
+          python -m compileall -q standalone/mltd standalone/manage_users.py
+
+      - name: Commit patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add standalone/mltd/models/models.py standalone/mltd/models/setup.py standalone/mltd/servers/config.py standalone/mltd/services/auth.py standalone/mltd/servers/handler.py
+          if git diff --cached --quiet; then
+            echo 'No patch changes to commit.'
+            exit 0
+          fi
+          git commit -m 'feat: integrate multi-user authentication and registration'
+          git push origin HEAD:feature/multi-user-accounts
