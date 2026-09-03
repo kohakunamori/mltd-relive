@@ -81,6 +81,7 @@ def _get_user(session, context):
 
 
 def _get_owned_item(session, user, item_id):
+    """Resolve the single-item RPC's inventory-row ``item_id``."""
     item = session.scalar(
         select(Item)
         .where(Item.user_id == user.user_id)
@@ -89,6 +90,30 @@ def _get_owned_item(session, user, item_id):
     if item is None:
         raise LookupError('item not found')
     if item.mst_item.item_type != 6:
+        raise RuntimeError('item is not a vitality recovery item')
+    return item
+
+
+def _get_owned_item_by_mst_id(session, user, mst_item_id, item_type=None):
+    """Resolve an ItemAmount entry used by RecoverVitalityByItemMulti.
+
+    The preserved client contract is ItemAmount{mst_item_id, item_type,
+    amount}.  It does *not* send the user's inventory-row ``item_id`` here.
+    Resolve the row by (user_id, mst_item_id), then verify that the redundant
+    wire ``item_type`` agrees with master data before any mutation occurs.
+    """
+    item = session.scalar(
+        select(Item)
+        .where(Item.user_id == user.user_id)
+        .where(Item.mst_item_id == mst_item_id)
+    )
+    if item is None:
+        raise LookupError('item not found')
+
+    actual_type = item.mst_item.item_type
+    if item_type is not None and int(item_type) != actual_type:
+        raise RuntimeError('item type does not match master item')
+    if actual_type != 6:
         raise RuntimeError('item is not a vitality recovery item')
     return item
 
@@ -152,17 +177,28 @@ def recover_vitality_by_item_multi(params, context):
         total_points = 0
         seen = set()
 
-        # Validate every entry before mutating any amount so the transaction is
-        # all-or-nothing even when the client sends a bad item near the end.
+        # The client sends ItemAmount entries, whose identifier is mst_item_id
+        # rather than Item.item_id. Validate every entry before mutating any
+        # amount so a malformed/insufficient entry keeps the call atomic.
         for entry in requested:
-            item_id = entry.get('item_id')
-            if item_id in seen:
-                raise RuntimeError('duplicate item_id in item_amount_list')
-            seen.add(item_id)
+            if 'mst_item_id' not in entry:
+                raise RuntimeError('mst_item_id is required')
+            mst_item_id = int(entry['mst_item_id'])
+            if mst_item_id <= 0:
+                raise RuntimeError('mst_item_id must be positive')
+            if mst_item_id in seen:
+                raise RuntimeError('duplicate mst_item_id in item_amount_list')
+            seen.add(mst_item_id)
+
             amount = int(entry.get('amount', 0))
-            item = _get_owned_item(session, user, item_id)
             if amount <= 0:
                 raise RuntimeError('item amount must be positive')
+            item = _get_owned_item_by_mst_id(
+                session,
+                user,
+                mst_item_id,
+                item_type=entry.get('item_type'),
+            )
             if item.amount < amount:
                 raise RuntimeError('insufficient item amount')
             entries.append((item, amount))
