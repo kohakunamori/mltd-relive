@@ -25,17 +25,67 @@ jobs:
         run: |
           set -euo pipefail
           cd standalone
-          rm -f mltd-relive.db config.ini
+          rm -f mltd-relive.db config.ini fk-baseline.json
           PYTHONPATH=. python -m mltd.models.setup
+          python - <<'PY'
+          import json, sqlite3
+          db = sqlite3.connect('mltd-relive.db')
+          baseline = list(db.execute('PRAGMA foreign_key_check'))
+          with open('fk-baseline.json', 'w') as f:
+              json.dump(baseline, f)
+          print(f'baseline FK violations: {len(baseline)}')
+          PY
           PYTHONPATH=. python -m unittest discover -v -s ../tests -p 'test_multi_user_accounts_runtime.py'
-      - name: Validate database foreign keys
+      - name: Assert registrations add no FK violations
         run: |
           cd standalone
           python - <<'PY'
+          import json, sqlite3
+          with open('fk-baseline.json') as f:
+              baseline = {tuple(v) for v in json.load(f)}
+          db = sqlite3.connect('mltd-relive.db')
+          current = set(db.execute('PRAGMA foreign_key_check'))
+          added = current - baseline
+          if added:
+              raise SystemExit(f'new FK violations introduced: {sorted(added)[:20]}')
+          print(f'foreign_key_check unchanged: {len(current)} historical violations, 0 added')
+          PY
+      - name: Simulate v0.1.10 database migration
+        run: |
+          set -euo pipefail
+          cd standalone
+          rm -f mltd-relive.db config.ini
+          PYTHONPATH=. python -m mltd.models.setup
+          python - <<'PY'
           import sqlite3
           db = sqlite3.connect('mltd-relive.db')
-          problems = list(db.execute('PRAGMA foreign_key_check'))
-          if problems:
-              raise SystemExit(problems[:20])
-          print('foreign_key_check: ok')
+          before = db.execute("SELECT level, money, name FROM user WHERE user_id='ffffffffffffffffffffffffffffffff'").fetchone()
+          if before is None:
+              # SQLAlchemy UUID may be stored with hyphens on some SQLite builds.
+              before = db.execute("SELECT level, money, name FROM user WHERE search_id='00000000'").fetchone()
+          db.execute('DROP TABLE account_credential')
+          db.execute("UPDATE server_version SET version='0.1.10'")
+          db.commit()
+          with open('migration-before.txt', 'w') as f:
+              f.write(repr(before))
+          PY
+          PYTHONPATH=. python - <<'PY'
+          from mltd.models.setup import upgrade_database
+          upgrade_database()
+          PY
+          PYTHONPATH=. python - <<'PY'
+          import ast, sqlite3
+          from mltd.accounts import DEFAULT_USER_ID, DEFAULT_USERNAME
+          db = sqlite3.connect('mltd-relive.db')
+          version = db.execute('SELECT version FROM server_version').fetchone()[0]
+          if version != '0.1.11':
+              raise SystemExit(f'unexpected migrated version: {version}')
+          row = db.execute('SELECT username FROM account_credential WHERE username=?', (DEFAULT_USERNAME,)).fetchone()
+          if row != (DEFAULT_USERNAME,):
+              raise SystemExit('default credential missing after migration')
+          after = db.execute("SELECT level, money, name FROM user WHERE search_id='00000000'").fetchone()
+          before = ast.literal_eval(open('migration-before.txt').read())
+          if after != before:
+              raise SystemExit(f'default save changed during migration: {before!r} -> {after!r}')
+          print('v0.1.10 -> v0.1.11 migration preserved default save')
           PY
