@@ -9,42 +9,24 @@ from sqlalchemy.orm import Session
 from mltd.models.engine import engine
 from mltd.models.models import (Item, Mission, MstMission, MstSong, Offer,
                                 Song, User)
+from mltd.accounts import authenticate_transfer, verify_login_secret
 from mltd.models.schemas import UserSchema
 from mltd.servers.config import config
 
 
 @dispatcher.add_method(name='AuthService.TransferPassword')
 def transfer_password(params):
-    """Service for transferring an existing account using a password.
-
-    Invoked after doing a clean installation and entering user ID and
-    password.
-    Args:
-        params: A dict containing the following keys.
-            user_id: Entered user ID. Corresponds to search_id of the
-                     existing user (8 characters).
-            password: Entered password. This must match the password
-                      previously entered for the transfer to be
-                      successful.
-            platform: Platform of the mobile device (google/apple).
-            platform_user_id: A 16-character hex value. Seems to be
-                              device-specific. This value is the same as
-                              the header value 'X-Platform-User-Id' for
-                              all requests sent from the device.
-            device_name: Name of the mobile device the game is running
-                         on.
-    Returns:
-        A dict containing the following keys.
-        success: A boolean flag indicating whether the transfer was
-                 successful.
-        user_id: The user ID in UUID format (if successful).
-        secret: The user secret (if successful).
-    """
-    # Return a static user_id for now.
+    """Authenticate an externally registered account through password transfer."""
+    authenticated = authenticate_transfer(
+        params.get('user_id', ''), params.get('password', '')
+    )
+    if authenticated is None:
+        return {'success': False, 'user_id': '', 'secret': ''}
+    user_id, secret = authenticated
     return {
         'success': True,
-        'user_id': 'ffffffff-ffff-ffff-ffff-ffffffffffff',
-        'secret': 'abcdefghijklmnopqrstuvwxyz012345'
+        'user_id': str(user_id),
+        'secret': secret,
     }
 
 
@@ -201,6 +183,9 @@ def login(params):
             training_point: 0.
             total_training_point: 0.
     """
+    if not verify_login_secret(params.get('user_id'), params.get('secret')):
+        raise LookupError('invalid user or secret')
+
     result = {
         # Skip authentication for local server. Return a static token.
         'token': (

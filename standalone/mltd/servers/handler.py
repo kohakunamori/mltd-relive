@@ -1,3 +1,4 @@
+import hmac
 import json
 import logging
 import time
@@ -7,6 +8,8 @@ from uuid import UUID
 
 from jsonrpc import JSONRPCResponseManager, dispatcher
 
+from mltd.accounts import register_account
+from mltd.servers.config import config
 from mltd.servers.encryption import decrypt_request, encrypt_response
 from mltd.servers.logging import logger
 from mltd.servers.utilities import format_datetime
@@ -69,7 +72,65 @@ def _is_allowed_api_host(host):
     return _normalize_host(host) in _ALLOWED_API_HOSTS
 
 
+def _json_response(start_response, status, payload):
+    body = json.dumps(payload, separators=(',', ':')).encode('utf-8')
+    start_response(status, [
+        ('Content-Type', 'application/json; charset=utf-8'),
+        ('Content-Length', str(len(body))),
+    ])
+    return [body]
+
+
+def _registration_authorized(environ):
+    remote = (environ.get('REMOTE_ADDR') or '').strip()
+    if remote in {'127.0.0.1', '::1'}:
+        return True
+    key = config.registration_api_key
+    if not key:
+        return False
+    supplied = environ.get('HTTP_AUTHORIZATION', '')
+    expected = 'Bearer ' + key
+    return hmac.compare_digest(supplied, expected)
+
+
+def _handle_account_registration(environ, start_response):
+    if environ.get('REQUEST_METHOD', '').upper() != 'POST':
+        return _json_response(start_response, '405 Method Not Allowed', {
+            'error': 'method_not_allowed'
+        })
+    if not _registration_authorized(environ):
+        return _json_response(start_response, '403 Forbidden', {
+            'error': 'registration_not_authorized'
+        })
+    try:
+        length = int(environ.get('CONTENT_LENGTH') or '0')
+    except ValueError:
+        length = 0
+    if length <= 0 or length > 8192:
+        return _json_response(start_response, '400 Bad Request', {
+            'error': 'invalid_request_body'
+        })
+    try:
+        payload = json.loads(environ['wsgi.input'].read(length).decode('utf-8'))
+        result = register_account(
+            payload.get('username', ''),
+            payload.get('password', ''),
+            display_name=payload.get('display_name'),
+        )
+    except ValueError as exc:
+        status = '409 Conflict' if 'already exists' in str(exc) else '400 Bad Request'
+        return _json_response(start_response, status, {'error': str(exc)})
+    except (KeyError, TypeError, UnicodeDecodeError, json.JSONDecodeError):
+        return _json_response(start_response, '400 Bad Request', {
+            'error': 'invalid_request_body'
+        })
+    return _json_response(start_response, '201 Created', result)
+
+
 def application(environ, start_response):
+    if environ.get('PATH_INFO') == '/relive/accounts/register':
+        return _handle_account_registration(environ, start_response)
+
     host = environ.get('HTTP_HOST', '')
 
     if _is_allowed_api_host(host):

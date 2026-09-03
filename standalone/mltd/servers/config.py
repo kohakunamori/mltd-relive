@@ -3,7 +3,7 @@ from configparser import ConfigParser
 from datetime import timedelta, timezone
 from urllib.parse import urlsplit
 
-version = '0.1.10'
+version = '0.1.11'
 api_port = 7650
 # 'zh' for Traditional Chinese, 'ko' for Korean
 _language = 'zh'
@@ -11,6 +11,7 @@ _log_level = logging.INFO
 _is_local = False
 _asset_mode = 'remote'
 _asset_remote_url = ''
+_registration_api_key = ''
 
 ASSET_MODES = ('remote',)
 _LEGACY_ASSET_KEYS = (
@@ -53,6 +54,7 @@ class CustomConfigParser(ConfigParser):
                 'is_local': _is_local,
                 'asset_mode': _asset_mode,
                 'asset_remote_url': _asset_remote_url,
+                'registration_api_key': _registration_api_key,
             }
         })
         if not self.read('config.ini'):
@@ -118,6 +120,15 @@ class CustomConfigParser(ConfigParser):
     @is_local.setter
     def is_local(self, value):
         self['default']['is_local'] = str(value)
+        self.write_config()
+
+    @property
+    def registration_api_key(self):
+        return self['default'].get('registration_api_key', '').strip()
+
+    @registration_api_key.setter
+    def registration_api_key(self, value):
+        self['default']['registration_api_key'] = str(value or '').strip()
         self.write_config()
 
     @property

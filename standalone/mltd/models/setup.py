@@ -856,6 +856,12 @@ def setup(conn=None):
 
         session.commit()
 
+    # Bind the preserved full-save user to the documented default login.
+    from mltd.accounts import ensure_default_account
+    with Session(engine) as session:
+        ensure_default_account(session)
+        session.commit()
+
     logger.info('Database initialized.')
     if conn:
         conn.send(True)
@@ -1124,6 +1130,17 @@ def upgrade_database():
             _migrate_theater_contact_and_user_contact_schedules(session)
             session.commit()
         logger.info('v0.1.7 migration data validated.')
+
+    if version_tuple(db_version) < version_tuple('0.1.11'):
+        logger.info('Upgrading database to v0.1.11...')
+        from mltd.accounts import ensure_default_account
+        with Session(engine) as session:
+            Base.metadata.tables['account_credential'].create(
+                bind=session.get_bind(), checkfirst=True)
+            ensure_default_account(session)
+            session.execute(update(ServerVersion).values(version='0.1.11'))
+            session.commit()
+        logger.info('Database upgraded to v0.1.11.')
 
     # Additive compatibility state introduced after the historical schema
     # version stopped advancing. This is safe and idempotent for old saves.

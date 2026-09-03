@@ -3010,3 +3010,19 @@ class MstTheaterContact(Base):
 if __name__ == '__main__':
     Base.metadata.create_all(engine)
 
+
+
+class AccountCredential(Base):
+    """External login credentials mapped to one independent game save."""
+    __tablename__ = 'account_credential'
+
+    username: Mapped[str] = mapped_column(String(8), primary_key=True)
+    user_id: Mapped[UUID] = mapped_column(
+        ForeignKey('user.user_id'), unique=True, nullable=False
+    )
+    password_salt: Mapped[str] = mapped_column(String(64), nullable=False)
+    password_hash: Mapped[str] = mapped_column(String(128), nullable=False)
+    secret_hash: Mapped[str] = mapped_column(String(128), default='')
+    created_date: Mapped[datetime] = mapped_column(
+        default=lambda: datetime.now(timezone.utc)
+    )
