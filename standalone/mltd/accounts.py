@@ -5,7 +5,7 @@ import secrets
 from base64 import b64encode
 from uuid import UUID, uuid4
 
-from sqlalchemy import select
+from sqlalchemy import Boolean, Column, String, Table, select
 from sqlalchemy.orm import Session
 
 from mltd.models.engine import engine
@@ -21,10 +21,21 @@ _USER_HASH_SUFFIX = bytes.fromhex(
     'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
 )
 
+# Account enable/disable state deliberately lives outside AccountCredential so
+# existing v0.1.11 databases do not need a destructive/rebuilding migration.
+# Missing rows mean enabled, preserving old installations automatically.
+_ACCOUNT_CONTROL = Table(
+    'account_control',
+    Base.metadata,
+    Column('username', String(8), primary_key=True),
+    Column('is_enabled', Boolean, nullable=False, default=True),
+)
+
 # These rows describe a live/transient session or social relationship rather
 # than the reusable full-save baseline. A newly registered account starts with
 # a clean state for them even when the default account currently has rows.
 _CLONE_SKIP_TABLES = {
+    'account_control',
     'account_credential',
     'friend',
     'pending_job',
@@ -76,6 +87,44 @@ def _secret_digest(secret: str) -> str:
 
 def _user_id_hash(user_id: UUID):
     return b64encode(str(user_id).encode('ascii') + _USER_HASH_SUFFIX)
+
+
+def _ensure_account_control_table(session: Session) -> None:
+    _ACCOUNT_CONTROL.create(bind=session.get_bind(), checkfirst=True)
+
+
+def _account_enabled(session: Session, username: str) -> bool:
+    _ensure_account_control_table(session)
+    value = session.scalar(
+        select(_ACCOUNT_CONTROL.c.is_enabled)
+        .where(_ACCOUNT_CONTROL.c.username == username)
+    )
+    return True if value is None else bool(value)
+
+
+def _store_account_enabled(
+    session: Session,
+    username: str,
+    enabled: bool,
+) -> None:
+    _ensure_account_control_table(session)
+    existing = session.scalar(
+        select(_ACCOUNT_CONTROL.c.username)
+        .where(_ACCOUNT_CONTROL.c.username == username)
+    )
+    if existing is None:
+        session.execute(
+            _ACCOUNT_CONTROL.insert().values(
+                username=username,
+                is_enabled=bool(enabled),
+            )
+        )
+    else:
+        session.execute(
+            _ACCOUNT_CONTROL.update()
+            .where(_ACCOUNT_CONTROL.c.username == username)
+            .values(is_enabled=bool(enabled))
+        )
 
 
 def _owner_column(table):
@@ -182,6 +231,7 @@ def clone_full_save(
 
 
 def ensure_default_account(session: Session) -> AccountCredential:
+    _ensure_account_control_table(session)
     account = session.get(AccountCredential, DEFAULT_USERNAME)
     if account is not None:
         return account
@@ -196,6 +246,10 @@ def ensure_default_account(session: Session) -> AccountCredential:
         secret_hash=_secret_digest(LEGACY_DEFAULT_SECRET),
     )
     session.add(account)
+    # A database reset may leave an old control row when an older console
+    # process did not have account_control in its metadata. Re-enable the newly
+    # created default account explicitly so stale state cannot survive reset.
+    _store_account_enabled(session, DEFAULT_USERNAME, True)
     return account
 
 
@@ -236,6 +290,9 @@ def register_account(
             secret_hash='',
         )
         session.add(account)
+        # New accounts are always enabled, including a username reused after
+        # an earlier database reset left stale account_control metadata.
+        _store_account_enabled(session, username, True)
         session.flush()
         result = {
             'username': username,
@@ -246,6 +303,142 @@ def register_account(
         if owns_session:
             session.commit()
         return result
+    except Exception:
+        if owns_session:
+            session.rollback()
+        raise
+    finally:
+        if owns_session:
+            session.close()
+
+
+def list_accounts(*, session: Session | None = None) -> list[dict]:
+    """Return GUI-safe account summaries without exposing password material."""
+    owns_session = session is None
+    if owns_session:
+        session = Session(engine)
+    try:
+        ensure_default_account(session)
+        accounts = session.scalars(
+            select(AccountCredential).order_by(AccountCredential.username)
+        ).all()
+        result = []
+        for account in accounts:
+            user = session.get(User, account.user_id)
+            result.append({
+                'username': account.username,
+                'user_id': str(account.user_id),
+                'search_id': '' if user is None else user.search_id,
+                'display_name': '' if user is None else user.name,
+                'is_enabled': _account_enabled(session, account.username),
+                'is_default': account.user_id == DEFAULT_USER_ID,
+            })
+        if owns_session:
+            session.commit()
+        return result
+    except Exception:
+        if owns_session:
+            session.rollback()
+        raise
+    finally:
+        if owns_session:
+            session.close()
+
+
+def set_account_enabled(
+    username: str,
+    enabled: bool,
+    *,
+    session: Session | None = None,
+) -> dict:
+    username = normalize_username(username)
+    owns_session = session is None
+    if owns_session:
+        session = Session(engine)
+    try:
+        account = session.get(AccountCredential, username)
+        if account is None:
+            raise ValueError('account does not exist')
+        _store_account_enabled(session, username, bool(enabled))
+        if owns_session:
+            session.commit()
+        else:
+            session.flush()
+        return {
+            'username': username,
+            'user_id': str(account.user_id),
+            'is_enabled': bool(enabled),
+            'is_default': account.user_id == DEFAULT_USER_ID,
+        }
+    except Exception:
+        if owns_session:
+            session.rollback()
+        raise
+    finally:
+        if owns_session:
+            session.close()
+
+
+def delete_account(
+    username: str,
+    *,
+    session: Session | None = None,
+) -> dict:
+    """Permanently delete one non-default account and its independent save."""
+    username = normalize_username(username)
+    if username == DEFAULT_USERNAME:
+        raise ValueError('default full-save account cannot be deleted')
+
+    owns_session = session is None
+    if owns_session:
+        session = Session(engine)
+    try:
+        account = session.get(AccountCredential, username)
+        if account is None:
+            raise ValueError('account does not exist')
+        if account.user_id == DEFAULT_USER_ID:
+            raise ValueError('default full-save account cannot be deleted')
+        user_id = account.user_id
+
+        # Remove incoming friend references first. The generic ownership filter
+        # below covers rows where this account is the owning user_id.
+        friend_table = Base.metadata.tables.get('friend')
+        if friend_table is not None and 'friend_id' in friend_table.c:
+            session.execute(
+                friend_table.delete().where(friend_table.c.friend_id == user_id)
+            )
+
+        # The credential itself references user.user_id, so delete it before
+        # walking user-owned tables in reverse dependency order.
+        session.execute(
+            AccountCredential.__table__.delete()
+            .where(AccountCredential.username == username)
+        )
+        _ensure_account_control_table(session)
+        session.execute(
+            _ACCOUNT_CONTROL.delete()
+            .where(_ACCOUNT_CONTROL.c.username == username)
+        )
+
+        for table in reversed(Base.metadata.sorted_tables):
+            if table.name in {'account_control', 'account_credential'}:
+                continue
+            owner_filter = _source_filter(table, user_id)
+            if owner_filter is None:
+                continue
+            session.execute(table.delete().where(owner_filter))
+
+        if session.get(User, user_id) is not None:
+            raise RuntimeError('could not fully delete user save')
+        if owns_session:
+            session.commit()
+        else:
+            session.flush()
+        return {
+            'username': username,
+            'user_id': str(user_id),
+            'deleted': True,
+        }
     except Exception:
         if owns_session:
             session.rollback()
@@ -272,7 +465,9 @@ def authenticate_transfer(
         session = Session(engine)
     try:
         account = session.get(AccountCredential, username)
-        if account is None or not _verify_password(account, password):
+        if (account is None
+                or not _account_enabled(session, username)
+                or not _verify_password(account, password)):
             return None
         if account.user_id == DEFAULT_USER_ID:
             secret = LEGACY_DEFAULT_SECRET
@@ -302,13 +497,6 @@ def verify_login_secret(
     if not isinstance(secret, str):
         return False
 
-    # Preserve compatibility for already configured installations that used
-    # the historical static full-save secret before multi-user support.
-    if user_id == DEFAULT_USER_ID and hmac.compare_digest(
-        secret, LEGACY_DEFAULT_SECRET
-    ):
-        return True
-
     owns_session = session is None
     if owns_session:
         session = Session(engine)
@@ -316,6 +504,19 @@ def verify_login_secret(
         account = session.scalar(
             select(AccountCredential).where(AccountCredential.user_id == user_id)
         )
+        if account is not None and not _account_enabled(session, account.username):
+            return False
+
+        # Preserve compatibility for already configured installations that
+        # used the historical static full-save secret before multi-user
+        # support, while still honoring GUI disable state.
+        if user_id == DEFAULT_USER_ID and hmac.compare_digest(
+            secret, LEGACY_DEFAULT_SECRET
+        ):
+            if account is None:
+                return _account_enabled(session, DEFAULT_USERNAME)
+            return True
+
         if account is None or not account.secret_hash:
             return False
         return hmac.compare_digest(account.secret_hash, _secret_digest(secret))
