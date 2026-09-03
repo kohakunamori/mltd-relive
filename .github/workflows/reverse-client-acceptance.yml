@@ -1,0 +1,216 @@
+name: Reverse-engineered client acceptance
+
+on:
+  push:
+    branches:
+      - feature/multi-user-accounts
+    paths:
+      - '.github/workflows/reverse-client-acceptance.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rebuild-client:
+    name: Rebuild, sign and validate zh-fixed Android client
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout server branch
+        uses: actions/checkout@v4
+        with:
+          path: server
+          fetch-depth: 1
+
+      - name: Checkout authoritative decompiled client tree
+        uses: actions/checkout@v4
+        with:
+          ref: client-decompiled-zh-fixed-v1
+          path: reverse-client
+          fetch-depth: 1
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            apktool
+            report/apktool-version.txt
+            report/apktool-rebuild.exit-code
+            il2cpp-dump/dump.cs
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Prepare Android build tools and Apktool
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(tr -d '\r\n' < reverse-client/report/apktool-version.txt)" = '2.12.1'
+          test "$(tr -d '\r\n' < reverse-client/report/apktool-rebuild.exit-code)" = '0'
+          sdkmanager 'build-tools;35.0.0' >/dev/null
+          curl -L --fail --retry 3 \
+            -o /tmp/apktool.jar \
+            https://github.com/iBotPeaches/Apktool/releases/download/v2.12.1/apktool_2.12.1.jar
+          test "$(java -jar /tmp/apktool.jar --version)" = '2.12.1'
+          echo "$ANDROID_HOME/build-tools/35.0.0" >> "$GITHUB_PATH"
+
+      - name: Rebuild and sign client
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p out
+          java -jar /tmp/apktool.jar b reverse-client/apktool -o out/unsigned.apk
+          zipalign -p -f 4 out/unsigned.apk out/aligned.apk
+          keytool -genkeypair -noprompt \
+            -keystore out/acceptance.jks \
+            -storepass acceptance \
+            -keypass acceptance \
+            -alias acceptance \
+            -keyalg RSA -keysize 2048 -validity 3650 \
+            -dname 'CN=MLTD Relive Acceptance,O=Local Test,C=XX'
+          apksigner sign \
+            --ks out/acceptance.jks \
+            --ks-pass pass:acceptance \
+            --key-pass pass:acceptance \
+            --out out/mltd-relive-reverse-client.apk \
+            out/aligned.apk
+          apksigner verify --verbose --print-certs out/mltd-relive-reverse-client.apk
+          rm -f out/acceptance.jks out/unsigned.apk out/aligned.apk
+
+      - name: Validate package, preserved native payloads and client contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          APK=out/mltd-relive-reverse-client.apk
+          REPORT=out/reverse-client-acceptance.txt
+          PACKAGE="$(aapt dump badging "$APK" | sed -n "s/^package: name='\([^']*\)'.*/\1/p" | head -1)"
+          VERSION="$(aapt dump badging "$APK" | sed -n "s/^package: .* versionName='\([^']*\)'.*/\1/p" | head -1)"
+          test "$PACKAGE" = 'com.bandainamcoent.imas_millionlive_theaterdays_ch.local'
+          test "$VERSION" = '2.1.000'
+
+          LIB_PATH='lib/arm64-v8a/libil2cpp.so'
+          META_PATH="$(unzip -Z1 "$APK" | grep -E '(^|/)global-metadata\.dat$' | head -1)"
+          test -n "$META_PATH"
+          unzip -p "$APK" "$LIB_PATH" > /tmp/libil2cpp.so
+          unzip -p "$APK" "$META_PATH" > /tmp/global-metadata.dat
+          LIB_SHA="$(sha256sum /tmp/libil2cpp.so | awk '{print $1}')"
+          META_SHA="$(sha256sum /tmp/global-metadata.dat | awk '{print $1}')"
+          test "$LIB_SHA" = '52d0cdac0179ae4a5d61a00b9bfd500969730d1a3f157cf667d82c525836936b'
+          test "$META_SHA" = '0b0913387be65fb046a7536e016cd9f8514b0ac23bd79b8b20540c73cb1d8cf0'
+
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          dump = Path('reverse-client/il2cpp-dump/dump.cs').read_text(errors='replace')
+          server_root = Path('server/standalone/mltd/services')
+          server_text = '\n'.join(
+              p.read_text(errors='replace') for p in server_root.rglob('*.py')
+          )
+
+          client_needles = [
+              'AuthService.TransferPassword',
+              'AuthService.Login',
+              'UserService.RecoverVitalityByItemMulti',
+              'BirthdayService.ExecuteBirthdayPresent',
+              'IdolService.SetFavoriteCostume',
+              'IdolService.GetSalesCostumeList',
+              'PresentService.GetPresentHistory',
+              'SetGameServerUrl',
+              'public class TransferPasswordArgs',
+              'public class LoginArgs',
+              'public class RecoverVitalityByItemMultiArgs',
+              'public class ItemAmount',
+              'public int mst_item_id;',
+              'public int item_type;',
+              'public int amount;',
+          ]
+          missing_client = [x for x in client_needles if x not in dump]
+          if missing_client:
+              raise SystemExit(f'missing client contract markers: {missing_client}')
+
+          server_needles = [
+              "name='AuthService.TransferPassword'",
+              "name='AuthService.Login'",
+              "name='UserService.RecoverVitalityByItemMulti'",
+              "name='BirthdayService.ExecuteBirthdayPresent'",
+              "name='IdolService.SetFavoriteCostume'",
+              "name='IdolService.GetSalesCostumeList'",
+              "name='PresentService.GetPresentHistory'",
+          ]
+          missing_server = [x for x in server_needles if x not in server_text]
+          if missing_server:
+              raise SystemExit(f'missing server handlers for active acceptance surface: {missing_server}')
+
+          # UseItem is intentionally not required: reverse analysis found no active UI/business callsite.
+          if "name='ItemService.UseItem'" in server_text:
+              raise SystemExit('ItemService.UseItem unexpectedly registered; preserve audited intentional gap')
+
+          out = Path('out/client-contract-markers.txt')
+          with out.open('w') as f:
+              for marker in client_needles:
+                  f.write(f'client\t{marker}\tpresent\n')
+              for marker in server_needles:
+                  f.write(f'server\t{marker}\tpresent\n')
+              f.write('server\tItemService.UseItem\tintentionally-not-registered\n')
+          PY
+
+          APK_SHA="$(sha256sum "$APK" | awk '{print $1}')"
+          {
+            echo "server_head=${GITHUB_SHA}"
+            echo 'client_source_branch=client-decompiled-zh-fixed-v1'
+            echo 'apktool_version=2.12.1'
+            echo "package=$PACKAGE"
+            echo "version_name=$VERSION"
+            echo "rebuilt_signed_apk_sha256=$APK_SHA"
+            echo "libil2cpp_sha256=$LIB_SHA"
+            echo "global_metadata_sha256=$META_SHA"
+            echo "global_metadata_path=$META_PATH"
+            echo 'signature=ephemeral-CI-test-key'
+            echo 'status=PASS'
+          } | tee "$REPORT"
+          sha256sum "$APK" > out/mltd-relive-reverse-client.apk.sha256
+
+      - name: Upload installable reverse-client acceptance build
+        uses: actions/upload-artifact@v4
+        with:
+          name: mltd-relive-reverse-client-${{ github.sha }}
+          path: |
+            out/mltd-relive-reverse-client.apk
+            out/mltd-relive-reverse-client.apk.sha256
+            out/reverse-client-acceptance.txt
+            out/client-contract-markers.txt
+          if-no-files-found: error
+          retention-days: 14
+
+  arm64-runner-probe:
+    name: Probe hosted ARM64 Android-runtime capability
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: Record runner virtualization capabilities
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p out
+          {
+            echo "arch=$(uname -m)"
+            echo "kernel=$(uname -r)"
+            if [ -e /dev/kvm ]; then
+              echo 'kvm_device=present'
+              ls -l /dev/kvm
+            else
+              echo 'kvm_device=absent'
+            fi
+            if command -v docker >/dev/null; then
+              echo "docker=$(docker --version)"
+            else
+              echo 'docker=absent'
+            fi
+            echo 'note=ARM64 host alone is not treated as Android client execution; this probe decides whether a later emulator/container gate is technically viable.'
+          } | tee out/arm64-runtime-capability.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: arm64-runtime-capability-${{ github.sha }}
+          path: out/arm64-runtime-capability.txt
+          if-no-files-found: error
+          retention-days: 14
