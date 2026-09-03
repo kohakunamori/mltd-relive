@@ -1,0 +1,33 @@
+name: Audit next active RPC contracts
+
+on:
+  push:
+    branches: [fix/story-service-compat]
+    paths: ['.github/workflows/audit-next-rpc-contracts.yml']
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - run: git fetch origin client-decompiled-zh-fixed-v1 --depth=1
+      - name: Audit preserved native/master evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            echo '===== NATIVE/APK FILES ====='
+            git ls-tree -r --name-only origin/client-decompiled-zh-fixed-v1 | grep -Ei '(^|/)(libil2cpp\.so|[^/]+\.apk)$' || true
+            echo '===== BIRTHDAY/SALES COSTUME FILES ====='
+            git ls-tree -r --name-only origin/client-decompiled-zh-fixed-v1 | grep -Ei 'birthday|sales.?costume|costume.?sales|mst_sales' || true
+            echo '===== SERVER PRESERVED MASTER FILES ====='
+            find standalone -type f | grep -Ei 'birthday|sales.?costume|costume.?sales|mst_sales' || true
+          } | tee /tmp/evidence.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: preserved-evidence-audit
+          path: /tmp/evidence.txt
+          retention-days: 7

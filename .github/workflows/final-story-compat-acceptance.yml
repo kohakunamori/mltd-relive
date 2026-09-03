@@ -1,0 +1,112 @@
+name: Final story compatibility acceptance
+
+# Reusable acceptance gate; rerun after the vitality multi device regression fix.
+on:
+  push:
+    branches: [fix/story-service-compat]
+    paths: ['.github/workflows/final-story-compat-acceptance.yml']
+  workflow_dispatch:
+
+jobs:
+  runtime:
+    name: Full standalone runtime suite
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: requirements.txt
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+      - name: Build fresh standalone database
+        working-directory: standalone
+        run: |
+          rm -f mltd-relive.db mltd-relive.db-shm mltd-relive.db-wal
+          PYTHONPATH=. python -m mltd.models.setup
+      - name: Run complete test suite
+        working-directory: standalone
+        run: PYTHONPATH=. python -m unittest discover -s ../tests -p 'test_*.py' -v
+
+  rpc-audit:
+    name: Current client/server RPC audit
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - run: git fetch origin client-decompiled-zh-fixed-v1 --depth=1
+      - name: Generate current coverage report
+        shell: bash
+        run: |
+          set -euo pipefail
+          git show origin/client-decompiled-zh-fixed-v1:il2cpp-dump/dump.cs > /tmp/dump.cs
+          grep -oE '[A-Za-z][A-Za-z0-9]*Service\.[A-Za-z][A-Za-z0-9]*' /tmp/dump.cs | sort -u > /tmp/client-rpc.txt
+          grep -RhoE "name=['\"][A-Za-z][A-Za-z0-9]*Service\.[A-Za-z][A-Za-z0-9]*['\"]" standalone/mltd/services \
+            | sed -E "s/^name=['\"]//; s/['\"]$//" | sort -u > /tmp/server-rpc.txt
+          {
+            echo "HEAD=${GITHUB_SHA}"
+            echo "client_rpc_count=$(wc -l < /tmp/client-rpc.txt)"
+            echo "server_rpc_count=$(wc -l < /tmp/server-rpc.txt)"
+            echo "missing_string_surface_count=$(comm -23 /tmp/client-rpc.txt /tmp/server-rpc.txt | wc -l)"
+            echo
+            echo '=== CLIENT STRING SURFACE MISSING ON SERVER ==='
+            comm -23 /tmp/client-rpc.txt /tmp/server-rpc.txt
+            echo
+            echo '=== SERVER RPC NOT SEEN IN CLIENT DUMP ==='
+            comm -13 /tmp/client-rpc.txt /tmp/server-rpc.txt
+            echo
+            echo '=== CLOSED REMAINING TARGETS ==='
+            for rpc in \
+              ItemService.UseItem \
+              BirthdayService.ExecuteBirthdayPresent \
+              IdolService.SetFavoriteCostume \
+              IdolService.GetSalesCostumeList \
+              PresentService.GetPresentHistory; do
+              if grep -Fxq "$rpc" /tmp/server-rpc.txt; then state=registered; else state=not-registered; fi
+              printf '%s\t%s\n' "$rpc" "$state"
+            done
+          } | tee /tmp/current-rpc-coverage.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: current-rpc-coverage
+          path: /tmp/current-rpc-coverage.txt
+          if-no-files-found: error
+          retention-days: 14
+
+  ubuntu-gui:
+    name: Build latest Ubuntu standalone GUI
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: requirements.txt
+      - name: Install build dependencies
+        run: |
+          python -m venv env
+          source env/bin/activate
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+      - name: Build Ubuntu GUI
+        run: |
+          cd standalone
+          ../env/bin/pyinstaller gui_ubuntu.spec
+      - name: Verify executable
+        run: |
+          test -x standalone/dist/mltd-relive-standalone
+          file standalone/dist/mltd-relive-standalone
+          sha256sum standalone/dist/mltd-relive-standalone | tee standalone/dist/mltd-relive-standalone.sha256
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mltd-relive-story-compat-ubuntu-${{ github.sha }}
+          path: |
+            standalone/dist/mltd-relive-standalone
+            standalone/dist/mltd-relive-standalone.sha256
+          if-no-files-found: error
+          retention-days: 14
