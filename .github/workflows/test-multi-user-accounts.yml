@@ -27,7 +27,7 @@ jobs:
           cd standalone
           rm -f mltd-relive.db config.ini
           PYTHONPATH=. python -m mltd.models.setup
-          PYTHONPATH=. python -m unittest -v ../tests/test_multi_user_accounts_runtime.py
+          PYTHONPATH=. python -m unittest discover -v -s ../tests -p 'test_multi_user_accounts_runtime.py'
       - name: Validate database foreign keys
         run: |
           cd standalone
