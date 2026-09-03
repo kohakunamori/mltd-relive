@@ -146,6 +146,55 @@ DNS / TLS 通常需要监听 53 / 443 等特权端口，因此 Linux 上通常�
 
 排障时建议先使用最简单的同一局域网环境。
 
+## 多用户账户与外部注册
+
+Standalone `v0.1.11` 起支持多个彼此独立的玩家存档。客户端不需要修改登录 DTO：在标题画面的“密码继承 / 引继”界面输入 **8 位用户名 + 密码**，服务端会通过 `AuthService.TransferPassword` 验证凭据并返回该账户自己的 UUID / secret，随后 `AuthService.Login` 会继续验证该 secret。
+
+### 默认全存档账户
+
+首次初始化数据库时会保留原来的全解锁存档，并为它创建固定登录凭据：
+
+```text
+用户名：MLTD0000
+密码：relive2026
+```
+
+它仍然绑定原来的 `ffffffff-ffff-ffff-ffff-ffffffffffff` 存档，游戏内 `search_id` 仍为 `00000000`；升级旧数据库不会重建或覆盖这份存档内容。
+
+> [!IMPORTANT]
+> 默认密码是公开的开箱即用凭据。如果服务器会被不受信任的设备访问，请不要把默认账户当作私密账户使用，并应限制服务器网络暴露范围。
+
+### 注册新用户
+
+新注册账户会从默认全存档模板复制出一份**独立**存档，并为 Card / Idol / Unit / SongUnit / Profile / FavoriteCostume 等用户状态重映射 UUID。后续任何状态修改都只写入该用户自己的记录。Friend、PendingSong、PendingJob、Present 等社交或瞬态记录不会从模板继承。
+
+用户名必须是 8 位 ASCII 字母或数字（服务端统一转换为大写），密码长度为 8–64 个字符。密码只保存 salted PBKDF2-HMAC-SHA256 派生值，不保存明文。
+
+本机管理员可直接使用 CLI：
+
+```bash
+cd standalone
+python manage_users.py register USER0001 password123 --display-name Producer
+```
+
+也可以通过外部注册 API 创建账户：
+
+```http
+POST /relive/accounts/register
+Content-Type: application/json
+Authorization: Bearer <registration_api_key>
+
+{
+  "username": "USER0001",
+  "password": "password123",
+  "display_name": "Producer"
+}
+```
+
+来自 `127.0.0.1` / `::1` 的注册请求可直接使用；非 loopback 请求必须在 `config.ini` 设置 `registration_api_key` 并携带对应 Bearer Token。不要把未设置 API key 的注册接口直接暴露到公网。
+
+注册完成后，在原客户端的密码继承界面输入注册时的用户名和密码即可进入该用户的独立存档。
+
 ## 本地数据与备份
 
 首次运行后，服务器会在运行目录生成或使用本地配置、数据库和日志。
@@ -176,6 +225,7 @@ config.ini
 language = zh
 asset_mode = remote
 asset_remote_url =
+registration_api_key =
 ```
 
 其中：
@@ -183,6 +233,7 @@ asset_remote_url =
 - `language`：客户端语言；
 - `asset_mode`：当前只支持 `remote`；
 - `asset_remote_url`：留空时使用默认 remote endpoint；设置时必须是正常 HTTPS URL。
+- `registration_api_key`：非本机调用外部账户注册 API 时使用的 Bearer Token；留空则只允许 loopback 注册。
 
 `asset_remote_url` 只决定**游戏客户端从哪里下载 Asset**，不会让 Standalone Server 变成 Asset Proxy。
 

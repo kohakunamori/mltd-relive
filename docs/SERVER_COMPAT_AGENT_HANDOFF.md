@@ -432,3 +432,26 @@ Verification:
 
 - Targeted workflow `Test user vitality RPC compatibility`, run `33716679545` has passed on fix/test HEAD `24e9ee29638669fecf1b825eb154cef55337c22a`.
 - A fresh full acceptance and Ubuntu GUI build must be run from the post-cleanup final HEAD before asking the user to retry the device smoke.
+
+
+## 15. Multi-user account architecture (2026-09-03)
+
+A separate compatibility pass added real multi-user authentication while preserving the original client DTOs. Runtime implementation lives primarily in `standalone/mltd/accounts.py`, `standalone/mltd/services/auth.py`, `standalone/mltd/servers/handler.py`, and the additive `AccountCredential` model. Server/config schema version is now `0.1.11`.
+
+Confirmed design:
+
+- Client `AuthService.TransferPassword.user_id` is treated as the external 8-character account username. No client DTO change is required.
+- `TransferPassword` validates the salted PBKDF2-HMAC-SHA256 password and returns the account's real UUID plus a login secret.
+- `AuthService.Login` validates the UUID/secret pair instead of accepting arbitrary values.
+- The original full-save user remains `ffffffff-ffff-ffff-ffff-ffffffffffff`, `search_id=00000000`, game name `MLTDrelive`.
+- Default public compatibility credentials are `MLTD0000 / relive2026`. They are intentionally documented as convenience credentials, not private credentials.
+- Existing databases migrate additively from v0.1.10 to v0.1.11: `account_credential` is created and the default credential is attached without rewriting the existing save.
+- External users receive a unique UUID/search_id and an independent clone of the full-save baseline. UUID-prefixed IDs/references are remapped.
+- Direct user-owned tables plus indirect Profile children and `FavoriteCostume -> Idol` state are cloned.
+- Friend, PendingSong, PendingJob, PendingJobAnswer and Present state are intentionally not cloned.
+- CLI registration is available through `standalone/manage_users.py register`.
+- HTTP registration is `POST /relive/accounts/register`; loopback is allowed directly, while non-loopback calls require `config.ini` `registration_api_key` as a Bearer token.
+
+Targeted multi-user acceptance already covers default credentials, bad-password rejection, external registration, independent full-save state, TransferPassword/Login secret authentication, duplicate-registration atomicity, two-user UUID separation, HTTP registration authorization, FK-regression comparison, and v0.1.10 -> v0.1.11 migration preservation.
+
+The final branch acceptance workflow must be run from the cleanup HEAD before merge/release. A real-client password-transfer smoke is still the final device-dependent gate because this environment cannot operate the user's Android device directly.
