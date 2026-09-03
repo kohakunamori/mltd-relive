@@ -1,9 +1,7 @@
-name: Build and Release
+name: Build and Publish Latest Release
 
 on:
   push:
-    tags:
-      - 'standalone-v*'
     branches:
       - main
   workflow_dispatch:
@@ -22,25 +20,29 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: rolling-main-release
+  cancel-in-progress: true
+
 jobs:
   metadata:
-    name: Resolve release metadata
-    if: github.event_name == 'workflow_dispatch' || github.ref_type == 'tag' || contains(github.event.head_commit.message, '[release standalone]')
+    name: Resolve rolling release metadata
     runs-on: ubuntu-latest
     outputs:
       standalone_version: ${{ steps.meta.outputs.standalone_version }}
       release_tag: ${{ steps.meta.outputs.release_tag }}
       patcher_version: ${{ steps.meta.outputs.patcher_version }}
-      previous_release_tag: ${{ steps.meta.outputs.previous_release_tag }}
+      baseline_release_tag: ${{ steps.meta.outputs.baseline_release_tag }}
       patcher_changed: ${{ steps.meta.outputs.patcher_changed }}
       gameclient_changed: ${{ steps.meta.outputs.gameclient_changed }}
+      short_sha: ${{ steps.meta.outputs.short_sha }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Resolve versions and changed components
+      - name: Resolve versions and reusable assets
         id: meta
         shell: bash
         run: |
@@ -57,39 +59,25 @@ jobs:
           PY
           )"
           patcher_version="v$(tr -d '\r\n ' < tools/apk-patcher/VERSION)"
-          release_tag="standalone-v${standalone_version}"
-
-          if [[ "${GITHUB_REF_TYPE}" == "tag" && "${GITHUB_REF_NAME}" != "${release_tag}" ]]; then
-            echo "Tag ${GITHUB_REF_NAME} does not match source version ${release_tag}." >&2
-            exit 1
-          fi
+          release_tag="standalone-latest"
+          short_sha="${GITHUB_SHA:0:8}"
 
           git fetch --force --tags
-          previous_release_tag="$(
-            git tag --list 'standalone-v*' --sort=-v:refname |
-              grep -Fvx "${release_tag}" |
-              head -n 1 || true
-          )"
+          baseline_release_tag="$(git tag --list 'standalone-v*' --sort=-v:refname | head -n 1 || true)"
 
           patcher_changed=true
           gameclient_changed=true
 
-          if [[ -n "${previous_release_tag}" ]]; then
-            if git diff --quiet "${previous_release_tag}" "${GITHUB_SHA}" -- \
-              tools/apk-patcher requirements.txt; then
+          if [[ -n "${baseline_release_tag}" ]]; then
+            if git diff --quiet "${baseline_release_tag}" "${GITHUB_SHA}" -- tools/apk-patcher requirements.txt; then
               patcher_changed=false
             fi
 
-            # v0.1.9 and older predate the tracked client manifest but already
-            # contain the fixed-clients-v1 APKs. Treat that baseline as reusable.
-            if git cat-file -e "${previous_release_tag}:release/game-client.env" 2>/dev/null; then
-              if git diff --quiet "${previous_release_tag}" "${GITHUB_SHA}" -- \
-                release/game-client.env; then
+            if git cat-file -e "${baseline_release_tag}:release/game-client.env" 2>/dev/null; then
+              if git diff --quiet "${baseline_release_tag}" "${GITHUB_SHA}" -- release/game-client.env; then
                 gameclient_changed=false
               fi
             else
-              # The first manifest records the exact APK hashes already shipped
-              # by standalone-v0.1.8/v0.1.9, so no redownload is necessary.
               source release/game-client.env
               if [[ "${GAME_CLIENT_REVISION}" == "fixed-clients-v1" \
                     && "${ZH_SHA256}" == "a423f1b09b6d9022cf255aff9a43716d6beadf32d42641da3c7b92d2e663e918" \
@@ -110,22 +98,24 @@ jobs:
             echo "standalone_version=${standalone_version}"
             echo "release_tag=${release_tag}"
             echo "patcher_version=${patcher_version}"
-            echo "previous_release_tag=${previous_release_tag}"
+            echo "baseline_release_tag=${baseline_release_tag}"
             echo "patcher_changed=${patcher_changed}"
             echo "gameclient_changed=${gameclient_changed}"
+            echo "short_sha=${short_sha}"
           } >> "$GITHUB_OUTPUT"
 
-          echo "Release tag: ${release_tag}"
-          echo "Previous release: ${previous_release_tag:-<none>}"
+          echo "Rolling release tag: ${release_tag}"
+          echo "Source version: ${standalone_version}"
+          echo "Baseline versioned release: ${baseline_release_tag:-<none>}"
           echo "APK Patcher changed: ${patcher_changed}"
           echo "Game clients changed: ${gameclient_changed}"
 
   build:
-    name: Build standalone packages
+    name: Build Standalone (${{ matrix.target }})
     needs: metadata
-    if: needs.metadata.result == 'success'
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: windows-latest
@@ -176,11 +166,11 @@ jobs:
           python-version: '3.11'
           cache: pip
           cache-dependency-path: requirements.txt
-      - name: Install dependencies for ${{ matrix.target }}
+      - name: Install dependencies
         run: ${{ matrix.cmd-install }}
-      - name: Build with PyInstaller for ${{ matrix.target }}
+      - name: Build with PyInstaller
         run: ${{ matrix.cmd-build }}
-      - name: Package release file
+      - name: Package rolling release file
         shell: bash
         env:
           PACKAGE_SOURCE: ${{ matrix.package-source }}
@@ -197,7 +187,7 @@ jobs:
           else
             cp "$PACKAGE_SOURCE" "standalone/dist/release-output/mltd-relive-${RELEASE_TAG}-${PACKAGE_SUFFIX}"
           fi
-      - name: Upload build artifacts
+      - name: Upload Standalone artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.out-name }}
@@ -205,11 +195,12 @@ jobs:
           if-no-files-found: error
 
   patcher:
-    name: Build APK Patcher packages
+    name: Build APK Patcher (${{ matrix.target }})
     needs: metadata
-    if: needs.metadata.result == 'success' && needs.metadata.outputs.patcher_changed == 'true'
+    if: needs.metadata.outputs.patcher_changed == 'true'
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: windows-latest
@@ -260,9 +251,9 @@ jobs:
           python-version: '3.11'
           cache: pip
           cache-dependency-path: requirements.txt
-      - name: Install dependencies for ${{ matrix.target }}
+      - name: Install dependencies
         run: ${{ matrix.cmd-install }}
-      - name: Build APK Patcher for ${{ matrix.target }}
+      - name: Build APK Patcher
         run: ${{ matrix.cmd-build }}
       - name: Package APK Patcher
         shell: bash
@@ -281,7 +272,7 @@ jobs:
           else
             cp "$PACKAGE_SOURCE" "tools/apk-patcher/dist/release-output/mltd-relive-apk-patcher-${PATCHER_VERSION}-${PACKAGE_SUFFIX}"
           fi
-      - name: Upload APK Patcher artifacts
+      - name: Upload APK Patcher artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.out-name }}
@@ -291,19 +282,19 @@ jobs:
   reuse-patcher:
     name: Reuse unchanged APK Patcher packages
     needs: metadata
-    if: needs.metadata.result == 'success' && needs.metadata.outputs.patcher_changed == 'false'
+    if: needs.metadata.outputs.patcher_changed == 'false'
     runs-on: ubuntu-latest
     steps:
-      - name: Download APK Patcher assets from previous Release
+      - name: Download APK Patcher assets from versioned Release
         env:
           GH_TOKEN: ${{ github.token }}
-          PREVIOUS_RELEASE_TAG: ${{ needs.metadata.outputs.previous_release_tag }}
+          BASELINE_RELEASE_TAG: ${{ needs.metadata.outputs.baseline_release_tag }}
         shell: bash
         run: |
           set -euo pipefail
-          test -n "${PREVIOUS_RELEASE_TAG}"
+          test -n "${BASELINE_RELEASE_TAG}"
           mkdir -p reused-patcher
-          gh release download "${PREVIOUS_RELEASE_TAG}" \
+          gh release download "${BASELINE_RELEASE_TAG}" \
             --repo "${GITHUB_REPOSITORY}" \
             --pattern 'mltd-relive-apk-patcher-*' \
             --dir reused-patcher
@@ -318,23 +309,22 @@ jobs:
   gameclient:
     name: Prepare corrected game clients
     needs: metadata
-    if: needs.metadata.result == 'success'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Reuse unchanged game clients from previous Release
+      - name: Reuse unchanged game clients from versioned Release
         if: needs.metadata.outputs.gameclient_changed == 'false'
         env:
           GH_TOKEN: ${{ github.token }}
-          PREVIOUS_RELEASE_TAG: ${{ needs.metadata.outputs.previous_release_tag }}
+          BASELINE_RELEASE_TAG: ${{ needs.metadata.outputs.baseline_release_tag }}
         shell: bash
         run: |
           set -euo pipefail
-          test -n "${PREVIOUS_RELEASE_TAG}"
+          test -n "${BASELINE_RELEASE_TAG}"
           mkdir -p game-client
-          gh release download "${PREVIOUS_RELEASE_TAG}" \
+          gh release download "${BASELINE_RELEASE_TAG}" \
             --repo "${GITHUB_REPOSITORY}" \
             --pattern 'mltd-relive-game-client-*-fixed.apk' \
             --dir game-client
@@ -394,7 +384,6 @@ jobs:
                   if bad is not None:
                       raise SystemExit(f'{apk} contains a corrupt entry: {bad}')
           PY
-          cp RELEASE_NOTES.md game-client/RELEASE_NOTES.md
           (
             cd game-client
             sha256sum *.apk > SHA256SUMS.txt
@@ -407,8 +396,8 @@ jobs:
           path: game-client/*
           if-no-files-found: error
 
-  createrelease:
-    name: Create or update Release
+  publish:
+    name: Publish rolling Latest Release
     needs:
       - metadata
       - build
@@ -429,8 +418,29 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: release-artifacts
-      - name: Align release tag with current source
-        if: github.ref_type != 'tag'
+
+      - name: Write rolling release notes
+        env:
+          STANDALONE_VERSION: ${{ needs.metadata.outputs.standalone_version }}
+          SHORT_SHA: ${{ needs.metadata.outputs.short_sha }}
+        shell: bash
+        run: |
+          cat > rolling-release-notes.md <<EOF
+          # mltd-relive — Latest main build
+
+          This is the automatically updated rolling release for the latest commit on \`main\`.
+
+          - Commit: \`${GITHUB_SHA}\`
+          - Short commit: \`${SHORT_SHA}\`
+          - Standalone source version: \`v${STANDALONE_VERSION}\`
+          - Build source: \`main\`
+
+          The assets attached to this Release are replaced whenever \`main\` receives a newer commit. Use a versioned \`standalone-v*\` Release if you need an immutable historical build.
+
+          Current \`main\` contains the latest server compatibility work. Some client-side UI/state-machine incompatibilities may still exist even when the local server request itself succeeds; see the repository README and compatibility handoff for current scope and known limitations.
+          EOF
+
+      - name: Align rolling tag with current main commit
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ needs.metadata.outputs.release_tag }}
@@ -438,15 +448,17 @@ jobs:
         run: |
           set -euo pipefail
           if gh api "repos/${GITHUB_REPOSITORY}/git/ref/tags/${RELEASE_TAG}" >/dev/null 2>&1; then
-            gh api -X PATCH "repos/${GITHUB_REPOSITORY}/git/refs/tags/${RELEASE_TAG}" -f sha="${GITHUB_SHA}" -F force=true >/dev/null
+            gh api -X PATCH "repos/${GITHUB_REPOSITORY}/git/refs/tags/${RELEASE_TAG}" \
+              -f sha="${GITHUB_SHA}" -F force=true >/dev/null
           fi
-      - name: Create or update Release
+
+      - name: Create or update rolling Latest Release
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ needs.metadata.outputs.release_tag }}
           commit: ${{ github.sha }}
-          name: mltd-relive-${{ needs.metadata.outputs.release_tag }}
-          bodyFile: RELEASE_NOTES.md
+          name: mltd-relive latest main (${{ needs.metadata.outputs.short_sha }})
+          bodyFile: rolling-release-notes.md
           artifacts: 'LICENSE,release-artifacts/windows/*,release-artifacts/ubuntu/*,release-artifacts/macos/*,release-artifacts/patcher-*/*,release-artifacts/game-client/*'
           artifactErrorsFailBuild: true
           allowUpdates: true
