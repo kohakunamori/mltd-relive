@@ -1,6 +1,6 @@
 name: Final story compatibility acceptance
 
-# Reusable pre-device acceptance gate for the story compatibility branch.
+# Reusable acceptance gate; rerun after the vitality multi device regression fix.
 on:
   push:
     branches: [fix/story-service-compat]
