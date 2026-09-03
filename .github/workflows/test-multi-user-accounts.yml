@@ -1,0 +1,41 @@
+name: Test multi-user accounts
+
+on:
+  push:
+    branches:
+      - feature/multi-user-accounts
+    paths:
+      - 'standalone/**'
+      - 'tests/test_multi_user_accounts_runtime.py'
+      - '.github/workflows/test-multi-user-accounts.yml'
+  workflow_dispatch:
+
+jobs:
+  targeted:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: requirements.txt
+      - run: python -m pip install -r requirements.txt
+      - name: Fresh database and multi-user runtime tests
+        run: |
+          set -euo pipefail
+          cd standalone
+          rm -f mltd-relive.db config.ini
+          PYTHONPATH=. python -m mltd.models.setup
+          PYTHONPATH=. python -m unittest -v ../tests/test_multi_user_accounts_runtime.py
+      - name: Validate database foreign keys
+        run: |
+          cd standalone
+          python - <<'PY'
+          import sqlite3
+          db = sqlite3.connect('mltd-relive.db')
+          problems = list(db.execute('PRAGMA foreign_key_check'))
+          if problems:
+              raise SystemExit(problems[:20])
+          print('foreign_key_check: ok')
+          PY
