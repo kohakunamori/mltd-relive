@@ -3,6 +3,7 @@ name: Test multi-user accounts
 on:
   push:
     branches:
+      - main
       - feature/multi-user-accounts
     paths:
       - 'standalone/**'
@@ -61,7 +62,6 @@ jobs:
           db = sqlite3.connect('mltd-relive.db')
           before = db.execute("SELECT level, money, name FROM user WHERE user_id='ffffffffffffffffffffffffffffffff'").fetchone()
           if before is None:
-              # SQLAlchemy UUID may be stored with hyphens on some SQLite builds.
               before = db.execute("SELECT level, money, name FROM user WHERE search_id='00000000'").fetchone()
           db.execute('DROP TABLE account_credential')
           db.execute("UPDATE server_version SET version='0.1.10'")
@@ -75,7 +75,7 @@ jobs:
           PY
           PYTHONPATH=. python - <<'PY'
           import ast, sqlite3
-          from mltd.accounts import DEFAULT_USER_ID, DEFAULT_USERNAME
+          from mltd.accounts import DEFAULT_USERNAME
           db = sqlite3.connect('mltd-relive.db')
           version = db.execute('SELECT version FROM server_version').fetchone()[0]
           if version != '0.1.11':
