@@ -1,0 +1,74 @@
+name: Audit device vitality multi contract
+
+on:
+  push:
+    branches: [fix/story-service-compat]
+    paths: ['.github/workflows/audit-vitality-multi-device.yml']
+
+jobs:
+  audit:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - run: git fetch origin client-decompiled-zh-fixed-v1 --depth=1
+      - name: Extract focused client contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          git show origin/client-decompiled-zh-fixed-v1:il2cpp-dump/dump.cs > /tmp/dump.cs
+          python - <<'PY' | tee /tmp/vitality-multi-audit.txt
+          from pathlib import Path
+          import re
+
+          lines = Path('/tmp/dump.cs').read_text(encoding='utf-8', errors='replace').splitlines()
+          needles = [
+              'RecoverVitalityByItemMulti',
+              'RecoverVitalityByItem',
+              'ItemAmount',
+              'ItemStatus',
+              'VitalityRecovery',
+              'VitalityRecover',
+              'RecoveryItem',
+              'RecoverPopup',
+          ]
+
+          print('=== TARGET CONTEXTS ===')
+          seen = set()
+          for i, line in enumerate(lines):
+              if any(n in line for n in needles):
+                  lo = max(0, i - 12)
+                  hi = min(len(lines), i + 25)
+                  key = (lo, hi)
+                  if key in seen:
+                      continue
+                  seen.add(key)
+                  print(f'\n--- lines {lo+1}-{hi} hit={line.strip()} ---')
+                  for j in range(lo, hi):
+                      print(f'{j+1}: {lines[j]}')
+
+          print('\n=== CLASSES WITH VITALITY/RECOVER + HTTP-ish METHODS ===')
+          class_re = re.compile(r'^(?:public|private|internal|protected|sealed|abstract|static|\s)+class\s+([^ :]+)')
+          starts = []
+          for i, line in enumerate(lines):
+              m = class_re.search(line)
+              if m:
+                  starts.append((i, m.group(1)))
+          for idx, (start, name) in enumerate(starts):
+              end = starts[idx+1][0] if idx+1 < len(starts) else len(lines)
+              block = '\n'.join(lines[start:min(end, start+220)])
+              if re.search(r'Vitality|Recover', name, re.I) or 'RecoverVitalityByItem' in block:
+                  if re.search(r'HTTP|Request|RecoverVitalityByItem|item', block, re.I):
+                      print(f'\n--- class {name} @ {start+1} ---')
+                      for j in range(start, min(end, start+220)):
+                          s = lines[j]
+                          if re.search(r'Vitality|Recover|Item|HTTP|Request|Reply|Args|Amount|\.ctor', s, re.I):
+                              print(f'{j+1}: {s}')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vitality-multi-audit
+          path: /tmp/vitality-multi-audit.txt
+          if-no-files-found: error
+          retention-days: 7
