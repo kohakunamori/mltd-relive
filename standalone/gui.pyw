@@ -5,6 +5,7 @@ from tkinter import *
 from tkinter import messagebox, ttk
 from tkinter.scrolledtext import ScrolledText
 
+from mltd.gui_accounts import UserManagementWindow
 from mltd.models.setup import (check_database_version, cleanup, setup,
                                upgrade_database)
 from mltd.servers import dns, proxy
@@ -69,6 +70,13 @@ class MLTDReliveGUI:
             width=20
         )
         self.reset_button.grid(column=1, row=1)
+        self.user_management_button = ttk.Button(
+            button_frame,
+            text='User Management',
+            command=self.open_user_management,
+            width=20,
+        )
+        self.user_management_button.grid(column=1, row=2)
 
         info_frame = ttk.Labelframe(main_frame, text='Server Info', padding=10)
         info_frame.grid(column=0, row=2, sticky=(N, S, W, E))
@@ -153,6 +161,7 @@ class MLTDReliveGUI:
         )
         self.log_view.grid(column=0, row=1, sticky=(N, S, W, E))
 
+        self._user_management = None
         self._log_offset = 0
         self._log_identity = None
         self._load_initial_log_tail()
@@ -238,6 +247,27 @@ class MLTDReliveGUI:
 
     def clear_log_view(self):
         self._replace_log_text('')
+
+    def open_user_management(self):
+        if not os.path.isfile('mltd-relive.db'):
+            messagebox.showinfo(
+                'User Management',
+                'Initialize the database before managing users.',
+            )
+            return
+        try:
+            upgrade_database()
+        except (RuntimeError, OSError) as exc:
+            messagebox.showerror('User Management', str(exc))
+            return
+
+        existing = self._user_management
+        if existing is not None and existing.window.winfo_exists():
+            existing.refresh()
+            existing.window.lift()
+            existing.window.focus_force()
+            return
+        self._user_management = UserManagementWindow(self.root)
 
     def _set_options_state(self, enabled):
         state = NORMAL if enabled else DISABLED
