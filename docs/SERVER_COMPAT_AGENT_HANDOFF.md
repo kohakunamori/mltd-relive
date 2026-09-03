@@ -455,3 +455,26 @@ Confirmed design:
 Targeted multi-user acceptance already covers default credentials, bad-password rejection, external registration, independent full-save state, TransferPassword/Login secret authentication, duplicate-registration atomicity, two-user UUID separation, HTTP registration authorization, FK-regression comparison, and v0.1.10 -> v0.1.11 migration preservation.
 
 The final branch acceptance workflow must be run from the cleanup HEAD before merge/release. A real-client password-transfer smoke is still the final device-dependent gate because this environment cannot operate the user's Android device directly.
+
+
+## 16. Multi-user final automated acceptance (2026-09-03)
+
+The multi-user runtime tree was frozen and accepted at commit `5f9e47fdfe0b5f5edaf75b8d59ff70a99ea10b80` by workflow run `33725815975`. All four final jobs passed:
+
+1. Full fresh-database standalone suite: **89 tests passed**. This includes the 7 multi-user account tests plus the existing Story/Friend/Job/Profile/Vitality/Costume/offline compatibility suite.
+2. Multi-user migration/FK gate: fresh setup has 2006 pre-existing master-data FK violations; account registration introduced **0 new FK violations**. The simulated `v0.1.10 -> v0.1.11` upgrade created the default credential and preserved the original default full-save `(level, money, name)` state.
+3. Current client/server RPC audit: client string surface 309, registered server handlers 111, unmatched string surface 198. The closeout cluster remains Birthday/FavoriteCostume/SalesCostume/PresentHistory registered, while `ItemService.UseItem` is intentionally not registered because no active request callsite was proven.
+4. Ubuntu standalone GUI build succeeded. Artifact ID `9881959777`; executable SHA-256 `55108d91bb44c8f75484f73aee07ec1b95f275a2bbe18bb697a1fd40dfd2150a`.
+
+Repository relation at acceptance: feature branch is cleanly ahead of `main` (`4627b02f5398405cb2cd20c07c94f31d654d6e3f`) with no commits behind. Subsequent commits in this round are documentation/CI cleanup only and do not change the accepted runtime tree.
+
+### Remaining blocker
+
+The only remaining gate is real-client/device validation of password transfer and account isolation. Minimum required smoke:
+
+- clean-client password transfer with `MLTD0000 / relive2026` reaches the original full save;
+- an externally registered second account can password-transfer and reach its own cloned full save;
+- changing persistent state on the second account does not change the default account;
+- wrong password is rejected.
+
+Do not merge/release until this device-only smoke passes. After it passes, refetch both branch heads, create/merge the PR (or otherwise merge the cleanly-ahead branch according to repository policy), and let the main rolling-release workflow publish the new `standalone-latest`.
