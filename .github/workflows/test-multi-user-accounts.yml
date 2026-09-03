@@ -7,12 +7,14 @@ on:
       - feature/multi-user-accounts
       - feature/gui-user-management
       - feature/optional-dns-gui
+      - feature/manual-update-check
     paths:
       - 'standalone/**'
       - 'tests/test_multi_user_accounts_runtime.py'
       - 'tests/test_account_management_runtime.py'
       - 'tests/test_gui_remote_asset_ui.py'
       - 'tests/test_gui_dns_control.py'
+      - 'tests/test_gui_update_control.py'
       - '.github/workflows/test-multi-user-accounts.yml'
   workflow_dispatch:
 
