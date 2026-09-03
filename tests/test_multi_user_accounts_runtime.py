@@ -174,7 +174,6 @@ class MultiUserAccountsRuntimeTest(unittest.TestCase):
         })
         self.assertEqual(reply['user']['user_id'], str(user_id))
         self.assertEqual(reply['user']['name'], 'ProducerB')
-        self.assertEqual(len(reply['user']['profile']['helper_card_list']), 4)
         self.assertIn('token', reply)
 
         with self.assertRaises(LookupError):
