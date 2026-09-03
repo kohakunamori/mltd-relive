@@ -1,0 +1,74 @@
+name: Record reverse-client acceptance handoff
+
+on:
+  push:
+    branches:
+      - feature/multi-user-accounts
+    paths:
+      - '.github/workflows/record-reverse-client-handoff.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  handoff:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Append reverse-client acceptance checkpoint
+        shell: bash
+        run: |
+          cat >> docs/SERVER_COMPAT_AGENT_HANDOFF.md <<'EOF'
+
+## 17. Reverse-engineered client acceptance gate (2026-09-03)
+
+Final acceptance now includes a client-side rebuild gate sourced from the repository's authoritative historical fixed-client reverse tree.
+
+Source distinction:
+
+- `client-decompiled-zh-fixed-v1` is the complete generated Apktool/JADX/IL2CPP tree of the known historical working `zh-fixed` client and is the acceptance-client source.
+- `client-zh-fixed-reconstruction` is the independent official-2.1.000/AppGuard reconstruction effort and is not yet complete enough to be used as the executable acceptance baseline.
+
+Workflow: `.github/workflows/reverse-client-acceptance.yml`.
+
+The gate performs all of the following from `client-decompiled-zh-fixed-v1`:
+
+1. sparse-checks out the authoritative `apktool/` tree plus `dump.cs` and recorded rebuild metadata;
+2. verifies the recorded Apktool baseline (`2.12.1`, historical rebuild exit code `0`);
+3. rebuilds the Android package with Apktool;
+4. zipaligns and signs it with an ephemeral CI-only test key;
+5. verifies APK signatures;
+6. verifies package `com.bandainamcoent.imas_millionlive_theaterdays_ch.local` and version `2.1.000`;
+7. verifies rebuilt APK still contains the exact historical fixed native payloads:
+   - `libil2cpp.so` SHA-256 `52d0cdac0179ae4a5d61a00b9bfd500969730d1a3f157cf667d82c525836936b`;
+   - `global-metadata.dat` SHA-256 `0b0913387be65fb046a7536e016cd9f8514b0ac23bd79b8b20540c73cb1d8cf0`;
+8. checks the reversed client still exposes the active authentication/vitality/Birthday/FavoriteCostume/SalesCostume/PresentHistory contract markers expected by the final standalone server;
+9. preserves the audited intentional absence of `ItemService.UseItem` on the server.
+
+First successful client rebuild run: `33727172810`, server HEAD `6ac273f1ab258e215957ebd0df099126c9443b39`. It produced an installable rebuilt client with APK SHA-256 `284f678fba67879cb5a0c27b91f4ebdec5fe83e2b4c3b47b97a14cbe6442649c` and artifact ID `9882417625`.
+
+Hosted ARM64 execution was also probed rather than assumed. `ubuntu-24.04-arm` is native `aarch64`, but `/dev/kvm` is absent. Docker is present. Therefore GitHub-hosted ARM64 is not accepted as a trustworthy Android-emulator runtime gate; ARM64 host execution alone is not equivalent to running the Android application. Do not claim that CI has dynamically launched the game client.
+
+The reverse-client workflow is coupled to the final standalone acceptance workflow so the final pre-device checkpoint can generate the rebuilt Android client and standalone server artifacts from the exact same feature-branch HEAD.
+
+### Remaining device-dependent gate
+
+Use the CI-rebuilt reverse-client APK, not an unrelated historical APK, for the final Android smoke. At minimum verify:
+
+1. install/launch on an ARM64 Android device;
+2. password transfer `MLTD0000 / relive2026` reaches the original full-save Home state;
+3. an externally registered second user can transfer/login and has an independent save;
+4. wrong password is rejected;
+5. core login/Live/Story/Profile/Vitality/Friend/Job/Costume flows remain usable, with special attention to the real-client `RecoverVitalityByItemMulti` wire path;
+6. Birthday/FavoriteCostume surfaces are exercised if reachable from UI.
+
+Only after this real Android execution passes should PR/merge/release proceed.
+EOF
+      - name: Commit handoff
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/SERVER_COMPAT_AGENT_HANDOFF.md
+          git commit -m 'docs: record reverse-client acceptance gate'
+          git push
