@@ -1,10 +1,13 @@
 import os
+import threading
 import traceback
+import webbrowser
 from multiprocessing import freeze_support, set_start_method
 from tkinter import *
 from tkinter import messagebox, ttk
 from tkinter.scrolledtext import ScrolledText
 
+from mltd.build_info import BUILD_COMMIT
 from mltd.gui_accounts import UserManagementWindow
 from mltd.models.setup import (check_database_version, cleanup, setup,
                                upgrade_database)
@@ -14,6 +17,7 @@ from mltd.servers.dns import dns_port, get_lan_ips
 from mltd.servers.logging import handler, logger
 from mltd.servers.process import CustomProcess
 from mltd.servers.proxy import proxy_port
+from mltd.update_check import check_for_updates
 
 LOG_PATH = 'mltd-relive.log'
 LOG_TAIL_BYTES = 128 * 1024
@@ -93,6 +97,13 @@ class MLTDReliveGUI:
             width=20,
         )
         self.dns_server_button.grid(column=1, row=3, pady=(6, 0))
+        self.update_button = ttk.Button(
+            button_frame,
+            text='Check for Updates',
+            command=self.check_for_updates,
+            width=20,
+        )
+        self.update_button.grid(column=1, row=4, pady=(6, 0))
 
         info_frame = ttk.Labelframe(main_frame, text='Server Info', padding=10)
         info_frame.grid(column=0, row=2, sticky=(N, S, W, E))
@@ -109,6 +120,16 @@ class MLTDReliveGUI:
             column=1, row=0, padx=5, sticky=W)
         ttk.Label(info_frame, text=f'TLS/API Port: {proxy_port}').grid(
             column=1, row=1, padx=5, sticky=W)
+        build_text = BUILD_COMMIT[:8] if BUILD_COMMIT else 'source checkout'
+        ttk.Label(info_frame, text=f'Build: {build_text}').grid(
+            column=0, row=2, padx=5, pady=(4, 0), sticky=W)
+        self.update_status_label = ttk.Label(
+            info_frame,
+            text='Update: Not checked',
+            foreground='grey',
+        )
+        self.update_status_label.grid(
+            column=1, row=2, padx=5, pady=(4, 0), sticky=W)
 
         options_frame = ttk.Labelframe(main_frame, text='Options', padding=10)
         options_frame.grid(column=1, row=2, sticky=(N, S, W, E))
@@ -178,6 +199,7 @@ class MLTDReliveGUI:
         self.log_view.grid(column=0, row=1, sticky=(N, S, W, E))
 
         self._user_management = None
+        self._update_info = None
         self._log_offset = 0
         self._log_identity = None
         self._load_initial_log_tail()
@@ -263,6 +285,75 @@ class MLTDReliveGUI:
 
     def clear_log_view(self):
         self._replace_log_text('')
+
+    def check_for_updates(self):
+        if self._update_info is not None:
+            if self._update_info.update_available:
+                logger.info(
+                    f'Opening manual update download: {self._update_info.download_url}')
+                webbrowser.open(self._update_info.download_url)
+                return
+            if not self._update_info.current_build_known:
+                logger.info(
+                    f'Opening rolling Release: {self._update_info.release_url}')
+                webbrowser.open(self._update_info.release_url)
+                return
+
+        self._update_info = None
+        self.update_button.config(text='Checking...', state=DISABLED)
+        self.update_status_label.config(
+            text='Update: Checking...', foreground='black')
+        logger.info('Checking for Standalone updates by explicit user request...')
+        threading.Thread(
+            target=self._check_for_updates_worker,
+            name='mltd-update-check',
+            daemon=True,
+        ).start()
+
+    def _check_for_updates_worker(self):
+        try:
+            info = check_for_updates(version)
+        except Exception as exc:
+            self.root.after(0, self._finish_update_check, None, str(exc))
+            return
+        self.root.after(0, self._finish_update_check, info, None)
+
+    def _finish_update_check(self, info, error):
+        if error:
+            logger.warning(f'Update check failed: {error}')
+            self.update_status_label.config(
+                text='Update: Check failed', foreground='red')
+            self.update_button.config(
+                text='Check for Updates', state=NORMAL)
+            return
+
+        self._update_info = info
+        if not info.current_build_known:
+            self.update_status_label.config(
+                text='Update: Source build', foreground='grey')
+            self.update_button.config(
+                text='Open Latest Release', state=NORMAL)
+            logger.info(
+                'Update check completed: source checkout has no embedded release commit; '
+                'automatic comparison was intentionally skipped.')
+            return
+
+        if info.update_available:
+            latest = info.latest_commit[:8] if info.latest_commit else 'unknown'
+            self.update_status_label.config(
+                text=f'Update: Available ({latest})', foreground='green')
+            self.update_button.config(
+                text='Download Update', state=NORMAL)
+            logger.info(
+                f'Update available: current={info.current_commit[:8]} latest={latest}. '
+                'No download will occur until the user clicks Download Update.')
+            return
+
+        self.update_status_label.config(
+            text='Update: Up to date', foreground='green')
+        self.update_button.config(
+            text='Check for Updates', state=NORMAL)
+        logger.info('Update check completed: this packaged build is current.')
 
     def open_user_management(self):
         if not os.path.isfile('mltd-relive.db'):
