@@ -83,7 +83,10 @@ def _owner_column(table):
         return table.c.user_id
     if 'id_' in table.c:
         column = table.c.id_
-        if any(fk.target_fullname == 'user.user_id' for fk in column.foreign_keys):
+        targets = {fk.target_fullname for fk in column.foreign_keys}
+        # Profile helper/stat tables are user-owned indirectly through
+        # profile.id_; their id_ value is still exactly the user's UUID.
+        if targets & {'user.user_id', 'profile.id_'}:
             return column
     return None
 
