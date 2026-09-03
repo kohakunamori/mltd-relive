@@ -52,6 +52,15 @@ class MLTDReliveGUI:
             status_frame, text=f'Server Status: {self.server_status}',
             font=(None, 14), foreground='red', width=20, anchor=CENTER)
         self.status_label.grid(column=0, row=0)
+        self.dns_status = 'Stopped'
+        self.dns_status_label = ttk.Label(
+            status_frame,
+            text=f'DNS Status: {self.dns_status}',
+            foreground='grey',
+            width=20,
+            anchor=CENTER,
+        )
+        self.dns_status_label.grid(column=0, row=1)
         self.progress_bar = ttk.Progressbar(status_frame, mode='indeterminate')
 
         button_frame = ttk.Frame(main_frame, padding=10)
@@ -77,6 +86,13 @@ class MLTDReliveGUI:
             width=20,
         )
         self.user_management_button.grid(column=1, row=2)
+        self.dns_server_button = ttk.Button(
+            button_frame,
+            text='Start DNS Server',
+            command=self.start_dns_server,
+            width=20,
+        )
+        self.dns_server_button.grid(column=1, row=3, pady=(6, 0))
 
         info_frame = ttk.Labelframe(main_frame, text='Server Info', padding=10)
         info_frame.grid(column=0, row=2, sticky=(N, S, W, E))
@@ -89,7 +105,7 @@ class MLTDReliveGUI:
             column=0, row=0, padx=5, sticky=W)
         ttk.Label(info_frame, text=f'IPv6: {lan_ipv6}').grid(
             column=0, row=1, padx=5, sticky=W)
-        ttk.Label(info_frame, text=f'DNS Port: {dns_port}').grid(
+        ttk.Label(info_frame, text=f'DNS Port: {dns_port} (optional)').grid(
             column=1, row=0, padx=5, sticky=W)
         ttk.Label(info_frame, text=f'TLS/API Port: {proxy_port}').grid(
             column=1, row=1, padx=5, sticky=W)
@@ -288,37 +304,28 @@ class MLTDReliveGUI:
         return True
 
     def update_server_status(self):
-        proxy_alive = getattr(self, 'proxy_process', None) is not None \
-            and self.proxy_process.is_alive()
-        dns_alive = getattr(self, 'dns_process', None) is not None \
-            and self.dns_process.is_alive()
+        process = getattr(self, 'proxy_process', None)
+        proxy_alive = process is not None and process.is_alive()
 
-        if proxy_alive or dns_alive:
-            if self.server_status != 'Stopping':
-                if self.proxy_process.exception:
-                    self.stop_server_on_error(self.proxy_process.exception)
-                    return
-                elif self.dns_process.exception:
-                    self.stop_server_on_error(self.dns_process.exception)
-                    return
-                if (self.server_status == 'Starting'
-                        and self.proxy_process.is_ready()
-                        and self.dns_process.is_ready()):
-                    self.server_status = 'Started'
-                    self.status_label.config(
-                        text=f'Server Status: {self.server_status}',
-                        foreground='green')
-                    self.stop_server_button.configure(state=NORMAL)
-                    self.progress_bar.stop()
-                    self.progress_bar.grid_forget()
-                    logger.info('Server started.')
+        if process is not None and process.exception:
+            self.stop_server_on_error(process.exception)
+            return
+
+        if proxy_alive:
+            if (self.server_status == 'Starting' and process.is_ready()):
+                self.server_status = 'Started'
+                self.status_label.config(
+                    text=f'Server Status: {self.server_status}',
+                    foreground='green')
+                self.stop_server_button.configure(state=NORMAL)
+                self.progress_bar.stop()
+                self.progress_bar.grid_forget()
+                logger.info('Server started. DNS server remains disabled unless started separately.')
             self.root.after(200, self.update_server_status)
             return
 
-        if getattr(self, 'proxy_process', None) is not None:
-            self.proxy_process.join()
-        if getattr(self, 'dns_process', None) is not None:
-            self.dns_process.join()
+        if process is not None:
+            process.join()
         if self.server_status == 'Stopping':
             self.server_status = 'Stopped'
             self.status_label.config(
@@ -332,6 +339,17 @@ class MLTDReliveGUI:
             self.progress_bar.stop()
             self.progress_bar.grid_forget()
             logger.info('Server stopped.')
+        elif self.server_status == 'Starting':
+            self.server_status = 'Stopped'
+            self.status_label.config(
+                text=f'Server Status: {self.server_status}', foreground='red')
+            self.start_server_button.grid(column=1, row=0)
+            self.stop_server_button.grid_forget()
+            self.start_server_button.configure(state=NORMAL)
+            self.reset_button.config(state=NORMAL)
+            self._set_options_state(True)
+            self.progress_bar.stop()
+            self.progress_bar.grid_forget()
 
     def start_server(self):
         if not self._save_asset_remote_url():
@@ -345,7 +363,8 @@ class MLTDReliveGUI:
 
         handler.doRollover()
         self.status_label.config(text='Starting Server...', foreground='black')
-        logger.info('Starting server...')
+        logger.info('Starting TLS/API server...')
+        logger.info('Built-in DNS server is opt-in and is not started automatically.')
         if config.asset_remote_url:
             logger.info(f'Asset remote URL: {config.asset_remote_url}')
         else:
@@ -357,12 +376,10 @@ class MLTDReliveGUI:
         self.stop_server_button.configure(state=NORMAL)
         self.reset_button.config(state=DISABLED)
         self._set_options_state(False)
-        self.progress_bar.grid(column=0, row=1, sticky=(W, E))
+        self.progress_bar.grid(column=0, row=2, sticky=(W, E))
         self.progress_bar.start()
         self.proxy_process = CustomProcess(target=proxy.start, daemon=True)
         self.proxy_process.start()
-        self.dns_process = CustomProcess(target=dns.start, daemon=True)
-        self.dns_process.start()
         self.root.after(200, self.update_server_status)
 
     def stop_server(self):
@@ -370,13 +387,12 @@ class MLTDReliveGUI:
             return
         self.server_status = 'Stopping'
         self.status_label.config(text='Stopping Server...', foreground='black')
-        logger.info('Stopping server...')
+        logger.info('Stopping TLS/API server...')
         self.stop_server_button.config(state=DISABLED)
         self.start_server_button.config(state=DISABLED)
-        for process_name in ('proxy_process', 'dns_process'):
-            process = getattr(self, process_name, None)
-            if process is not None and process.is_alive():
-                process.terminate()
+        process = getattr(self, 'proxy_process', None)
+        if process is not None and process.is_alive():
+            process.terminate()
         self.root.after(200, self.update_server_status)
 
     def stop_server_on_error(self, message):
@@ -385,6 +401,85 @@ class MLTDReliveGUI:
         self.progress_bar.stop()
         self.progress_bar.grid_forget()
         self.stop_server()
+
+    def start_dns_server(self):
+        process = getattr(self, 'dns_process', None)
+        if process is not None and process.is_alive():
+            return
+        self.dns_status = 'Starting'
+        self.dns_status_label.config(
+            text='DNS Status: Starting', foreground='black')
+        self.dns_server_button.config(
+            text='Starting DNS...', state=DISABLED)
+        logger.info('Starting optional DNS server...')
+        self.dns_process = CustomProcess(target=dns.start, daemon=True)
+        self.dns_process.start()
+        self.root.after(200, self.update_dns_status)
+
+    def update_dns_status(self):
+        process = getattr(self, 'dns_process', None)
+        if process is None:
+            return
+
+        error = process.exception
+        if error:
+            logger.error(error)
+            if process.is_alive():
+                process.terminate()
+            process.join()
+            self.dns_status = 'Stopped'
+            self.dns_status_label.config(
+                text='DNS Status: Stopped', foreground='red')
+            self.dns_server_button.config(
+                text='Start DNS Server', command=self.start_dns_server,
+                state=NORMAL)
+            messagebox.showerror('DNS Server Error', error)
+            return
+
+        if process.is_alive():
+            if self.dns_status == 'Starting' and process.is_ready():
+                self.dns_status = 'Started'
+                self.dns_status_label.config(
+                    text='DNS Status: Started', foreground='green')
+                self.dns_server_button.config(
+                    text='Stop DNS Server', command=self.stop_dns_server,
+                    state=NORMAL)
+                logger.info('Optional DNS server started.')
+            self.root.after(200, self.update_dns_status)
+            return
+
+        process.join()
+        was_stopping = self.dns_status == 'Stopping'
+        self.dns_status = 'Stopped'
+        self.dns_status_label.config(
+            text='DNS Status: Stopped', foreground='grey')
+        self.dns_server_button.config(
+            text='Start DNS Server', command=self.start_dns_server,
+            state=NORMAL)
+        if was_stopping:
+            logger.info('Optional DNS server stopped.')
+        else:
+            logger.warning('Optional DNS server exited.')
+
+    def stop_dns_server(self):
+        if self.dns_status == 'Stopping':
+            return
+        process = getattr(self, 'dns_process', None)
+        if process is None or not process.is_alive():
+            self.dns_status = 'Stopped'
+            self.dns_status_label.config(
+                text='DNS Status: Stopped', foreground='grey')
+            self.dns_server_button.config(
+                text='Start DNS Server', command=self.start_dns_server,
+                state=NORMAL)
+            return
+        self.dns_status = 'Stopping'
+        self.dns_status_label.config(
+            text='DNS Status: Stopping', foreground='black')
+        self.dns_server_button.config(text='Stopping DNS...', state=DISABLED)
+        logger.info('Stopping optional DNS server...')
+        process.terminate()
+        self.root.after(200, self.update_dns_status)
 
     def update_reset_data_progress(self):
         if not self.process.is_ready():
@@ -421,7 +516,7 @@ class MLTDReliveGUI:
         self.start_server_button.config(state=DISABLED)
         self.reset_button.config(state=DISABLED)
         self._set_options_state(False)
-        self.progress_bar.grid(column=0, row=1, sticky=(W, E))
+        self.progress_bar.grid(column=0, row=2, sticky=(W, E))
         self.progress_bar.start()
         self.process = CustomProcess(target=setup)
         self.process.start()
