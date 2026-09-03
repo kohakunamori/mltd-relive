@@ -17,23 +17,19 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Update documentation and long-lived CI
-        run: python tools/finalize_multi_user_branch.py
-      - name: Remove temporary helpers
+      - name: Update README and handoff
         run: |
-          rm -f \
-            .github/workflows/apply-multi-user-patch.yml \
-            .github/workflows/audit-auth-client.yml \
-            .github/workflows/audit-user-schema.yml \
-            .github/workflows/audit-user-ownership-graph.yml \
-            .github/workflows/finalize-multi-user-branch.yml \
-            tools/finalize_multi_user_branch.py
-      - name: Commit finalized branch
+          python - <<'PY'
+          from tools.finalize_multi_user_branch import update_readme, update_handoff
+          update_readme()
+          update_handoff()
+          PY
+      - name: Commit documentation
         run: |
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add -A
+          git add README.md docs/SERVER_COMPAT_AGENT_HANDOFF.md
           git diff --cached --check
-          git commit -m 'docs: document multi-user accounts and finalize CI'
+          git commit -m 'docs: document multi-user accounts'
           git push origin HEAD:feature/multi-user-accounts
