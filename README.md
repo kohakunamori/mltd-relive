@@ -146,38 +146,97 @@ DNS / TLS 通常需要监听 53 / 443 等特权端口，因此 Linux 上通常�
 
 排障时建议先使用最简单的同一局域网环境。
 
-## 多用户账户与外部注册
+## 完整存档用户与一般用户
 
-Standalone `v0.1.11` 起支持多个彼此独立的玩家存档。客户端不需要修改登录 DTO：在标题画面的“密码继承 / 引继”界面输入 **8 位用户名 + 密码**，服务端会通过 `AuthService.TransferPassword` 验证凭据并返回该账户自己的 UUID / secret，随后 `AuthService.Login` 会继续验证该 secret。
+Standalone `v0.1.11` 起支持多个彼此独立的玩家账户。客户端不需要新增自定义登录页面：账户选择继续使用原客户端标题画面的“密码继承 / 引继”流程。服务端把该界面的 8 位 `user_id` 输入解释为 Standalone 用户名，通过 `AuthService.TransferPassword` 验证用户名和密码，再向客户端返回该账户实际的 UUID / secret；之后客户端使用保存的 UUID / secret 调用 `AuthService.Login`。
 
-### 默认全存档账户
+当前有两类使用方式：
 
-首次初始化数据库时会保留原来的全解锁存档，并为它创建固定登录凭据：
+| 类型 | 用途 | 是否需要先注册 | 初始存档 | UUID / search_id |
+| --- | --- | --- | --- | --- |
+| **完整存档用户** | 直接使用项目保留的原有全解锁 / 完整存档 | 否 | 数据库中原来的 preserved full-save | 固定 UUID `ffffffff-ffff-ffff-ffff-ffffffffffff`，`search_id=00000000` |
+| **一般用户** | 给不同玩家建立彼此独立的账户 | 是 | 注册时从完整存档用户的持久化状态复制一份 | 每个账户独立生成 UUID 和 8 位 `search_id` |
+
+> [!IMPORTANT]
+> 当前“一般用户”**不是从教程开始的空白新号**。新账户会复制注册当时的完整存档模板，再成为独立存档。如果需要真正的 Lv.1 / 未完成教程新号，目前还没有对应初始化模板。
+
+### 使用完整存档用户
+
+完整存档用户就是项目一直以来使用的默认 preserved save。首次初始化新数据库时会自动创建它；从旧版 Standalone 升级到 `v0.1.11` 时，也只会为已有完整存档增加账户凭据绑定，不会重新创建或覆盖该用户的游戏数据。
+
+默认登录凭据：
 
 ```text
 用户名：MLTD0000
 密码：relive2026
 ```
 
-它仍然绑定原来的 `ffffffff-ffff-ffff-ffff-ffffffffffff` 存档，游戏内 `search_id` 仍为 `00000000`；升级旧数据库不会重建或覆盖这份存档内容。
+在一个尚未绑定 Standalone 账户的客户端上使用它：
 
-> [!IMPORTANT]
-> 默认密码是公开的开箱即用凭据。如果服务器会被不受信任的设备访问，请不要把默认账户当作私密账户使用，并应限制服务器网络暴露范围。
+1. 正常启动 Standalone Server；
+2. 如果你是从旧版服务器升级并希望保留旧存档，把原来的 `mltd-relive.db` 放在新版服务器运行目录中；
+3. **不要点击 `Reset Data`，也不要使用 `--reset`**；
+4. 启动游戏，在标题画面进入“密码继承 / 引继”；
+5. 用户名 / User ID 输入 `MLTD0000`；
+6. 密码输入 `relive2026`；
+7. 继承成功后，服务端会把固定完整存档 UUID 和登录 secret 返回给客户端；
+8. 之后客户端即可按正常标题登录流程进入这份完整存档。
 
-### 注册新用户
+如果旧客户端本地已经保存了这个默认完整存档的 UUID / historical secret，`v0.1.11` 仍保留兼容验证，因此通常可以继续直接登录，不要求先清除客户端数据重新继承。
 
-新注册账户会从默认全存档模板复制出一份**独立**存档，并为 Card / Idol / Unit / SongUnit / Profile / FavoriteCostume 等用户状态重映射 UUID。后续任何状态修改都只写入该用户自己的记录。Friend、PendingSong、PendingJob、Present 等社交或瞬态记录不会从模板继承。
+完整存档用户的游戏内修改会正常持久化到 `mltd-relive.db`。它同时也是**以后注册一般用户时的复制源**：一般用户复制的是“注册发生那一刻”完整存档用户的持久化状态，而不是一个永远不变的内置快照。因此：
 
-用户名必须是 8 位 ASCII 字母或数字（服务端统一转换为大写），密码长度为 8–64 个字符。密码只保存 salted PBKDF2-HMAC-SHA256 派生值，不保存明文。
+- 已经创建的一般用户不会因为完整存档用户后来发生变化而同步改变；
+- 完整存档用户后来获得的新状态，只会影响之后新注册账户的初始复制结果；
+- 如果希望多名玩家从完全相同的基线开始，建议先备份数据库并在修改完整存档用户之前批量创建这些账户。
 
-本机管理员可直接使用 CLI：
+> [!WARNING]
+> `MLTD0000 / relive2026` 是公开的默认凭据，不应视为私密账户密码。不要把 Standalone API / DNS / TLS 服务直接暴露给不受信任的公网客户端。
+
+### 使用一般用户
+
+一般用户必须先由服务器管理员创建。每次注册都会生成新的 UUID 和 `search_id`，并把完整存档用户当前的持久化状态复制为该账户自己的独立数据。
+
+会复制并重新绑定到新 UUID 的内容包括 Card、Idol、Costume、Unit、SongUnit、Profile、FavoriteCostume 等用户持久化状态。Friend、PendingSong、PendingJob、PendingJobAnswer、Present 等社交、进行中流程或瞬态记录不会从完整存档模板继承。
+
+注册后，不同一般用户之间、一般用户与完整存档用户之间的后续修改互不覆盖。
+
+用户名规则：
+
+- 必须正好 **8 位 ASCII 字母或数字**；
+- 服务端统一转换为大写；
+- 例如 `USER0001`。
+
+密码规则：
+
+- 长度 **8–64 个字符**；
+- 数据库只保存 salted PBKDF2-HMAC-SHA256 派生值，不保存密码明文。
+
+游戏内显示名 `display_name` 为 1–10 个字符；省略时默认使用用户名。
+
+#### 方法一：服务器本机 CLI 注册
+
+从源码运行时，在仓库中执行：
 
 ```bash
 cd standalone
 python manage_users.py register USER0001 password123 --display-name Producer
 ```
 
-也可以通过外部注册 API 创建账户：
+成功后会输出该账户的用户名、UUID、`search_id` 和显示名。
+
+然后让该玩家在客户端上：
+
+1. 连接到这台 Standalone Server；
+2. 启动游戏并进入标题画面的“密码继承 / 引继”；
+3. 用户名 / User ID 输入注册时的 8 位用户名，例如 `USER0001`；
+4. 密码输入注册时设置的密码，例如 `password123`；
+5. 继承成功后，客户端会取得该账户自己的 UUID / secret；
+6. 后续登录和所有受支持的持久化操作都会落到该用户自己的数据库记录。
+
+#### 方法二：注册 API
+
+也可以通过服务器的注册 API 创建一般用户：
 
 ```http
 POST /relive/accounts/register
@@ -191,9 +250,30 @@ Authorization: Bearer <registration_api_key>
 }
 ```
 
-来自 `127.0.0.1` / `::1` 的注册请求可直接使用；非 loopback 请求必须在 `config.ini` 设置 `registration_api_key` 并携带对应 Bearer Token。不要把未设置 API key 的注册接口直接暴露到公网。
+来自 `127.0.0.1` / `::1` 的注册请求可直接使用；非 loopback 请求必须先在 `config.ini` 中设置 `registration_api_key`，并携带对应 Bearer Token。
 
-注册完成后，在原客户端的密码继承界面输入注册时的用户名和密码即可进入该用户的独立存档。
+不要把没有认证保护的注册入口暴露到公网。建议只允许受信任的 LAN / VPN 管理端访问注册接口。
+
+### 旧数据库升级与用户数据安全
+
+服务器使用的数据库文件仍然是：
+
+```text
+mltd-relive.db
+```
+
+正常 **Start Server** 时，如果该文件已经存在，服务器会运行兼容 migration，而不是重新执行完整初始化。`v0.1.11` 升级会创建 `account_credential` 表并把已有完整存档用户绑定到 `MLTD0000`；更老数据库还可能执行历史 schema migration。
+
+因此“保留旧用户存档”和“数据库文件完全不发生变化”是两件事：升级会原地修改 schema / 兼容数据，但不会主动把已有完整存档用户重置为初始状态。
+
+升级前建议至少备份：
+
+```text
+mltd-relive.db
+config.ini
+```
+
+真正会清空玩家数据的是 GUI 的 **Reset Data** 或命令行 `--reset`：确认后会删除数据库中的现有表并重新初始化。已有长期存档时不要使用它。
 
 ## 本地数据与备份
 
