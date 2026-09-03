@@ -1,5 +1,14 @@
 # -*- mode: python ; coding: utf-8 -*-
 
+import os
+from pathlib import Path
+
+if os.environ.get('GITHUB_SHA'):
+    Path('mltd/build_info.py').write_text(
+        '"""Build metadata injected by CI for packaged Standalone releases."""\n\n'
+        f"BUILD_COMMIT = {os.environ['GITHUB_SHA']!r}\n",
+        encoding='utf-8',
+    )
 
 block_cipher = None
 
