@@ -45,6 +45,7 @@ def _find_profile(session, params, requester_id):
     """
     requested_user_id = (params or {}).get('user_id') or ''
     search_user_id = (params or {}).get('search_user_id') or ''
+    name_card_url = (params or {}).get('name_card_url') or ''
 
     if requested_user_id:
         try:
@@ -66,6 +67,28 @@ def _find_profile(session, params, requester_id):
         )
         if profile is not None:
             return profile
+
+    if name_card_url:
+        # Relive uses the public search ID as its compact QR routing token.
+        # Also accept a UUID payload so hand-created/preserved QR codes remain
+        # useful without requiring a separate discontinued URL-routing table.
+        profile = session.scalar(
+            select(Profile)
+            .join(User, User.user_id == Profile.id_)
+            .where(User.search_id == name_card_url)
+        )
+        if profile is not None:
+            return profile
+        try:
+            namecard_user_id = UUID(name_card_url)
+        except (TypeError, ValueError):
+            namecard_user_id = None
+        if namecard_user_id is not None:
+            profile = session.scalar(
+                select(Profile).where(Profile.id_ == namecard_user_id)
+            )
+            if profile is not None:
+                return profile
 
     # Offline saves normally contain one local producer. Falling back to the
     # authenticated producer keeps QR/name-card/profile entry points usable

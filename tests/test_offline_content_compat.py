@@ -6,7 +6,7 @@ from mltd.services.offline_content_compat import (
     get_mail_list,
     get_navi_list,
     get_present_history,
-    get_sales_costume_list,
+    get_shop_item_list,
 )
 
 
@@ -43,10 +43,10 @@ class OfflineContentCompatTest(unittest.TestCase):
             {'present_history': [], 'cursor': ''},
         )
 
-    def test_sales_costume_list_empty_shape(self):
+    def test_shop_item_list_exact_shape(self):
         self.assertEqual(
-            get_sales_costume_list({}),
-            {'sales_costume_list': []},
+            get_shop_item_list(),
+            {'shop_item_list': []},
         )
 
 

@@ -1147,6 +1147,12 @@ def upgrade_database():
     with Session(engine) as session:
         Base.metadata.tables['favorite_costume'].create(
             bind=session.get_bind(), checkfirst=True)
+        Base.metadata.tables['sales_costume_purchase'].create(
+            bind=session.get_bind(), checkfirst=True)
+        Base.metadata.tables['sales_song_purchase'].create(
+            bind=session.get_bind(), checkfirst=True)
+        Base.metadata.tables['namecard'].create(
+            bind=session.get_bind(), checkfirst=True)
         session.commit()
 
 

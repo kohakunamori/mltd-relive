@@ -291,6 +291,24 @@ class Costume(Base):
                                                      innerjoin=True)
 
 
+class SalesCostumePurchase(Base):
+    """Preservation-layer purchase state for the discontinued costume shop.
+
+    Playable costume ownership and shop purchase state are deliberately kept
+    separate: full-save Relive users may already have every Costume row while
+    the legacy client still expects an unpurchased SalesCostumeStatus catalog.
+    """
+    __tablename__ = 'sales_costume_purchase'
+    __table_args__ = (
+        PrimaryKeyConstraint('user_id', 'mst_sales_costume_id'),
+    )
+
+    user_id = mapped_column(ForeignKey('user.user_id'), nullable=False)
+    mst_sales_costume_id: Mapped[int]
+    purchase_date: Mapped[datetime] = mapped_column(
+        default=lambda: datetime.now(timezone.utc))
+
+
 class FavoriteCostume(Base):
     """Ordered favorite-costume selection for one user idol."""
     __tablename__ = 'favorite_costume'
@@ -1150,6 +1168,34 @@ class Song(Base):
         foreign_keys=[user_id, mst_song_id],
         viewonly=True, lazy='selectin',
         order_by='[Course.course_id]')
+
+
+class SalesSongPurchase(Base):
+    """Preservation-layer purchase state for songs sold by SongService."""
+    __tablename__ = 'sales_song_purchase'
+    __table_args__ = (
+        PrimaryKeyConstraint('user_id', 'mst_sales_song_id'),
+    )
+
+    user_id = mapped_column(ForeignKey('user.user_id'), nullable=False)
+    mst_sales_song_id: Mapped[int]
+    purchase_date: Mapped[datetime] = mapped_column(
+        default=lambda: datetime.now(timezone.utc))
+
+
+class Namecard(Base):
+    """Persisted producer-card payload for the legacy NamecardService.
+
+    The client owns the serialized card-layout format and sends it back through
+    SetNamecard.  Keeping the opaque strings intact is both forward-compatible
+    and safer than trying to reinterpret the discontinued service format.
+    """
+    __tablename__ = 'namecard'
+
+    user_id = mapped_column(ForeignKey('user.user_id'), primary_key=True)
+    data_structure: Mapped[str] = mapped_column(default='')
+    photo_data_structure: Mapped[str] = mapped_column(default='')
+    qr_code: Mapped[str] = mapped_column(default='')
 
 
 class MstCourse(Base):
