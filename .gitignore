@@ -2,6 +2,12 @@
 __pycache__/
 *.py[cod]
 *.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
 
 # Virtual environments
 .venv/
@@ -33,6 +39,12 @@ asset-cache/
 assets-*/
 obsolete/
 standalone/mltd*.db
+*.db-wal
+*.db-shm
+*.db-journal
+*.sqlite-wal
+*.sqlite-shm
+*.sqlite-journal
 standalone/mltd*.log*
 standalone/mltd/locales/*.cmd
 standalone/test_json/*
