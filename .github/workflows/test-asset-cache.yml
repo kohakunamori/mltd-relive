@@ -42,14 +42,7 @@ jobs:
         with:
           python-version: '3.11'
       - name: Install test dependencies
-        run: >-
-          python -m pip install
-          requests==2.31.0
-          msgpack==1.0.5
-          json-rpc==1.15.0
-          dnslib==0.9.23
-          netifaces==0.11.0
-          SQLAlchemy==2.0.19
+        run: python -m pip install -r requirements.txt
       - name: Compile Python source
         run: |
           python -m compileall -q standalone/mltd/models standalone/mltd/services standalone/mltd/servers
@@ -64,10 +57,17 @@ jobs:
             tests/test_strict_local_and_api.py \
             tests/test_unit_sqlalchemy_compat.py \
             tests/api_transport_benchmark.py
+      - name: Build fresh standalone database
+        working-directory: standalone
+        run: |
+          rm -f mltd-relive.db mltd-relive.db-shm mltd-relive.db-wal config.ini
+          PYTHONPATH=. python -m mltd.models.setup
       - name: Run compatibility and cache tests
-        run: python -m unittest discover -s tests -p 'test_*.py' -v
+        working-directory: standalone
+        run: PYTHONPATH=. python -m unittest discover -s ../tests -p 'test_*.py' -v
       - name: Benchmark API transport
-        run: python tests/api_transport_benchmark.py
+        working-directory: standalone
+        run: PYTHONPATH=. python ../tests/api_transport_benchmark.py
 
   api-runtime:
     runs-on: ubuntu-22.04

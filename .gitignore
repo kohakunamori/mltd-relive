@@ -37,3 +37,23 @@ standalone/mltd*.log*
 standalone/mltd/locales/*.cmd
 standalone/test_json/*
 tools/burp-viewer(hardcoded_path).pyw
+
+# Local preservation / reverse-engineering workspace
+# These contain machine-specific runtime data, large extracted binaries,
+# temporary captures, local tooling, and AgentDock work state rather than
+# distributable project source.
+/runtime/
+/.hosts-mltd
+/.workbuddy/
+/evidence/
+/notes/
+/handoff/
+/scripts/
+/scope.md
+/timeline.md
+/workitems.md
+/live-win.*.log
+/client/android_sdk/
+/client/apktool*.jar
+/client/apktool*.bat
+/client/imgui.ini
