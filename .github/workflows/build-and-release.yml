@@ -1,6 +1,17 @@
 name: 按需构建与发布
 
 on:
+  # Automatic publishing is called only after ci.yml validates a main push.
+  workflow_call:
+    inputs:
+      rebuild_patcher:
+        required: false
+        default: false
+        type: boolean
+      refresh_game_clients:
+        required: false
+        default: false
+        type: boolean
   workflow_dispatch:
     inputs:
       rebuild_patcher:
@@ -61,13 +72,17 @@ jobs:
           short_sha="${GITHUB_SHA:0:8}"
 
           git fetch --force --tags
-          baseline_release_tag="$(git tag --list 'standalone-v*' --sort=-v:refname | head -n 1 || true)"
+          # Compare to the last published packages, not an old versioned release.
+          baseline_release_tag="$(git tag --list 'standalone-latest')"
+          if [[ -z "${baseline_release_tag}" ]]; then
+            baseline_release_tag="$(git tag --list 'standalone-v*' --sort=-v:refname | head -n 1 || true)"
+          fi
 
           patcher_changed=true
           gameclient_changed=true
 
           if [[ -n "${baseline_release_tag}" ]]; then
-            if git diff --quiet "${baseline_release_tag}" "${GITHUB_SHA}" -- tools/apk-patcher requirements.txt; then
+            if git diff --quiet "${baseline_release_tag}" "${GITHUB_SHA}" -- tools/apk-patcher tools/fonts requirements.txt; then
               patcher_changed=false
             fi
 
@@ -133,7 +148,7 @@ jobs:
             target: Ubuntu
             cmd-install: |
               sudo apt-get update
-              sudo apt-get install -y libtk8.6 libtcl8.6
+              sudo apt-get install -y libtk8.6 libtcl8.6 xvfb xauth
               python -m venv env
               source env/bin/activate
               python -m pip install --upgrade pip
@@ -170,6 +185,32 @@ jobs:
         run: ${{ matrix.cmd-install }}
       - name: Build with PyInstaller
         run: ${{ matrix.cmd-build }}
+      - name: 校验 Ubuntu 运行库与完整许可声明
+        if: matrix.target == 'Ubuntu'
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd standalone
+          ../env/bin/python - <<'PY'
+          from pathlib import Path
+          from PyInstaller.archive.readers import CArchiveReader
+
+          archive = CArchiveReader('dist/mltd-relive-standalone')
+          for library in ('libtk8.6.so', 'libtcl8.6.so'):
+              assert library in archive.toc, f'Missing bundled library: {library}'
+          filename = 'mltd-relive-standalone-ubuntu-NOTICES.txt'
+          embedded = archive.extract(f'licenses/{filename}')
+          assert embedded == (Path('dist') / filename).read_bytes()
+          for package in ('libtk8.6', 'libtcl8.6'):
+              original = (Path('/usr/share/doc') / package / 'copyright').read_bytes()
+              assert original.strip() and original in embedded, f'Incomplete notice: {package}'
+          print('Both shared libraries and complete package notices are bundled.')
+          PY
+
+      - name: 验证 Ubuntu 图形界面启动
+        if: matrix.target == 'Ubuntu'
+        shell: bash
+        run: bash tools/smoke-test-ubuntu-gui.sh standalone/dist/mltd-relive-standalone
       - name: Package rolling release file
         shell: bash
         env:

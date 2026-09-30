@@ -1,4 +1,4 @@
-"""Release guide rendering and the repository's manual-only CI policy."""
+"""Release guide rendering and the repository's change-aware CI policy."""
 
 import ast
 import importlib.util
@@ -50,7 +50,7 @@ class ReleaseGuideTests(unittest.TestCase):
         body = self.render()
         for text in ('Start Server', 'Start DNS Server', 'Reset Data',
                      'mltd-relive.db', 'config.ini', 'MLTD0000',
-                     'relive2026', '远端下载', '已知问题', '手动按需更新'):
+                     'relive2026', '远端下载', '已知问题', '下载渠道'):
             with self.subTest(text=text):
                 self.assertIn(text, body)
 
@@ -90,7 +90,7 @@ class ReleaseGuideTests(unittest.TestCase):
             self.assertEqual(output.read_text(encoding='utf-8'), self.render())
 
 
-class ManualWorkflowPolicyTests(unittest.TestCase):
+class SelectiveWorkflowPolicyTests(unittest.TestCase):
     def test_only_two_maintained_workflows_remain(self):
         workflows = {p.name for p in (ROOT / '.github/workflows').glob('*.y*ml')}
         self.assertEqual(workflows, {'ci.yml', 'build-and-release.yml'})
@@ -102,32 +102,26 @@ class ManualWorkflowPolicyTests(unittest.TestCase):
                          'DROP TABLE account_credential', 'upgrade_database()',
                          'CArchiveReader', 'original in embedded',
                          'bash tools/smoke-test-ubuntu-gui.sh',
-                         'if: inputs.ubuntu_gui', 'needs: regression'):
+                         "needs.changes.outputs.ubuntu_gui == 'true'", 'needs: [changes, regression]'):
             with self.subTest(required=required):
                 self.assertIn(required, source)
         self.assertRegex(source, r'ubuntu_gui:\n(?: +[^\n]*\n)*?        default: false\n')
         self.assertIn('  contents: read', source)
-        self.assertNotIn('contents: write', source)
+        self.assertEqual(source.count('contents: write'), 1)
+        self.assertIn("github.event_name == 'push' && github.ref == 'refs/heads/main'", source)
         self.assertNotIn('gh release', source)
         self.assertNotIn('release-action', source)
 
-    def test_all_workflows_are_manually_triggered(self):
-        workflows = sorted((ROOT / '.github' / 'workflows').glob('*.y*ml'))
-        self.assertTrue(workflows)
-        for path in workflows:
-            with self.subTest(workflow=path.name):
-                lines = path.read_text(encoding='utf-8').splitlines()
-                start = next(i for i, line in enumerate(lines) if line.startswith('on:'))
-                end = next((i for i in range(start + 1, len(lines))
-                            if lines[i] and not lines[i][0].isspace()
-                            and not lines[i].startswith('#')), len(lines))
-                inline = lines[start][3:].strip()
-                if inline:
-                    self.assertEqual(inline, '[workflow_dispatch]')
-                else:
-                    events = re.findall(r'^  ([a-z_]+):',
-                                        '\n'.join(lines[start + 1:end]), re.MULTILINE)
-                    self.assertEqual(events, ['workflow_dispatch'])
+    def test_workflows_keep_manual_entrypoints(self):
+        for filename in ('ci.yml', 'build-and-release.yml'):
+            source = (ROOT / '.github/workflows' / filename).read_text(encoding='utf-8')
+            self.assertIn('  workflow_dispatch:', source)
+        ci = (ROOT / '.github/workflows/ci.yml').read_text(encoding='utf-8')
+        self.assertIn('  push:', ci)
+        self.assertIn('  pull_request:', ci)
+        release = (ROOT / '.github/workflows/build-and-release.yml').read_text(encoding='utf-8')
+        self.assertIn('  workflow_call:', release)
+        self.assertNotIn('  push:', release)
 
     def test_publish_uses_shared_renderer_and_guards_main(self):
         source = (ROOT / '.github/workflows/build-and-release.yml').read_text(encoding='utf-8')

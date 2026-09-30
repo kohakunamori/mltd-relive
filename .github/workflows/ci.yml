@@ -1,6 +1,42 @@
 name: 按需验证
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'standalone/**'
+      - 'tests/**'
+      - 'tools/**'
+      - 'client/**'
+      - 'key/**'
+      - 'requirements.txt'
+      - 'app_icon.*'
+      - 'LICENSE'
+      - 'release/game-client.env'
+      - '.github/workflows/ci.yml'
+      - '.github/workflows/build-and-release.yml'
+      - '.gitattributes'
+      - '!**/*.md'
+      - '!**/*.rst'
+      - '!**/*.adoc'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'standalone/**'
+      - 'tests/**'
+      - 'tools/**'
+      - 'client/**'
+      - 'key/**'
+      - 'requirements.txt'
+      - 'app_icon.*'
+      - 'LICENSE'
+      - 'release/game-client.env'
+      - '.github/workflows/ci.yml'
+      - '.github/workflows/build-and-release.yml'
+      - '.gitattributes'
+      - '!**/*.md'
+      - '!**/*.rst'
+      - '!**/*.adoc'
   workflow_dispatch:
     inputs:
       ubuntu_gui:
@@ -13,7 +49,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: manual-validation-${{ github.ref }}
+  group: selective-ci-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 defaults:
@@ -21,7 +57,36 @@ defaults:
     shell: bash
 
 jobs:
+  changes:
+    name: 改动范围与轻量检查
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      regression: ${{ steps.scope.outputs.regression }}
+      ubuntu_gui: ${{ steps.scope.outputs.ubuntu_gui }}
+      release: ${{ steps.scope.outputs.release }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: 判断需要执行的任务
+        id: scope
+        env:
+          REQUEST_UBUNTU_GUI: ${{ inputs.ubuntu_gui }}
+        run: python tools/ci_scope.py
+      - name: 检查触发策略、文档链接与打包输入
+        run: |
+          python -m compileall -q tools
+          python -m unittest discover -s tests -p 'test_ci_policy.py' -v
+          python -m unittest discover -s tests -p 'test_release_guidance.py' -v
+          python -m unittest discover -s tests -p 'test_ubuntu_standalone_packaging.py' -v
+
   regression:
+    needs: changes
+    if: needs.changes.outputs.regression == 'true'
     name: 服务器回归测试
     runs-on: ubuntu-22.04
     timeout-minutes: 15
@@ -141,8 +206,12 @@ jobs:
 
   ubuntu-gui:
     name: Ubuntu 打包与界面验证
-    needs: regression
-    if: inputs.ubuntu_gui
+    needs: [changes, regression]
+    if: >-
+      always() && !cancelled() &&
+      needs.changes.result == 'success' &&
+      needs.changes.outputs.ubuntu_gui == 'true' &&
+      (needs.regression.result == 'success' || needs.regression.result == 'skipped')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -199,3 +268,16 @@ jobs:
       - name: 验证图形界面启动
         shell: bash
         run: bash tools/smoke-test-ubuntu-gui.sh standalone/dist/mltd-relive-standalone
+
+  release:
+    name: 发布有实际变化的程序
+    needs: [changes, regression, ubuntu-gui]
+    if: >-
+      always() && !cancelled() &&
+      github.event_name == 'push' && github.ref == 'refs/heads/main' &&
+      needs.changes.result == 'success' && needs.changes.outputs.release == 'true' &&
+      needs.regression.result == 'success' &&
+      (needs.ubuntu-gui.result == 'success' || needs.ubuntu-gui.result == 'skipped')
+    permissions:
+      contents: write
+    uses: ./.github/workflows/build-and-release.yml
