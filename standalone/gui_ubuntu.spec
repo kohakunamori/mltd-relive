@@ -29,6 +29,27 @@ def find_runtime_library(soname):
     raise RuntimeError(f'Unable to locate required Ubuntu runtime library: {soname}')
 
 
+TK_NOTICE_FILENAME = 'mltd-relive-standalone-ubuntu-NOTICES.txt'
+
+
+def write_tk_notices(destination, doc_root=Path('/usr/share/doc')):
+    """Retain the installed Ubuntu packages' complete notices, byte for byte."""
+    parts = [b'Ubuntu standalone: bundled Tcl/Tk third-party notices\n']
+    for package in ('libtk8.6', 'libtcl8.6'):
+        source = Path(doc_root) / package / 'copyright'
+        try:
+            notice = source.read_bytes()
+        except OSError as exc:
+            raise RuntimeError(f'Required Tcl/Tk notice is unavailable: {source}') from exc
+        if not notice.strip():
+            raise RuntimeError(f'Required Tcl/Tk notice is empty: {source}')
+        parts.extend([f'\n===== {package}/copyright =====\n\n'.encode('utf-8'), notice])
+    destination = Path(destination)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    destination.write_bytes(b''.join(parts))
+    return str(destination)
+
+
 # The GitHub Actions Python distribution exposes _tkinter, but PyInstaller
 # 5.x does not reliably collect the system Tcl/Tk shared libraries that
 # _tkinter links against.  The resulting one-file executable then crashes on
@@ -41,11 +62,16 @@ tk_runtime_binaries = [
 ]
 
 
+# Use the exact package notices installed alongside the bundled libraries.
+# Missing/empty notices must fail the build, not silently omit attribution.
+tk_notice = write_tk_notices(Path(workpath) / TK_NOTICE_FILENAME)
+
+
 a = Analysis(
     ['gui.pyw'],
     pathex=[],
     binaries=tk_runtime_binaries,
-    datas=[],
+    datas=[(tk_notice, 'licenses')],
     hiddenimports=[],
     hookspath=['.'],
     hooksconfig={},
@@ -84,3 +110,6 @@ exe = EXE(
     codesign_identity=None,
     entitlements_file=None,
 )
+
+# Keep a readable copy beside the executable as well as inside its archive.
+shutil.copyfile(tk_notice, Path(DISTPATH) / TK_NOTICE_FILENAME)

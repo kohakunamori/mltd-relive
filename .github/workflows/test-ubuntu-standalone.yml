@@ -6,6 +6,9 @@ on:
       - 'standalone/**'
       - 'requirements.txt'
       - '.github/workflows/test-ubuntu-standalone.yml'
+      - '.github/workflows/build-and-release.yml'
+      - 'tools/smoke-test-ubuntu-gui.sh'
+      - 'tests/test_ubuntu_standalone_packaging.py'
   push:
     branches:
       - main
@@ -13,10 +16,17 @@ on:
       - 'standalone/**'
       - 'requirements.txt'
       - '.github/workflows/test-ubuntu-standalone.yml'
+      - '.github/workflows/build-and-release.yml'
+      - 'tools/smoke-test-ubuntu-gui.sh'
+      - 'tests/test_ubuntu_standalone_packaging.py'
+
+permissions:
+  contents: read
 
 jobs:
   smoke-test:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -25,6 +35,9 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+
+      - name: Test packaging and smoke-test failure handling
+        run: python -m unittest discover -s tests -p 'test_ubuntu_standalone_packaging.py' -v
 
       - name: Install build and GUI test dependencies
         shell: bash
@@ -44,33 +57,27 @@ jobs:
           cd standalone
           ../env/bin/pyinstaller gui_ubuntu.spec
 
-      - name: Verify bundled Tcl/Tk libraries
+      - name: Verify bundled Tcl/Tk libraries and complete notices
         shell: bash
         run: |
           set -euo pipefail
           cd standalone
-          ../env/bin/pyi-archive_viewer -l dist/mltd-relive-standalone | tee /tmp/archive.txt
-          grep -F 'libtk8.6.so' /tmp/archive.txt
-          grep -F 'libtcl8.6.so' /tmp/archive.txt
+          ../env/bin/python - <<'PY'
+          from pathlib import Path
+          from PyInstaller.archive.readers import CArchiveReader
+
+          archive = CArchiveReader('dist/mltd-relive-standalone')
+          for library in ('libtk8.6.so', 'libtcl8.6.so'):
+              assert library in archive.toc, f'Missing bundled library: {library}'
+          filename = 'mltd-relive-standalone-ubuntu-NOTICES.txt'
+          embedded = archive.extract(f'licenses/{filename}')
+          assert embedded == (Path('dist') / filename).read_bytes()
+          for package in ('libtk8.6', 'libtcl8.6'):
+              original = (Path('/usr/share/doc') / package / 'copyright').read_bytes()
+              assert original.strip() and original in embedded, f'Incomplete notice: {package}'
+          print('Both shared libraries and complete package notices are bundled.')
+          PY
 
       - name: Smoke-test GUI under Xvfb
         shell: bash
-        run: |
-          set -euo pipefail
-          cd standalone
-          set +e
-          timeout 8s xvfb-run -a ./dist/mltd-relive-standalone > /tmp/mltd-gui-smoke.log 2>&1
-          status=$?
-          set -e
-          cat /tmp/mltd-gui-smoke.log
-
-          # The GUI is expected to stay open until timeout. A clean exit is
-          # also accepted, but any other status means it crashed on startup.
-          if [[ "$status" -ne 0 && "$status" -ne 124 ]]; then
-            exit "$status"
-          fi
-
-          if grep -Fq 'libtk8.6.so: cannot open shared object file' /tmp/mltd-gui-smoke.log; then
-            echo 'Ubuntu standalone still cannot load Tk.' >&2
-            exit 1
-          fi
+        run: bash tools/smoke-test-ubuntu-gui.sh standalone/dist/mltd-relive-standalone
