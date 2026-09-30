@@ -1,1 +1,4 @@
 prototype/responses/* -linguist-detectable
+
+# Keep the Ubuntu smoke script executable from Windows/WSL checkouts.
+tools/smoke-test-ubuntu-gui.sh text eol=lf

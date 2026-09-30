@@ -134,6 +134,8 @@ jobs:
           - os: ubuntu-latest
             target: Ubuntu
             cmd-install: |
+              sudo apt-get update
+              sudo apt-get install -y libtk8.6 libtcl8.6
               python -m venv env
               source env/bin/activate
               python -m pip install --upgrade pip
@@ -186,6 +188,10 @@ jobs:
             )
           else
             cp "$PACKAGE_SOURCE" "standalone/dist/release-output/mltd-relive-${RELEASE_TAG}-${PACKAGE_SUFFIX}"
+          fi
+          if [[ "$PACKAGE_SUFFIX" == "ubuntu" ]]; then
+            cp standalone/dist/mltd-relive-standalone-ubuntu-NOTICES.txt \
+              "standalone/dist/release-output/mltd-relive-${RELEASE_TAG}-ubuntu-NOTICES.txt"
           fi
       - name: Upload Standalone artifact
         uses: actions/upload-artifact@v4
