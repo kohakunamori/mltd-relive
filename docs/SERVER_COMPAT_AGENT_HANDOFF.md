@@ -1,5 +1,7 @@
 # Server Compatibility Agent Handoff
 
+> **历史记录**：本文提到的临时审计、客户端提取/重建及分项测试工作流已从当前分支移除。[旧配置快照](https://github.com/kohakunamori/mltd-relive/tree/5ce30cae2259d4b8b41a41815955c82747285bb0/.github/workflows)仅供查阅；现用入口见 [README 的按需构建与发布](../README.md#按需构建与发布)。测试源码和本地工具仍保留。
+
 > Repository: `kohakunamori/mltd-relive`  
 > Working branch: `fix/story-service-compat`  
 > Base branch: `main`  

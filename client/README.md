@@ -60,10 +60,10 @@ python tools/client-source/compare-server-contract.py \
   client-source-output/report
 ```
 
-For a repository-hosted regeneration, use:
-
-- `.github/workflows/extract-zh-fixed-client.yml` to generate downloadable artifacts;
-- `.github/workflows/publish-zh-fixed-decompiled.yml` to regenerate and force-publish the complete orphan branch.
+The historical extraction and generated-branch publishing workflows have been
+removed from GitHub Actions. Use the local commands above for regeneration.
+Existing generated branches and local analysis tools are unchanged; the former
+workflow definitions remain available in Git history.
 
 ## Important limitation
 
@@ -79,7 +79,7 @@ When a future client baseline changes:
 
 1. update `release/game-client.env` and its SHA-256;
 2. create a new baseline ID rather than silently replacing `zh-fixed-v1`;
-3. run the extraction workflow and regenerate the dedicated decompiled branch;
+3. run the local extraction commands above and review the regenerated output;
 4. compare RPC contracts, smali, metadata and network symbols;
 5. relocate native patches from method identity/signatures rather than assuming old RVAs/file offsets remain valid;
 6. require patchers to verify both the baseline file hash and expected bytes/signature at every native patch point;

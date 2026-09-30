@@ -1,5 +1,7 @@
 # MLTD `zh-fixed.apk` 完整反编译与客户端维护指南
 
+> **历史记录**：本文提到的临时审计、客户端提取/重建及分项测试工作流已从当前分支移除。[旧配置快照](https://github.com/kohakunamori/mltd-relive/tree/5ce30cae2259d4b8b41a41815955c82747285bb0/.github/workflows)仅供查阅；现用入口见 [README 的按需构建与发布](../README.md#按需构建与发布)。测试源码和本地工具仍保留。
+
 本文档描述 `mltd-relive-game-client-zh-fixed.apk` 的完整可重复反编译、IL2CPP 元数据恢复、RPC 契约提取、服务端联动维护、原生补丁和重新打包流程。
 
 目标不是声称恢复了 Bandai Namco / Unity 的“原始工程源码”，而是建立一个对后续维护足够稳定、可重现、可 diff 的客户端源码视图。

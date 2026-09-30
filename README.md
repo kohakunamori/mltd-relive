@@ -462,9 +462,12 @@ python -m unittest discover -s ../tests -p 'test_gui_*.py' -v
 
 | 需要做什么 | 工作流文件 |
 | --- | --- |
-| 检查服务器兼容性、资源缓存和接口运行 | `test-asset-cache.yml` |
-| 验证 Ubuntu 打包、许可声明和图形界面启动 | `test-ubuntu-standalone.yml` |
+| 检查服务器功能、账户、数据库升级与资源缓存 | `ci.yml`（页面名称为“按需验证”） |
 | 构建并更新公开下载附件 | `build-and-release.yml`（页面名称为“按需构建与发布”） |
+
+仓库只保留以上两个入口。“按需验证”默认运行回归测试；需要验证 Ubuntu 可执行文件时，再勾选 `ubuntu_gui`，它会在回归通过后检查打包、许可声明和图形界面启动，不会发布附件。
+
+历史反编译、客户端重建、临时审计和重复构建工作流已移除；原测试文件与本地工具仍保留，旧配置可从 Git 历史查阅。
 
 发布工作流只接受 `main` 分支。两个“强制重新构建 / 下载”选项默认关闭；未变化的补丁工具和客户端会按现有规则复用。只有确实需要更新下载附件时才执行发布，修改文案不需要重新打包。
 
@@ -482,7 +485,7 @@ standalone/*.spec           PyInstaller 构建定义
 tools/cache_assets.py       Asset 灾备缓存 / 完整性验证
 tools/apk-patcher/          分辨率 / FPS APK Patcher
 tests/                      兼容性与 runtime regression tests
-.github/workflows/          CI / Release / compatibility audit
+.github/workflows/          手动回归验证与发布
 ASSET_CACHE.md              Asset 保存工具详细文档
 RELEASE_NOTES.md            版本更新记录
 LICENSE                     软件、依赖和第三方内容许可声明

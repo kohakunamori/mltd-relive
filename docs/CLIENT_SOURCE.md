@@ -83,9 +83,11 @@ UserService.GetSelf
 
 后续 patcher 应在写入前同时验证文件哈希和原始字节，避免客户端换版后旧 offset 静默破坏二进制。
 
-## 自动提取
+## 本地提取与历史自动化记录
 
-工作流：
+历史提取工作流已从当前分支移除，下述流程仅保留作参考；需要重新提取时，请使用本节后面的本地命令。
+
+原工作流（见 Git 历史）：
 
 ```text
 .github/workflows/extract-zh-fixed-client.yml
@@ -103,7 +105,7 @@ UserService.GetSelf
 8. 把客户端 RPC 清单与 `standalone/mltd/services` 中 `@dispatcher.add_method(...)` 注册项做集合差异，输出服务端覆盖报告；
 9. 上传 compact report artifact 与完整 `tar.zst` source artifact。
 
-本地也可执行：
+当前请在本地执行：
 
 ```bash
 chmod +x tools/client-source/extract-zh-fixed.sh

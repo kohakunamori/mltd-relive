@@ -22,7 +22,8 @@ The identical notice is also embedded in the executable under
 `licenses/mltd-relive-standalone-ubuntu-NOTICES.txt`. The rolling release
 workflow uploads the readable notice alongside the Ubuntu executable.
 
-`Test Ubuntu Standalone GUI` verifies the archive libraries, compares its
+The optional `ubuntu_gui` input in `.github/workflows/ci.yml` enables the
+Ubuntu packaging check. It verifies the bundled libraries, compares the
 embedded notice with the sidecar and both original package notices, and runs
 the executable under Xvfb from a fresh temporary directory. It does not load a
 user database or start a configured server. Only timeout status 124 is accepted;

@@ -99,7 +99,7 @@ def main() -> int:
             {"path": path, "bytes": size} for size, path in sorted(warnings, reverse=True)
         ],
         "largest_files": largest,
-        "generated_by": ".github/workflows/publish-zh-fixed-decompiled.yml",
+        "generated_by": "tools/client-source/prepare-publish-tree.py",
         "excluded_generated_output": ["rebuild-check/unsigned-rebuilt.apk"],
         "source_truth_order": [
             "apktool/smali for Android byte-level edits",

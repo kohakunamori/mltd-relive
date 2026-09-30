@@ -1,5 +1,7 @@
 # Reverse-engineered Android client acceptance
 
+> **历史记录**：本文提到的临时审计、客户端提取/重建及分项测试工作流已从当前分支移除。[旧配置快照](https://github.com/kohakunamori/mltd-relive/tree/5ce30cae2259d4b8b41a41815955c82747285bb0/.github/workflows)仅供查阅；现用入口见 [README 的按需构建与发布](../README.md#按需构建与发布)。测试源码和本地工具仍保留。
+
 Recorded: 2026-09-03
 
 This document records the client-side acceptance layer used together with the standalone server compatibility gate.
