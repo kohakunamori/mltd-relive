@@ -113,6 +113,11 @@ class TkPackagingTests(unittest.TestCase):
             self.assertEqual(namespace['a'].datas, [(str(generated), 'licenses')])
             self.assertEqual((dist / filename).read_bytes(), generated.read_bytes())
 
+    def test_smoke_script_keeps_linux_line_endings_on_windows(self):
+        attributes = (ROOT / '.gitattributes').read_text(encoding='utf-8')
+        self.assertIn('tools/smoke-test-ubuntu-gui.sh text eol=lf', attributes)
+        self.assertNotIn(b'\r\n', SMOKE.read_bytes())
+
     def test_release_upload_includes_notice_sidecar(self):
         source = (ROOT / '.github/workflows/build-and-release.yml').read_text(encoding='utf-8')
         self.assertIn('cp standalone/dist/mltd-relive-standalone-ubuntu-NOTICES.txt', source)
