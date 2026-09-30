@@ -3,12 +3,10 @@ import os
 import sqlite3
 import threading
 import time
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Iterable, NamedTuple
+from typing import Iterable
 
-import requests
 from msgpack import unpackb
 
 REMOTE_ASSET_ROOT = 'https://assets.rainbowunicorn7297.com'
@@ -18,7 +16,6 @@ MANIFEST_NAMES = {
 }
 SUPPORTED_LANGUAGES = frozenset(MANIFEST_NAMES)
 SUPPORTED_PLATFORMS = frozenset({'android', 'ios'})
-_METADATA_BATCH_SIZE = 256
 
 
 def _safe_component(value: str) -> str:
@@ -69,14 +66,14 @@ def parse_manifest_objects(data: bytes) -> list[str]:
     return objects
 
 
-class _DownloadOutcome(NamedTuple):
-    path: Path
-    metadata: tuple
-    size: int
-
-
 class AssetStore:
-    def __init__(self, root: str | os.PathLike[str] = 'asset-cache'):
+    """Persistent on-disk Asset mirror format shared by mirror and server.
+
+    This class intentionally contains no networking. The Asset Mirror tool is
+    responsible for populating it; Asset Server only reads from it.
+    """
+
+    def __init__(self, root: str | os.PathLike[str] = 'asset-archive'):
         self.root = Path(root)
         self.root.mkdir(parents=True, exist_ok=True)
         self.db_path = self.root / '.asset-index.sqlite3'
@@ -218,7 +215,6 @@ class AssetStore:
 
     def complete_names(self, language: str, platform: str,
                        names: Iterable[str], *, verify: bool = False) -> set[str]:
-        """Return complete objects using one SQLite query and one directory scan."""
         names = list(dict.fromkeys(names))
         if not names:
             return set()
@@ -288,224 +284,3 @@ class AssetStore:
         except OSError:
             return False
         return digest.hexdigest() == metadata['sha256']
-
-
-class AssetMirror:
-    def __init__(self, store: AssetStore, remote_root: str = REMOTE_ASSET_ROOT,
-                 timeout: float = 60.0, upstream_proxy: str | None = None):
-        self.store = store
-        self.remote_root = remote_root.rstrip('/')
-        self.timeout = timeout
-        self.upstream_proxy = upstream_proxy.strip() if upstream_proxy else None
-        self._local = threading.local()
-
-    def _session(self) -> requests.Session:
-        session = getattr(self._local, 'session', None)
-        if session is None:
-            session = requests.Session()
-            adapter = requests.adapters.HTTPAdapter(
-                pool_connections=1,
-                pool_maxsize=1,
-                max_retries=3,
-            )
-            session.mount('http://', adapter)
-            session.mount('https://', adapter)
-            session.headers['User-Agent'] = 'mltd-relive-asset-mirror/1'
-            if self.upstream_proxy:
-                session.proxies.update({
-                    'http': self.upstream_proxy,
-                    'https': self.upstream_proxy,
-                })
-            self._local.session = session
-        return session
-
-    def remote_url(self, language: str, platform: str, name: str) -> str:
-        _safe_component(name)
-        return f'{self.remote_root}/{scope_name(language, platform)}/{name}'
-
-    def _download(self, language: str, platform: str, name: str,
-                  *, force: bool = False, skip_existing_check: bool = False,
-                  defer_metadata: bool = False,
-                  durable_write: bool = True) -> _DownloadOutcome:
-        destination = self.store.object_path(language, platform, name)
-        if (not force and not skip_existing_check
-                and self.store.is_complete(language, platform, name)):
-            try:
-                size = destination.stat().st_size
-            except OSError:
-                size = 0
-            return _DownloadOutcome(destination, (), size)
-
-        part = self.store.part_path(language, platform, name)
-        try:
-            resume_at = part.stat().st_size
-        except OSError:
-            resume_at = 0
-        headers = {'Accept-Encoding': 'identity'}
-        if resume_at:
-            headers['Range'] = f'bytes={resume_at}-'
-
-        response = self._session().get(
-            self.remote_url(language, platform, name),
-            headers=headers,
-            stream=True,
-            timeout=self.timeout,
-        )
-        try:
-            if response.status_code == 416 and resume_at:
-                part.unlink(missing_ok=True)
-                return self._download(
-                    language, platform, name, force=True,
-                    skip_existing_check=True, defer_metadata=defer_metadata,
-                    durable_write=durable_write,
-                )
-            response.raise_for_status()
-
-            append = resume_at > 0 and response.status_code == 206
-            if not append:
-                resume_at = 0
-            mode = 'ab' if append else 'wb'
-            digest = hashlib.sha256()
-            if append:
-                with part.open('rb') as existing:
-                    for chunk in iter(lambda: existing.read(1024 * 1024), b''):
-                        digest.update(chunk)
-
-            with part.open(mode) as file:
-                for chunk in response.iter_content(chunk_size=1024 * 1024):
-                    if not chunk:
-                        continue
-                    file.write(chunk)
-                    digest.update(chunk)
-                if durable_write:
-                    file.flush()
-                    os.fsync(file.fileno())
-
-            size = part.stat().st_size
-            expected_total = None
-            if response.status_code == 206:
-                content_range = response.headers.get('Content-Range', '')
-                if '/' in content_range:
-                    total = content_range.rsplit('/', 1)[1]
-                    if total.isdigit():
-                        expected_total = int(total)
-            elif response.headers.get('Content-Length', '').isdigit():
-                expected_total = int(response.headers['Content-Length'])
-
-            if expected_total is not None and size != expected_total:
-                raise IOError(
-                    f'Incomplete asset {name}: got {size} bytes, expected {expected_total}'
-                )
-
-            os.replace(part, destination)
-            record = self.store._metadata_record(
-                scope_name(language, platform), name,
-                status=200, size=size, sha256=digest.hexdigest(),
-                headers=response.headers,
-            )
-            if not defer_metadata:
-                self.store.put_metadata_batch([record])
-            return _DownloadOutcome(destination, record, size)
-        finally:
-            response.close()
-
-    def download(self, language: str, platform: str, name: str,
-                 *, force: bool = False) -> Path:
-        return self._download(language, platform, name, force=force).path
-
-    def head(self, language: str, platform: str, name: str):
-        response = self._session().head(
-            self.remote_url(language, platform, name),
-            headers={'Accept-Encoding': 'identity'},
-            allow_redirects=True,
-            timeout=self.timeout,
-        )
-        response.raise_for_status()
-        return response
-
-    def fetch_manifest(self, language: str, platform: str,
-                       *, force: bool = False) -> tuple[Path, list[str]]:
-        name = manifest_name(language)
-        path = self.download(language, platform, name, force=force)
-        return path, parse_manifest_objects(path.read_bytes())
-
-    def prefetch(self, language: str, platform: str, *, workers: int = 8,
-                 force: bool = False, verify_existing: bool = False,
-                 names: Iterable[str] | None = None,
-                 progress=None,
-                 manifest_objects: Iterable[str] | None = None,
-                 metadata_batch_size: int = _METADATA_BATCH_SIZE,
-                 durable_writes: bool = False) -> dict:
-        if manifest_objects is None:
-            manifest_path, source_objects = self.fetch_manifest(
-                language, platform, force=force
-            )
-        else:
-            source_objects = list(dict.fromkeys(manifest_objects))
-            manifest_path = self.store.object_path(
-                language, platform, manifest_name(language)
-            )
-
-        requested = source_objects if names is None else list(names)
-        requested = list(dict.fromkeys(requested))
-
-        if force:
-            complete = set()
-        else:
-            complete = self.store.complete_names(
-                language, platform, requested, verify=verify_existing
-            )
-        pending = [name for name in requested if name not in complete]
-
-        result = {
-            'manifest': str(manifest_path),
-            'total_manifest_objects': len(source_objects),
-            'requested': len(requested),
-            'already_cached': len(requested) - len(pending),
-            'downloaded': 0,
-            'failed': [],
-        }
-        if not pending:
-            return result
-
-        batch_size = max(1, int(metadata_batch_size))
-        metadata_batch: list[tuple] = []
-        with ThreadPoolExecutor(
-                max_workers=min(max(1, workers), len(pending))) as executor:
-            futures = {
-                executor.submit(
-                    self._download,
-                    language,
-                    platform,
-                    name,
-                    force=force,
-                    skip_existing_check=True,
-                    defer_metadata=True,
-                    durable_write=durable_writes,
-                ): name
-                for name in pending
-            }
-            completed = 0
-            for future in as_completed(futures):
-                name = futures[future]
-                completed += 1
-                try:
-                    outcome = future.result()
-                except Exception as exc:
-                    result['failed'].append((name, str(exc)))
-                    ok = False
-                    error = exc
-                else:
-                    metadata_batch.append(outcome.metadata)
-                    if len(metadata_batch) >= batch_size:
-                        self.store.put_metadata_batch(metadata_batch)
-                        metadata_batch.clear()
-                    result['downloaded'] += 1
-                    ok = True
-                    error = None
-                if progress:
-                    progress(completed, len(pending), name, ok, error)
-
-        if metadata_batch:
-            self.store.put_metadata_batch(metadata_batch)
-        return result

@@ -1,0 +1,99 @@
+name: Test multi-user accounts
+
+on:
+  push:
+    branches:
+      - main
+      - feature/multi-user-accounts
+      - feature/gui-user-management
+      - feature/optional-dns-gui
+      - feature/manual-update-check
+    paths:
+      - 'standalone/**'
+      - 'tests/test_multi_user_accounts_runtime.py'
+      - 'tests/test_account_management_runtime.py'
+      - 'tests/test_gui_remote_asset_ui.py'
+      - 'tests/test_gui_dns_control.py'
+      - 'tests/test_gui_update_control.py'
+      - '.github/workflows/test-multi-user-accounts.yml'
+  workflow_dispatch:
+
+jobs:
+  targeted:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: requirements.txt
+      - run: python -m pip install -r requirements.txt
+      - name: Fresh database and multi-user runtime tests
+        run: |
+          set -euo pipefail
+          cd standalone
+          rm -f mltd-relive.db config.ini fk-baseline.json
+          PYTHONPATH=. python -m mltd.models.setup
+          python - <<'PY'
+          import json, sqlite3
+          db = sqlite3.connect('mltd-relive.db')
+          baseline = list(db.execute('PRAGMA foreign_key_check'))
+          with open('fk-baseline.json', 'w') as f:
+              json.dump(baseline, f)
+          print(f'baseline FK violations: {len(baseline)}')
+          PY
+          PYTHONPATH=. python -m unittest discover -v -s ../tests -p 'test_*account*_runtime.py'
+          PYTHONPATH=. python -m unittest discover -v -s ../tests -p 'test_gui_*.py'
+      - name: Assert account operations add no FK violations
+        run: |
+          cd standalone
+          python - <<'PY'
+          import json, sqlite3
+          with open('fk-baseline.json') as f:
+              baseline = {tuple(v) for v in json.load(f)}
+          db = sqlite3.connect('mltd-relive.db')
+          current = set(db.execute('PRAGMA foreign_key_check'))
+          added = current - baseline
+          if added:
+              raise SystemExit(f'new FK violations introduced: {sorted(added)[:20]}')
+          print(f'foreign_key_check unchanged: {len(current)} historical violations, 0 added')
+          PY
+      - name: Simulate v0.1.10 database migration
+        run: |
+          set -euo pipefail
+          cd standalone
+          rm -f mltd-relive.db config.ini
+          PYTHONPATH=. python -m mltd.models.setup
+          python - <<'PY'
+          import sqlite3
+          db = sqlite3.connect('mltd-relive.db')
+          before = db.execute("SELECT level, money, name FROM user WHERE user_id='ffffffffffffffffffffffffffffffff'").fetchone()
+          if before is None:
+              before = db.execute("SELECT level, money, name FROM user WHERE search_id='00000000'").fetchone()
+          db.execute('DROP TABLE account_credential')
+          db.execute("UPDATE server_version SET version='0.1.10'")
+          db.commit()
+          with open('migration-before.txt', 'w') as f:
+              f.write(repr(before))
+          PY
+          PYTHONPATH=. python - <<'PY'
+          from mltd.models.setup import upgrade_database
+          upgrade_database()
+          PY
+          PYTHONPATH=. python - <<'PY'
+          import ast, sqlite3
+          from mltd.accounts import DEFAULT_USERNAME
+          db = sqlite3.connect('mltd-relive.db')
+          version = db.execute('SELECT version FROM server_version').fetchone()[0]
+          if version != '0.1.11':
+              raise SystemExit(f'unexpected migrated version: {version}')
+          row = db.execute('SELECT username FROM account_credential WHERE username=?', (DEFAULT_USERNAME,)).fetchone()
+          if row != (DEFAULT_USERNAME,):
+              raise SystemExit('default credential missing after migration')
+          after = db.execute("SELECT level, money, name FROM user WHERE search_id='00000000'").fetchone()
+          before = ast.literal_eval(open('migration-before.txt').read())
+          if after != before:
+              raise SystemExit(f'default save changed during migration: {before!r} -> {after!r}')
+          print('v0.1.10 -> v0.1.11 migration preserved default save')
+          PY

@@ -1,7 +1,6 @@
 from jsonrpc import dispatcher
 
 from mltd.servers.asset_cache import REMOTE_ASSET_ROOT, scope_name
-from mltd.servers.asset_server import asset_port
 from mltd.servers.config import config
 
 
@@ -9,42 +8,15 @@ from mltd.servers.config import config
 def get_asset_version(params):
     """Service for getting current asset version.
 
-    Invoked after logging in.
-    Args:
-        params: A dict containing the following keys.
-            os_name: Which OS the game is designed to run on
-                     (Android/iOS).
-            unity_version: Unity version of the game (2018v1).
-            environment: 'production'
-            token: A 40-character hex value representing the game
-                   version. This value is the same as header value
-                   'X-Version-Hash' for all requests sent from the same
-                   game client version.
-    Returns:
-        A dict containing the following keys.
-        asset_url: The URL from which assets are downloaded.
-        asset_index_name: The name of the index/manifest file containing
-                          file names and other info of all other assets.
-        asset_version: Asset version (last version before EoS is
-                       120000).
+    Standalone always returns a normal HTTPS remote Asset endpoint. By default
+    that is Rainbow's CDN. ``asset_remote_url`` can point at a trusted HTTPS
+    relay/mirror which performs its own caching or proxied upstream fetches.
     """
     os_name = 'android' if params['os_name'] == 'Android' else 'ios'
     scope = scope_name(config.language, os_name)
 
-    if config.asset_mode == 'remote':
-        asset_url = f'{REMOTE_ASSET_ROOT}/{scope}/'
-    elif config.is_local:
-        # Termux / same-device mode talks directly to the local HTTP asset
-        # server and therefore needs no extra certificate or DNS handling.
-        asset_url = f'http://127.0.0.1:{asset_port}/{scope}/'
-    else:
-        # Desktop clients already trust and resolve the existing API hostname
-        # to the standalone TLS proxy. Reuse that trust path instead of
-        # introducing a second local certificate for the public asset domain.
-        asset_url = (
-            f'https://theaterdays-{config.language}.appspot.com/'
-            f'__mltd_assets/{scope}/'
-        )
+    base_url = config.asset_remote_url or REMOTE_ASSET_ROOT
+    asset_url = f'{base_url}/{scope}/'
 
     return {
         'asset_url': asset_url,

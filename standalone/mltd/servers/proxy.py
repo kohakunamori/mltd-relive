@@ -1,10 +1,9 @@
 import io
 import socket
-import ssl
 import sys
 import threading
 import traceback
-from http.server import ThreadingHTTPServer
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from os import path
 from ssl import PROTOCOL_TLS_SERVER, SSLContext
 from urllib.parse import unquote, urlsplit
@@ -12,13 +11,10 @@ from urllib.parse import unquote, urlsplit
 import requests
 import urllib3
 
-from mltd.servers.asset_cache import AssetMirror, AssetStore
-from mltd.servers.asset_server import AssetHTTPRequestHandler, bind_asset_handler
 from mltd.servers.config import api_port, config
 from mltd.servers.logging import logger
 
 proxy_port = 443
-_ASSET_PREFIX = '/__mltd_assets'
 _HOP_BY_HOP_HEADERS = {
     'connection',
     'keep-alive',
@@ -62,56 +58,22 @@ class ThreadedProxyServer(ThreadingHTTPServer):
     block_on_close = False
     allow_reuse_address = True
     request_queue_size = _REQUEST_QUEUE_SIZE
-    ssl_context: SSLContext | None = None
 
     def get_request(self):
-        # Accept stays plaintext so ThreadingMixIn can dispatch immediately;
-        # TLS handshakes are performed inside each worker below.  Wrapping the
-        # listening socket serializes handshakes in the accept path under a
-        # burst of new game/asset connections.
         request, client_address = super().get_request()
         _tune_client_socket(request)
         return request, client_address
 
-    def process_request_thread(self, request, client_address):
-        context = self.ssl_context
-        if context is not None:
-            try:
-                request = context.wrap_socket(request, server_side=True)
-            except (ssl.SSLError, OSError):
-                try:
-                    request.close()
-                except OSError:
-                    pass
-                return
-        super().process_request_thread(request, client_address)
 
-
-class ProxyHTTPRequestHandler(AssetHTTPRequestHandler):
+class ProxyHTTPRequestHandler(BaseHTTPRequestHandler):
     protocol_version = 'HTTP/1.1'
     api_application = None
 
     def do_HEAD(self):
-        asset_path = self._asset_path()
-        if asset_path is None:
-            self.send_error(404)
-            return
-        self._serve_path(asset_path, send_body=False)
+        self.send_error(404)
 
     def do_GET(self):
-        asset_path = self._asset_path()
-        if asset_path is None:
-            self.send_error(404)
-            return
-        self._serve_path(asset_path, send_body=True)
-
-    def _asset_path(self):
-        request_path = urlsplit(self.path).path
-        if request_path == _ASSET_PREFIX:
-            return '/'
-        if request_path.startswith(_ASSET_PREFIX + '/'):
-            return request_path[len(_ASSET_PREFIX):]
-        return None
+        self.send_error(404)
 
     def do_POST(self):
         content_len = int(self.headers.get('Content-Length', '0'))
@@ -235,6 +197,15 @@ class ProxyHTTPRequestHandler(AssetHTTPRequestHandler):
         except (BrokenPipeError, ConnectionResetError):
             pass
 
+    def send_error(self, code, message=None, explain=None):
+        if code in {404, 500, 502, 503}:
+            logger.warning(
+                'Client API HTTP error: '
+                f'status={code} method={self.command} '
+                f'host={self.headers.get("Host", "")} path={self.path}'
+            )
+        super().send_error(code, message, explain)
+
     def log_message(self, format, *args):
         pass
 
@@ -249,43 +220,23 @@ def start(port=proxy_port, conn=None):
 
     ProxyHTTPRequestHandler.api_application = application
 
-    if config.asset_mode == 'local':
-        from mltd.servers.asset_prepare import prepare_local_assets
-        prepare_local_assets(
-            config.language,
-            config.asset_cache_root,
-            workers=config.asset_prefetch_workers,
-            upstream_proxy=config.asset_upstream_proxy,
-        )
-
-    store = AssetStore(config.asset_cache_root)
-    fetch_on_miss = config.asset_mode == 'hybrid'
-    mirror = AssetMirror(
-        store,
-        upstream_proxy=config.asset_upstream_proxy,
-    ) if fetch_on_miss else None
-    bind_asset_handler(
-        ProxyHTTPRequestHandler,
-        store,
-        mirror=mirror,
-        fetch_on_miss=fetch_on_miss,
-    )
-
     httpd = ThreadedProxyServer(('', port), ProxyHTTPRequestHandler)
     certfile = path.join(key_path(), 'api.crt')
     keyfile = path.join(key_path(), 'api.key')
     context = SSLContext(PROTOCOL_TLS_SERVER)
     context.load_cert_chain(certfile, keyfile)
-    # Keep the listening socket plaintext.  Each ThreadingMixIn worker wraps
-    # its accepted socket, so TLS handshakes can proceed in parallel.
-    httpd.ssl_context = context
+
+    # Preserve the v0.1.6 TLS accept path for corrected game-client
+    # compatibility. The listener itself is SSL-wrapped before serve_forever.
+    httpd.socket = context.wrap_socket(httpd.socket, server_side=True)
 
     logger.info(f'TLS API server is running on port {port}...')
-    logger.info('TLS handshakes: parallel worker mode')
-    logger.info('API dispatch: direct WSGI (no localhost HTTP hop)')
-    logger.info(f'Asset mode: {config.asset_mode}')
-    if config.asset_upstream_proxy:
-        logger.info(f'Asset upstream proxy: {config.asset_upstream_proxy}')
+    logger.info('TLS handshakes: listener-wrapped compatibility mode')
+    logger.info('API dispatch: direct WSGI, concurrent HTTP/1.1 keep-alive')
+    if config.asset_remote_url:
+        logger.info(f'Asset transport: remote endpoint {config.asset_remote_url}')
+    else:
+        logger.info('Asset transport: Rainbow remote CDN')
     if conn:
         conn.send(True)
         conn.close()

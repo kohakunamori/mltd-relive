@@ -1,34 +1,53 @@
-name: Build and Release
+name: Build and Publish Latest Release
 
 on:
   push:
-    tags:
-      - 'standalone-v*'
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      rebuild_patcher:
+        description: 'Force rebuilding APK Patcher packages'
+        required: false
+        default: false
+        type: boolean
+      refresh_game_clients:
+        description: 'Force downloading and validating corrected game clients'
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: write
 
+concurrency:
+  group: rolling-main-release
+  cancel-in-progress: true
+
 jobs:
   metadata:
-    name: Resolve release metadata
-    if: github.event_name == 'workflow_dispatch' || github.ref_type == 'tag' || contains(github.event.head_commit.message, '[release standalone]')
+    name: Resolve rolling release metadata
     runs-on: ubuntu-latest
     outputs:
       standalone_version: ${{ steps.meta.outputs.standalone_version }}
       release_tag: ${{ steps.meta.outputs.release_tag }}
       patcher_version: ${{ steps.meta.outputs.patcher_version }}
+      baseline_release_tag: ${{ steps.meta.outputs.baseline_release_tag }}
+      patcher_changed: ${{ steps.meta.outputs.patcher_changed }}
+      gameclient_changed: ${{ steps.meta.outputs.gameclient_changed }}
+      short_sha: ${{ steps.meta.outputs.short_sha }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Resolve versions from source
+      - name: Resolve versions and reusable assets
         id: meta
         shell: bash
         run: |
           set -euo pipefail
+
           standalone_version="$(python - <<'PY'
           import pathlib
           import re
@@ -40,21 +59,63 @@ jobs:
           PY
           )"
           patcher_version="v$(tr -d '\r\n ' < tools/apk-patcher/VERSION)"
-          release_tag="standalone-v${standalone_version}"
-          if [[ "${GITHUB_REF_TYPE}" == "tag" && "${GITHUB_REF_NAME}" != "${release_tag}" ]]; then
-            echo "Tag ${GITHUB_REF_NAME} does not match source version ${release_tag}." >&2
-            exit 1
+          release_tag="standalone-latest"
+          short_sha="${GITHUB_SHA:0:8}"
+
+          git fetch --force --tags
+          baseline_release_tag="$(git tag --list 'standalone-v*' --sort=-v:refname | head -n 1 || true)"
+
+          patcher_changed=true
+          gameclient_changed=true
+
+          if [[ -n "${baseline_release_tag}" ]]; then
+            if git diff --quiet "${baseline_release_tag}" "${GITHUB_SHA}" -- tools/apk-patcher requirements.txt; then
+              patcher_changed=false
+            fi
+
+            if git cat-file -e "${baseline_release_tag}:release/game-client.env" 2>/dev/null; then
+              if git diff --quiet "${baseline_release_tag}" "${GITHUB_SHA}" -- release/game-client.env; then
+                gameclient_changed=false
+              fi
+            else
+              source release/game-client.env
+              if [[ "${GAME_CLIENT_REVISION}" == "fixed-clients-v1" \
+                    && "${ZH_SHA256}" == "a423f1b09b6d9022cf255aff9a43716d6beadf32d42641da3c7b92d2e663e918" \
+                    && "${KO_SHA256}" == "a0dbd66681f59d4ac5ca9d4bd1cf7aea24e7cd728356342158ded6b871f47e93" ]]; then
+                gameclient_changed=false
+              fi
+            fi
           fi
-          echo "standalone_version=${standalone_version}" >> "$GITHUB_OUTPUT"
-          echo "release_tag=${release_tag}" >> "$GITHUB_OUTPUT"
-          echo "patcher_version=${patcher_version}" >> "$GITHUB_OUTPUT"
+
+          if [[ "${{ inputs.rebuild_patcher }}" == "true" ]]; then
+            patcher_changed=true
+          fi
+          if [[ "${{ inputs.refresh_game_clients }}" == "true" ]]; then
+            gameclient_changed=true
+          fi
+
+          {
+            echo "standalone_version=${standalone_version}"
+            echo "release_tag=${release_tag}"
+            echo "patcher_version=${patcher_version}"
+            echo "baseline_release_tag=${baseline_release_tag}"
+            echo "patcher_changed=${patcher_changed}"
+            echo "gameclient_changed=${gameclient_changed}"
+            echo "short_sha=${short_sha}"
+          } >> "$GITHUB_OUTPUT"
+
+          echo "Rolling release tag: ${release_tag}"
+          echo "Source version: ${standalone_version}"
+          echo "Baseline versioned release: ${baseline_release_tag:-<none>}"
+          echo "APK Patcher changed: ${patcher_changed}"
+          echo "Game clients changed: ${gameclient_changed}"
 
   build:
-    name: Build standalone packages
+    name: Build Standalone (${{ matrix.target }})
     needs: metadata
-    if: needs.metadata.result == 'success'
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: windows-latest
@@ -103,11 +164,13 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Install dependencies for ${{ matrix.target }}
+          cache: pip
+          cache-dependency-path: requirements.txt
+      - name: Install dependencies
         run: ${{ matrix.cmd-install }}
-      - name: Build with PyInstaller for ${{ matrix.target }}
+      - name: Build with PyInstaller
         run: ${{ matrix.cmd-build }}
-      - name: Package release file
+      - name: Package rolling release file
         shell: bash
         env:
           PACKAGE_SOURCE: ${{ matrix.package-source }}
@@ -124,7 +187,7 @@ jobs:
           else
             cp "$PACKAGE_SOURCE" "standalone/dist/release-output/mltd-relive-${RELEASE_TAG}-${PACKAGE_SUFFIX}"
           fi
-      - name: Upload build artifacts
+      - name: Upload Standalone artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.out-name }}
@@ -132,11 +195,12 @@ jobs:
           if-no-files-found: error
 
   patcher:
-    name: Build APK Patcher packages
+    name: Build APK Patcher (${{ matrix.target }})
     needs: metadata
-    if: needs.metadata.result == 'success'
+    if: needs.metadata.outputs.patcher_changed == 'true'
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: windows-latest
@@ -185,9 +249,11 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Install dependencies for ${{ matrix.target }}
+          cache: pip
+          cache-dependency-path: requirements.txt
+      - name: Install dependencies
         run: ${{ matrix.cmd-install }}
-      - name: Build APK Patcher for ${{ matrix.target }}
+      - name: Build APK Patcher
         run: ${{ matrix.cmd-build }}
       - name: Package APK Patcher
         shell: bash
@@ -206,65 +272,123 @@ jobs:
           else
             cp "$PACKAGE_SOURCE" "tools/apk-patcher/dist/release-output/mltd-relive-apk-patcher-${PATCHER_VERSION}-${PACKAGE_SUFFIX}"
           fi
-      - name: Upload APK Patcher artifacts
+      - name: Upload APK Patcher artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.out-name }}
           path: tools/apk-patcher/dist/release-output/*
           if-no-files-found: error
 
+  reuse-patcher:
+    name: Reuse unchanged APK Patcher packages
+    needs: metadata
+    if: needs.metadata.outputs.patcher_changed == 'false'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download APK Patcher assets from versioned Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BASELINE_RELEASE_TAG: ${{ needs.metadata.outputs.baseline_release_tag }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${BASELINE_RELEASE_TAG}"
+          mkdir -p reused-patcher
+          gh release download "${BASELINE_RELEASE_TAG}" \
+            --repo "${GITHUB_REPOSITORY}" \
+            --pattern 'mltd-relive-apk-patcher-*' \
+            --dir reused-patcher
+          test "$(find reused-patcher -maxdepth 1 -type f | wc -l)" -ge 3
+      - name: Upload reused APK Patcher artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: patcher-reused
+          path: reused-patcher/*
+          if-no-files-found: error
+
   gameclient:
     name: Prepare corrected game clients
     needs: metadata
-    if: needs.metadata.result == 'success'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Reuse unchanged game clients from versioned Release
+        if: needs.metadata.outputs.gameclient_changed == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BASELINE_RELEASE_TAG: ${{ needs.metadata.outputs.baseline_release_tag }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${BASELINE_RELEASE_TAG}"
+          mkdir -p game-client
+          gh release download "${BASELINE_RELEASE_TAG}" \
+            --repo "${GITHUB_REPOSITORY}" \
+            --pattern 'mltd-relive-game-client-*-fixed.apk' \
+            --dir game-client
+
       - name: Install MEGA download tools
+        if: needs.metadata.outputs.gameclient_changed == 'true'
         run: |
           sudo apt-get update
-          sudo apt-get install -y megatools unzip
+          sudo apt-get install -y megatools
+
       - name: Download corrected Traditional Chinese client
+        if: needs.metadata.outputs.gameclient_changed == 'true'
         shell: bash
         run: |
           set -euo pipefail
+          source release/game-client.env
           mkdir -p game-client
           output='game-client/mltd-relive-game-client-zh-fixed.apk'
-          modern='https://mega.nz/file/HMgiTSbI#cy7z52H6zBOSdSX5Xok1GKQ4yT7k6K1ctjV6Heceu3I'
-          legacy='https://mega.nz/#!HMgiTSbI!cy7z52H6zBOSdSX5Xok1GKQ4yT7k6K1ctjV6Heceu3I'
-          if ! megatools dl --no-progress --path - "$modern" > "${output}.part"; then
+          if ! megatools dl --no-progress --path - "$ZH_MODERN_URL" > "${output}.part"; then
             rm -f "${output}.part"
-            megatools dl --no-progress --path - "$legacy" > "${output}.part"
+            megatools dl --no-progress --path - "$ZH_LEGACY_URL" > "${output}.part"
           fi
           mv "${output}.part" "$output"
+
       - name: Download corrected Korean client
+        if: needs.metadata.outputs.gameclient_changed == 'true'
         shell: bash
         run: |
           set -euo pipefail
+          source release/game-client.env
           mkdir -p game-client
           output='game-client/mltd-relive-game-client-ko-fixed.apk'
-          modern='https://mega.nz/file/2dBgiBQY#NBgo-1rTW7g1Jtm9FLYZ61KoOP4HFoElxO75dzMyXew'
-          legacy='https://mega.nz/#!2dBgiBQY!NBgo-1rTW7g1Jtm9FLYZ61KoOP4HFoElxO75dzMyXew'
-          if ! megatools dl --no-progress --path - "$modern" > "${output}.part"; then
+          if ! megatools dl --no-progress --path - "$KO_MODERN_URL" > "${output}.part"; then
             rm -f "${output}.part"
-            megatools dl --no-progress --path - "$legacy" > "${output}.part"
+            megatools dl --no-progress --path - "$KO_LEGACY_URL" > "${output}.part"
           fi
           mv "${output}.part" "$output"
+
       - name: Validate game client packages
         shell: bash
         run: |
           set -euo pipefail
-          for apk in game-client/*.apk; do
-            test "$(stat -c%s "$apk")" -gt 10000000
-            unzip -tq "$apk"
-            unzip -p "$apk" AndroidManifest.xml > /dev/null
-          done
-          cp RELEASE_NOTES.md game-client/RELEASE_NOTES.md
+          source release/game-client.env
+          echo "${ZH_SHA256}  game-client/mltd-relive-game-client-zh-fixed.apk" | sha256sum -c -
+          echo "${KO_SHA256}  game-client/mltd-relive-game-client-ko-fixed.apk" | sha256sum -c -
+          python - <<'PY'
+          from pathlib import Path
+          from zipfile import ZipFile
+
+          for apk in Path('game-client').glob('*.apk'):
+              if apk.stat().st_size <= 10_000_000:
+                  raise SystemExit(f'{apk} is unexpectedly small')
+              with ZipFile(apk) as archive:
+                  if 'AndroidManifest.xml' not in archive.namelist():
+                      raise SystemExit(f'{apk} has no AndroidManifest.xml')
+                  bad = archive.testzip()
+                  if bad is not None:
+                      raise SystemExit(f'{apk} contains a corrupt entry: {bad}')
+          PY
           (
             cd game-client
             sha256sum *.apk > SHA256SUMS.txt
           )
+
       - name: Upload game client artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -272,14 +396,20 @@ jobs:
           path: game-client/*
           if-no-files-found: error
 
-  createrelease:
-    name: Create or update Release
+  publish:
+    name: Publish rolling Latest Release
     needs:
       - metadata
       - build
       - patcher
+      - reuse-patcher
       - gameclient
-    if: needs.metadata.result == 'success' && needs.build.result == 'success' && needs.patcher.result == 'success' && needs.gameclient.result == 'success'
+    if: >-
+      always() &&
+      needs.metadata.result == 'success' &&
+      needs.build.result == 'success' &&
+      needs.gameclient.result == 'success' &&
+      (needs.patcher.result == 'success' || needs.reuse-patcher.result == 'success')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -288,8 +418,29 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: release-artifacts
-      - name: Align release tag with current source
-        if: github.ref_type != 'tag'
+
+      - name: Write rolling release notes
+        env:
+          STANDALONE_VERSION: ${{ needs.metadata.outputs.standalone_version }}
+          SHORT_SHA: ${{ needs.metadata.outputs.short_sha }}
+        shell: bash
+        run: |
+          cat > rolling-release-notes.md <<EOF
+          # mltd-relive — Latest main build
+
+          This is the automatically updated rolling release for the latest commit on \`main\`.
+
+          - Commit: \`${GITHUB_SHA}\`
+          - Short commit: \`${SHORT_SHA}\`
+          - Standalone source version: \`v${STANDALONE_VERSION}\`
+          - Build source: \`main\`
+
+          The assets attached to this Release are replaced whenever \`main\` receives a newer commit. Use a versioned \`standalone-v*\` Release if you need an immutable historical build.
+
+          Current \`main\` contains the latest server compatibility work. Some client-side UI/state-machine incompatibilities may still exist even when the local server request itself succeeds; see the repository README and compatibility handoff for current scope and known limitations.
+          EOF
+
+      - name: Align rolling tag with current main commit
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ needs.metadata.outputs.release_tag }}
@@ -297,16 +448,18 @@ jobs:
         run: |
           set -euo pipefail
           if gh api "repos/${GITHUB_REPOSITORY}/git/ref/tags/${RELEASE_TAG}" >/dev/null 2>&1; then
-            gh api -X PATCH "repos/${GITHUB_REPOSITORY}/git/refs/tags/${RELEASE_TAG}" -f sha="${GITHUB_SHA}" -F force=true >/dev/null
+            gh api -X PATCH "repos/${GITHUB_REPOSITORY}/git/refs/tags/${RELEASE_TAG}" \
+              -f sha="${GITHUB_SHA}" -F force=true >/dev/null
           fi
-      - name: Create or update Release
+
+      - name: Create or update rolling Latest Release
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ needs.metadata.outputs.release_tag }}
           commit: ${{ github.sha }}
-          name: mltd-relive-${{ needs.metadata.outputs.release_tag }}
-          bodyFile: RELEASE_NOTES.md
-          artifacts: 'LICENSE,release-artifacts/windows/*,release-artifacts/ubuntu/*,release-artifacts/macos/*,release-artifacts/patcher-windows/*,release-artifacts/patcher-ubuntu/*,release-artifacts/patcher-macos/*,release-artifacts/game-client/*'
+          name: mltd-relive latest main (${{ needs.metadata.outputs.short_sha }})
+          bodyFile: rolling-release-notes.md
+          artifacts: 'LICENSE,release-artifacts/windows/*,release-artifacts/ubuntu/*,release-artifacts/macos/*,release-artifacts/patcher-*/*,release-artifacts/game-client/*'
           artifactErrorsFailBuild: true
           allowUpdates: true
           replacesArtifacts: true

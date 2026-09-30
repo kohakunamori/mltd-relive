@@ -1,14 +1,15 @@
 from uuid import UUID
 
 from jsonrpc import dispatcher
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
 from mltd.models.engine import engine
-from mltd.models.models import (CostumeAdv, Episode, Idol, Memorial,
+from mltd.models.models import (Costume, CostumeAdv, Episode,
+                                FavoriteCostume, Idol, Memorial, MstCostume,
                                 MstCostumeBulkChangeGroup)
 from mltd.models.schemas import (CostumeAdvSchema, EpisodeSchema, IdolSchema,
-                                 MemorialSchema,
+                                 MemorialSchema, MstCostumeSchema,
                                  MstCostumeBulkChangeGroupSchema)
 from mltd.servers.i18n import translation
 
@@ -335,3 +336,57 @@ def get_bulk_change_costume_group_list(params):
         'bulk_change_costume_group_list': bulk_change_costume_group_list
     }
 
+
+
+@dispatcher.add_method(name='IdolService.SetFavoriteCostume', context_arg='context')
+def set_favorite_costume(params, context):
+    """Replace an idol's ordered favorite-costume selection atomically."""
+    user_id = UUID(context['user_id'])
+    mst_idol_id = int(params['mst_idol_id'])
+    costume_ids = [int(value) for value in params.get('mst_costume_id_list', [])]
+
+    if len(costume_ids) != len(set(costume_ids)):
+        raise ValueError('mst_costume_id_list contains duplicates')
+
+    with Session(engine) as session:
+        idol = session.scalar(
+            select(Idol)
+            .where(Idol.user_id == user_id)
+            .where(Idol.mst_idol_id == mst_idol_id)
+        )
+        if idol is None:
+            raise ValueError('idol is not owned by user')
+
+        costume_by_id = {}
+        if costume_ids:
+            owned = session.scalars(
+                select(MstCostume)
+                .join(Costume, Costume.mst_costume_id == MstCostume.mst_costume_id)
+                .where(Costume.user_id == user_id)
+                .where(MstCostume.mst_idol_id == mst_idol_id)
+                .where(MstCostume.mst_costume_id.in_(costume_ids))
+            ).all()
+            costume_by_id = {row.mst_costume_id: row for row in owned}
+            if set(costume_by_id) != set(costume_ids):
+                raise ValueError('favorite costume is not owned by target idol')
+
+        # Validate the entire request before deleting prior state so a bad
+        # request cannot partially clear favorites. The transaction commits
+        # only after every replacement row has been staged.
+        session.execute(
+            delete(FavoriteCostume)
+            .where(FavoriteCostume.idol_id == idol.idol_id)
+        )
+        for sort_order, mst_costume_id in enumerate(costume_ids):
+            session.add(FavoriteCostume(
+                idol_id=idol.idol_id,
+                mst_costume_id=mst_costume_id,
+                sort_order=sort_order,
+            ))
+        session.commit()
+
+        favorites = [costume_by_id[value] for value in costume_ids]
+        return {
+            'favorite_costume_list': MstCostumeSchema().dump(
+                favorites, many=True),
+        }

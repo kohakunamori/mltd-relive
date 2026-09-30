@@ -1,75 +1,171 @@
-# mltd-relive Standalone v0.1.8
+# mltd-relive Standalone v0.1.10
 
-本 Release 同时包含 **Standalone v0.1.8 服务器、修正版游戏客户端和 APK Patcher**。
+本版本修复 v0.1.9 的 Asset 登录回归与 `UnitService.SetUnit` 演唱会入口异常，并将 Asset 架构收敛为更简单、兼容性更高的 **remote-only HTTPS** 模式。最终 remote-only GUI 与 API keep-alive / 并发版本均已通过修正版繁中客户端真机 smoke test。
 
-## v0.1.8 重点更新
+## Asset：移除 hybrid/local 运行模式
 
-### Asset Server 高性能传输
+v0.1.9 的本地 self-signed HTTPS Asset 路径已被设备测试确认不兼容：
 
-- 为已缓存 Asset 建立内存 serving index；正常 `GET` / `HEAD` 热路径不再逐请求查询 SQLite，也不再重复执行文件 `stat`。
-- hybrid 或外部 prefetch 在运行时新增的 Asset 会自动自愈进入 serving index；之后的请求继续走零 SQLite 热路径。
-- HTTP/1.1 keep-alive 保持开启，连接 backlog 提升到 512，并启用 `TCP_NODELAY`、TCP keepalive 和连接超时控制。
-- 桌面 443 TLS listener 改为 **accept 后在线程内执行 TLS handshake**，避免新连接突发时在 accept 路径串行握手，提高并发连接建立能力。
-- 明文 Asset listener 可使用内核 `sendfile()` 零拷贝传输；TLS 路径使用 1 MiB `readinto(memoryview)` 缓冲，减少 Python 临时对象和复制开销。
-- Range、HEAD、ETag / If-None-Match、Last-Modified / If-Modified-Since 等行为继续保留。
-- 新增 Asset 热路径并发回归测试：重复命中明确要求不得再次调用 SQLite metadata 查询，并覆盖 96 个并发 GET / Range 请求。
-
-GitHub Actions 合成基准（Ubuntu runner，64 KiB Asset，32 个 HTTP/1.1 持久客户端）：
-
-- **1600 requests / 100 MiB / 1.074 s**
-- **1489.4 req/s**
-- **93.1 MiB/s**
-
-该数字用于比较服务器实现的相对吞吐；实际游戏速度仍取决于客户端、TLS、磁盘和本机网络环境。
-
-### API Server 性能与诊断
-
-- 保留 direct WSGI API dispatch，不再经过 localhost HTTP hop。
-- 合成 API transport benchmark：direct WSGI 约 **4557 req/s，median 0.217 ms，p95 0.244 ms**。
-- 优化 `UnitService.SetUnit` ORM 读取，显式 eager-load 目标 Unit / UnitIdol，减少 relationship lazy-load。
-- Slow API 日志现在可以识别 JSON-RPC batch，并显示 batch 内的方法预览，不再只显示 `?`。
-
-### 合并 yuyueryuyu Standalone 新功能
-
-已合并 `yuyueryuyu/mltd-relive` 的新 Standalone 功能（PR #4），同时保留本 fork 的 Asset/API/GUI/配置性能改造，包括：
-
-- 偶像详情相关功能。
-- 工作（Job）相关补全。
-- 礼物领取相关功能。
-- 剧场中与偶像互动相关功能。
-- 对应 model、schema、master data、繁中 locale 及相关 service 更新。
-- DNS 补充 `theaterdays.appspot.com` 本地解析支持。
-
-上游调试残留及会破坏本 fork 配置语义的 server 改动没有机械覆盖；`config.py`、高性能 `handler.py`、logging、encryption 和 Asset/TLS server 保留本 fork 实现。
-
-### Local Asset 延续优化
-
-继续包含 v0.1.7 / v0.1.6 的 local 优化：
-
-- 默认只准备 `zh-android`，额外 scope 可通过 `asset_local_scopes` 单独配置。
-- 默认 48 workers，`asset_prefetch_workers` 可在 `config.ini` 修改。
-- bulk metadata transaction、批量 cache snapshot、减少重复 manifest 解析。
-- Preparing Local Assets 阶段支持 Stop Server 中断。
-- strict-local 完成后使用可自动失效的 ready stamp；未改变 cache 时后续启动直接走常数级 fast-start。
-
-## local 配置示例
-
-```ini
-[default]
-asset_mode = local
-asset_local_scopes = zh-android
-asset_prefetch_workers = 48
+```text
+hybrid -> 登录 ErrorCode [-404 / 0]
+remote -> 登录正常
 ```
 
-## 下载哪个文件
+v0.1.10 曾进一步测试独立 cleartext HTTP Asset 路径，设备返回：
 
-| 文件 | 用途 |
-|---|---|
-| `mltd-relive-standalone-v0.1.8-windows.exe` | Windows GUI/服务器 |
-| `mltd-relive-standalone-v0.1.8-ubuntu` | Ubuntu/Linux 服务器 |
-| `mltd-relive-standalone-v0.1.8-macos.zip` | macOS 服务器 |
-| `mltd-relive-game-client-zh-fixed.apk` | 繁中修正版客户端 |
-| `mltd-relive-game-client-ko-fixed.apk` | 韩文修正版客户端 |
-| `mltd-relive-apk-patcher-*-windows.exe` | Windows APK Patcher |
+```text
+資料下載失敗
+ErrorCode -21990
+```
 
-Windows + 繁中客户端通常使用 `mltd-relive-standalone-v0.1.8-windows.exe` 和 `mltd-relive-game-client-zh-fixed.apk`。
+因此 Standalone runtime 不再运行 Asset Server，也不再支持 `hybrid/local`。
+
+最终运行模型：
+
+```text
+client -> remote HTTPS Asset storage
+```
+
+默认：
+
+```text
+https://assets.rainbowunicorn7297.com/
+```
+
+可通过：
+
+```ini
+asset_remote_url = https://assets.example.com
+```
+
+切换到其它受信任 HTTPS 对象存储。GUI 中旧的 `Asset Mode` 与 `Asset Preparation` 已移除，只保留可选的 `Asset Remote URL`。
+
+DNS interception 只负责 MLTD API hostname，不再接管 Asset hostname。
+
+## Asset 灾备：新增独立 cache tool
+
+为了防止当前 remote/R2 将来失联，新增：
+
+```text
+tools/cache_assets.py
+```
+
+同步完整繁中 Android Asset：
+
+```bash
+python tools/cache_assets.py sync \
+  --scope zh-android \
+  --root /path/to/durable/mltd-assets \
+  --workers 48
+```
+
+功能包括：
+
+- 当前 manifest 驱动的全量缓存；
+- 48 workers 默认并发；
+- `.part` + HTTP Range 断点续传；
+- size / SHA256 / ETag / Last-Modified 等元数据；
+- 已完成对象复用；
+- 可选 `--verify-existing`；
+- 可选 `--proxy`；
+- 可直接保存到 NAS 挂载目录；
+- `cache-snapshot.json` 保存每次同步快照信息。
+
+即使原始 remote/R2 已完全不可访问，也可以纯本地验证：
+
+```bash
+python tools/cache_assets.py verify \
+  --scope zh-android \
+  --root /path/to/durable/mltd-assets
+```
+
+详细说明见 `ASSET_CACHE.md`。
+
+## 修复 Live：SQLAlchemy 2.x SetUnit
+
+设备日志定位到：
+
+```text
+UnitService.SetUnit
+TypeError: 'ChunkedIteratorResult' object is not subscriptable
+```
+
+优化后的 SetUnit 将 SQLAlchemy 2.x Result 直接传给 `dict()`，触发 mapping/subscript 接口冲突。
+
+修复为：
+
+```python
+card_rows = session.execute(...).all()
+card_to_idol = dict(card_rows)
+```
+
+修复后设备已确认完整 Live 流程可以正常进入、完成并返回。
+
+## API transport：恢复 keep-alive 与并发
+
+保留修正版客户端已验证的 listener-wrapped TLS accept path，同时移除排障阶段临时加入的全局 API 串行锁与强制 `Connection: close`。
+
+最终实现：
+
+- listener-wrapped TLS；
+- direct WSGI API dispatch；
+- HTTP/1.1 keep-alive；
+- concurrent/threaded WSGI dispatch；
+- `wsgi.multithread = True`；
+- TCP_NODELAY / SO_KEEPALIVE / backlog 优化。
+
+A/B 构建已完成真机测试：
+
+```text
+登录
+-> Live
+-> SetUnit
+-> StartSong
+-> FinishSong
+-> 返回选曲
+```
+
+全流程正常，因此无需保留串行化或每请求断开连接的兼容措施。
+
+## 配置迁移
+
+v0.1.10 会把旧 `hybrid/local` 自动迁移为：
+
+```ini
+asset_mode = remote
+```
+
+并从 server runtime config 删除以下旧字段：
+
+```text
+asset_cache_root
+asset_prefetch_workers
+asset_upstream_proxy
+asset_local_scopes
+asset_public_url
+asset_tls_cert
+asset_tls_key
+```
+
+这些缓存相关参数改由 `tools/cache_assets.py` 自己的 CLI 管理。
+
+## 客户端
+
+继续使用现有修正版：
+
+- `mltd-relive-game-client-zh-fixed.apk`
+- `mltd-relive-game-client-ko-fixed.apk`
+
+无需为了 v0.1.10 的 remote-only Asset 架构重新修改 APK。
+
+## 验证状态
+
+已确认：
+
+- remote 登录正常；
+- remote Asset 下载正常；
+- Theater 流程正常；
+- SetUnit / Live 正常；
+- remote-only GUI 正常；
+- API keep-alive + 并发 A/B 正常；
+- 最终 targeted compatibility 与 Asset/cache/transport CI 全部通过。

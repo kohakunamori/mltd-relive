@@ -1,0 +1,61 @@
+name: Test story service compatibility
+
+on:
+  push:
+    branches:
+      - fix/story-service-compat
+    paths:
+      - 'standalone/mltd/services/__init__.py'
+      - 'standalone/mltd/services/story.py'
+      - 'standalone/mltd/services/story_legacy.py'
+      - 'standalone/mltd/services/mission.py'
+      - 'standalone/mltd/models/models.py'
+      - 'standalone/mltd/models/schemas.py'
+      - 'tests/test_story_service_compat.py'
+      - 'tests/test_story_service_runtime.py'
+      - '.github/workflows/test-story-service.yml'
+  pull_request:
+    paths:
+      - 'standalone/mltd/services/__init__.py'
+      - 'standalone/mltd/services/story.py'
+      - 'standalone/mltd/services/story_legacy.py'
+      - 'standalone/mltd/services/mission.py'
+      - 'standalone/mltd/models/models.py'
+      - 'standalone/mltd/models/schemas.py'
+      - 'tests/test_story_service_compat.py'
+      - 'tests/test_story_service_runtime.py'
+      - '.github/workflows/test-story-service.yml'
+
+jobs:
+  reverse-contract:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m unittest tests.test_story_service_compat -v
+
+  runtime-smoke:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: >-
+          python -m pip install
+          json-rpc==1.15.0
+          SQLAlchemy==2.0.19 SQLAlchemy-Utils==0.41.1
+          marshmallow==3.20.1 marshmallow-sqlalchemy==0.29.0
+          msgpack==1.0.5 pycryptodome==3.18.0
+      - name: Import StoryService from standalone runtime directory
+        working-directory: standalone
+        run: >-
+          python -c "import mltd.services.story; import mltd.services.story_legacy; print('StoryService import OK')"
+      - name: Initialize standalone database
+        working-directory: standalone
+        run: python -c "from mltd.models.setup import setup; setup()"
+      - name: Exercise StoryService state transitions
+        working-directory: standalone
+        run: PYTHONPATH=. python ../tests/test_story_service_runtime.py

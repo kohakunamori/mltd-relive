@@ -1,0 +1,47 @@
+name: Audit client mission mapping
+
+on:
+  push:
+    branches:
+      - fix/story-service-compat
+    paths:
+      - '.github/workflows/audit-client-mission-mapping.yml'
+
+jobs:
+  audit:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect client mission rewards and state
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo '=== TRAINING CLIENT MISSIONS ==='
+          grep -E '^(20107|20108|20109|20110|25207|25208|25209|25210),' standalone/mltd/models/mst_data/mst_mission.csv || true
+          echo '=== TRAINING CLIENT MISSION REWARDS ==='
+          grep -E '^(20107|20108|20109|20110|25207|25208|25209|25210),' standalone/mltd/models/mst_data/mst_mission_reward.csv || true
+          echo '=== ALL CLASS 74/75 REWARD SHAPES ==='
+          python - <<'PY'
+          import csv
+          missions = {}
+          with open('standalone/mltd/models/mst_data/mst_mission.csv', newline='', encoding='utf-8-sig') as f:
+              for row in csv.DictReader(f):
+                  if row['mst_mission_class_id'] in {'74', '75'}:
+                      missions[row['mst_mission_id']] = row
+          rewards = {}
+          with open('standalone/mltd/models/mst_data/mst_mission_reward.csv', newline='', encoding='utf-8-sig') as f:
+              for row in csv.DictReader(f):
+                  if row['mst_mission_id'] in missions:
+                      rewards.setdefault(row['mst_mission_id'], []).append(row)
+          shapes = {}
+          for mid, mission in missions.items():
+              rs = rewards.get(mid, [])
+              shape = tuple((r['mst_item_id'], r['item_type_id'], r['amount'], r['mst_achievement_id'], r['mst_song_id']) for r in rs)
+              shapes.setdefault((mission['mst_mission_class_id'], mission['option'], shape), 0)
+              shapes[(mission['mst_mission_class_id'], mission['option'], shape)] += 1
+          for key, count in sorted(shapes.items()):
+              print(key, 'count=', count)
+          print('mission_count=', len(missions), 'rewarded=', len(rewards))
+          PY
+          echo '=== MISSION/USER TRAINING POINT REFERENCES ==='
+          grep -RIn -C 4 -E 'training_point_diff|training_point|total_training_point' standalone/mltd/services standalone/mltd/models | head -n 600 || true

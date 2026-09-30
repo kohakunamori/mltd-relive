@@ -1,0 +1,30 @@
+{
+  "revision": "fixed-clients-v1",
+  "language": "zh-TW",
+  "artifact": "mltd-relive-game-client-zh-fixed.apk",
+  "apk_sha256": "a423f1b09b6d9022cf255aff9a43716d6beadf32d42641da3c7b92d2e663e918",
+  "package": "com.bandainamcoent.imas_millionlive_theaterdays_ch.local",
+  "version_code": 21000,
+  "version_name": "2.1.000",
+  "min_sdk": 19,
+  "target_sdk": 29,
+  "abi": [
+    "arm64-v8a"
+  ],
+  "dex": [
+    "classes.dex"
+  ],
+  "il2cpp": {
+    "binary": "lib/arm64-v8a/libil2cpp.so",
+    "binary_sha256": "52d0cdac0179ae4a5d61a00b9bfd500969730d1a3f157cf667d82c525836936b",
+    "metadata": "assets/bin/Data/Managed/Metadata/global-metadata.dat",
+    "metadata_sha256": "0b0913387be65fb046a7536e016cd9f8514b0ac23bd79b8b20540c73cb1d8cf0"
+  },
+  "extraction": {
+    "apktool": "2.12.1",
+    "jadx": "1.5.6",
+    "apktool_full_decode": true,
+    "apktool_unsigned_rebuild": true,
+    "jadx_is_readability_view_only": true
+  }
+}

@@ -4,7 +4,8 @@ from decimal import Decimal
 from typing import List, Optional
 from uuid import UUID, uuid4
 
-from sqlalchemy import ForeignKey, ForeignKeyConstraint, Index, String
+from sqlalchemy import (ForeignKey, ForeignKeyConstraint, Index,
+                        PrimaryKeyConstraint, String, UniqueConstraint)
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy_utils import force_instant_defaults
@@ -225,6 +226,13 @@ class Idol(Base):
         primaryjoin='and_(Idol.user_id == Costume.user_id, '
             + 'Idol.mst_idol_id == MstCostume.mst_idol_id)',
         viewonly=True, lazy='selectin')
+    favorite_mst_costumes: Mapped[List['MstCostume']] = relationship(
+        secondary='favorite_costume',
+        primaryjoin='Idol.idol_id == FavoriteCostume.idol_id',
+        secondaryjoin=(
+            'FavoriteCostume.mst_costume_id == MstCostume.mst_costume_id'),
+        order_by='FavoriteCostume.sort_order',
+        viewonly=True, lazy='selectin')
     mst_voice_categories: Mapped[List['MstVoiceCategory']] = relationship(
         uselist=True,
         primaryjoin='and_(MstVoiceCategory.idol_detail_type == 3, '
@@ -281,6 +289,40 @@ class Costume(Base):
     user: Mapped['User'] = relationship(back_populates='costumes')
     mst_costume: Mapped['MstCostume'] = relationship(lazy='joined',
                                                      innerjoin=True)
+
+
+class SalesCostumePurchase(Base):
+    """Preservation-layer purchase state for the discontinued costume shop.
+
+    Playable costume ownership and shop purchase state are deliberately kept
+    separate: full-save Relive users may already have every Costume row while
+    the legacy client still expects an unpurchased SalesCostumeStatus catalog.
+    """
+    __tablename__ = 'sales_costume_purchase'
+    __table_args__ = (
+        PrimaryKeyConstraint('user_id', 'mst_sales_costume_id'),
+    )
+
+    user_id = mapped_column(ForeignKey('user.user_id'), nullable=False)
+    mst_sales_costume_id: Mapped[int]
+    purchase_date: Mapped[datetime] = mapped_column(
+        default=lambda: datetime.now(timezone.utc))
+
+
+class FavoriteCostume(Base):
+    """Ordered favorite-costume selection for one user idol."""
+    __tablename__ = 'favorite_costume'
+    __table_args__ = (
+        PrimaryKeyConstraint(
+            'idol_id', 'mst_costume_id', name='favorite_costume_pk'),
+        UniqueConstraint(
+            'idol_id', 'sort_order', name='favorite_costume_order_un'),
+    )
+
+    idol_id = mapped_column(ForeignKey('idol.idol_id'), nullable=False)
+    mst_costume_id = mapped_column(
+        ForeignKey('mst_costume.mst_costume_id'), nullable=False)
+    sort_order: Mapped[int]
 
 
 class MstCostumeBulkChangeGroup(Base):
@@ -1126,6 +1168,34 @@ class Song(Base):
         foreign_keys=[user_id, mst_song_id],
         viewonly=True, lazy='selectin',
         order_by='[Course.course_id]')
+
+
+class SalesSongPurchase(Base):
+    """Preservation-layer purchase state for songs sold by SongService."""
+    __tablename__ = 'sales_song_purchase'
+    __table_args__ = (
+        PrimaryKeyConstraint('user_id', 'mst_sales_song_id'),
+    )
+
+    user_id = mapped_column(ForeignKey('user.user_id'), nullable=False)
+    mst_sales_song_id: Mapped[int]
+    purchase_date: Mapped[datetime] = mapped_column(
+        default=lambda: datetime.now(timezone.utc))
+
+
+class Namecard(Base):
+    """Persisted producer-card payload for the legacy NamecardService.
+
+    The client owns the serialized card-layout format and sends it back through
+    SetNamecard.  Keeping the opaque strings intact is both forward-compatible
+    and safer than trying to reinterpret the discontinued service format.
+    """
+    __tablename__ = 'namecard'
+
+    user_id = mapped_column(ForeignKey('user.user_id'), primary_key=True)
+    data_structure: Mapped[str] = mapped_column(default='')
+    photo_data_structure: Mapped[str] = mapped_column(default='')
+    qr_code: Mapped[str] = mapped_column(default='')
 
 
 class MstCourse(Base):
@@ -2986,3 +3056,19 @@ class MstTheaterContact(Base):
 if __name__ == '__main__':
     Base.metadata.create_all(engine)
 
+
+
+class AccountCredential(Base):
+    """External login credentials mapped to one independent game save."""
+    __tablename__ = 'account_credential'
+
+    username: Mapped[str] = mapped_column(String(8), primary_key=True)
+    user_id: Mapped[UUID] = mapped_column(
+        ForeignKey('user.user_id'), unique=True, nullable=False
+    )
+    password_salt: Mapped[str] = mapped_column(String(64), nullable=False)
+    password_hash: Mapped[str] = mapped_column(String(128), nullable=False)
+    secret_hash: Mapped[str] = mapped_column(String(128), default='')
+    created_date: Mapped[datetime] = mapped_column(
+        default=lambda: datetime.now(timezone.utc)
+    )

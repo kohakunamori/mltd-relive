@@ -1,0 +1,45 @@
+name: Test interrupted job RPC compatibility
+
+on:
+  push:
+    branches:
+      - fix/story-service-compat
+    paths:
+      - 'standalone/mltd/services/__init__.py'
+      - 'standalone/mltd/services/job.py'
+      - 'standalone/mltd/services/job_compat.py'
+      - 'standalone/mltd/models/models.py'
+      - 'tests/test_job_compat_runtime.py'
+      - '.github/workflows/test-job-compat-rpc.yml'
+  pull_request:
+    paths:
+      - 'standalone/mltd/services/__init__.py'
+      - 'standalone/mltd/services/job.py'
+      - 'standalone/mltd/services/job_compat.py'
+      - 'standalone/mltd/models/models.py'
+      - 'tests/test_job_compat_runtime.py'
+      - '.github/workflows/test-job-compat-rpc.yml'
+
+jobs:
+  runtime-job-compat:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: >-
+          python -m pip install
+          json-rpc==1.15.0
+          SQLAlchemy==2.0.19 SQLAlchemy-Utils==0.41.1
+          marshmallow==3.20.1 marshmallow-sqlalchemy==0.29.0
+          msgpack==1.0.5 pycryptodome==3.18.0
+      - name: Import JobService compatibility handlers
+        working-directory: standalone
+        run: python -c "import mltd.services.job_compat; print('Job compatibility RPC import OK')"
+      - name: Initialize standalone database
+        working-directory: standalone
+        run: python -c "from mltd.models.setup import setup; setup()"
+      - name: Exercise interrupted job cleanup state machine
+        working-directory: standalone
+        run: PYTHONPATH=. python ../tests/test_job_compat_runtime.py

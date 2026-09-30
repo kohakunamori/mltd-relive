@@ -1,0 +1,163 @@
+name: Publish complete zh-fixed decompilation
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Release tag containing mltd-relive-game-client-zh-fixed.apk (blank = latest)'
+        required: false
+        default: ''
+        type: string
+      publish_branch:
+        description: 'Destination branch for the complete decompiled tree'
+        required: false
+        default: 'client-decompiled-zh-fixed-v1'
+        type: string
+  push:
+    branches:
+      - client-source-extraction
+    paths:
+      - '.github/workflows/publish-zh-fixed-decompiled.yml'
+      - 'tools/client-source/**'
+      - 'release/game-client.env'
+      - 'client/baseline/zh-fixed-v1.json'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publish-zh-fixed-decompiled
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Generate and publish complete decompiled client tree
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      - name: Checkout maintenance branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up .NET 6 for Il2CppDumper
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '6.0.x'
+
+      - name: Install extraction dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y binutils curl file rsync unzip zip zstd
+
+      - name: Resolve release and destination branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REQUESTED_TAG: ${{ github.event.inputs.release_tag }}
+          REQUESTED_BRANCH: ${{ github.event.inputs.publish_branch }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -n "${REQUESTED_TAG:-}" ]]; then
+            release_tag="$REQUESTED_TAG"
+          else
+            release_tag="$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName --jq .tagName)"
+          fi
+          publish_branch="${REQUESTED_BRANCH:-client-decompiled-zh-fixed-v1}"
+          if [[ ! "$publish_branch" =~ ^[A-Za-z0-9._/-]+$ ]]; then
+            echo "Unsafe publish branch name: $publish_branch" >&2
+            exit 2
+          fi
+          echo "release_tag=$release_tag" >> "$GITHUB_ENV"
+          echo "publish_branch=$publish_branch" >> "$GITHUB_ENV"
+          echo "Using release: $release_tag"
+          echo "Publishing to: $publish_branch"
+
+      - name: Download fixed Traditional Chinese APK
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p input
+          gh release download "$release_tag" \
+            --repo "$GITHUB_REPOSITORY" \
+            --pattern 'mltd-relive-game-client-zh-fixed.apk' \
+            --dir input
+          test -s input/mltd-relive-game-client-zh-fixed.apk
+
+      - name: Verify exact APK baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          source release/game-client.env
+          echo "${ZH_SHA256}  input/mltd-relive-game-client-zh-fixed.apk" | sha256sum -c -
+
+      - name: Generate Apktool and JADX trees
+        shell: bash
+        run: |
+          set -euo pipefail
+          chmod +x tools/client-source/extract-zh-fixed.sh
+          tools/client-source/extract-zh-fixed.sh \
+            input/mltd-relive-game-client-zh-fixed.apk \
+            "$RUNNER_TEMP/client-source-output"
+
+      - name: Generate IL2CPP metadata tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          chmod +x tools/client-source/extract-il2cpp.sh
+          tools/client-source/extract-il2cpp.sh "$RUNNER_TEMP/client-source-output"
+
+      - name: Compare client RPC contract with server
+        shell: bash
+        run: |
+          set -euo pipefail
+          python tools/client-source/compare-server-contract.py \
+            "$RUNNER_TEMP/client-source-output/report/client-rpc-methods.txt" \
+            standalone/mltd/services \
+            "$RUNNER_TEMP/client-source-output/report"
+
+      - name: Prepare complete publish tree and enforce GitHub file limits
+        shell: bash
+        run: |
+          set -euo pipefail
+          python tools/client-source/prepare-publish-tree.py \
+            "$RUNNER_TEMP/client-source-output" \
+            "$RUNNER_TEMP/publish-tree" \
+            --release-tag "$release_tag" \
+            --source-commit "$GITHUB_SHA"
+          du -sh "$RUNNER_TEMP/publish-tree"
+          find "$RUNNER_TEMP/publish-tree" -type f -printf '%s %p\n' | sort -nr | sed -n '1,20p'
+
+      - name: Publish orphan decompiled branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          publish_root="$RUNNER_TEMP/publish-tree"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git checkout --orphan __publish_zh_decompiled
+          git rm -rf . >/dev/null 2>&1 || true
+          find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          rsync -a "$publish_root/" ./
+          git add -A
+          git commit -m "client: publish complete zh-fixed decompilation (${release_tag})"
+          git count-objects -vH
+          git push --force origin "HEAD:refs/heads/${publish_branch}"
+
+      - name: Verify published branch exists
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh api "repos/${GITHUB_REPOSITORY}/branches/${publish_branch}" \
+            --jq '.name + " @ " + .commit.sha'
