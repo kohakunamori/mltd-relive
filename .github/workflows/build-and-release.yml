@@ -238,6 +238,7 @@ jobs:
           name: ${{ matrix.out-name }}
           path: standalone/dist/release-output/*
           if-no-files-found: error
+          retention-days: 3
 
   patcher:
     name: Build APK Patcher (${{ matrix.target }})
@@ -323,6 +324,7 @@ jobs:
           name: ${{ matrix.out-name }}
           path: tools/apk-patcher/dist/release-output/*
           if-no-files-found: error
+          retention-days: 3
 
   reuse-patcher:
     name: Reuse unchanged APK Patcher packages
@@ -350,6 +352,7 @@ jobs:
           name: patcher-reused
           path: reused-patcher/*
           if-no-files-found: error
+          retention-days: 3
 
   gameclient:
     name: Prepare corrected game clients
@@ -440,6 +443,7 @@ jobs:
           name: game-client
           path: game-client/*
           if-no-files-found: error
+          retention-days: 3
 
   publish:
     name: Publish rolling Latest Release
