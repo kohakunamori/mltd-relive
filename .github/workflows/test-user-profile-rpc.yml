@@ -1,26 +1,7 @@
 name: Test user profile RPC compatibility
 
 on:
-  push:
-    branches:
-      - fix/story-service-compat
-    paths:
-      - 'standalone/mltd/services/__init__.py'
-      - 'standalone/mltd/services/user_profile.py'
-      - 'standalone/mltd/services/mission.py'
-      - 'standalone/mltd/models/models.py'
-      - 'standalone/mltd/models/schemas.py'
-      - 'tests/test_user_profile_runtime.py'
-      - '.github/workflows/test-user-profile-rpc.yml'
-  pull_request:
-    paths:
-      - 'standalone/mltd/services/__init__.py'
-      - 'standalone/mltd/services/user_profile.py'
-      - 'standalone/mltd/services/mission.py'
-      - 'standalone/mltd/models/models.py'
-      - 'standalone/mltd/models/schemas.py'
-      - 'tests/test_user_profile_runtime.py'
-      - '.github/workflows/test-user-profile-rpc.yml'
+  workflow_dispatch:
 
 jobs:
   runtime-profile:

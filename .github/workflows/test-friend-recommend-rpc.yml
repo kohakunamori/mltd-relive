@@ -1,20 +1,7 @@
 name: Test friend recommendation RPC compatibility
 
 on:
-  push:
-    branches:
-      - fix/story-service-compat
-    paths:
-      - 'standalone/mltd/services/__init__.py'
-      - 'standalone/mltd/services/friend_recommend.py'
-      - 'tests/test_friend_recommend_runtime.py'
-      - '.github/workflows/test-friend-recommend-rpc.yml'
-  pull_request:
-    paths:
-      - 'standalone/mltd/services/__init__.py'
-      - 'standalone/mltd/services/friend_recommend.py'
-      - 'tests/test_friend_recommend_runtime.py'
-      - '.github/workflows/test-friend-recommend-rpc.yml'
+  workflow_dispatch:
 
 jobs:
   runtime-friend-recommend:

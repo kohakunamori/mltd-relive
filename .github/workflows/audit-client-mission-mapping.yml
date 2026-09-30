@@ -1,11 +1,7 @@
 name: Audit client mission mapping
 
 on:
-  push:
-    branches:
-      - fix/story-service-compat
-    paths:
-      - '.github/workflows/audit-client-mission-mapping.yml'
+  workflow_dispatch:
 
 jobs:
   audit:

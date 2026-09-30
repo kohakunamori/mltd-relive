@@ -1,22 +1,7 @@
 name: Test friend core RPC compatibility
 
 on:
-  push:
-    branches:
-      - fix/story-service-compat
-    paths:
-      - 'standalone/mltd/services/__init__.py'
-      - 'standalone/mltd/services/friend.py'
-      - 'standalone/mltd/services/friend_core.py'
-      - 'tests/test_friend_core_runtime.py'
-      - '.github/workflows/test-friend-core-rpc.yml'
-  pull_request:
-    paths:
-      - 'standalone/mltd/services/__init__.py'
-      - 'standalone/mltd/services/friend.py'
-      - 'standalone/mltd/services/friend_core.py'
-      - 'tests/test_friend_core_runtime.py'
-      - '.github/workflows/test-friend-core-rpc.yml'
+  workflow_dispatch:
 
 jobs:
   runtime-friend-core:

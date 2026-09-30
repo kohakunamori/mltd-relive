@@ -1,9 +1,6 @@
 name: Audit next active RPC contracts
 
 on:
-  push:
-    branches: [fix/story-service-compat]
-    paths: ['.github/workflows/audit-next-rpc-contracts.yml']
   workflow_dispatch:
 
 jobs:

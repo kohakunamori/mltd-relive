@@ -2,11 +2,6 @@ name: Final standalone acceptance
 # Final-head rerun marker: 2026-09-03 reverse-client-coupled
 
 on:
-  push:
-    branches:
-      - feature/multi-user-accounts
-    paths:
-      - '.github/workflows/final-standalone-acceptance.yml'
   workflow_dispatch:
 
 jobs:

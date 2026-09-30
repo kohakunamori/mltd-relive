@@ -1,12 +1,6 @@
 name: Reverse-engineered client acceptance
 
 on:
-  push:
-    branches:
-      - feature/multi-user-accounts
-    paths:
-      - '.github/workflows/reverse-client-acceptance.yml'
-      - '.github/workflows/final-standalone-acceptance.yml'
   workflow_dispatch:
 
 permissions:

@@ -1,8 +1,22 @@
-# mltd-relive Standalone v0.1.10
+# mltd-relive 更新记录
+
+下载与首次使用请查看[最新发布页](https://github.com/kohakunamori/mltd-relive/releases/tag/standalone-latest)，详细配置见 [README](README.md)。
+
+## v0.1.11
+
+- 支持多个独立账户，可在服务器界面的用户管理窗口创建用户，再通过客户端标题画面的“密码继承 / 引继”登录。
+- 内置 DNS 改为单独启停；使用它连接客户端时，需要另外点击 `Start DNS Server`。
+- 增加手动检查更新与打开下载页的入口，不会在启动服务器时自动检查或下载。
+- Ubuntu 程序补齐 Tcl/Tk 运行库，并随程序提供第三方许可说明文件。
+- 继续修复剧情、任务、个人资料、体力、好友、工作和服装等功能的兼容问题；尚未解决的情况见[已知问题](KNOWN_ISSUES.md)。
+
+升级前请完全退出服务器并备份原运行目录，保留 `mltd-relive.db` 与 `config.ini`，不要点击 `Reset Data`。
+
+## v0.1.10
 
 本版本修复 v0.1.9 的 Asset 登录回归与 `UnitService.SetUnit` 演唱会入口异常，并将 Asset 架构收敛为更简单、兼容性更高的 **remote-only HTTPS** 模式。最终 remote-only GUI 与 API keep-alive / 并发版本均已通过修正版繁中客户端真机 smoke test。
 
-## Asset：移除 hybrid/local 运行模式
+### Asset：移除 hybrid/local 运行模式
 
 v0.1.9 的本地 self-signed HTTPS Asset 路径已被设备测试确认不兼容：
 
@@ -42,7 +56,7 @@ asset_remote_url = https://assets.example.com
 
 DNS interception 只负责 MLTD API hostname，不再接管 Asset hostname。
 
-## Asset 灾备：新增独立 cache tool
+### Asset 灾备：新增独立 cache tool
 
 为了防止当前 remote/R2 将来失联，新增：
 
@@ -81,7 +95,7 @@ python tools/cache_assets.py verify \
 
 详细说明见 `ASSET_CACHE.md`。
 
-## 修复 Live：SQLAlchemy 2.x SetUnit
+### 修复 Live：SQLAlchemy 2.x SetUnit
 
 设备日志定位到：
 
@@ -101,7 +115,7 @@ card_to_idol = dict(card_rows)
 
 修复后设备已确认完整 Live 流程可以正常进入、完成并返回。
 
-## API transport：恢复 keep-alive 与并发
+### API transport：恢复 keep-alive 与并发
 
 保留修正版客户端已验证的 listener-wrapped TLS accept path，同时移除排障阶段临时加入的全局 API 串行锁与强制 `Connection: close`。
 
@@ -127,7 +141,7 @@ A/B 构建已完成真机测试：
 
 全流程正常，因此无需保留串行化或每请求断开连接的兼容措施。
 
-## 配置迁移
+### 配置迁移
 
 v0.1.10 会把旧 `hybrid/local` 自动迁移为：
 
@@ -149,7 +163,7 @@ asset_tls_key
 
 这些缓存相关参数改由 `tools/cache_assets.py` 自己的 CLI 管理。
 
-## 客户端
+### 客户端
 
 继续使用现有修正版：
 
@@ -158,7 +172,7 @@ asset_tls_key
 
 无需为了 v0.1.10 的 remote-only Asset 架构重新修改 APK。
 
-## 验证状态
+### 验证状态
 
 已确认：
 

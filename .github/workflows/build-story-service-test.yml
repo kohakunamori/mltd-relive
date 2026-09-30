@@ -1,13 +1,6 @@
 name: Build StoryService compatibility test
 
 on:
-  push:
-    branches:
-      - fix/story-service-compat
-    paths:
-      - 'standalone/**'
-      - 'requirements.txt'
-      - '.github/workflows/build-story-service-test.yml'
   workflow_dispatch:
 
 permissions:

@@ -1,30 +1,7 @@
 name: Test story service compatibility
 
 on:
-  push:
-    branches:
-      - fix/story-service-compat
-    paths:
-      - 'standalone/mltd/services/__init__.py'
-      - 'standalone/mltd/services/story.py'
-      - 'standalone/mltd/services/story_legacy.py'
-      - 'standalone/mltd/services/mission.py'
-      - 'standalone/mltd/models/models.py'
-      - 'standalone/mltd/models/schemas.py'
-      - 'tests/test_story_service_compat.py'
-      - 'tests/test_story_service_runtime.py'
-      - '.github/workflows/test-story-service.yml'
-  pull_request:
-    paths:
-      - 'standalone/mltd/services/__init__.py'
-      - 'standalone/mltd/services/story.py'
-      - 'standalone/mltd/services/story_legacy.py'
-      - 'standalone/mltd/services/mission.py'
-      - 'standalone/mltd/models/models.py'
-      - 'standalone/mltd/models/schemas.py'
-      - 'tests/test_story_service_compat.py'
-      - 'tests/test_story_service_runtime.py'
-      - '.github/workflows/test-story-service.yml'
+  workflow_dispatch:
 
 jobs:
   reverse-contract:

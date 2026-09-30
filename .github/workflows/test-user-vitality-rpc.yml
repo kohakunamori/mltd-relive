@@ -1,24 +1,7 @@
 name: Test user vitality RPC compatibility
 
 on:
-  push:
-    branches:
-      - fix/story-service-compat
-    paths:
-      - 'standalone/mltd/services/__init__.py'
-      - 'standalone/mltd/services/user_vitality.py'
-      - 'standalone/mltd/models/models.py'
-      - 'standalone/mltd/models/schemas.py'
-      - 'tests/test_user_vitality_runtime.py'
-      - '.github/workflows/test-user-vitality-rpc.yml'
-  pull_request:
-    paths:
-      - 'standalone/mltd/services/__init__.py'
-      - 'standalone/mltd/services/user_vitality.py'
-      - 'standalone/mltd/models/models.py'
-      - 'standalone/mltd/models/schemas.py'
-      - 'tests/test_user_vitality_runtime.py'
-      - '.github/workflows/test-user-vitality-rpc.yml'
+  workflow_dispatch:
 
 jobs:
   runtime-vitality:

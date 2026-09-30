@@ -13,14 +13,6 @@ on:
         required: false
         default: 'client-decompiled-zh-fixed-v1'
         type: string
-  push:
-    branches:
-      - client-source-extraction
-    paths:
-      - '.github/workflows/publish-zh-fixed-decompiled.yml'
-      - 'tools/client-source/**'
-      - 'release/game-client.env'
-      - 'client/baseline/zh-fixed-v1.json'
 
 permissions:
   contents: write

@@ -4,12 +4,12 @@
 
 > 一个面向已停止运营的《偶像大师 百万人演唱会！剧场时光》繁体中文版 / 韩文版客户端的**非官方本地服务器、兼容层与数字保存项目**。
 
-本项目通过本地 Standalone Server 重新实现客户端所需的一部分 API、DNS/TLS 接入、状态持久化与兼容逻辑，使原客户端能够在官方服务结束后继续进入部分游戏内容。
+在自己的电脑上运行本地服务器，再让安卓客户端连接到这台电脑，即可使用本地存档游玩当前支持的内容。支持繁体中文和韩文客户端；游戏资源仍从远端 HTTPS 地址下载。
 
 本仓库基于 [RainbowUnicorn7297/mltd-relive](https://github.com/RainbowUnicorn7297/mltd-relive) 继续维护。原有 Prototype 已移除，目前只维护 **Standalone Server** 及其配套工具。
 
 > [!IMPORTANT]
-> 本项目不是官方复服，也不是原服务器的完整镜像。当前实现仍属于兼容性重建工程：部分功能已经具备真实持久化语义，部分历史/在线功能因缺少原始服务器数据无法完整还原；也存在“服务器请求成功但客户端 UI / 流程仍异常”的已知情况。
+> 这是非官方本地服务器，并非完整的官方服务。部分活动、商店和在线社交功能尚未完整支持，也可能遇到客户端页面或流程异常。使用前请查看[已知问题](KNOWN_ISSUES.md)。
 
 ## 项目能做什么
 
@@ -34,38 +34,17 @@
 - Asset 灾备缓存工具；
 - Android 客户端分辨率 / FPS APK Patcher。
 
-其中部分 RPC 为兼容客户端页面而提供“无数据”返回。例如当前 preserved database 中没有完整的 Sales Costume 商店目录或历史 Present ledger，因此对应页面只提供不伪造数据的空结果，而不是虚构商品、奖励或历史记录。
+部分商店和礼物历史页面目前没有可展示的内容，具体限制见[已知问题](KNOWN_ISSUES.md)。
 
-## 当前状态
+## 下载与版本
 
-### Public Release
+直接运行请前往 **[最新发布页](https://github.com/kohakunamori/mltd-relive/releases/tag/standalone-latest)**。发布页提供各系统的服务器下载、繁中 / 韩文安卓客户端、首次连接步骤和升级说明。
 
-当前最新公开 Release：
+- 本地服务器：`v0.1.11`；
+- 画面补丁工具：`v1.0.9`，仅在调整分辨率或帧率时需要；
+- 游戏资源：由客户端从远端 HTTPS 地址下载，不能仅凭服务器程序完全离线游玩。
 
-- **Standalone Server:** `v0.1.10`
-- **APK Patcher:** `v1.0.9`
-- **Asset Transport:** `remote HTTPS only`
-
-下载：**[GitHub Releases](https://github.com/kohakunamori/mltd-relive/releases/latest)**
-
-> [!NOTE]
-> `main` 可能包含比最新 Release 更新的兼容修复。需要最新 `main` 行为时，请从源码构建；Release 更适合希望直接运行已发布二进制的用户。
-
-### 当前 main 的兼容性进度
-
-当前 `main` 已合并一轮较大的服务器兼容性重建，包括 Story、Mission、Profile、Vitality、Friend、Job、Birthday、Favorite Costume 等状态逻辑，并建立了 fresh SQLite runtime regression suite。
-
-这不代表原版所有功能已经恢复。以下类型仍可能不完整：
-
-- 活动 / Event；
-- Gasha / Shop / Payment；
-- Lounge 等大型在线社交系统；
-- 已停止服务后无法获得的服务器侧历史数据；
-- 依赖缺失 Master / catalog / ledger 的功能；
-- 部分客户端 UI、动画或状态机兼容问题；
-- 仅存在于旧客户端字符串表、但没有实际业务 callsite 的 legacy RPC。
-
-项目原则是：**宁可明确返回“没有可用数据”，也不伪造不存在的持久化状态、奖励或消费结果。**
+发布包由维护者按需更新，`main` 有新提交不代表下载附件已经更新。以发布页底部的版本与构建信息为准。版本变化见[更新记录](RELEASE_NOTES.md)，功能限制见[已知问题](KNOWN_ISSUES.md)。
 
 ## 工作原理
 
@@ -112,14 +91,12 @@ https://assets.rainbowunicorn7297.com/
 
 ### Windows
 
-1. 从 [Releases](https://github.com/kohakunamori/mltd-relive/releases/latest) 下载 Windows Standalone Server；
-2. 启动服务器；
-3. 在 GUI 中选择客户端语言；
-4. 等待服务器显示已启动；
-5. 记录 GUI 中显示的电脑 LAN IPv4；
-6. 将 Android 当前 Wi-Fi 的 DNS 指向该 IPv4；
-7. 安装对应的 `*-fixed.apk`；
-8. 启动游戏。
+1. 从[最新发布页](https://github.com/kohakunamori/mltd-relive/releases/tag/standalone-latest) 下载 `mltd-relive-standalone-latest-windows.exe`，放入固定的运行目录后打开；
+2. 选择与安卓客户端一致的语言，点击“启动服务器”（`Start Server`），等待状态显示 `Started`；首次使用会自动初始化数据库；
+3. 使用内置 DNS 连接时，另外点击“启动 DNS 服务器”（`Start DNS Server`），等待其状态也显示 `Started`。**启动主服务器不会自动启动 DNS**；
+4. 记录窗口中电脑的局域网 IPv4，将安卓设备当前 Wi-Fi 的 DNS 指向该地址；
+5. 在安卓设备安装对应语言的 `*-fixed.apk`，启动游戏；
+6. 首次绑定账户时，在标题画面的“密码继承 / 引继”中登录。默认完整存档用户名为 `MLTD0000`，密码为 `relive2026`，详见[完整存档用户与一般用户](#完整存档用户与一般用户)。
 
 如果服务器无法绑定 DNS / HTTPS 端口，可尝试以管理员权限运行。Windows 防火墙询问时，需要允许服务器在当前局域网通信。
 
@@ -128,17 +105,19 @@ https://assets.rainbowunicorn7297.com/
 Release 二进制示例：
 
 ```bash
-chmod +x mltd-relive-standalone-*-ubuntu
-sudo ./mltd-relive-standalone-*-ubuntu
+chmod +x mltd-relive-standalone-latest-ubuntu
+sudo ./mltd-relive-standalone-latest-ubuntu
 ```
 
-DNS / TLS 通常需要监听 53 / 443 等特权端口，因此 Linux 上通常需要 root 或对应 capability。
+这是图形界面程序，需要可用的桌面显示环境；在 WSL 中运行时也需要图形显示支持。启动后按上方步骤选择语言，并分别启动主服务器与内置 DNS。
+
+DNS / TLS 通常需要监听 53 / 443 等特权端口，因此 Linux 上通常需要 root 或对应 capability。Ubuntu 的 `*-NOTICES.txt` 是第三方许可说明，不是启动程序，请与程序一并保留。
 
 ### macOS
 
 下载 Release 中的 macOS Standalone 压缩包并解压，启动其中的应用。系统首次运行第三方下载程序时可能要求确认权限。
 
-随后同样将 Android Wi-Fi DNS 指向运行服务器的 Mac LAN IPv4。
+启动应用后，分别点击 `Start Server` 和 `Start DNS Server`，再将 Android Wi-Fi DNS 指向运行服务器的 Mac 局域网 IPv4。
 
 ### Android 网络注意事项
 
@@ -458,12 +437,14 @@ standalone/mltd/models/
 tests/
 ```
 
-项目目前特别重视“真实状态语义”而不只是返回一个不会报错的 JSON：
+修改后可先在本地运行对应测试。例如，检查界面和手动更新功能：
 
-- Stateful RPC 应有 SQLite / SQLAlchemy runtime test；
-- 应验证正常路径、持久化、重复请求、非法请求和事务原子性；
-- 客户端 DTO / RPC 应优先以 preserved client / reverse evidence 为准；
-- 不因为 dump 中存在一个字符串常量就自动实现对应服务。
+```bash
+cd standalone
+python -m unittest discover -s ../tests -p 'test_gui_*.py' -v
+```
+
+需要数据库的服务测试应使用独立测试目录和新建的数据库，不要对游玩存档执行初始化或清理命令。
 
 如果你遇到问题，最有价值的信息通常是：
 
@@ -472,6 +453,24 @@ tests/
 - Standalone 服务器 traceback / 最后几十行日志；
 - 使用的客户端语言和版本；
 - 使用的 Standalone commit / Release 版本。
+
+## 按需构建与发布
+
+所有 GitHub Actions 工作流均为**手动触发**。提交代码、更新拉取请求或修改文档不会自动运行构建、测试或发布。
+
+需要运行时，在仓库的 **Actions** 页面选择相应工作流，再点击 **Run workflow**，选择分支后执行。一次只运行与本次改动有关的任务即可。
+
+| 需要做什么 | 工作流文件 |
+| --- | --- |
+| 检查服务器兼容性、资源缓存和接口运行 | `test-asset-cache.yml` |
+| 验证 Ubuntu 打包、许可声明和图形界面启动 | `test-ubuntu-standalone.yml` |
+| 构建并更新公开下载附件 | `build-and-release.yml`（页面名称为“按需构建与发布”） |
+
+发布工作流只接受 `main` 分支。两个“强制重新构建 / 下载”选项默认关闭；未变化的补丁工具和客户端会按现有规则复用。只有确实需要更新下载附件时才执行发布，修改文案不需要重新打包。
+
+发布指南模板位于 [`release/RELEASE_GUIDE.md`](release/RELEASE_GUIDE.md)。它由 `tools/render_release_notes.py` 填入版本号、构建提交和下载地址，后续发布沿用同一份中文指南。
+
+手动运行方式也可参考 [GitHub 官方说明](https://docs.github.com/actions/managing-workflow-runs/manually-running-a-workflow)。
 
 ## 仓库结构
 
@@ -485,7 +484,7 @@ tools/apk-patcher/          分辨率 / FPS APK Patcher
 tests/                      兼容性与 runtime regression tests
 .github/workflows/          CI / Release / compatibility audit
 ASSET_CACHE.md              Asset 保存工具详细文档
-RELEASE_NOTES.md            当前公开 Release 说明
+RELEASE_NOTES.md            版本更新记录
 LICENSE                     软件、依赖和第三方内容许可声明
 ```
 
@@ -561,4 +560,4 @@ Copyright (c) 2017-2022 BANDAI NAMCO Entertainment Inc. All rights reserved.
 
 ---
 
-**本项目的目标是保存和研究已经停止运营客户端的软件行为，并尽可能以可验证、可持久化、不过度伪造服务器语义的方式恢复其本地可运行性。**
+欢迎通过问题反馈提供操作步骤、错误画面和服务器日志，帮助改进本地游玩体验。

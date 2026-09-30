@@ -46,6 +46,25 @@ class UpdateCheckTests(unittest.TestCase):
         self.assertEqual(info.latest_version, '0.1.11')
         self.assertEqual(info.download_url, 'https://example.invalid/windows.exe')
 
+    def test_chinese_release_version_is_supported(self):
+        for separator in ('：', ':'):
+            with self.subTest(separator=separator):
+                release = self._release()
+                release['body'] = f'- 服务器版本{separator} `v0.1.11`'
+                with patch.object(update_check, 'BUILD_COMMIT', 'a' * 40):
+                    info = self._check(release)
+                self.assertEqual(info.latest_version, '0.1.11')
+                self.assertTrue(info.update_available)
+
+    def test_unrecognized_version_text_does_not_block_commit_update(self):
+        release = self._release()
+        release['body'] = '# 下载与使用指南'
+        with patch.object(update_check, 'BUILD_COMMIT', 'a' * 40):
+            info = self._check(release)
+        self.assertIsNone(info.latest_version)
+        self.assertTrue(info.update_available)
+        self.assertEqual(info.download_url, 'https://example.invalid/windows.exe')
+
     def test_same_commit_is_up_to_date(self):
         target = 'c' * 40
         with patch.object(update_check, 'BUILD_COMMIT', target):

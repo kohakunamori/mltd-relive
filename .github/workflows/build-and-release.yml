@@ -1,18 +1,15 @@
-name: Build and Publish Latest Release
+name: 按需构建与发布
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
     inputs:
       rebuild_patcher:
-        description: 'Force rebuilding APK Patcher packages'
+        description: '强制重新构建画面补丁工具（默认复用未变化的附件）'
         required: false
         default: false
         type: boolean
       refresh_game_clients:
-        description: 'Force downloading and validating corrected game clients'
+        description: '强制重新下载并校验修正版客户端（默认复用未变化的附件）'
         required: false
         default: false
         type: boolean
@@ -27,6 +24,7 @@ concurrency:
 jobs:
   metadata:
     name: Resolve rolling release metadata
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     outputs:
       standalone_version: ${{ steps.meta.outputs.standalone_version }}
@@ -425,26 +423,19 @@ jobs:
         with:
           path: release-artifacts
 
-      - name: Write rolling release notes
+      - name: 生成中文下载与使用指南
         env:
           STANDALONE_VERSION: ${{ needs.metadata.outputs.standalone_version }}
-          SHORT_SHA: ${{ needs.metadata.outputs.short_sha }}
+          RELEASE_TAG: ${{ needs.metadata.outputs.release_tag }}
         shell: bash
         run: |
-          cat > rolling-release-notes.md <<EOF
-          # mltd-relive — Latest main build
-
-          This is the automatically updated rolling release for the latest commit on \`main\`.
-
-          - Commit: \`${GITHUB_SHA}\`
-          - Short commit: \`${SHORT_SHA}\`
-          - Standalone source version: \`v${STANDALONE_VERSION}\`
-          - Build source: \`main\`
-
-          The assets attached to this Release are replaced whenever \`main\` receives a newer commit. Use a versioned \`standalone-v*\` Release if you need an immutable historical build.
-
-          Current \`main\` contains the latest server compatibility work. Some client-side UI/state-machine incompatibilities may still exist even when the local server request itself succeeds; see the repository README and compatibility handoff for current scope and known limitations.
-          EOF
+          set -euo pipefail
+          python tools/render_release_notes.py \
+            --repository "$GITHUB_REPOSITORY" \
+            --tag "$RELEASE_TAG" \
+            --version "$STANDALONE_VERSION" \
+            --commit "$GITHUB_SHA" \
+            --output rolling-release-notes.md
 
       - name: Align rolling tag with current main commit
         env:
@@ -463,7 +454,7 @@ jobs:
         with:
           tag: ${{ needs.metadata.outputs.release_tag }}
           commit: ${{ github.sha }}
-          name: mltd-relive latest main (${{ needs.metadata.outputs.short_sha }})
+          name: mltd-relive v${{ needs.metadata.outputs.standalone_version }}｜本地服务器与客户端下载
           bodyFile: rolling-release-notes.md
           artifacts: 'LICENSE,release-artifacts/windows/*,release-artifacts/ubuntu/*,release-artifacts/macos/*,release-artifacts/patcher-*/*,release-artifacts/game-client/*'
           artifactErrorsFailBuild: true

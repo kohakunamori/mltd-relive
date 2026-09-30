@@ -1,11 +1,6 @@
 name: Audit current RPC coverage
 
 on:
-  push:
-    branches:
-      - fix/story-service-compat
-    paths:
-      - '.github/workflows/audit-current-rpc-coverage.yml'
   workflow_dispatch:
 
 jobs:

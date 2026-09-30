@@ -1,13 +1,6 @@
 name: Build live asset compatibility test
 
 on:
-  push:
-    branches:
-      - fix/live-asset-compat
-    paths:
-      - 'standalone/**'
-      - 'requirements.txt'
-      - '.github/workflows/build-live-asset-test.yml'
   workflow_dispatch:
 
 permissions:

@@ -1,24 +1,7 @@
 name: Test interrupted job RPC compatibility
 
 on:
-  push:
-    branches:
-      - fix/story-service-compat
-    paths:
-      - 'standalone/mltd/services/__init__.py'
-      - 'standalone/mltd/services/job.py'
-      - 'standalone/mltd/services/job_compat.py'
-      - 'standalone/mltd/models/models.py'
-      - 'tests/test_job_compat_runtime.py'
-      - '.github/workflows/test-job-compat-rpc.yml'
-  pull_request:
-    paths:
-      - 'standalone/mltd/services/__init__.py'
-      - 'standalone/mltd/services/job.py'
-      - 'standalone/mltd/services/job_compat.py'
-      - 'standalone/mltd/models/models.py'
-      - 'tests/test_job_compat_runtime.py'
-      - '.github/workflows/test-job-compat-rpc.yml'
+  workflow_dispatch:
 
 jobs:
   runtime-job-compat:

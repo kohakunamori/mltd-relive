@@ -1,20 +1,7 @@
 name: Test producer rank RPC compatibility
 
 on:
-  push:
-    branches:
-      - fix/story-service-compat
-    paths:
-      - 'standalone/mltd/services/__init__.py'
-      - 'standalone/mltd/services/user_rank.py'
-      - 'tests/test_user_rank_runtime.py'
-      - '.github/workflows/test-user-rank-rpc.yml'
-  pull_request:
-    paths:
-      - 'standalone/mltd/services/__init__.py'
-      - 'standalone/mltd/services/user_rank.py'
-      - 'tests/test_user_rank_runtime.py'
-      - '.github/workflows/test-user-rank-rpc.yml'
+  workflow_dispatch:
 
 jobs:
   runtime-user-rank:

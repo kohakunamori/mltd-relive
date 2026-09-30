@@ -8,13 +8,6 @@ on:
         required: false
         default: ''
         type: string
-  push:
-    branches:
-      - client-source-extraction
-    paths:
-      - '.github/workflows/extract-zh-fixed-client.yml'
-      - 'tools/client-source/**'
-      - 'release/game-client.env'
 
 permissions:
   contents: read

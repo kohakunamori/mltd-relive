@@ -15,7 +15,9 @@ RELEASE_PAGE_URL = (
     f'https://github.com/{REPOSITORY}/releases/tag/{ROLLING_RELEASE_TAG}'
 )
 _USER_AGENT = 'mltd-relive-standalone-update-check'
-_VERSION_RE = re.compile(r'Standalone source version:\s*`v([^`]+)`')
+_VERSION_RE = re.compile(
+    r'(?:服务器版本[：:]|Standalone source version:)\s*`v([^`]+)`'
+)
 
 
 @dataclass(frozen=True)

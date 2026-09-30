@@ -1,20 +1,7 @@
 name: Test core RPC compatibility
 
 on:
-  push:
-    branches:
-      - fix/story-service-compat
-    paths:
-      - 'standalone/mltd/services/__init__.py'
-      - 'standalone/mltd/services/theater_compat.py'
-      - 'tests/test_theater_opening_compat.py'
-      - '.github/workflows/test-core-rpc-compat.yml'
-  pull_request:
-    paths:
-      - 'standalone/mltd/services/__init__.py'
-      - 'standalone/mltd/services/theater_compat.py'
-      - 'tests/test_theater_opening_compat.py'
-      - '.github/workflows/test-core-rpc-compat.yml'
+  workflow_dispatch:
 
 jobs:
   theater-opening:

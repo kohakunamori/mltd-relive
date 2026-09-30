@@ -1,12 +1,7 @@
 name: Test birthday present runtime
 
 on:
-  push:
-    branches: [fix/story-service-compat]
-    paths:
-      - 'standalone/mltd/services/birthday.py'
-      - 'tests/test_birthday_present_runtime.py'
-      - '.github/workflows/test-birthday-present-runtime.yml'
+  workflow_dispatch:
 
 jobs:
   runtime:

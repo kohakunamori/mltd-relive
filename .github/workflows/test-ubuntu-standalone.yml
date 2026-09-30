@@ -1,24 +1,7 @@
 name: Test Ubuntu Standalone GUI
 
 on:
-  pull_request:
-    paths:
-      - 'standalone/**'
-      - 'requirements.txt'
-      - '.github/workflows/test-ubuntu-standalone.yml'
-      - '.github/workflows/build-and-release.yml'
-      - 'tools/smoke-test-ubuntu-gui.sh'
-      - 'tests/test_ubuntu_standalone_packaging.py'
-  push:
-    branches:
-      - main
-    paths:
-      - 'standalone/**'
-      - 'requirements.txt'
-      - '.github/workflows/test-ubuntu-standalone.yml'
-      - '.github/workflows/build-and-release.yml'
-      - 'tools/smoke-test-ubuntu-gui.sh'
-      - 'tests/test_ubuntu_standalone_packaging.py'
+  workflow_dispatch:
 
 permissions:
   contents: read

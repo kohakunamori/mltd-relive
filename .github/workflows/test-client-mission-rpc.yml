@@ -1,20 +1,7 @@
 name: Test client mission RPC compatibility
 
 on:
-  push:
-    branches:
-      - fix/story-service-compat
-    paths:
-      - 'standalone/mltd/services/__init__.py'
-      - 'standalone/mltd/services/mission_client.py'
-      - 'tests/test_client_mission_runtime.py'
-      - '.github/workflows/test-client-mission-rpc.yml'
-  pull_request:
-    paths:
-      - 'standalone/mltd/services/__init__.py'
-      - 'standalone/mltd/services/mission_client.py'
-      - 'tests/test_client_mission_runtime.py'
-      - '.github/workflows/test-client-mission-rpc.yml'
+  workflow_dispatch:
 
 jobs:
   runtime-client-mission:

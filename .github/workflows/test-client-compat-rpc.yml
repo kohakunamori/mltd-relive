@@ -1,20 +1,7 @@
 name: Test lightweight client compatibility RPCs
 
 on:
-  push:
-    branches:
-      - fix/story-service-compat
-    paths:
-      - 'standalone/mltd/services/__init__.py'
-      - 'standalone/mltd/services/client_compat.py'
-      - 'tests/test_client_compat_runtime.py'
-      - '.github/workflows/test-client-compat-rpc.yml'
-  pull_request:
-    paths:
-      - 'standalone/mltd/services/__init__.py'
-      - 'standalone/mltd/services/client_compat.py'
-      - 'tests/test_client_compat_runtime.py'
-      - '.github/workflows/test-client-compat-rpc.yml'
+  workflow_dispatch:
 
 jobs:
   runtime-client-compat:

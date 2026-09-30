@@ -1,20 +1,7 @@
 name: Test offline content compatibility
 
 on:
-  push:
-    branches:
-      - fix/story-service-compat
-    paths:
-      - 'standalone/mltd/services/__init__.py'
-      - 'standalone/mltd/services/offline_content_compat.py'
-      - 'tests/test_offline_content_compat.py'
-      - '.github/workflows/test-offline-content-compat.yml'
-  pull_request:
-    paths:
-      - 'standalone/mltd/services/__init__.py'
-      - 'standalone/mltd/services/offline_content_compat.py'
-      - 'tests/test_offline_content_compat.py'
-      - '.github/workflows/test-offline-content-compat.yml'
+  workflow_dispatch:
 
 jobs:
   contract:

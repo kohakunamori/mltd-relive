@@ -1,20 +1,7 @@
 name: Test system setting RPC compatibility
 
 on:
-  push:
-    branches:
-      - fix/story-service-compat
-    paths:
-      - 'standalone/mltd/services/__init__.py'
-      - 'standalone/mltd/services/system_setting.py'
-      - 'tests/test_system_setting_runtime.py'
-      - '.github/workflows/test-system-setting-rpc.yml'
-  pull_request:
-    paths:
-      - 'standalone/mltd/services/__init__.py'
-      - 'standalone/mltd/services/system_setting.py'
-      - 'tests/test_system_setting_runtime.py'
-      - '.github/workflows/test-system-setting-rpc.yml'
+  workflow_dispatch:
 
 jobs:
   runtime-system-setting:

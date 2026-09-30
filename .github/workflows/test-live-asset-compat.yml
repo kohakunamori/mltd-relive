@@ -1,26 +1,7 @@
 name: Test live asset compatibility
 
 on:
-  push:
-    branches:
-      - fix/live-asset-compat
-    paths:
-      - 'standalone/gui.pyw'
-      - 'standalone/mltd/services/asset.py'
-      - 'standalone/mltd/services/unit.py'
-      - 'standalone/mltd/servers/asset_cache.py'
-      - 'standalone/mltd/servers/config.py'
-      - 'standalone/mltd/servers/dns.py'
-      - 'standalone/mltd/servers/proxy.py'
-      - 'tools/cache_assets.py'
-      - 'tests/test_api_serial_compat.py'
-      - 'tests/test_asset_cache_tool.py'
-      - 'tests/test_asset_host_routing.py'
-      - 'tests/test_gui_remote_asset_ui.py'
-      - 'tests/test_proxy_tls_compat.py'
-      - 'tests/test_strict_local_and_api.py'
-      - 'tests/test_unit_sqlalchemy_compat.py'
-      - '.github/workflows/test-live-asset-compat.yml'
+  workflow_dispatch:
 
 jobs:
   asset-host:
