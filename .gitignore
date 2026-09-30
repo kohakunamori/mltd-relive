@@ -69,3 +69,8 @@ tools/burp-viewer(hardcoded_path).pyw
 /client/apktool*.jar
 /client/apktool*.bat
 /client/imgui.ini
+
+# Generated local analysis output and root runtime logs
+/client-source-output/
+/contract-report/
+/mltd-relive.log*

@@ -1,153 +1,52 @@
-# 当前兼容性结论与排查记录
+# 已知问题与排障
 
-> 最后更新：2026-09-02
->
-> 本文保留已经完成的关键 A/B 结果，避免后续维护重新走回已经证伪的方向。
+本文对应当前 `main` 的使用方式。下载包可能晚于源码更新，请先核对[发布页](https://github.com/kohakunamori/mltd-relive/releases/tag/standalone-latest)的构建编号。历史修复见[更新记录](RELEASE_NOTES.md)。
 
-## 当前测试基线
+## 功能范围
 
-- Server：`kohakunamori/mltd-relive` `fix/live-asset-compat` / Standalone v0.1.10。
-- Client：`mltd-relive-game-client-zh-fixed.apk`。
-- Client API 基址：`https://theaterdays-zh.appspot.com/`。
-- Asset 默认基址：`https://assets.rainbowunicorn7297.com/`。
+这是面向繁体中文、韩文修正版客户端的非官方本地服务器，不是完整的官方服务。部分活动、抽卡、商店和在线社交功能仍未完整支持；部分商店目录、礼物历史页面没有可展示的内容。遇到具体页面异常时，请记录操作步骤和服务器日志。
 
-## Issue 1：Hybrid 登录 `ErrorCode [-404 / 0]`
+新建的一般账户会复制注册当时的完整存档模板，**不是从教程开始的空白新号**。已经创建的账户不会跟随模板后续变化同步更新，详见[账户说明](README.md#完整存档用户与一般用户)。
 
-### 已确认现象
+## 无法连接或登录
 
-相同 Server、APK、数据库和 TheaterService：
+使用内置 DNS 的局域网连接方式时，检查以下项目：
 
-```text
-asset_mode = hybrid -> 登录失败 [-404 / 0]
-asset_mode = remote -> 登录正常
-```
+1. 电脑和安卓设备能够互相访问，客户端语言与服务器设置一致。
+2. 主服务器显示 `Started`，内置 DNS 也已单独点击 `Start DNS Server` 启动。两者独立启停。
+3. 安卓当前 Wi-Fi 的 DNS 指向窗口显示的电脑局域网 IPv4。排障时检查私人 DNS、VPN 或代理是否绕过该设置。
+4. 电脑防火墙允许服务器在当前受信任的局域网通信，53 / 443 端口没有被其他程序占用。
 
-因此根因被隔离在 Asset transport，而不是 Auth/Login、数据库迁移或 Theater API 本身。
+首次绑定账户请从游戏标题画面的“密码继承 / 引继”登录。默认完整存档凭据与独立账户创建方法见 [README](README.md#完整存档用户与一般用户)。不要为了排查登录问题先重置存档或清除客户端数据。
 
-v0.1.9 hybrid 返回本地 API hostname 下的 self-signed HTTPS Asset URL。修正版客户端接受这张证书用于 API RPC，但 Asset/Web 下载栈无法可靠接受该拓扑。
+## 资源下载失败
 
-### cleartext HTTP 复测
+游戏资源由客户端直接从远端 HTTPS 地址下载，服务器不代理或自动托管本地缓存。因此，电脑端服务器启动成功不代表客户端能够下载资源，也不代表可以完全离线游玩。
 
-v0.1.10 曾测试独立 cleartext Asset URL：
+`asset_remote_url` 留空时使用默认资源地址；自行设置时必须使用客户端可访问的、证书受信任的 HTTPS 静态存储。检查资源地址、网络和证书，不要把它改成本地自签名 HTTPS 或普通 HTTP 来替代。
 
-```text
-http://theaterdays-zh.appspot.com:7651/zh-android/
-```
+旧版 `hybrid/local` 方案曾出现登录 `[-404 / 0]` 和资源下载 `-21990` 错误，现已移除。这些错误码不是唯一的故障原因；当前版本遇到它们时，仍应结合具体请求和日志定位。
 
-设备结果：
+已下载到磁盘或 NAS 的灾备缓存不会自动提供给客户端。需要部署为可用的 HTTPS 资源服务后再配置地址，参见[资源保存说明](ASSET_CACHE.md)。
 
-```text
-資料下載失敗
-ErrorCode -21990
-```
+## Ubuntu 窗口打不开
 
-该方案同样淘汰。
+Ubuntu 下载包是图形界面程序，需要可用的桌面显示环境；WSL 中也需要图形显示支持。在纯终端环境中，仅添加可执行权限并不能提供显示服务。
 
-### 最终处理
+先从终端启动程序查看错误。旧包缺少 Tcl/Tk 运行库的问题已修复；若仍提示 `libtk8.6.so` 或 `libtcl8.6.so` 缺失，核对下载包的构建编号。自行打包需要安装对应运行库并保留许可声明，详见[Ubuntu 打包说明](standalone/UBUNTU_PACKAGING.md)。
 
-`hybrid/local` 已从 Standalone runtime 移除。
+## 升级与存档
 
-当前只保留：
+升级前完全退出服务器，再备份 `mltd-relive.db` 和 `config.ini`。正常启动会执行必要的数据库兼容升级；`Reset Data` 和 `--reset` 会重新初始化数据，不是升级步骤。
 
-```ini
-asset_mode = remote
-asset_remote_url =
-```
+存档恢复和旧数据库说明见 [README](README.md#旧数据库升级与用户数据安全)。不要对游玩存档运行测试数据库初始化脚本。
 
-空 `asset_remote_url` 使用原 Rainbow remote HTTPS endpoint；也可以配置另一个正常受信任的 HTTPS 对象存储。
+## 已修复的问题
 
-Standalone 不再运行 Asset Server、Relay 或 fetch-on-miss cache。
+`UnitService.SetUnit` 曾因 SQLAlchemy 结果转换导致演唱会入口报错，相关修复已有回归测试。当前接口已使用 HTTP/1.1 长连接与并发处理，不再保留排障阶段的全局串行锁和强制断连措施。
 
-为了防止当前 remote/R2 将来失联，使用独立：
+这些历史修复不代表所有客户端页面都已完成验证。接口测试通过与安卓客户端完整流程通过是不同的检查。
 
-```text
-tools/cache_assets.py
-```
+## 提交问题时附带什么
 
-进行 manifest 驱动的全量灾备缓存和纯本地 SHA256 校验。详见 `ASSET_CACHE.md`。
-
-## Issue 2：Remote 可登录但 Live 进入失败
-
-### 已定位根因
-
-设备日志直接给出：
-
-```text
-UnitService.SetUnit
-TypeError: 'ChunkedIteratorResult' object is not subscriptable
-```
-
-优化后的代码曾将 SQLAlchemy 2.x `Session.execute()` 返回的 Result 直接传给 `dict()`：
-
-```python
-card_to_idol = dict(session.execute(...))
-```
-
-Result 对象暴露 `keys()`，`dict()` 会将其误判为 mapping 并尝试执行下标访问，最终触发：
-
-```text
-'ChunkedIteratorResult' object is not subscriptable
-```
-
-修复为先物化 rows：
-
-```python
-card_rows = session.execute(...).all()
-card_to_idol = dict(card_rows)
-```
-
-修复 commit：
-
-```text
-351161e8df288fce8ab478953c34701010106ca0
-```
-
-### 设备验证
-
-修复后保持 remote Asset transport：
-
-```text
-登录 -> Unit -> Guest -> StartSong -> Live -> FinishSong -> 返回
-```
-
-已确认正常。
-
-因此本次实际 Live 故障根因不是 `live.py`、Asset、TLS handshake 或 API keep-alive，而是 `UnitService.SetUnit` 的 SQLAlchemy 2.x Result 转换 bug。
-
-## API transport 兼容措施
-
-当前分支仍暂时保留：
-
-- listener-wrapped TLS；
-- API `Connection: close`；
-- API POST 全局串行 dispatch；
-- direct WSGI。
-
-其中 listener-wrapped TLS 是已知 corrected-client 兼容路径。
-
-`Connection: close` 与全局串行化并不是已确认的 Live 根因，后续可独立 A/B 测试是否能够安全移除，以恢复更高 API 并发。
-
-## Remote Asset 完整性证据
-
-排查期间观察到繁中 Android manifest 约 4.27 MB、33,676 条记录。
-
-对于 Theater 资源：
-
-- 53 个 Theater resource ID 中 52 个可直接映射到 manifest；
-- 已识别的 104 个 Theater Asset 对象上游 HEAD 均返回 200。
-
-因此没有证据表明当前 remote/R2 缺失导致 Theater/Login 失败。
-
-## 当前状态
-
-已确认：
-
-- remote 登录：正常；
-- Theater 当前测试流程：正常；
-- Live：修复 SetUnit 后正常；
-- self-signed local HTTPS Asset：不兼容；
-- Desktop cleartext HTTP Asset：不兼容；
-- runtime Asset 架构：remote-only；
-- 远端资源灾备：独立 cache tool。
-
-当前剩余工作是 CI、最终 smoke test，以及评估是否可移除 API 串行化/Connection-close 兼容措施。
+提供服务器版本与构建编号、客户端语言和版本、复现步骤、错误画面，以及服务器日志最后相关部分。分享前去掉密码、令牌和其他私人信息。

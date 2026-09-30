@@ -1,58 +1,32 @@
-# MLTD Traditional Chinese client maintenance baseline
+# 客户端维护资料
 
-This directory is the small, reviewable source-of-truth layer for maintaining the corrected Traditional Chinese (`zh-fixed`) client together with the relive server.
+本目录保存繁体中文修正版客户端的小型基线资料，供维护服务端协议和画面补丁时核对。普通用户无需操作这些文件，安装与连接方法见[项目说明](../README.md)。
 
-The complete generated decompilation is published separately on the orphan branch:
+## 保留的资料
 
-- [`client-decompiled-zh-fixed-v1`](https://github.com/kohakunamori/mltd-relive/tree/client-decompiled-zh-fixed-v1)
-- [Complete decompilation and maintenance guide](../docs/CLIENT_DECOMPILATION_COMPLETE.md)
+| 路径 | 用途 |
+| --- | --- |
+| [baseline/zh-fixed-v1.json](baseline/zh-fixed-v1.json) | APK、原生库和元数据的校验值，以及包名、版本和提取工具记录。 |
+| [android/smali/](android/smali/) | Android 外壳类的基线代码片段，供比较修改前后的行为。 |
+| [contract/rpc-methods-zh-fixed-v1.txt](contract/rpc-methods-zh-fixed-v1.txt) | 从客户端恢复的接口名称清单。它包含字符串常量，不能直接当作实际调用清单或功能完成率。 |
+| [il2cpp/patch-points.yml](il2cpp/patch-points.yml) | 绑定到特定原生库校验值和原始字节的画面补丁位置。 |
 
-Keeping the generated tree on a dedicated orphan branch avoids making normal `main` clones carry hundreds of MiB of decompiler/native output while still keeping the complete result directly browsable in this repository.
+实际画面补丁工具在 [tools/apk-patcher/](../tools/apk-patcher/)，使用自身的代码与资源；这里的基线片段不是替代它的构建入口。客户端版本变化后，应重新核对原始文件和补丁位置，不能直接套用旧偏移。
 
-## What is authoritative
+历史完整生成结果仍保留在 [`client-decompiled-zh-fixed-v1`](https://github.com/kohakunamori/mltd-relive/tree/client-decompiled-zh-fixed-v1) 分支。本次仓库整理不改动该分支，也不重写 Git 历史。
 
-- `baseline/zh-fixed-v1.json`
-  - exact APK, `libil2cpp.so`, and `global-metadata.dat` hashes;
-  - package/version/SDK information;
-  - extraction tool versions and rebuild status.
-- `android/smali/`
-  - exact baseline Dalvik/smali for the game-specific Android shell classes we currently patch or need to reason about.
-- `contract/rpc-methods-zh-fixed-v1.txt`
-  - stable sorted snapshot of the 75 services / 309 recovered RPC method constants.
-- `il2cpp/patch-points.yml`
-  - named native patch points bound to an exact `libil2cpp.so` hash and expected original instruction bytes.
+## 本地提取
 
-## Complete generated source branch
+在具备 Java、.NET 和脚本所需命令的 Linux / WSL 环境中，从仓库根目录执行。工具会按脚本中的版本下载提取依赖，因此该步骤需要网络。
 
-The generated branch contains:
-
-```text
-client-decompiled-zh-fixed-v1/
-  README.md
-  PROVENANCE.json
-  FILE_INDEX.tsv
-  apktool/        # editable/rebuildable Android + smali representation
-  jadx/           # Java-like readability view
-  il2cpp-dump/    # dump.cs, script.json, il2cpp.h, DummyDll, metadata maps
-  raw-critical/   # exact binary manifest/resources payloads
-  report/         # hashes, tool logs, ELF/APK structure, RPC/server comparison
-```
-
-`FILE_INDEX.tsv` records SHA-256 and size for every generated source/decompiler file. `PROVENANCE.json` records the exact APK baseline, maintenance commit, largest files, tool provenance and total generated-tree size.
-
-The branch intentionally omits only `rebuild-check/unsigned-rebuilt.apk`, because that file is a derived validation build rather than decompiled source. The rebuild result itself remains recorded in `report/`.
-
-## Reproduce locally
+**提取会重建输出目录。** 请使用专门的生成目录，不要指定仓库根目录、存档目录或已有资料目录。
 
 ```bash
-chmod +x tools/client-source/extract-zh-fixed.sh
-chmod +x tools/client-source/extract-il2cpp.sh
-
-tools/client-source/extract-zh-fixed.sh \
+bash tools/client-source/extract-zh-fixed.sh \
   /path/to/mltd-relive-game-client-zh-fixed.apk \
   client-source-output
 
-tools/client-source/extract-il2cpp.sh client-source-output
+bash tools/client-source/extract-il2cpp.sh client-source-output
 
 python tools/client-source/compare-server-contract.py \
   client-source-output/report/client-rpc-methods.txt \
@@ -60,27 +34,23 @@ python tools/client-source/compare-server-contract.py \
   client-source-output/report
 ```
 
-The historical extraction and generated-branch publishing workflows have been
-removed from GitHub Actions. Use the local commands above for regeneration.
-Existing generated branches and local analysis tools are unchanged; the former
-workflow definitions remain available in Git history.
+输入 APK 的校验值见基线文件，发布用客户端来源与校验值由 [release/game-client.env](../release/game-client.env) 管理。`client-source-output/` 是本地生成物，已被 Git 忽略。
 
-## Important limitation
+不重新提取 APK、只比较现有接口清单时，可以执行：
 
-MLTD is a Unity IL2CPP title. JADX can recover the Android wrapper, but most game logic is compiled into `libil2cpp.so`. `dump.cs` from Il2CppDumper is also **not the original C# implementation**: it restores types, method signatures and native address annotations from IL2CPP metadata. Native method bodies remain ARM64 machine code.
+```bash
+python tools/client-source/compare-server-contract.py \
+  client/contract/rpc-methods-zh-fixed-v1.txt \
+  standalone/mltd/services \
+  contract-report
+```
 
-For concrete gameplay/network method behavior, use the recovered method/RVA from `dump.cs` or `script.json` and analyze the corresponding ARM64 body in `libil2cpp.so` with Ghidra/IDA or another native disassembler/decompiler.
+输出在被忽略的 `contract-report/` 中。比较结果只反映脚本可静态识别的接口名称差异，不等同于运行时全部注册项或客户端流程测试。
 
-This is nevertheless a complete reproducible reverse-engineering representation of what can be recovered from the shipped APK without access to the original Unity project: Android smali/resources, Java-like DEX decompilation, original native/Unity payloads, IL2CPP metadata declarations and address maps, dummy assemblies, hashes and contract indexes.
+## 如何使用生成结果
 
-## Update policy
+`apktool/` 用于检查 Android 资源和 smali，`jadx/` 提供便于阅读的 Java 视图，`il2cpp-dump/` 保存类型、方法签名、地址和元数据映射。它们不等同于原始 Unity 工程，`dump.cs` 也不包含恢复后的完整 C# 方法实现。
 
-When a future client baseline changes:
+需要确认具体游戏逻辑时，结合原生库与方法地址分析；修改服务端后，用 `tests/` 中相应测试检查，再区分记录接口结果和安卓客户端实际流程结果。
 
-1. update `release/game-client.env` and its SHA-256;
-2. create a new baseline ID rather than silently replacing `zh-fixed-v1`;
-3. run the local extraction commands above and review the regenerated output;
-4. compare RPC contracts, smali, metadata and network symbols;
-5. relocate native patches from method identity/signatures rather than assuming old RVAs/file offsets remain valid;
-6. require patchers to verify both the baseline file hash and expected bytes/signature at every native patch point;
-7. write durable reverse-engineering conclusions back into `client/`, `tools/client-source/`, tests or `docs/` instead of manually editing the generated branch.
+更新客户端基线时，保留旧基线的身份，使用新的基线编号，重新生成并比较校验值、接口和补丁位置。不要手工修改历史生成分支来代替维护源码和脚本。

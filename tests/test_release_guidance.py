@@ -1,5 +1,6 @@
 """Release guide rendering and the repository's manual-only CI policy."""
 
+import ast
 import importlib.util
 from pathlib import Path
 import re
@@ -7,6 +8,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from urllib.parse import unquote, urlsplit
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -141,6 +143,44 @@ class ManualWorkflowPolicyTests(unittest.TestCase):
                 self.assertNotIn(phrase, source)
         self.assertIn('按需构建与发布', source)
         self.assertIn('Start DNS Server', source)
+
+
+class RepositoryLayoutTests(unittest.TestCase):
+    def test_local_documentation_links_resolve(self):
+        documents = sorted(ROOT.glob('*.md')) + [
+            ROOT / 'client/README.md', ROOT / 'standalone/UBUNTU_PACKAGING.md',
+        ]
+        for document in documents:
+            text = document.read_text(encoding='utf-8')
+            for target in re.findall(r'\[[^\]\n]*\]\(([^\s)]+)\)', text):
+                url = urlsplit(target)
+                if url.scheme or url.netloc or not url.path:
+                    continue
+                with self.subTest(document=document.name, target=target):
+                    self.assertTrue((document.parent / unquote(url.path)).exists())
+
+    def test_packaging_entrypoints_and_local_resources_exist(self):
+        specs = sorted((ROOT / 'standalone').glob('*.spec'))
+        specs += sorted((ROOT / 'tools/apk-patcher').glob('*.spec'))
+        self.assertTrue(specs)
+        for spec in specs:
+            tree = ast.parse(spec.read_text(encoding='utf-8'))
+            paths = []
+            for node in ast.walk(tree):
+                if not isinstance(node, ast.Call):
+                    continue
+                if isinstance(node.func, ast.Name) and node.args:
+                    if node.func.id == 'Tree':
+                        paths.append(ast.literal_eval(node.args[0]))
+                    elif node.func.id == 'Analysis':
+                        paths.extend(ast.literal_eval(node.args[0]))
+                for keyword in node.keywords:
+                    if keyword.arg == 'icon':
+                        value = ast.literal_eval(keyword.value)
+                        paths.extend(value if isinstance(value, list) else [value])
+            for path in paths:
+                with self.subTest(spec=spec.name, path=path):
+                    self.assertTrue((spec.parent / path).exists())
 
 
 if __name__ == '__main__':

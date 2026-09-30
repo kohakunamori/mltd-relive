@@ -6,7 +6,7 @@
 
 在自己的电脑上运行本地服务器，再让安卓客户端连接到这台电脑，即可使用本地存档游玩当前支持的内容。支持繁体中文和韩文客户端；游戏资源仍从远端 HTTPS 地址下载。
 
-本仓库基于 [RainbowUnicorn7297/mltd-relive](https://github.com/RainbowUnicorn7297/mltd-relive) 继续维护。原有 Prototype 已移除，目前只维护 **Standalone Server** 及其配套工具。
+本仓库基于 [RainbowUnicorn7297/mltd-relive](https://github.com/RainbowUnicorn7297/mltd-relive) 继续维护，目前维护 **Standalone Server**、画面补丁与资源保存工具。
 
 > [!IMPORTANT]
 > 这是非官方本地服务器，并非完整的官方服务。部分活动、商店和在线社交功能尚未完整支持，也可能遇到客户端页面或流程异常。使用前请查看[已知问题](KNOWN_ISSUES.md)。
@@ -347,7 +347,7 @@ python tools/cache_assets.py verify \
 
 它不是运行本地服务器的必要组件。
 
-如果不需要修改画面参数，直接使用 Release 中的 `*-fixed.apk` 即可。
+如果不需要修改画面参数，直接使用 Release 中的 `*-fixed.apk` 即可。发布页提供的客户端未预设高分辨率或高帧率；调整这些参数时才需要补丁工具。
 
 当前 Patcher `v1.0.9` 在 Windows 环境需要：
 
@@ -467,7 +467,7 @@ python -m unittest discover -s ../tests -p 'test_gui_*.py' -v
 
 仓库只保留以上两个入口。“按需验证”默认运行回归测试；需要验证 Ubuntu 可执行文件时，再勾选 `ubuntu_gui`，它会在回归通过后检查打包、许可声明和图形界面启动，不会发布附件。
 
-历史反编译、客户端重建、临时审计和重复构建工作流已移除；原测试文件与本地工具仍保留，旧配置可从 Git 历史查阅。
+历史临时工作流已移除；客户端基线和可复用维护命令见 [client/README.md](client/README.md)，旧配置与阶段性记录可从 Git 历史查阅。
 
 发布工作流只接受 `main` 分支。两个“强制重新构建 / 下载”选项默认关闭；未变化的补丁工具和客户端会按现有规则复用。只有确实需要更新下载附件时才执行发布，修改文案不需要重新打包。
 
@@ -478,18 +478,24 @@ python -m unittest discover -s ../tests -p 'test_gui_*.py' -v
 ## 仓库结构
 
 ```text
-standalone/                 Standalone API / DNS / TLS 服务器
-standalone/mltd/services/   JSON-RPC / 游戏服务实现
-standalone/mltd/models/     SQLite / SQLAlchemy 数据模型
-standalone/*.spec           PyInstaller 构建定义
-tools/cache_assets.py       Asset 灾备缓存 / 完整性验证
-tools/apk-patcher/          分辨率 / FPS APK Patcher
-tests/                      兼容性与 runtime regression tests
-.github/workflows/          手动回归验证与发布
-ASSET_CACHE.md              Asset 保存工具详细文档
+standalone/                 服务器、账户管理与桌面构建配置
+standalone/mltd/models/     数据模型和初始化所需主数据
+standalone/mltd/services/   游戏接口实现
+client/                     客户端基线与维护说明
+tools/apk-patcher/          分辨率与帧率补丁工具
+tools/fonts/                补丁工具运行所需字体
+tools/client-source/        本地提取与接口清单对比工具
+tools/cache_assets.py       资源保存与完整性校验
+release/                    发布指南模板与客户端来源配置
+tests/                      回归测试
+.github/workflows/          按需验证、按需构建与发布
+ASSET_CACHE.md              资源保存指南
+KNOWN_ISSUES.md             当前限制与排障
 RELEASE_NOTES.md            版本更新记录
-LICENSE                     软件、依赖和第三方内容许可声明
+LICENSE                     软件与第三方组件许可
 ```
+
+客户端维护资料见 [client/README.md](client/README.md)，Ubuntu 打包与许可文件说明见 [standalone/UBUNTU_PACKAGING.md](standalone/UBUNTU_PACKAGING.md)。运行所需主数据、翻译、字体和许可文件随源码保留；存档、日志、缓存与提取生成物不纳入 Git。
 
 ## 鸣谢
 
