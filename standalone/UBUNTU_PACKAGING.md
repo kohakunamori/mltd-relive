@@ -22,8 +22,10 @@ The identical notice is also embedded in the executable under
 `licenses/mltd-relive-standalone-ubuntu-NOTICES.txt`. The rolling release
 workflow uploads the readable notice alongside the Ubuntu executable.
 
-The optional `ubuntu_gui` input in `.github/workflows/ci.yml` enables the
-Ubuntu packaging check. It verifies the bundled libraries, compares the
+Pull requests that change Ubuntu packaging, GUI code or dependencies run the
+Ubuntu packaging check automatically. The `ubuntu_gui` input also enables it
+for manual validation. Main-branch publishing verifies the actual release
+artifact instead of building it twice. It verifies the bundled libraries, compares the
 embedded notice with the sidecar and both original package notices, and runs
 the executable under Xvfb from a fresh temporary directory. It does not load a
 user database or start a configured server. Only timeout status 124 is accepted;
